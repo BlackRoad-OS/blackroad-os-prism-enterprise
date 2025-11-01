@@ -7,6 +7,12 @@
       "summary": "Bench bring-up card and Codex prompt set for spinning up the hologram stack from blank SD cards."
     },
     {
+      "id": "phase-4",
+      "slug": "phase-4",
+      "title": "Phase 4 — AI Compliance Grid Codex",
+      "summary": "Immutable compliance ledger binding Lucidia and BlackRoad audit evidence."
+    },
+    {
       "id": "phase-37",
       "slug": "phase-37",
       "title": "Phase 37 — PLM & MANUFACTURING OPS (BOMs, ECO/ECR, Routings, Work Instructions, SPC, Yield, COQ)",
