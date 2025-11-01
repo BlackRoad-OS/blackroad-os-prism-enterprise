@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import datetime as dt
 from typing import Any, Dict, Optional
 
@@ -87,4 +88,14 @@ def create_app(cfg: Optional[ConfigHolder] = None) -> FastAPI:
     return app
 
 
-app = create_app()
+def _create_default_app() -> FastAPI:
+    try:
+        return create_app()
+    except (FileNotFoundError, json.JSONDecodeError):
+        # Tests provide their own configuration; fall back to a bare app when
+        # the default config is missing or malformed so import-time side
+        # effects do not explode.
+        return FastAPI(title="Autopal Console")
+
+
+app = _create_default_app()
