@@ -409,6 +409,16 @@ class AutoNovelAgent:
         return (
             f"A tale of {clean_theme} begins with hope. In the end, {clean_theme} prevails."
         )
+        """Generate a short themed story.
+
+        Args:
+            theme: Central theme of the story.
+            protagonist: Name or description of the main character.
+
+        Returns:
+            A short story string.
+        """
+        return f"{protagonist} set out on a {theme} journey, " "discovering wonders along the way."
 
 
 if __name__ == "__main__":
@@ -430,3 +440,4 @@ if __name__ == "__main__":
     )
     agent.create_game("unity")
     print(agent.write_short_story("friendship"))
+    print(agent.generate_story("mystical", "A coder"))
