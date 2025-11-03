@@ -9,39 +9,48 @@ jobs:
   autofix:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout head ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          token: ${{ secrets.BOT_TOKEN || github.token }}
 
-      # Node autofix (if package.json present)
-      - if: ${{ hashFiles('**/package.json') != '' }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - if: ${{ hashFiles('**/package.json') != '' }}
-        run: |
-          npm i -g prettier eslint || true
-          npx prettier -w .
-          npx eslint . --fix || true
+        with:
+          node-version: '20'
 
-      # Python autofix (if pyproject/requirements present)
-      - if: ${{ hashFiles('**/pyproject.toml','**/requirements*.txt') != '' }}
+      - name: Setup Python
         uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
-      - if: ${{ hashFiles('**/pyproject.toml','**/requirements*.txt') != '' }}
-        run: |
-          pip install --upgrade pip black isort
-          black .
-          isort .
+        with:
+          python-version: '3.11'
 
-      # Shell autofix
-      - run: sudo apt-get update && sudo apt-get install -y shfmt
-      - run: shfmt -w .
+      - name: Run fix-everything.sh
+        run: bash fix-everything.sh
 
-      # Commit back if changes
+      - name: Upload JustFix summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auto-fix-summary
+          path: .justfix-summary.md
+          if-no-files-found: warn
+
       - name: Commit changes
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
         run: |
           if [ -n "$(git status --porcelain)" ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git config user.name "${{ secrets.BOT_USER || 'blackroad-bot' }}"
+            git config user.email "${{ secrets.BOT_USER || 'blackroad-bot' }}@users.noreply.github.com"
             git add -A
-            git commit -m "chore(auto-fix): format & lint"
-            git push
+            git commit -m "chore(auto-fix): apply fix-everything"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
+
+      - name: Report pending fixes for forks
+        if: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::warning::Auto-fix produced changes but cannot push to forked repository."
           fi
