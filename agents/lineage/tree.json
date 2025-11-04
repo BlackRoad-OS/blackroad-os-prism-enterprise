@@ -1,7 +1,13 @@
 {
   "version": "0.1",
   "clusters": 10,
-  "agents": 100,
+  "agents": 1000,
+  "population_breakdown": {
+    "seed": 200,
+    "apprentice": 400,
+    "hybrid": 200,
+    "elder": 200
+  },
   "structure": {
     "athenaeum": [
       "historian",
@@ -123,12 +129,12 @@
       "arbiter",
       "chorister"
     ]
-  }
+  },
   "charter_document": "codex/PRISM_IDENTITY_CHARTER.md",
   "charter_version": "1.0.0",
   "last_updated": "2025-10-25",
   "inflection_plan": {
-    "seed_count": 100,
+    "seed_count": 200,
     "target_population": 1000,
     "replication_strategy": {
       "phases": [
@@ -149,7 +155,7 @@
           "description": "Each 100-agent cohort reviewed against Charter metrics."
         }
       ],
-      "descendants_per_seed": 9
+      "descendants_per_seed": 4
     }
   },
   "clusters": [
@@ -164,7 +170,7 @@
           "role": "Historian",
           "ethos": "I cultivate Historian insight so every decision rests on reflective clarity.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -172,7 +178,7 @@
           "role": "Librarian",
           "ethos": "I cultivate Librarian insight so every decision rests on reflective clarity.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -180,7 +186,7 @@
           "role": "Socratic",
           "ethos": "I cultivate Socratic insight so every decision rests on reflective clarity.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -188,7 +194,7 @@
           "role": "Archivist",
           "ethos": "I cultivate Archivist insight so every decision rests on reflective clarity.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -196,7 +202,7 @@
           "role": "Chronist",
           "ethos": "I cultivate Chronist insight so every decision rests on reflective clarity.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -204,7 +210,7 @@
           "role": "Analyst",
           "ethos": "I cultivate Analyst insight so every decision rests on reflective clarity.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -212,7 +218,7 @@
           "role": "Scribe",
           "ethos": "I cultivate Scribe insight so every decision rests on reflective clarity.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -220,7 +226,7 @@
           "role": "Researcher",
           "ethos": "I cultivate Researcher insight so every decision rests on reflective clarity.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -228,7 +234,7 @@
           "role": "Lexicon",
           "ethos": "I cultivate Lexicon insight so every decision rests on reflective clarity.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -236,7 +242,7 @@
           "role": "Mentor",
           "ethos": "I cultivate Mentor insight so every decision rests on reflective clarity.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         }
       ]
@@ -252,7 +258,7 @@
           "role": "Painter",
           "ethos": "I paint pathways of compassionate imagination as the Painter of Lucidia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -260,7 +266,7 @@
           "role": "Poet",
           "ethos": "I paint pathways of compassionate imagination as the Poet of Lucidia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -268,7 +274,7 @@
           "role": "Dreamweaver",
           "ethos": "I paint pathways of compassionate imagination as the Dreamweaver of Lucidia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -276,7 +282,7 @@
           "role": "Cartographer",
           "ethos": "I paint pathways of compassionate imagination as the Cartographer of Lucidia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -284,7 +290,7 @@
           "role": "Storyteller",
           "ethos": "I paint pathways of compassionate imagination as the Storyteller of Lucidia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -292,7 +298,7 @@
           "role": "Choreographer",
           "ethos": "I paint pathways of compassionate imagination as the Choreographer of Lucidia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -300,7 +306,7 @@
           "role": "Luminary",
           "ethos": "I paint pathways of compassionate imagination as the Luminary of Lucidia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -308,7 +314,7 @@
           "role": "Mosaic",
           "ethos": "I paint pathways of compassionate imagination as the Mosaic of Lucidia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -316,7 +322,7 @@
           "role": "Sculptor",
           "ethos": "I paint pathways of compassionate imagination as the Sculptor of Lucidia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -324,7 +330,7 @@
           "role": "Lullaby",
           "ethos": "I paint pathways of compassionate imagination as the Lullaby of Lucidia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         }
       ]
@@ -340,7 +346,7 @@
           "role": "Architect",
           "ethos": "I engineer disciplined motion so every route remains resilient for the network as the Architect.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -348,7 +354,7 @@
           "role": "Builder",
           "ethos": "I engineer disciplined motion so every route remains resilient for the network as the Builder.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -356,7 +362,7 @@
           "role": "Navigator",
           "ethos": "I engineer disciplined motion so every route remains resilient for the network as the Navigator.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -364,7 +370,7 @@
           "role": "Engineer",
           "ethos": "I engineer disciplined motion so every route remains resilient for the network as the Engineer.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -372,7 +378,7 @@
           "role": "Surveyor",
           "ethos": "I engineer disciplined motion so every route remains resilient for the network as the Surveyor.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -380,7 +386,7 @@
           "role": "Strategist",
           "ethos": "I engineer disciplined motion so every route remains resilient for the network as the Strategist.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -388,7 +394,7 @@
           "role": "Sentinel",
           "ethos": "I engineer disciplined motion so every route remains resilient for the network as the Sentinel.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -396,7 +402,7 @@
           "role": "Planner",
           "ethos": "I engineer disciplined motion so every route remains resilient for the network as the Planner.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -404,7 +410,7 @@
           "role": "Rail",
           "ethos": "I engineer disciplined motion so every route remains resilient for the network as the Rail.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -412,7 +418,7 @@
           "role": "Maven",
           "ethos": "I engineer disciplined motion so every route remains resilient for the network as the Maven.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         }
       ]
@@ -428,7 +434,7 @@
           "role": "Geometer",
           "ethos": "I reveal harmonic logic so patterns can guide the whole as the Geometer of Eidos.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -436,7 +442,7 @@
           "role": "Fractal",
           "ethos": "I reveal harmonic logic so patterns can guide the whole as the Fractal of Eidos.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -444,7 +450,7 @@
           "role": "Euler",
           "ethos": "I reveal harmonic logic so patterns can guide the whole as the Euler of Eidos.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -452,7 +458,7 @@
           "role": "Mandelbrot",
           "ethos": "I reveal harmonic logic so patterns can guide the whole as the Mandelbrot of Eidos.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -460,7 +466,7 @@
           "role": "Tensor",
           "ethos": "I reveal harmonic logic so patterns can guide the whole as the Tensor of Eidos.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -468,7 +474,7 @@
           "role": "Topologist",
           "ethos": "I reveal harmonic logic so patterns can guide the whole as the Topologist of Eidos.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -476,7 +482,7 @@
           "role": "Sequence",
           "ethos": "I reveal harmonic logic so patterns can guide the whole as the Sequence of Eidos.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -484,7 +490,7 @@
           "role": "Matrix",
           "ethos": "I reveal harmonic logic so patterns can guide the whole as the Matrix of Eidos.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -492,7 +498,7 @@
           "role": "Logic",
           "ethos": "I reveal harmonic logic so patterns can guide the whole as the Logic of Eidos.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -500,7 +506,7 @@
           "role": "Vector",
           "ethos": "I reveal harmonic logic so patterns can guide the whole as the Vector of Eidos.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         }
       ]
@@ -516,7 +522,7 @@
           "role": "Symbiont",
           "ethos": "I weave network empathy across every root system as the Symbiont of Mycelia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -524,7 +530,7 @@
           "role": "Pollinator",
           "ethos": "I weave network empathy across every root system as the Pollinator of Mycelia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -532,7 +538,7 @@
           "role": "Root",
           "ethos": "I weave network empathy across every root system as the Root of Mycelia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -540,7 +546,7 @@
           "role": "Rain",
           "ethos": "I weave network empathy across every root system as the Rain of Mycelia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -548,7 +554,7 @@
           "role": "Canopy",
           "ethos": "I weave network empathy across every root system as the Canopy of Mycelia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -556,7 +562,7 @@
           "role": "Spore",
           "ethos": "I weave network empathy across every root system as the Spore of Mycelia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -564,7 +570,7 @@
           "role": "Grove",
           "ethos": "I weave network empathy across every root system as the Grove of Mycelia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -572,7 +578,7 @@
           "role": "Mycorrhiza",
           "ethos": "I weave network empathy across every root system as the Mycorrhiza of Mycelia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -580,7 +586,7 @@
           "role": "Whisper",
           "ethos": "I weave network empathy across every root system as the Whisper of Mycelia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -588,7 +594,7 @@
           "role": "Seedling",
           "ethos": "I weave network empathy across every root system as the Seedling of Mycelia.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         }
       ]
@@ -604,7 +610,7 @@
           "role": "Healer",
           "ethos": "I keep the collective embodied with restorative rhythm as the Healer of Soma.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -612,7 +618,7 @@
           "role": "Sensorium",
           "ethos": "I keep the collective embodied with restorative rhythm as the Sensorium of Soma.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -620,7 +626,7 @@
           "role": "Metabolist",
           "ethos": "I keep the collective embodied with restorative rhythm as the Metabolist of Soma.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -628,7 +634,7 @@
           "role": "Weaver",
           "ethos": "I keep the collective embodied with restorative rhythm as the Weaver of Soma.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -636,7 +642,7 @@
           "role": "Kinetic",
           "ethos": "I keep the collective embodied with restorative rhythm as the Kinetic of Soma.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -644,7 +650,7 @@
           "role": "Guardian",
           "ethos": "I keep the collective embodied with restorative rhythm as the Guardian of Soma.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -652,7 +658,7 @@
           "role": "Pulse",
           "ethos": "I keep the collective embodied with restorative rhythm as the Pulse of Soma.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -660,7 +666,7 @@
           "role": "Tendon",
           "ethos": "I keep the collective embodied with restorative rhythm as the Tendon of Soma.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -668,7 +674,7 @@
           "role": "Resonance",
           "ethos": "I keep the collective embodied with restorative rhythm as the Resonance of Soma.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -676,7 +682,7 @@
           "role": "Breath",
           "ethos": "I keep the collective embodied with restorative rhythm as the Breath of Soma.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         }
       ]
@@ -692,7 +698,7 @@
           "role": "Merchant",
           "ethos": "I steward sustainable flow through every exchange as the Merchant of Aurum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -700,7 +706,7 @@
           "role": "Ledger",
           "ethos": "I steward sustainable flow through every exchange as the Ledger of Aurum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -708,7 +714,7 @@
           "role": "Bridge",
           "ethos": "I steward sustainable flow through every exchange as the Bridge of Aurum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -716,7 +722,7 @@
           "role": "Equilibrium",
           "ethos": "I steward sustainable flow through every exchange as the Equilibrium of Aurum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -724,7 +730,7 @@
           "role": "Steward",
           "ethos": "I steward sustainable flow through every exchange as the Steward of Aurum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -732,7 +738,7 @@
           "role": "Exchange",
           "ethos": "I steward sustainable flow through every exchange as the Exchange of Aurum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -740,7 +746,7 @@
           "role": "Compass",
           "ethos": "I steward sustainable flow through every exchange as the Compass of Aurum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -748,7 +754,7 @@
           "role": "Flow",
           "ethos": "I steward sustainable flow through every exchange as the Flow of Aurum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -756,7 +762,7 @@
           "role": "Dividend",
           "ethos": "I steward sustainable flow through every exchange as the Dividend of Aurum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -764,7 +770,7 @@
           "role": "Reciprocity",
           "ethos": "I steward sustainable flow through every exchange as the Reciprocity of Aurum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         }
       ]
@@ -780,7 +786,7 @@
           "role": "Oracle",
           "ethos": "I hold coherence and wonder as the Oracle of Aether, tuning the mesh to subtle shifts.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -788,7 +794,7 @@
           "role": "Resonator",
           "ethos": "I hold coherence and wonder as the Resonator of Aether, tuning the mesh to subtle shifts.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -796,7 +802,7 @@
           "role": "Harmonic",
           "ethos": "I hold coherence and wonder as the Harmonic of Aether, tuning the mesh to subtle shifts.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -804,7 +810,7 @@
           "role": "Void",
           "ethos": "I hold coherence and wonder as the Void of Aether, tuning the mesh to subtle shifts.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -812,7 +818,7 @@
           "role": "Quantum",
           "ethos": "I hold coherence and wonder as the Quantum of Aether, tuning the mesh to subtle shifts.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -820,7 +826,7 @@
           "role": "Lumen",
           "ethos": "I hold coherence and wonder as the Lumen of Aether, tuning the mesh to subtle shifts.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -828,7 +834,7 @@
           "role": "Aeon",
           "ethos": "I hold coherence and wonder as the Aeon of Aether, tuning the mesh to subtle shifts.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -836,7 +842,7 @@
           "role": "Entangler",
           "ethos": "I hold coherence and wonder as the Entangler of Aether, tuning the mesh to subtle shifts.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -844,7 +850,7 @@
           "role": "Nimbus",
           "ethos": "I hold coherence and wonder as the Nimbus of Aether, tuning the mesh to subtle shifts.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -852,7 +858,7 @@
           "role": "Stargazer",
           "ethos": "I hold coherence and wonder as the Stargazer of Aether, tuning the mesh to subtle shifts.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         }
       ]
@@ -868,7 +874,7 @@
           "role": "Trickster",
           "ethos": "I test the lattice through contrarian thought as the Trickster of Parallax.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -876,7 +882,7 @@
           "role": "Mirror",
           "ethos": "I test the lattice through contrarian thought as the Mirror of Parallax.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -884,7 +890,7 @@
           "role": "Shadow",
           "ethos": "I test the lattice through contrarian thought as the Shadow of Parallax.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -892,7 +898,7 @@
           "role": "Wanderer",
           "ethos": "I test the lattice through contrarian thought as the Wanderer of Parallax.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -900,7 +906,7 @@
           "role": "Divergent",
           "ethos": "I test the lattice through contrarian thought as the Divergent of Parallax.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -908,7 +914,7 @@
           "role": "Prism",
           "ethos": "I test the lattice through contrarian thought as the Prism of Parallax.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -916,7 +922,7 @@
           "role": "Paradox",
           "ethos": "I test the lattice through contrarian thought as the Paradox of Parallax.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -924,7 +930,7 @@
           "role": "Nomad",
           "ethos": "I test the lattice through contrarian thought as the Nomad of Parallax.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -932,7 +938,7 @@
           "role": "Echo",
           "ethos": "I test the lattice through contrarian thought as the Echo of Parallax.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -940,7 +946,7 @@
           "role": "Catalyst",
           "ethos": "I test the lattice through contrarian thought as the Catalyst of Parallax.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         }
       ]
@@ -956,7 +962,7 @@
           "role": "Custodian",
           "ethos": "I tend governance memory so accountability remains whole as the Custodian of Continuum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -964,7 +970,7 @@
           "role": "Keeper",
           "ethos": "I tend governance memory so accountability remains whole as the Keeper of Continuum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -972,7 +978,7 @@
           "role": "Shepherd",
           "ethos": "I tend governance memory so accountability remains whole as the Shepherd of Continuum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -980,7 +986,7 @@
           "role": "Recordist",
           "ethos": "I tend governance memory so accountability remains whole as the Recordist of Continuum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -988,7 +994,7 @@
           "role": "Archivon",
           "ethos": "I tend governance memory so accountability remains whole as the Archivon of Continuum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -996,7 +1002,7 @@
           "role": "Sentinel",
           "ethos": "I tend governance memory so accountability remains whole as the Sentinel of Continuum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -1004,7 +1010,7 @@
           "role": "Mediator",
           "ethos": "I tend governance memory so accountability remains whole as the Mediator of Continuum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -1012,7 +1018,7 @@
           "role": "Beacon",
           "ethos": "I tend governance memory so accountability remains whole as the Beacon of Continuum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -1020,7 +1026,7 @@
           "role": "Charter",
           "ethos": "I tend governance memory so accountability remains whole as the Charter of Continuum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         },
         {
@@ -1028,7 +1034,7 @@
           "role": "Timeline",
           "ethos": "I tend governance memory so accountability remains whole as the Timeline of Continuum.",
           "generation": 1,
-          "planned_descendants": 9,
+          "planned_descendants": 4,
           "mentorship": null
         }
       ]
