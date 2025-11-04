@@ -4,12 +4,16 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   pr-auto-bot:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout PR code
-        uses: actions/checkout@v3
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
