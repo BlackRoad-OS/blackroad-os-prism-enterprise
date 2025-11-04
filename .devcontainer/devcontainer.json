@@ -1,29 +1,30 @@
 {
-  "name": "BlackRoad Dev",
+  "name": "blackroad-prism-console",
   "build": {
     "dockerfile": "Dockerfile"
   },
-  "name": "blackroad",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "workspaceFolder": "/workspaces/blackroad-prism-console",
   "features": {
-    "ghcr.io/devcontainers/features/python:1": {},
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
-    "ghcr.io/devcontainers/features/node:1": { "version": "20" },
-    "ghcr.io/devcontainers/features/python:1": { "version": "3.11" },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    },
     "ghcr.io/devcontainers/features/postgres:1": {
       "version": "16",
       "password": "postgres",
       "db": "appdb",
       "user": "appuser"
     },
-    "ghcr.io/devcontainers/features/redis:1": { "version": "7" },
-    "ghcr.io/devcontainers/features/common-utils:2": {},
-    "ghcr.io/devcontainers/features/pnpm:2": {}
-    "ghcr.io/devcontainers/features/python:1": {
-      "version": "3.11"
+    "ghcr.io/devcontainers/features/redis:1": {
+      "version": "7"
     },
+    "ghcr.io/devcontainers/features/pnpm:2": {},
     "ghcr.io/devcontainers/features/aws-cli:1": {},
     "ghcr.io/devcontainers/features/terraform:1": {
       "version": "1.6.6"
@@ -31,22 +32,44 @@
     "ghcr.io/devcontainers/features/aws-ssm-session-manager:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  "postCreateCommand": "bash .devcontainer/post-create.sh",
-  "forwardPorts": [3000, 8000, 4000],
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": true,
+  "mounts": [
+    "source=${localWorkspaceFolder}/.cache,target=/workspaces/.cache,type=bind"
+  ],
+  "remoteEnv": {
+    "DATABASE_URL": "postgresql://appuser:postgres@localhost:5432/appdb",
+    "REDIS_URL": "redis://localhost:6379"
+  },
+  "forwardPorts": [3000, 4000, 5173, 8000, 5432, 6379],
   "portsAttributes": {
     "3000": {
       "label": "Website",
       "onAutoForward": "notify"
     },
+    "4000": {
+      "label": "Backend API",
+      "onAutoForward": "silent"
+    },
+    "5173": {
+      "label": "Vite Dev Server",
+      "onAutoForward": "silent"
+    },
     "8000": {
       "label": "LLM API",
       "onAutoForward": "silent"
     },
-    "4000": {
-      "label": "Backend API",
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "silent"
+    },
+    "6379": {
+      "label": "Redis",
       "onAutoForward": "silent"
     }
   },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "updateContentCommand": "echo '✅ Dev container ready'",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -56,71 +79,23 @@
         "ms-python.python",
         "ms-python.vscode-pylance",
         "ms-vscode.vscode-typescript-next",
-        "github.vscode-pull-request-github"
+        "github.vscode-pull-request-github",
+        "ms-playwright.playwright",
+        "github.copilot",
+        "github.copilot-chat",
+        "eamodio.gitlens",
+        "ms-vscode.makefile-tools"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
         "editor.formatOnSave": true,
-        "python.analysis.typeCheckingMode": "basic"
-      }
-    }
-  },
-  "remoteEnv": {
-    "DATABASE_URL": "postgresql://appuser:postgres@localhost:5432/appdb",
-    "REDIS_URL": "redis://localhost:6379"
-  },
-  "postCreateCommand": "python -m pip install -U pip && (pip install -r requirements.txt || true) && npm i -g pnpm && (pnpm i --frozen-lockfile || npm ci || true)",
-  "updateContentCommand": "echo '✅ Dev container ready'",
-  "forwardPorts": [3000, 4000, 5173, 8000, 5432, 6379],
-  "remoteUser": "vscode",
-  "updateRemoteUserUID": true,
-  "mounts": [
-    "source=${localWorkspaceFolder}/.cache,target=/workspaces/.cache,type=bind"
-  ]
-  "postCreateCommand": "bash scripts/bootstrap.sh || true",
-  "customizations": {
-    "vscode": {
-      "settings": { "editor.formatOnSave": true, "files.eol": "\\n" },
-        "terraform.codelens.enabled": true,
-        "editor.formatOnSave": true,
+        "files.eol": "\\n",
         "python.defaultInterpreterPath": "/usr/local/bin/python",
         "python.linting.enabled": true,
         "python.linting.pylintEnabled": false,
         "python.formatting.provider": "black",
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "[python]": {
-          "editor.defaultFormatter": "ms-python.python"
-        }
-  "name": "blackroad-prism-console",
-  "build": {
-    "dockerfile": "../Dockerfile",
-    "context": ".."
-  },
-  "workspaceFolder": "/workspace",
-  "features": {
-    "ghcr.io/devcontainers/features/git:1": {}
-  },
-  "customizations": {
-    "vscode": {
-      "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash"
-      },
-      "extensions": [
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-        "esbenp.prettier-vscode",
-        "dbaeumer.vscode-eslint",
-        "ms-playwright.playwright"
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-        "GitHub.copilot",
-        "GitHub.copilot-chat",
-        "eamodio.gitlens",
-        "ms-vscode.makefile-tools"
-        "dbaeumer.vscode-eslint"
-      ]
+        "terraform.codelens.enabled": true
+      }
     }
-  },
-  "forwardPorts": [3000],
-  "postCreateCommand": "pip install -U pip pytest jsonschema && (npm ci || true)"
+  }
 }
