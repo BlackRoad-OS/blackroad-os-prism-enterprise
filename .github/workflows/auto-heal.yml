@@ -3,21 +3,22 @@ on:
   pull_request:
   workflow_dispatch:
   workflow_run:
-    workflows: ["Super-Linter","CodeQL","Tests","HTML Validate","Broken Links"]
+    workflows: ["Super-Linter", "CodeQL", "Tests", "HTML Validate", "Broken Links"]
     types: [completed]
-permissions: { contents: write, pull-requests: write }
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   heal:
     if: github.event_name == 'pull_request' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
-          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref }}
-        with: { persist-credentials: false, ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref }} }
-      - run: |
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
 
       - name: Configure bot git author
         run: |
@@ -27,11 +28,6 @@ jobs:
       - name: Run auto-heal script
         id: heal
         run: .github/tools/autoheal.sh
-      - if: steps.heal.outputs.committed == '1'
-        env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-        env: { BOT_TOKEN: ${{ secrets.BOT_TOKEN }} }
-
       - name: Push fixes (if any)
         if: steps.heal.outputs.committed == '1'
         env:
@@ -44,6 +40,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
+          github-token: ${{ github.token }}
           script: |
             const committed = `${{ steps.heal.outputs.committed }}` === '1';
             const body = committed
