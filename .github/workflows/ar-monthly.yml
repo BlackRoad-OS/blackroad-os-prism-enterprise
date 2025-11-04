@@ -11,4 +11,9 @@ jobs:
         with: { node-version: '20' }
       - run: node scripts/ar/aging_schedule.ts
       - run: node scripts/ar/leakage_report.ts
-      - run: curl -s -X POST -H 'Content-Type: application/json' -d '{"asof":"auto"}' http://localhost:4000/api/ar/dunning/run || true
+      - name: Trigger dunning workflow
+        run: |
+          curl -s -X POST \
+            -H 'Content-Type: application/json' \
+            -d '{"asof":"auto"}' \
+            http://localhost:4000/api/ar/dunning/run || true
