@@ -9,15 +9,14 @@ permissions: { contents: write, pull-requests: write }
 
 jobs:
   heal:
-    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure')
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          repository: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_repository.full_name || github.repository }}
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref }}
-        with: { persist-credentials: false, ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref }} }
-      - run: |
 
       - name: Configure bot git author
         run: |
@@ -27,11 +26,6 @@ jobs:
       - name: Run auto-heal script
         id: heal
         run: .github/tools/autoheal.sh
-      - if: steps.heal.outputs.committed == '1'
-        env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-        env: { BOT_TOKEN: ${{ secrets.BOT_TOKEN }} }
-
       - name: Push fixes (if any)
         if: steps.heal.outputs.committed == '1'
         env:
@@ -45,7 +39,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const committed = `${{ steps.heal.outputs.committed }}` === '1';
+            const committed = '${{ steps.heal.outputs.committed }}' === '1';
             const body = committed
               ? "🤖 Auto-Heal committed fixes (configs, formatting, linting)."
               : "✅ Auto-Heal found no changes to apply.";

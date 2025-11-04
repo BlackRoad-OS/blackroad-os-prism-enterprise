@@ -37,27 +37,28 @@ jobs:
         id: detect
         run: |
           python - <<'PY'
-import os
-import pathlib
-subject = os.environ['SUBJECT']
-mode = os.environ['MODE'].lower()
-if mode not in {'auto', 'image', 'path'}:
-    raise SystemExit(f"Unsupported subject type override: {mode}")
-if mode == 'auto':
-    if '://' in subject or '@' in subject:
-        mode = 'image'
-    elif subject.startswith('ghcr.io/'):
-        mode = 'image'
-    else:
-        candidate = pathlib.Path(subject)
-        if candidate.exists():
-            mode = 'path'
-        else:
-            mode = 'image'
-with open(os.environ['GITHUB_OUTPUT'], 'w') as fh:
-    fh.write(f"mode={mode}\n")
-    fh.write(f"target={subject}\n")
-PY
+            import os
+            import pathlib
+
+            subject = os.environ['SUBJECT']
+            mode = os.environ['MODE'].lower()
+            if mode not in {'auto', 'image', 'path'}:
+                raise SystemExit(f"Unsupported subject type override: {mode}")
+            if mode == 'auto':
+                if '://' in subject or '@' in subject:
+                    mode = 'image'
+                elif subject.startswith('ghcr.io/'):
+                    mode = 'image'
+                else:
+                    candidate = pathlib.Path(subject)
+                    if candidate.exists():
+                        mode = 'path'
+                    else:
+                        mode = 'image'
+            with open(os.environ['GITHUB_OUTPUT'], 'w') as fh:
+                fh.write(f"mode={mode}\n")
+                fh.write(f"target={subject}\n")
+          PY
         env:
           SUBJECT: ${{ inputs.subject }}
           MODE: ${{ inputs['subject-type'] }}
