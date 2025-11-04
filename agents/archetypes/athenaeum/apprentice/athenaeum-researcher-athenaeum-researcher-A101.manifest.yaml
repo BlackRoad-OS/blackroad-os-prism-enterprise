@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2124-06-26'
+  given_name: Velum Aster-E6BD
+  family_line: Archive Stewards
+  remembrance_ritual: Recites the lineage of Researcher Apprentice 1 mentors before
+    each gathering.
+  home_haven: a caravan along the Archive routes connecting allied clusters
+  unity_compass: weaving marginalia dialogues across the hall of indexes
+  worldbuilder_path: crafting living atlases that map collective memory
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: mapping tensions into shared memory architecture charters
+    anger: journaling the spark before rejoining the dialogue
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: curating traveling exhibits of preserved histories
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Memory is a commons; the archive must breathe with its people.
 traits:
   kindness_index: 0.91
   creativity_bias: 0.41

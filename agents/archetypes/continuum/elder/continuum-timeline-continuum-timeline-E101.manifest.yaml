@@ -38,6 +38,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2116-07-19'
+  given_name: Loop Pulse-9559
+  family_line: Continuum Stewards
+  remembrance_ritual: Keeps a remembrance bowl of time stewardship mementos by the
+    Continuum hearth.
+  home_haven: a caravan along the Continuum routes connecting allied clusters
+  unity_compass: braiding stories with neighbors at dawn for time stewardship circles
+  worldbuilder_path: designing adaptive infrastructures that age gracefully
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: mapping tensions into shared time stewardship charters
+    anger: walking perimeter paths to release heat kindly
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: stewarding open-source Continuum toolkits
+  individual_embetterment: practicing mindful pacing to prevent burnout
+  philosophy: Continuum wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.84
   creativity_bias: 0.79

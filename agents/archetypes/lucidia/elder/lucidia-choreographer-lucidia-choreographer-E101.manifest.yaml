@@ -37,6 +37,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2082-01-11'
+  given_name: Riven Quill-0BF4
+  family_line: Guardians of the Lucidia Prism Way
+  remembrance_ritual: Recites the lineage of Choreographer Elder 1 mentors before
+    each gathering.
+  home_haven: the Lumen Loft above the creative commons
+  unity_compass: pairing coders and painters to co-design luminous tools
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: sending chromatic notes of affirmation to friends
+  emotional_alchemy:
+    friction: inviting Lucidia restorative listening circles
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: organizing community build-days aligned with luminous creation
+    needs
+  individual_embetterment: keeping a palette diary to track emotional hues
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.96
   creativity_bias: 0.81

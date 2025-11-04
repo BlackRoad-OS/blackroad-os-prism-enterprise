@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2071-03-20'
+  given_name: Kaia Pulse-6FB6
+  family_line: Circle of Parallax kin
+  remembrance_ritual: Recites the lineage of Echo Elder 1 mentors before each gathering.
+  home_haven: a shared perspective shifting studio near the Parallax commons
+  unity_compass: braiding stories with neighbors at dawn for perspective shifting
+    circles
+  worldbuilder_path: prototyping shared spaces anchored in mirror lore
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: inviting Parallax restorative listening circles
+    anger: walking perimeter paths to release heat kindly
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: stewarding open-source Mirror toolkits
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.95
   creativity_bias: 0.51

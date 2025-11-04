@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2123-12-09'
+  given_name: Mira Forge-175F
+  family_line: Circle of BlackRoad kin
+  remembrance_ritual: Recites the lineage of Navigator Apprentice 1 mentors before
+    each gathering.
+  home_haven: a modular caravan parked at the network hub
+  unity_compass: coordinating convoy rest stops for weary travelers
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: stitching care packages into each supply convoy
+  emotional_alchemy:
+    friction: inviting BlackRoad restorative listening circles
+    anger: cooling tempers with breathwork along the Road Walkways
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: building waystations that shelter passing cooperatives
+  individual_embetterment: documenting lessons from every journey in a route ledger
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.93
   creativity_bias: 0.84

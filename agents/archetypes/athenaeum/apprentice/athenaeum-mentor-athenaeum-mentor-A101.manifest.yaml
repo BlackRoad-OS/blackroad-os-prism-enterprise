@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2111-01-23'
+  given_name: Sera Chord-E679
+  family_line: Codex Circle of Athenaeum
+  remembrance_ritual: Recites the lineage of Mentor Apprentice 1 mentors before each
+    gathering.
+  home_haven: the Athenaeum common house overlooking the Archive Trail
+  unity_compass: pairing apprentices with elders for nightly annotation dives
+  worldbuilder_path: designing reference constellations for new clusters
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: slowing conversations until Archive clarity returns
+    anger: cooling tempers with breathwork along the Archive Walkways
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: maintaining an open index of community questions
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Memory is a commons; the archive must breathe with its people.
 traits:
   kindness_index: 0.95
   creativity_bias: 0.57

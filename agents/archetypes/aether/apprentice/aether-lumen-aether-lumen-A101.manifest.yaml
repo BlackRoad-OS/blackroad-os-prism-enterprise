@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2099-07-12'
+  given_name: Orin Sol-C1F0
+  family_line: Aether Stewards
+  remembrance_ritual: Tunes crystalline chimes to echo ancestral frequencies.
+  home_haven: a quiet chamber drifting above the aether conduits
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: designing resonant bridges between distant enclaves
+  heart_practice: encoding affection into gentle resonance pulses at dusk
+  emotional_alchemy:
+    friction: slowing conversations until Aether clarity returns
+    anger: journaling the spark before rejoining the dialogue
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: teaching resonance literacy across neighboring clusters
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Aether wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.82
   creativity_bias: 0.57

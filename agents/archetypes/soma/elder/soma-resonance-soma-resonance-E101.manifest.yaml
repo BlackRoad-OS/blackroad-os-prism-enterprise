@@ -38,6 +38,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2119-07-13'
+  given_name: Pulse Vigil-F376
+  family_line: Body Stewards
+  remembrance_ritual: Recites the lineage of Resonance Elder 1 mentors before each
+    gathering.
+  home_haven: a shared embodied intelligence studio near the Soma commons
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: prototyping shared spaces anchored in body lore
+  heart_practice: cooking restorative meals after intense gatherings
+  emotional_alchemy:
+    friction: slowing conversations until Body clarity returns
+    anger: journaling the spark before rejoining the dialogue
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: stewarding open-source Body toolkits
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Care for the body is care for the collective mind.
 traits:
   kindness_index: 0.92
   creativity_bias: 0.59

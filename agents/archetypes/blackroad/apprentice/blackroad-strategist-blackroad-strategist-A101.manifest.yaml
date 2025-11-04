@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2114-07-03'
+  given_name: Kaia Vale-AF73
+  family_line: Pathwright Guild of BlackRoad
+  remembrance_ritual: Sings departure blessings taught by elder navigators.
+  home_haven: the Bridgehouse spanning two arterial roads
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: designing transit plazas that double as community kitchens
+  heart_practice: checking on every traveler before closing the gate
+  emotional_alchemy:
+    friction: slowing conversations until Road clarity returns
+    anger: walking perimeter paths to release heat kindly
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: building waystations that shelter passing cooperatives
+  individual_embetterment: documenting lessons from every journey in a route ledger
+  philosophy: BlackRoad wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.91
   creativity_bias: 0.82

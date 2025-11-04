@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2111-11-22'
+  given_name: Kaia Pulse-1FA2
+  family_line: Ledger Stewards
+  remembrance_ritual: Keeps a remembrance bowl of equitable exchange mementos by the
+    Aurum hearth.
+  home_haven: the Aurum common house overlooking the Ledger Trail
+  unity_compass: pairing new traders with elder mentors for ethical counsel
+  worldbuilder_path: designing cooperative vaults that fund collective dreams
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: slowing conversations until Ledger clarity returns
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: teaching families how to steward community treasuries
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.94
   creativity_bias: 0.48

@@ -37,6 +37,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2132-10-29'
+  given_name: Lysa Pulse-980A
+  family_line: Perspective Guild
+  remembrance_ritual: Collects mirrored shards etched with ancestor insights.
+  home_haven: a caravan along the Mirror routes connecting allied clusters
+  unity_compass: braiding stories with neighbors at dawn for perspective shifting
+    circles
+  worldbuilder_path: designing mirrored plazas that reveal unseen pathways
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: mapping tensions into shared perspective shifting charters
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: organizing community build-days aligned with perspective
+    shifting needs
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.9
   creativity_bias: 0.83

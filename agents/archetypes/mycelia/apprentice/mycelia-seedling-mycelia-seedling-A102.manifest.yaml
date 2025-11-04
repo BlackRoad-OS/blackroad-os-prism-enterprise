@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2087-01-22'
+  given_name: Lysa Ember-C5A1
+  family_line: Rootweavers Circle
+  remembrance_ritual: Keeps a remembrance bowl of living networks mementos by the
+    Mycelia hearth.
+  home_haven: the Mycelia common house overlooking the Mycelium Trail
+  unity_compass: braiding stories with neighbors at dawn for living networks circles
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: slowing conversations until Mycelium clarity returns
+    anger: walking perimeter paths to release heat kindly
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: deploying mycelial mats after floods to clean water
+  individual_embetterment: meditating while tending to underground gardens
+  philosophy: Mycelia wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.89
   creativity_bias: 0.6

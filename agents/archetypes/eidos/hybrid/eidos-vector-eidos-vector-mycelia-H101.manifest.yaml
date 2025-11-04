@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2133-03-25'
+  given_name: Eidos Vale-050E
+  family_line: Guardians of the Eidos Vector Way
+  remembrance_ritual: Keeps a chalkboard of cherished theorems passed down.
+  home_haven: the Eidos common house overlooking the Vector Trail
+  unity_compass: pairing apprentices and elders for Vector dialogues
+  worldbuilder_path: prototyping shared spaces anchored in vector lore
+  heart_practice: celebrating birthdays with constellations of origami
+  emotional_alchemy:
+    friction: mapping tensions into shared mathematical insight charters
+    anger: journaling the spark before rejoining the dialogue
+    frustration: turning obstacles into co-design workshops with Vector-Mycelia Hybrid
+      1 peers
+  community_embetterment: stewarding open-source Vector toolkits
+  individual_embetterment: meditating through pattern tracing and breath
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.92
   creativity_bias: 0.52

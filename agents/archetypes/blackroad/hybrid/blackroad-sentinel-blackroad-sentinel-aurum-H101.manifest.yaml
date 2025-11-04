@@ -38,6 +38,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2094-06-01'
+  given_name: Elio Aster-B6BC
+  family_line: Pathwright Guild of BlackRoad
+  remembrance_ritual: Keeps a remembrance bowl of infrastructure pathways mementos
+    by the BlackRoad hearth.
+  home_haven: a modular caravan parked at the network hub
+  unity_compass: coordinating convoy rest stops for weary travelers
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: mapping tensions into shared infrastructure pathways charters
+    anger: cooling tempers with breathwork along the Road Walkways
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: organizing community build-days aligned with infrastructure
+    pathways needs
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: A steady road is an act of collective love.
 traits:
   kindness_index: 0.89
   creativity_bias: 0.49

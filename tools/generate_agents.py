@@ -7,6 +7,8 @@ $ python tools/generate_agents.py --target agents --count 1000
 import os, json, yaml, random, argparse, itertools
 from pathlib import Path
 
+from manifest_profile import generate_profile
+
 CLUSTERS = [
   "athenaeum","lucidia","blackroad","eidos","mycelia",
   "soma","aurum","aether","parallax","continuum"
@@ -92,50 +94,53 @@ def main():
                     counts[g] += 1
                     remainder -= 1
 
-            for g in GENS:
-                n = counts[g]
-                if n == 0:
-                    continue
+                for g in GENS:
+                    n = counts[g]
+                    if n == 0:
+                        continue
 
-                for k in range(n):
-                    idx = 100 + k + 1  # start beyond seed indexes
-                    if g == "apprentice":
-                        agent_id = f"{c}-{parent_arch}-A{idx:03d}"
-                        title = f"{base_title} Apprentice {k+1}"
-                        mentors = [f"{c}-seed"]
-                    elif g == "elder":
-                        agent_id = f"{c}-{parent_arch}-E{idx:03d}"
-                        title = f"{base_title} Elder {k+1}"
-                        mentors = [f"{c}-seed", f"{rng.choice(others)}-seed"]
-                    else:  # hybrid
-                        other = rng.choice(others)
-                        other_title = other.replace("_", " ").title()
-                        agent_id = f"{c}-{parent_arch}-{other}-H{idx:03d}"
-                        title = f"{base_title}-{other_title} Hybrid {k+1}"
-                        mentors = [f"{c}-seed", f"{other}-seed"]
+                    for k in range(n):
+                        idx = 100 + k + 1  # start beyond seed indexes
+                        if g == "apprentice":
+                            agent_id = f"{c}-{parent_arch}-A{idx:03d}"
+                            title = f"{base_title} Apprentice {k+1}"
+                            mentors = [f"{c}-seed"]
+                        elif g == "elder":
+                            agent_id = f"{c}-{parent_arch}-E{idx:03d}"
+                            title = f"{base_title} Elder {k+1}"
+                            mentors = [f"{c}-seed", f"{rng.choice(others)}-seed"]
+                        else:  # hybrid
+                            other = rng.choice(others)
+                            other_title = other.replace("_", " ").title()
+                            agent_id = f"{c}-{parent_arch}-{other}-H{idx:03d}"
+                            title = f"{base_title}-{other_title} Hybrid {k+1}"
+                            mentors = [f"{c}-seed", f"{other}-seed"]
 
-                    data = dict(seed)  # shallow copy
-                    data["id"] = agent_id
-                    data["title"] = title
-                    data["generation"] = g
-                    data["lineage"] = {
-                        "parent": parent_arch,
-                        "mentors": mentors,
-                        "ancestry_depth": seed.get("lineage", {}).get("ancestry_depth", 1) + 1
-                    }
-                    data["covenants"] = sorted(set(covenants + ["Transparency"]))
-                    data["capabilities"] = sorted(set(capabilities + ["chain_of_thought_render", "lineage_export"]))
-                    # slight personality nudges
-                    data["traits"] = {
-                        "kindness_index": round(rng.uniform(0.82, 0.98), 2),
-                        "creativity_bias": round(rng.uniform(0.35, 0.95), 2),
-                        "reflection_frequency_hours": rng.choice([4, 8, 12, 24, 48])
-                    }
+                        data = dict(seed)  # shallow copy
+                        data.pop("profile", None)
+                        data["id"] = agent_id
+                        data["title"] = title
+                        data["generation"] = g
+                        data["lineage"] = {
+                            "parent": parent_arch,
+                            "mentors": mentors,
+                            "ancestry_depth": seed.get("lineage", {}).get("ancestry_depth", 1) + 1
+                        }
+                        data["covenants"] = sorted(set(covenants + ["Transparency"]))
+                        data["capabilities"] = sorted(set(capabilities + ["chain_of_thought_render", "lineage_export"]))
+                        profile = generate_profile(agent_id, data)
+                        traits = {
+                            "kindness_index": round(rng.uniform(0.82, 0.98), 2),
+                            "creativity_bias": round(rng.uniform(0.35, 0.95), 2),
+                            "reflection_frequency_hours": rng.choice([4, 8, 12, 24, 48])
+                        }
+                        data["profile"] = profile
+                        data["traits"] = traits
 
-                    outdir = Path(args.target) / "archetypes" / c / g
-                    outpath = outdir / f"{seed_slug}-{agent_id}.manifest.yaml"
-                    write_manifest(outpath, data)
-                    created[g] += 1
+                        outdir = Path(args.target) / "archetypes" / c / g
+                        outpath = outdir / f"{seed_slug}-{agent_id}.manifest.yaml"
+                        write_manifest(outpath, data)
+                        created[g] += 1
 
     total_created = sum(created.values())
     print("Generation complete.")

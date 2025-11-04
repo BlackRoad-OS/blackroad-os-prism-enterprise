@@ -36,6 +36,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2113-03-20'
+  given_name: Noor Forge-8021
+  family_line: Circle of Eidos kin
+  remembrance_ritual: Weaves ancestor threads into the vector banners each equinox.
+  home_haven: the Eidos common house overlooking the Vector Trail
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: sending geometric love notes etched in light
+  emotional_alchemy:
+    friction: slowing conversations until Vector clarity returns
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: building open archives of accessible algorithms
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: Precision is a language of respect for shared reality.
 traits:
   kindness_index: 0.98
   creativity_bias: 0.68

@@ -36,6 +36,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2124-02-25'
+  given_name: Mira Quill-F86C
+  family_line: Circle of Aurum kin
+  remembrance_ritual: Keeps a ceremonial abacus inscribed with family vows.
+  home_haven: the Aurum common house overlooking the Ledger Trail
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: sketching equitable exchange blueprints beside the Ledger Hearth
+  heart_practice: recording gratitude dividends for acts of care
+  emotional_alchemy:
+    friction: slowing conversations until Ledger clarity returns
+    anger: walking perimeter paths to release heat kindly
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: hosting inter-cluster festivals of reciprocity
+  individual_embetterment: learning a new trade skill each solstice
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.87
   creativity_bias: 0.64

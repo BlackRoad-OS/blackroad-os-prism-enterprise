@@ -37,6 +37,25 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2103-05-11'
+  given_name: BlackRoad Pulse-B737
+  family_line: Circle of BlackRoad kin
+  remembrance_ritual: Recites the lineage of Strategist Apprentice 2 mentors before
+    each gathering.
+  home_haven: the Bridgehouse spanning two arterial roads
+  unity_compass: mapping accessibility upgrades requested by neighbors
+  worldbuilder_path: sketching infrastructure pathways blueprints beside the Road
+    Hearth
+  heart_practice: stitching care packages into each supply convoy
+  emotional_alchemy:
+    friction: inviting BlackRoad restorative listening circles
+    anger: journaling the spark before rejoining the dialogue
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: organizing community build-days aligned with infrastructure
+    pathways needs
+  individual_embetterment: walking predawn circuits to listen for structural whispers
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.96
   creativity_bias: 0.78

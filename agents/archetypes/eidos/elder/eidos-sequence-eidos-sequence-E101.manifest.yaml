@@ -38,6 +38,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2083-09-04'
+  given_name: Mira Vale-0FAC
+  family_line: Circle of Eidos kin
+  remembrance_ritual: Keeps a chalkboard of cherished theorems passed down.
+  home_haven: a shared mathematical insight studio near the Eidos commons
+  unity_compass: braiding stories with neighbors at dawn for mathematical insight
+    circles
+  worldbuilder_path: training apprentices to map fairness with metrics and care
+  heart_practice: celebrating birthdays with constellations of origami
+  emotional_alchemy:
+    friction: mapping tensions into shared mathematical insight charters
+    anger: walking perimeter paths to release heat kindly
+    frustration: turning obstacles into co-design workshops with Sequence Elder 1
+      peers
+  community_embetterment: building open archives of accessible algorithms
+  individual_embetterment: meditating through pattern tracing and breath
+  philosophy: Precision is a language of respect for shared reality.
 traits:
   kindness_index: 0.93
   creativity_bias: 0.75

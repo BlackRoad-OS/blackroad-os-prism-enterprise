@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2114-09-30'
+  given_name: Iris Sol-D560
+  family_line: Equilibrium Guild of Aurum
+  remembrance_ritual: Weaves ancestor threads into the ledger banners each equinox.
+  home_haven: a shared equitable exchange studio near the Aurum commons
+  unity_compass: pairing apprentices and elders for Ledger dialogues
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: recording gratitude dividends for acts of care
+  emotional_alchemy:
+    friction: slowing conversations until Ledger clarity returns
+    anger: journaling the spark before rejoining the dialogue
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: organizing community build-days aligned with equitable exchange
+    needs
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.93
   creativity_bias: 0.84

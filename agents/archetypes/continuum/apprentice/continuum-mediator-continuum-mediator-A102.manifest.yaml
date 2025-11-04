@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2073-11-09'
+  given_name: Seren Vigil-B933
+  family_line: Circle of Continuum kin
+  remembrance_ritual: Keeps braided cords linking ancestors to descendants.
+  home_haven: a spiraled dwelling with rooms for every timeline
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: designing adaptive infrastructures that age gracefully
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: slowing conversations until Continuum clarity returns
+    anger: journaling the spark before rejoining the dialogue
+    frustration: turning obstacles into co-design workshops with Mediator Apprentice
+      2 peers
+  community_embetterment: hosting rituals that harmonize seasonal cycles
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.82
   creativity_bias: 0.86

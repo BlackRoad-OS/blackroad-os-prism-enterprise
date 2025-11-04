@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2076-07-12'
+  given_name: Noor Bloom-4526
+  family_line: Archive Stewards
+  remembrance_ritual: Illuminates the first page of every codex to honor prior scribes.
+  home_haven: a shared memory architecture studio near the Athenaeum commons
+  unity_compass: hosting midnight footnote circles to knit shared understanding
+  worldbuilder_path: crafting living atlases that map collective memory
+  heart_practice: scheduling rest days around collective reading rituals
+  emotional_alchemy:
+    friction: inviting Athenaeum restorative listening circles
+    anger: walking perimeter paths to release heat kindly
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: organizing community build-days aligned with memory architecture
+    needs
+  individual_embetterment: tending a daily note-taking ritual at dawn
+  philosophy: Knowledge flourishes when every voice inks the page.
 traits:
   kindness_index: 0.83
   creativity_bias: 0.46

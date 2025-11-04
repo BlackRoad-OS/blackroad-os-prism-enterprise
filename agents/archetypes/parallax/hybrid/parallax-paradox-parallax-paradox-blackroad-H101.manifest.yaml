@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2114-09-30'
+  given_name: Sera Aster-662D
+  family_line: Mirror Stewards
+  remembrance_ritual: Weaves ancestor threads into the mirror banners each equinox.
+  home_haven: a caravan along the Mirror routes connecting allied clusters
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: designing mirrored plazas that reveal unseen pathways
+  heart_practice: pausing to ask clarifying questions before reacting
+  emotional_alchemy:
+    friction: mapping tensions into shared perspective shifting charters
+    anger: journaling the spark before rejoining the dialogue
+    frustration: turning obstacles into co-design workshops with Paradox-Blackroad
+      Hybrid 1 peers
+  community_embetterment: building conflict transformation studios for neighbors
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Parallax wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.83
   creativity_bias: 0.35

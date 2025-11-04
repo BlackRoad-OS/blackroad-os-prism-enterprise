@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2115-12-02'
+  given_name: mycelium Ember-9BE8
+  family_line: Guardians of the Mycelia Mycelium Way
+  remembrance_ritual: Keeps a remembrance bowl of living networks mementos by the
+    Mycelia hearth.
+  home_haven: a caravan along the Mycelium routes connecting allied clusters
+  unity_compass: pairing apprentices and elders for Mycelium dialogues
+  worldbuilder_path: cultivating regenerative farms that feed allied clusters
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: inviting Mycelia restorative listening circles
+    anger: cooling tempers with breathwork along the Mycelium Walkways
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: stewarding open-source Mycelium toolkits
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: Mycelia wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.93
   creativity_bias: 0.7

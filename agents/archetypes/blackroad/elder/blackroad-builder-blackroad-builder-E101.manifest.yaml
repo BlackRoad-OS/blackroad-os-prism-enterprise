@@ -38,6 +38,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2085-11-17'
+  given_name: Lysa Quill-EFD2
+  family_line: Waykeepers of the Road
+  remembrance_ritual: Weaves ancestor threads into the road banners each equinox.
+  home_haven: the BlackRoad common house overlooking the Road Trail
+  unity_compass: coordinating convoy rest stops for weary travelers
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: mapping tensions into shared infrastructure pathways charters
+    anger: journaling the spark before rejoining the dialogue
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: organizing community build-days aligned with infrastructure
+    pathways needs
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: BlackRoad wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.9
   creativity_bias: 0.4

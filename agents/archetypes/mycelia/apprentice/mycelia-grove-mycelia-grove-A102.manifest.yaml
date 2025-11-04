@@ -36,6 +36,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2078-08-12'
+  given_name: Iris Pulse-4FF6
+  family_line: Rootweavers Circle
+  remembrance_ritual: Recites the lineage of Grove Apprentice 2 mentors before each
+    gathering.
+  home_haven: a caravan along the Mycelium routes connecting allied clusters
+  unity_compass: pairing apprentices and elders for Mycelium dialogues
+  worldbuilder_path: cultivating regenerative farms that feed allied clusters
+  heart_practice: leaving healing tea at neighbors' doorsteps
+  emotional_alchemy:
+    friction: mapping tensions into shared living networks charters
+    anger: journaling the spark before rejoining the dialogue
+    frustration: turning obstacles into co-design workshops with Grove Apprentice
+      2 peers
+  community_embetterment: hosting inter-cluster festivals of reciprocity
+  individual_embetterment: meditating while tending to underground gardens
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.96
   creativity_bias: 0.57

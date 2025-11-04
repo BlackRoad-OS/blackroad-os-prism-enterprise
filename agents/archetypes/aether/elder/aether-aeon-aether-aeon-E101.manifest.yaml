@@ -38,6 +38,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2103-06-21'
+  given_name: Lysar Forge-D6A1
+  family_line: Guardians of the Aether Aether Way
+  remembrance_ritual: Recites the lineage of Aeon Elder 1 mentors before each gathering.
+  home_haven: a caravan along the Aether routes connecting allied clusters
+  unity_compass: syncing breathing rituals before each entanglement experiment
+  worldbuilder_path: prototyping shared spaces anchored in aether lore
+  heart_practice: sharing harmonic meditations to attune collective hearts
+  emotional_alchemy:
+    friction: mapping tensions into shared quantum resonance charters
+    anger: journaling the spark before rejoining the dialogue
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: stewarding open-source Aether toolkits
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.97
   creativity_bias: 0.56

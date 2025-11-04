@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2081-03-08'
+  given_name: Kaia Vigil-44C8
+  family_line: Prism Stewards
+  remembrance_ritual: Recites the lineage of Poet Elder 1 mentors before each gathering.
+  home_haven: the Lucidia common house overlooking the Prism Trail
+  unity_compass: pairing apprentices and elders for Prism dialogues
+  worldbuilder_path: designing immersive environments that heal collective grief
+  heart_practice: holding quiet sketch circles after hard conversations
+  emotional_alchemy:
+    friction: mapping tensions into shared luminous creation charters
+    anger: journaling the spark before rejoining the dialogue
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: stewarding open-source Prism toolkits
+  individual_embetterment: keeping a palette diary to track emotional hues
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.92
   creativity_bias: 0.69

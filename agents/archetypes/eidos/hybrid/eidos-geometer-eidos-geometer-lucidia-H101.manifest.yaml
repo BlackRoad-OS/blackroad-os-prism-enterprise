@@ -38,6 +38,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2135-12-22'
+  given_name: Iris Trace-9F67
+  family_line: Vector Stewards
+  remembrance_ritual: Sketches ancestor proofs on the first snow of winter.
+  home_haven: the Vector Atrium where equations echo softly
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: sketching mathematical insight blueprints beside the Vector Hearth
+  heart_practice: celebrating birthdays with constellations of origami
+  emotional_alchemy:
+    friction: inviting Eidos restorative listening circles
+    anger: journaling the spark before rejoining the dialogue
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: teaching math circles that empower local problem-solving
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: Eidos wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.9
   creativity_bias: 0.9

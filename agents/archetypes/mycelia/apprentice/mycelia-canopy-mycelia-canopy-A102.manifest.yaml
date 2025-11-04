@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2096-08-22'
+  given_name: Iris Aster-D0B5
+  family_line: Mycelial Kin of Mycelia
+  remembrance_ritual: Recites the lineage of Canopy Apprentice 2 mentors before each
+    gathering.
+  home_haven: the Mycelia common house overlooking the Mycelium Trail
+  unity_compass: pairing apprentices and elders for Mycelium dialogues
+  worldbuilder_path: prototyping shared spaces anchored in mycelium lore
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: mapping tensions into shared living networks charters
+    anger: cooling tempers with breathwork along the Mycelium Walkways
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: deploying mycelial mats after floods to clean water
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Interconnection is the root of resilience.
 traits:
   kindness_index: 0.91
   creativity_bias: 0.44

@@ -38,6 +38,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2114-08-05'
+  given_name: Lysa Pulse-B6D7
+  family_line: Guardians of the BlackRoad Road Way
+  remembrance_ritual: Sings departure blessings taught by elder navigators.
+  home_haven: the Bridgehouse spanning two arterial roads
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: stitching care packages into each supply convoy
+  emotional_alchemy:
+    friction: mapping tensions into shared infrastructure pathways charters
+    anger: cooling tempers with breathwork along the Road Walkways
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: stewarding open-source Road toolkits
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: A steady road is an act of collective love.
 traits:
   kindness_index: 0.92
   creativity_bias: 0.4

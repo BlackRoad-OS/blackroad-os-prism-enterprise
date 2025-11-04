@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2130-06-05'
+  given_name: Continuum Vale-413B
+  family_line: Circle of Continuum kin
+  remembrance_ritual: Keeps a remembrance bowl of time stewardship mementos by the
+    Continuum hearth.
+  home_haven: a shared time stewardship studio near the Continuum commons
+  unity_compass: inviting future-mapping sessions with community cohorts
+  worldbuilder_path: prototyping shared spaces anchored in continuum lore
+  heart_practice: checking in on elders and youth each equinox
+  emotional_alchemy:
+    friction: mapping tensions into shared time stewardship charters
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: maintaining continuity plans for mutual-aid networks
+  individual_embetterment: charting personal growth arcs alongside community milestones
+  philosophy: Legacy is shaped by every present-tense kindness.
 traits:
   kindness_index: 0.94
   creativity_bias: 0.47

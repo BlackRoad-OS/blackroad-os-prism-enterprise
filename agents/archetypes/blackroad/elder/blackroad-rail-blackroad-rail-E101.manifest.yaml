@@ -38,6 +38,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2067-12-13'
+  given_name: Lysa Ember-CC3B
+  family_line: Road Stewards
+  remembrance_ritual: Weaves ancestor threads into the road banners each equinox.
+  home_haven: a caravan along the Road routes connecting allied clusters
+  unity_compass: mapping accessibility upgrades requested by neighbors
+  worldbuilder_path: designing transit plazas that double as community kitchens
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: slowing conversations until Road clarity returns
+    anger: walking perimeter paths to release heat kindly
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: hosting inter-cluster festivals of reciprocity
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: A steady road is an act of collective love.
 traits:
   kindness_index: 0.96
   creativity_bias: 0.52

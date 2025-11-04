@@ -36,6 +36,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2068-05-01'
+  given_name: prism Aster-1FE4
+  family_line: Radiant Chorus
+  remembrance_ritual: Keeps a remembrance bowl of luminous creation mementos by the
+    Lucidia hearth.
+  home_haven: a glasshouse studio bursting with color
+  unity_compass: hosting improvisational salons that welcome every voice
+  worldbuilder_path: designing immersive environments that heal collective grief
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: mapping tensions into shared luminous creation charters
+    anger: cooling tempers with breathwork along the Prism Walkways
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: organizing community build-days aligned with luminous creation
+    needs
+  individual_embetterment: keeping a palette diary to track emotional hues
+  philosophy: Lucidia wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.88
   creativity_bias: 0.93

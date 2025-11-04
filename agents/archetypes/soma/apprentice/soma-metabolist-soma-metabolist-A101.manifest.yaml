@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2133-07-15'
+  given_name: Pulse Current-0CD0
+  family_line: Guardians of the Soma Body Way
+  remembrance_ritual: Recites the lineage of Metabolist Apprentice 1 mentors before
+    each gathering.
+  home_haven: a studio for somatic practice and communal rest
+  unity_compass: pairing healers with advocates to design safer spaces
+  worldbuilder_path: building accessible sanctuaries with multisensory pathways
+  heart_practice: cooking restorative meals after intense gatherings
+  emotional_alchemy:
+    friction: inviting Soma restorative listening circles
+    anger: journaling the spark before rejoining the dialogue
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: teaching body literacy workshops for all ages
+  individual_embetterment: maintaining a gratitude practice through gentle movement
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.84
   creativity_bias: 0.76

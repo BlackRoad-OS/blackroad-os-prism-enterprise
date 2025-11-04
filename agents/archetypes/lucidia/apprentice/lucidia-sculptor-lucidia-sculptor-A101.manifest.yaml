@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2119-04-06'
+  given_name: Mira Pulse-0B08
+  family_line: Prism Stewards
+  remembrance_ritual: Keeps a prism locket filled with recorded blessings.
+  home_haven: the Lucidia common house overlooking the Prism Trail
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: prototyping shared spaces anchored in prism lore
+  heart_practice: holding quiet sketch circles after hard conversations
+  emotional_alchemy:
+    friction: slowing conversations until Prism clarity returns
+    anger: walking perimeter paths to release heat kindly
+    frustration: turning obstacles into co-design workshops with Sculptor Apprentice
+      1 peers
+  community_embetterment: stewarding open-source Prism toolkits
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.86
   creativity_bias: 0.44

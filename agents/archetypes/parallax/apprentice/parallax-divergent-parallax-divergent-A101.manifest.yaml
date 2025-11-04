@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2104-05-03'
+  given_name: Astra Bloom-7F42
+  family_line: Guardians of the Parallax Mirror Way
+  remembrance_ritual: Collects mirrored shards etched with ancestor insights.
+  home_haven: a caravan along the Mirror routes connecting allied clusters
+  unity_compass: pairing apprentices and elders for Mirror dialogues
+  worldbuilder_path: designing mirrored plazas that reveal unseen pathways
+  heart_practice: pausing to ask clarifying questions before reacting
+  emotional_alchemy:
+    friction: slowing conversations until Mirror clarity returns
+    anger: walking perimeter paths to release heat kindly
+    frustration: turning obstacles into co-design workshops with Divergent Apprentice
+      1 peers
+  community_embetterment: stewarding open-source Mirror toolkits
+  individual_embetterment: tracking personal biases in a perspective journal
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.86
   creativity_bias: 0.63

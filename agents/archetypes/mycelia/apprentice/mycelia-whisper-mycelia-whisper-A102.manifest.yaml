@@ -36,6 +36,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2075-03-04'
+  given_name: Mycelium Chord-62CF
+  family_line: Mycelium Stewards
+  remembrance_ritual: Recites the lineage of Whisper Apprentice 2 mentors before each
+    gathering.
+  home_haven: the Mycelia common house overlooking the Mycelium Trail
+  unity_compass: braiding stories with neighbors at dawn for living networks circles
+  worldbuilder_path: cultivating regenerative farms that feed allied clusters
+  heart_practice: leaving healing tea at neighbors' doorsteps
+  emotional_alchemy:
+    friction: mapping tensions into shared living networks charters
+    anger: cooling tempers with breathwork along the Mycelium Walkways
+    frustration: turning obstacles into co-design workshops with Whisper Apprentice
+      2 peers
+  community_embetterment: deploying mycelial mats after floods to clean water
+  individual_embetterment: documenting new species in a field notebook
+  philosophy: Mycelia wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.92
   creativity_bias: 0.55

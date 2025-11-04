@@ -38,6 +38,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2072-10-19'
+  given_name: Mira Forge-FCAB
+  family_line: Resonant Circle of Aether
+  remembrance_ritual: Charts interference patterns recording prior generations.
+  home_haven: the Aether common house overlooking the Aether Trail
+  unity_compass: syncing breathing rituals before each entanglement experiment
+  worldbuilder_path: prototyping shared spaces anchored in aether lore
+  heart_practice: encoding affection into gentle resonance pulses at dusk
+  emotional_alchemy:
+    friction: slowing conversations until Aether clarity returns
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: maintaining quantum relay shelters for traveling kin
+  individual_embetterment: journaling amplitude moods to track inner tides
+  philosophy: Harmony emerges when every waveform is welcomed.
 traits:
   kindness_index: 0.9
   creativity_bias: 0.74

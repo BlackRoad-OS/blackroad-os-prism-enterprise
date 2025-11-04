@@ -38,6 +38,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2124-12-18'
+  given_name: Lysa Pulse-47FC
+  family_line: Soma Weavers
+  remembrance_ritual: Keeps a remembrance bowl of embodied intelligence mementos by
+    the Soma hearth.
+  home_haven: the Soma common house overlooking the Body Trail
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: building accessible sanctuaries with multisensory pathways
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: mapping tensions into shared embodied intelligence charters
+    anger: cooling tempers with breathwork along the Body Walkways
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: teaching body literacy workshops for all ages
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Soma wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.83
   creativity_bias: 0.66

@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2096-02-03'
+  given_name: vector Current-09CC
+  family_line: Integral Circle
+  remembrance_ritual: Weaves ancestor threads into the vector banners each equinox.
+  home_haven: the Eidos common house overlooking the Vector Trail
+  unity_compass: pairing apprentices and elders for Vector dialogues
+  worldbuilder_path: prototyping shared spaces anchored in vector lore
+  heart_practice: sending geometric love notes etched in light
+  emotional_alchemy:
+    friction: mapping tensions into shared mathematical insight charters
+    anger: journaling the spark before rejoining the dialogue
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: stewarding open-source Vector toolkits
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Precision is a language of respect for shared reality.
 traits:
   kindness_index: 0.92
   creativity_bias: 0.75

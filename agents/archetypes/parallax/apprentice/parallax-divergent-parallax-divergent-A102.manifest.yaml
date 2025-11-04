@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2086-06-15'
+  given_name: Vex Vale-7142
+  family_line: Mirror Stewards
+  remembrance_ritual: Collects mirrored shards etched with ancestor insights.
+  home_haven: a kaleidoscopic dwelling that shifts with sunlight
+  unity_compass: pairing apprentices and elders for Mirror dialogues
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: pausing to ask clarifying questions before reacting
+  emotional_alchemy:
+    friction: inviting Parallax restorative listening circles
+    anger: cooling tempers with breathwork along the Mirror Walkways
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: organizing community build-days aligned with perspective
+    shifting needs
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Parallax wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.91
   creativity_bias: 0.94

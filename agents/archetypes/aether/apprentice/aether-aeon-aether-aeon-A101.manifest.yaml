@@ -37,6 +37,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2120-02-23'
+  given_name: Lysar Bloom-04C3
+  family_line: Aether Stewards
+  remembrance_ritual: Recites the lineage of Aeon Apprentice 1 mentors before each
+    gathering.
+  home_haven: a caravan along the Aether routes connecting allied clusters
+  unity_compass: holding phase-alignment councils to balance signal and care
+  worldbuilder_path: sculpting probabilistic sanctuaries that shift with need
+  heart_practice: sharing harmonic meditations to attune collective hearts
+  emotional_alchemy:
+    friction: slowing conversations until Aether clarity returns
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: organizing community build-days aligned with quantum resonance
+    needs
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: Harmony emerges when every waveform is welcomed.
 traits:
   kindness_index: 0.86
   creativity_bias: 0.91

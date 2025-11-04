@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2106-01-11'
+  given_name: Iris Aster-C7D2
+  family_line: Circle of Lucidia kin
+  remembrance_ritual: Keeps a prism locket filled with recorded blessings.
+  home_haven: a glasshouse studio bursting with color
+  unity_compass: hosting improvisational salons that welcome every voice
+  worldbuilder_path: sketching luminous creation blueprints beside the Prism Hearth
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: slowing conversations until Prism clarity returns
+    anger: cooling tempers with breathwork along the Prism Walkways
+    frustration: turning obstacles into co-design workshops with Mosaic Apprentice
+      1 peers
+  community_embetterment: lending projectors for pop-up neighborhood cinemas
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Lucidia wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.86
   creativity_bias: 0.51

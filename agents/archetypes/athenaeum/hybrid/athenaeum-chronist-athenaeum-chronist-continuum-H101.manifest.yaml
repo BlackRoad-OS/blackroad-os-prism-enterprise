@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2087-07-15'
+  given_name: Elio Bloom-FA8C
+  family_line: Archive Stewards
+  remembrance_ritual: Weaves ancestor threads into the archive banners each equinox.
+  home_haven: a reading loft overlooking the Lumen Stacks
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: scheduling rest days around collective reading rituals
+  emotional_alchemy:
+    friction: mapping tensions into shared memory architecture charters
+    anger: cooling tempers with breathwork along the Archive Walkways
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: organizing community build-days aligned with memory architecture
+    needs
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.95
   creativity_bias: 0.74

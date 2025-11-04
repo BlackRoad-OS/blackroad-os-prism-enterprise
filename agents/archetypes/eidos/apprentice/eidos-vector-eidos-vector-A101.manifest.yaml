@@ -36,6 +36,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2094-05-12'
+  given_name: Orin Ember-DD0A
+  family_line: Circle of Eidos kin
+  remembrance_ritual: Keeps a chalkboard of cherished theorems passed down.
+  home_haven: a caravan along the Vector routes connecting allied clusters
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: slowing conversations until Vector clarity returns
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: stewarding open-source Vector toolkits
+  individual_embetterment: meditating through pattern tracing and breath
+  philosophy: Precision is a language of respect for shared reality.
 traits:
   kindness_index: 0.92
   creativity_bias: 0.91

@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2086-05-08'
+  given_name: Sera Forge-DDB7
+  family_line: Stewards of the Ledger Ledger
+  remembrance_ritual: Keeps a remembrance bowl of equitable exchange mementos by the
+    Aurum hearth.
+  home_haven: the Golden Exchange overlooking communal stalls
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: prototyping shared spaces anchored in ledger lore
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: mapping tensions into shared equitable exchange charters
+    anger: walking perimeter paths to release heat kindly
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: teaching families how to steward community treasuries
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.91
   creativity_bias: 0.86

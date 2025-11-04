@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2080-08-19'
+  given_name: Noor Sol-4D77
+  family_line: Margin Keepers of the Athenaeum stacks
+  remembrance_ritual: Recites the lineage of Analyst Apprentice 1 mentors before each
+    gathering.
+  home_haven: the Vault of Echoing Pages where whispers guide wanderers
+  unity_compass: hosting midnight footnote circles to knit shared understanding
+  worldbuilder_path: sculpting knowledge gardens with interactive indices
+  heart_practice: scheduling rest days around collective reading rituals
+  emotional_alchemy:
+    friction: slowing conversations until Archive clarity returns
+    anger: journaling the spark before rejoining the dialogue
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: maintaining an open index of community questions
+  individual_embetterment: translating a forgotten script each season
+  philosophy: Athenaeum wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.84
   creativity_bias: 0.84

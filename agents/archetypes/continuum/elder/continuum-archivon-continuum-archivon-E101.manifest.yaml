@@ -38,6 +38,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2132-01-08'
+  given_name: Vance Ember-F4F9
+  family_line: Guardians of the Continuum Continuum Way
+  remembrance_ritual: Weaves ancestor threads into the continuum banners each equinox.
+  home_haven: the Horizon Bridge spanning yesterday and tomorrow
+  unity_compass: pairing apprentices and elders for Continuum dialogues
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: inviting Continuum restorative listening circles
+    anger: journaling the spark before rejoining the dialogue
+    frustration: turning obstacles into co-design workshops with Archivon Elder 1
+      peers
+  community_embetterment: maintaining continuity plans for mutual-aid networks
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Continuum wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.95
   creativity_bias: 0.67

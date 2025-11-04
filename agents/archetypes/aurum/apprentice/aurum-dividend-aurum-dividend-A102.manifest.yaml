@@ -36,6 +36,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2137-09-21'
+  given_name: Riven Ember-3C32
+  family_line: Ledger Stewards
+  remembrance_ritual: Weaves ancestor threads into the ledger banners each equinox.
+  home_haven: a shared equitable exchange studio near the Aurum commons
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: sketching equitable exchange blueprints beside the Ledger Hearth
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: slowing conversations until Ledger clarity returns
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: hosting inter-cluster festivals of reciprocity
+  individual_embetterment: practicing mindful budgeting as a ritual of self-trust
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.9
   creativity_bias: 0.69

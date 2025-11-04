@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2125-02-05'
+  given_name: Lucidia Sol-CF48
+  family_line: Prism Stewards
+  remembrance_ritual: Projects ancestor murals in light across the studio walls.
+  home_haven: a caravan along the Prism routes connecting allied clusters
+  unity_compass: braiding stories with neighbors at dawn for luminous creation circles
+  worldbuilder_path: designing immersive environments that heal collective grief
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: mapping tensions into shared luminous creation charters
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: organizing community build-days aligned with luminous creation
+    needs
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.87
   creativity_bias: 0.52

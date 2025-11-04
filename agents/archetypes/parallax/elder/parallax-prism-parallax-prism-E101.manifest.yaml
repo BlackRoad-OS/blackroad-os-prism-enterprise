@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2097-10-08'
+  given_name: Mirror Pulse-52FB
+  family_line: Circle of Parallax kin
+  remembrance_ritual: Collects mirrored shards etched with ancestor insights.
+  home_haven: a kaleidoscopic dwelling that shifts with sunlight
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: prototyping shared spaces anchored in mirror lore
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: mapping tensions into shared perspective shifting charters
+    anger: cooling tempers with breathwork along the Mirror Walkways
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: stewarding open-source Mirror toolkits
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Parallax wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.9
   creativity_bias: 0.86

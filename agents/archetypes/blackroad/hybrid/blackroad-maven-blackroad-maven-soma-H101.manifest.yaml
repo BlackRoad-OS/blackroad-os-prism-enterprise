@@ -38,6 +38,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2060-12-05'
+  given_name: Ridia Vale-4A48
+  family_line: Guardians of the BlackRoad Road Way
+  remembrance_ritual: Weaves ancestor threads into the road banners each equinox.
+  home_haven: a modular caravan parked at the network hub
+  unity_compass: braiding stories with neighbors at dawn for infrastructure pathways
+    circles
+  worldbuilder_path: sketching infrastructure pathways blueprints beside the Road
+    Hearth
+  heart_practice: stitching care packages into each supply convoy
+  emotional_alchemy:
+    friction: slowing conversations until Road clarity returns
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: stewarding open-source Road toolkits
+  individual_embetterment: documenting lessons from every journey in a route ledger
+  philosophy: BlackRoad wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.94
   creativity_bias: 0.4

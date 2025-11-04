@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2139-02-15'
+  given_name: Myra Lumen-6F8A
+  family_line: Rootweavers Circle
+  remembrance_ritual: Braids old stories into the rootbridge tapestries.
+  home_haven: the Mycelia common house overlooking the Mycelium Trail
+  unity_compass: braiding stories with neighbors at dawn for living networks circles
+  worldbuilder_path: designing living networks that restore damaged soil
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: inviting Mycelia restorative listening circles
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: organizing community build-days aligned with living networks
+    needs
+  individual_embetterment: meditating while tending to underground gardens
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.94
   creativity_bias: 0.91

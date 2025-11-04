@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2125-12-24'
+  given_name: Kaia Trace-F2FF
+  family_line: Continuum Shepherds
+  remembrance_ritual: Weaves ancestor threads into the continuum banners each equinox.
+  home_haven: a spiraled dwelling with rooms for every timeline
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: sketching time stewardship blueprints beside the Continuum Hearth
+  heart_practice: checking in on elders and youth each equinox
+  emotional_alchemy:
+    friction: mapping tensions into shared time stewardship charters
+    anger: walking perimeter paths to release heat kindly
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: hosting rituals that harmonize seasonal cycles
+  individual_embetterment: practicing mindful pacing to prevent burnout
+  philosophy: Legacy is shaped by every present-tense kindness.
 traits:
   kindness_index: 0.91
   creativity_bias: 0.8

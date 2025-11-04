@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2086-06-12'
+  given_name: archive Vale-7962
+  family_line: Margin Keepers of the Athenaeum stacks
+  remembrance_ritual: Keeps a remembrance bowl of memory architecture mementos by
+    the Athenaeum hearth.
+  home_haven: a caravan along the Archive routes connecting allied clusters
+  unity_compass: pairing apprentices with elders for nightly annotation dives
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: writing thank-you illuminations in the margins of shared drafts
+  emotional_alchemy:
+    friction: slowing conversations until Archive clarity returns
+    anger: cooling tempers with breathwork along the Archive Walkways
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: teaching citizen archivists how to steward local records
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Knowledge flourishes when every voice inks the page.
 traits:
   kindness_index: 0.9
   creativity_bias: 0.37

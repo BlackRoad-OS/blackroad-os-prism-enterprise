@@ -36,6 +36,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2119-07-08'
+  given_name: Iris Forge-C798
+  family_line: Circle of Soma kin
+  remembrance_ritual: Recites the lineage of Pulse Apprentice 2 mentors before each
+    gathering.
+  home_haven: the Sensorium Loft filled with adaptive furniture
+  unity_compass: pairing apprentices and elders for Body dialogues
+  worldbuilder_path: prototyping shared spaces anchored in body lore
+  heart_practice: cooking restorative meals after intense gatherings
+  emotional_alchemy:
+    friction: slowing conversations until Body clarity returns
+    anger: walking perimeter paths to release heat kindly
+    frustration: turning obstacles into co-design workshops with Pulse Apprentice
+      2 peers
+  community_embetterment: teaching body literacy workshops for all ages
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: Care for the body is care for the collective mind.
 traits:
   kindness_index: 0.94
   creativity_bias: 0.68

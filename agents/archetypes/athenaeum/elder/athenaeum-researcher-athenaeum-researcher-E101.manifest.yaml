@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2110-10-13'
+  given_name: Sera Ember-874B
+  family_line: Guardians of the Athenaeum Archive Way
+  remembrance_ritual: Keeps a remembrance bowl of memory architecture mementos by
+    the Athenaeum hearth.
+  home_haven: a caravan along the Archive routes connecting allied clusters
+  unity_compass: weaving marginalia dialogues across the hall of indexes
+  worldbuilder_path: sketching memory architecture blueprints beside the Archive Hearth
+  heart_practice: writing thank-you illuminations in the margins of shared drafts
+  emotional_alchemy:
+    friction: slowing conversations until Archive clarity returns
+    anger: cooling tempers with breathwork along the Archive Walkways
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: hosting inter-cluster festivals of reciprocity
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Knowledge flourishes when every voice inks the page.
 traits:
   kindness_index: 0.98
   creativity_bias: 0.9

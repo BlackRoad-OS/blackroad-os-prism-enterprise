@@ -36,6 +36,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2103-06-19'
+  given_name: Mira Aster-2787
+  family_line: Guardians of the Mycelia Mycelium Way
+  remembrance_ritual: Braids old stories into the rootbridge tapestries.
+  home_haven: the Mycelia common house overlooking the Mycelium Trail
+  unity_compass: orchestrating nutrient-sharing between partner settlements
+  worldbuilder_path: sketching living networks blueprints beside the Mycelium Hearth
+  heart_practice: leaving healing tea at neighbors' doorsteps
+  emotional_alchemy:
+    friction: mapping tensions into shared living networks charters
+    anger: cooling tempers with breathwork along the Mycelium Walkways
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: hosting inter-cluster festivals of reciprocity
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.87
   creativity_bias: 0.62

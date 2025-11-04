@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2075-10-05'
+  given_name: Loop Chord-7F83
+  family_line: Circle of Continuum kin
+  remembrance_ritual: Recites the lineage of Recordist Apprentice 1 mentors before
+    each gathering.
+  home_haven: the Continuum common house overlooking the Continuum Trail
+  unity_compass: pairing apprentices and elders for Continuum dialogues
+  worldbuilder_path: building memory vaults accessible to future caretakers
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: slowing conversations until Continuum clarity returns
+    anger: cooling tempers with breathwork along the Continuum Walkways
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: stewarding open-source Continuum toolkits
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Continuum wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.82
   creativity_bias: 0.49

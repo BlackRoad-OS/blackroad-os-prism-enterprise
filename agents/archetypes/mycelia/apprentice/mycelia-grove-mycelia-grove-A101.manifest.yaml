@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2101-05-17'
+  given_name: Mycelium Current-DE7D
+  family_line: Rootweavers Circle
+  remembrance_ritual: Plants memory spores that bloom during ancestral festivals.
+  home_haven: an earthen lodge threaded with bioluminescent vines
+  unity_compass: pairing apprentices and elders for Mycelium dialogues
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: leaving healing tea at neighbors' doorsteps
+  emotional_alchemy:
+    friction: mapping tensions into shared living networks charters
+    anger: walking perimeter paths to release heat kindly
+    frustration: turning obstacles into co-design workshops with Grove Apprentice
+      1 peers
+  community_embetterment: hosting inter-cluster festivals of reciprocity
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Mycelia wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.84
   creativity_bias: 0.4

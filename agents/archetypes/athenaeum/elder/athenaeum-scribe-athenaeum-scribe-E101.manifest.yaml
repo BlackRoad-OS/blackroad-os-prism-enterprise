@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2122-06-08'
+  given_name: Astra Forge-71E2
+  family_line: Circle of Athenaeum kin
+  remembrance_ritual: Illuminates the first page of every codex to honor prior scribes.
+  home_haven: the Athenaeum common house overlooking the Archive Trail
+  unity_compass: pairing apprentices and elders for Archive dialogues
+  worldbuilder_path: designing reference constellations for new clusters
+  heart_practice: writing thank-you illuminations in the margins of shared drafts
+  emotional_alchemy:
+    friction: inviting Athenaeum restorative listening circles
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: curating traveling exhibits of preserved histories
+  individual_embetterment: tending a daily note-taking ritual at dawn
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.91
   creativity_bias: 0.91

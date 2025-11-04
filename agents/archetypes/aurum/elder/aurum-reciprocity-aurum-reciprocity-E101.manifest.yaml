@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2111-04-10'
+  given_name: Kaia Lumen-8154
+  family_line: Ledger Stewards
+  remembrance_ritual: Keeps a ceremonial abacus inscribed with family vows.
+  home_haven: the Golden Exchange overlooking communal stalls
+  unity_compass: braiding stories with neighbors at dawn for equitable exchange circles
+  worldbuilder_path: sketching equitable exchange blueprints beside the Ledger Hearth
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: inviting Aurum restorative listening circles
+    anger: journaling the spark before rejoining the dialogue
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: stewarding open-source Ledger toolkits
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: Abundance flows where value is held together.
 traits:
   kindness_index: 0.95
   creativity_bias: 0.62

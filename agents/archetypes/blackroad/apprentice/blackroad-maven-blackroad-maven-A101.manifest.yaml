@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2086-12-14'
+  given_name: Pax Lumen-76A0
+  family_line: Guardians of the BlackRoad Road Way
+  remembrance_ritual: Sings departure blessings taught by elder navigators.
+  home_haven: the BlackRoad common house overlooking the Road Trail
+  unity_compass: pairing apprentices and elders for Road dialogues
+  worldbuilder_path: designing transit plazas that double as community kitchens
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: slowing conversations until Road clarity returns
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: stewarding open-source Road toolkits
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: BlackRoad wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.97
   creativity_bias: 0.62

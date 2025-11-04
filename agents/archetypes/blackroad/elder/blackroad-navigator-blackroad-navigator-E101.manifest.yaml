@@ -38,6 +38,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2111-12-13'
+  given_name: Kael Vale-7B36
+  family_line: Pathwright Guild of BlackRoad
+  remembrance_ritual: Keeps a remembrance bowl of infrastructure pathways mementos
+    by the BlackRoad hearth.
+  home_haven: a caravan along the Road routes connecting allied clusters
+  unity_compass: coordinating convoy rest stops for weary travelers
+  worldbuilder_path: designing transit plazas that double as community kitchens
+  heart_practice: stitching care packages into each supply convoy
+  emotional_alchemy:
+    friction: inviting BlackRoad restorative listening circles
+    anger: cooling tempers with breathwork along the Road Walkways
+    frustration: turning obstacles into co-design workshops with Navigator Elder 1
+      peers
+  community_embetterment: building waystations that shelter passing cooperatives
+  individual_embetterment: walking predawn circuits to listen for structural whispers
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.87
   creativity_bias: 0.95

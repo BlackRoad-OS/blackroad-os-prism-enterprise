@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2098-12-21'
+  given_name: Kaia Rhythm-6B2E
+  family_line: Road Stewards
+  remembrance_ritual: Etches travel stories into milestone markers at every route.
+  home_haven: a caravan along the Road routes connecting allied clusters
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: checking on every traveler before closing the gate
+  emotional_alchemy:
+    friction: mapping tensions into shared infrastructure pathways charters
+    anger: cooling tempers with breathwork along the Road Walkways
+    frustration: turning obstacles into co-design workshops with Engineer Apprentice
+      2 peers
+  community_embetterment: building waystations that shelter passing cooperatives
+  individual_embetterment: documenting lessons from every journey in a route ledger
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.96
   creativity_bias: 0.73

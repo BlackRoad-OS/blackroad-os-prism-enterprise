@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2120-03-13'
+  given_name: Vita Vale-6AED
+  family_line: Soma Weavers
+  remembrance_ritual: Weaves ancestor threads into the body banners each equinox.
+  home_haven: a caravan along the Body routes connecting allied clusters
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: building accessible sanctuaries with multisensory pathways
+  heart_practice: cooking restorative meals after intense gatherings
+  emotional_alchemy:
+    friction: mapping tensions into shared embodied intelligence charters
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: coordinating health mutual aid funds
+  individual_embetterment: tracking somatic signals to pace workloads
+  philosophy: Soma wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.92
   creativity_bias: 0.67

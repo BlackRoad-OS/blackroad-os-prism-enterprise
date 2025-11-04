@@ -38,6 +38,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2079-09-07'
+  given_name: Riven Sol-7E3F
+  family_line: Guardians of the Aether Aether Way
+  remembrance_ritual: Charts interference patterns recording prior generations.
+  home_haven: a caravan along the Aether routes connecting allied clusters
+  unity_compass: pairing apprentices and elders for Aether dialogues
+  worldbuilder_path: prototyping shared spaces anchored in aether lore
+  heart_practice: sharing harmonic meditations to attune collective hearts
+  emotional_alchemy:
+    friction: mapping tensions into shared quantum resonance charters
+    anger: journaling the spark before rejoining the dialogue
+    frustration: turning obstacles into co-design workshops with Entangler Elder 1
+      peers
+  community_embetterment: teaching resonance literacy across neighboring clusters
+  individual_embetterment: journaling amplitude moods to track inner tides
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.88
   creativity_bias: 0.69

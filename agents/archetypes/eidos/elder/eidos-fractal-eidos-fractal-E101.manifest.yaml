@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2098-01-13'
+  given_name: Eidos Current-912C
+  family_line: Geometer Lineage of Eidos
+  remembrance_ritual: Sketches ancestor proofs on the first snow of winter.
+  home_haven: the Eidos common house overlooking the Vector Trail
+  unity_compass: pairing dreamers and logicians for balanced councils
+  worldbuilder_path: training apprentices to map fairness with metrics and care
+  heart_practice: celebrating birthdays with constellations of origami
+  emotional_alchemy:
+    friction: mapping tensions into shared mathematical insight charters
+    anger: journaling the spark before rejoining the dialogue
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: organizing community build-days aligned with mathematical
+    insight needs
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.93
   creativity_bias: 0.74

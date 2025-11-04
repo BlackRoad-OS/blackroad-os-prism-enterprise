@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2136-06-06'
+  given_name: Astra Pulse-BB51
+  family_line: Everflow Circle of Continuum
+  remembrance_ritual: Hosts echo councils where every era speaks in turn.
+  home_haven: the Continuum common house overlooking the Continuum Trail
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: building memory vaults accessible to future caretakers
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: mapping tensions into shared time stewardship charters
+    anger: journaling the spark before rejoining the dialogue
+    frustration: turning obstacles into co-design workshops with Keeper Elder 1 peers
+  community_embetterment: stewarding open-source Continuum toolkits
+  individual_embetterment: charting personal growth arcs alongside community milestones
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.93
   creativity_bias: 0.74

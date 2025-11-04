@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2098-08-04'
+  given_name: Riven Drift-FB16
+  family_line: Soma Weavers
+  remembrance_ritual: Performs movement rituals honoring ancestral resilience.
+  home_haven: the Sensorium Loft filled with adaptive furniture
+  unity_compass: hosting community stretch circles before assemblies
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: slowing conversations until Body clarity returns
+    anger: journaling the spark before rejoining the dialogue
+    frustration: turning obstacles into co-design workshops with Tendon Apprentice
+      1 peers
+  community_embetterment: stewarding open-source Body toolkits
+  individual_embetterment: tracking somatic signals to pace workloads
+  philosophy: Care for the body is care for the collective mind.
 traits:
   kindness_index: 0.92
   creativity_bias: 0.78

@@ -37,6 +37,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2108-01-14'
+  given_name: Riven Pulse-1271
+  family_line: Phasekeepers of the Aether Loom
+  remembrance_ritual: Recites the lineage of Entangler Apprentice 2 mentors before
+    each gathering.
+  home_haven: a caravan along the Aether routes connecting allied clusters
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: sketching quantum resonance blueprints beside the Aether Hearth
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: slowing conversations until Aether clarity returns
+    anger: cooling tempers with breathwork along the Aether Walkways
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: organizing community build-days aligned with quantum resonance
+    needs
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.9
   creativity_bias: 0.53
