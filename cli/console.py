@@ -1134,9 +1134,13 @@ def mfg_wi_render(item: str = typer.Option(..., "--item"), rev: str = typer.Opti
 def mfg_spc_analyze(
     op: str = typer.Option(..., "--op"), window: int = typer.Option(50, "--window")
 ):
-    report = mfg_spc.analyze(op, window)
-    if report["findings"]:
-        typer.echo(" ".join(report["findings"]))
+    result = mfg_spc.analyze(op, window)
+    if isinstance(result, dict):
+        findings = result.get("findings", [])
+    else:
+        findings = list(result)
+    if findings:
+        typer.echo(" ".join(findings))
     else:
         typer.echo("OK")
 def mfg_spc_analyze(op: str = typer.Option(..., "--op"), window: int = typer.Option(50, "--window")):
