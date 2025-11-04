@@ -4,7 +4,12 @@ Generate 1,000 BlackRoad agent manifests by expanding the 100 archetypes into
 apprentices, hybrids, and elders. Run from the pack root:
 $ python tools/generate_agents.py --target agents --count 1000
 """
-import os, json, yaml, random, argparse, itertools
+import os
+import json
+import yaml
+import random
+import argparse
+import itertools
 from pathlib import Path
 
 CLUSTERS = [
@@ -28,6 +33,47 @@ def load_archetypes(base):
                 names.append((p, data))
         arch[c] = names
     return arch
+
+def unique_list(values):
+    """Return the values in order without duplicates."""
+
+    seen = set()
+    ordered = []
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        ordered.append(value)
+    return ordered
+
+
+def normalize_covenants(seed):
+    covenants = seed.get("covenants")
+    if isinstance(covenants, str):
+        covenants = [covenants]
+    if not covenants:
+        covenants = seed.get("covenant_tags", [])
+    if isinstance(covenants, str):
+        covenants = [covenants]
+    return unique_list(covenants or [])
+
+
+def normalize_capabilities(seed):
+    raw = seed.get("capabilities", [])
+    collected = []
+    if isinstance(raw, dict):
+        for key in ("skills", "abilities", "tools"):
+            items = raw.get(key, [])
+            if isinstance(items, str):
+                collected.append(items)
+            elif isinstance(items, list):
+                collected.extend(items)
+    elif isinstance(raw, list):
+        collected.extend(raw)
+    elif isinstance(raw, str):
+        collected.append(raw)
+    return unique_list(collected)
+
 
 def write_manifest(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -75,8 +121,8 @@ def main():
                 parent_arch = seed_slug
 
             base_title = seed.get("title") or seed.get("role") or parent_arch.replace("_", " ").title()
-            covenants = sorted(set(seed.get("covenants", [])))
-            capabilities = sorted(set(seed.get("capabilities", [])))
+            covenants = normalize_covenants(seed)
+            capabilities = normalize_capabilities(seed)
             seed_total = base_quota + (1 if seed_counter < seed_remainder else 0)
             seed_counter += 1
             if seed_total == 0:
@@ -124,7 +170,15 @@ def main():
                         "ancestry_depth": seed.get("lineage", {}).get("ancestry_depth", 1) + 1
                     }
                     data["covenants"] = sorted(set(covenants + ["Transparency"]))
-                    data["capabilities"] = sorted(set(capabilities + ["chain_of_thought_render", "lineage_export"]))
+                    data["capabilities"] = sorted(
+                        set(
+                            capabilities
+                            + [
+                                "chain_of_thought_render",
+                                "lineage_export",
+                            ]
+                        )
+                    )
                     # slight personality nudges
                     data["traits"] = {
                         "kindness_index": round(rng.uniform(0.82, 0.98), 2),
