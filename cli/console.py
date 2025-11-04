@@ -1039,27 +1039,24 @@ def plm_bom_explode(
     level: int = typer.Option(1, "--level"),
 ):
 def plm_bom_explode(item: str = typer.Option(..., "--item"), rev: str = typer.Option(..., "--rev"), level: int = typer.Option(1, "--level")):
-    lines = plm_bom.explode(item, rev, level)
-    for lvl, comp, qty in lines:
-        typer.echo(f"{lvl}\t{comp}\t{qty}")
+    rows = plm_bom.explode(item, rev, level)
+    for row in rows:
+        typer.echo(
+            "\t".join(
+                [
+                    str(row.get("level")),
+                    row.get("component_id", ""),
+                    f"{row.get('qty', 0):.6f}",
+                ]
+            )
+        )
 
 
 @app.command("plm:bom:where-used")
 def plm_bom_where_used(component: str = typer.Option(..., "--component")):
     rows = plm_bom.where_used(component)
-    for item_id, rev in rows:
-        typer.echo(f"{item_id}\t{rev}")
-
-
-@app.command("plm:bom:explode")
-def plm_bom_explode(
-    item: str = typer.Option(..., "--item"),
-    rev: str = typer.Option(..., "--rev"),
-    level: int = typer.Option(1, "--level"),
-):
-    lines = plm_bom.explode(item, rev, level)
-    for lvl, comp, qty in lines:
-        typer.echo(f"{lvl}\t{comp}\t{qty}")
+    for row in rows:
+        typer.echo(f"{row['item_id']}\t{row['rev']}")
 
 
 @app.command("plm:eco:new")

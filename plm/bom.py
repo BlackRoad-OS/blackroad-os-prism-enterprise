@@ -7,6 +7,7 @@ rewrite keeps just enough structure for the unit tests under
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 from dataclasses import asdict, dataclass, field
@@ -14,6 +15,9 @@ from pathlib import Path
 from typing import Dict, Iterable, Iterator, List, Tuple
 
 ART_DIR: Path = Path("artifacts/plm")
+ITEMS_PATH: Path = ART_DIR / "items.json"
+BOMS_PATH: Path = ART_DIR / "boms.json"
+WHERE_USED_PATH: Path = ART_DIR / "where_used.json"
 
 
 @dataclass(frozen=True)
@@ -46,6 +50,18 @@ _ITEMS: List[Item] = []
 _BOMS: List[BOM] = []
 
 
+def _parse_suppliers(raw: str | None) -> List[str]:
+    if not raw:
+        return []
+    tokens = raw.replace(";", "|").split("|")
+    suppliers: List[str] = []
+    for token in tokens:
+        token = token.strip()
+        if token:
+            suppliers.append(token)
+    return suppliers
+
+
 def _ensure_art_dir() -> Path:
     path = Path(ART_DIR)
     path.mkdir(parents=True, exist_ok=True)
@@ -53,14 +69,16 @@ def _ensure_art_dir() -> Path:
 
 
 def _items_path() -> Path:
-    return _ensure_art_dir() / "items.json"
+    return ITEMS_PATH
 
 
 def _boms_path() -> Path:
-    return _ensure_art_dir() / "boms.json"
+    return BOMS_PATH
 
 
 def _serialize_and_write(path: Path, rows: Iterable[dict]) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(list(rows), indent=2, sort_keys=True), encoding="utf-8")
 
 
@@ -70,11 +88,7 @@ def load_items(directory: str) -> List[Item]:
         with csv_path.open(newline="", encoding="utf-8") as handle:
             reader = csv.DictReader(handle)
             for row in reader:
-                suppliers = [
-                    supplier.strip()
-                    for supplier in (row.get("suppliers") or "").split("|")
-                    if supplier and supplier.strip()
-                ]
+                suppliers = _parse_suppliers(row.get("suppliers"))
                 try:
                     lead_time = int(float(row.get("lead_time_days", 0) or 0))
                 except ValueError:
@@ -139,7 +153,35 @@ def load_boms(directory: str) -> List[BOM]:
             for bom in _BOMS
         ),
     )
+    _write_where_used()
     return boms
+
+
+def _write_where_used() -> None:
+    lookup: Dict[str, List[Dict[str, str]]] = {}
+    for bom in _BOMS:
+        for line in bom.lines:
+            component_id = (
+                line.get("component_id") if isinstance(line, dict) else line.component_id
+            )
+            if not component_id:
+                continue
+            lookup.setdefault(component_id, []).append(
+                {"item_id": bom.item_id, "rev": bom.rev}
+            )
+
+    rows: List[Dict[str, str]] = []
+    for component_id, parents in sorted(lookup.items()):
+        for parent in sorted(parents, key=lambda row: (row["item_id"], row["rev"])):
+            rows.append(
+                {
+                    "component_id": component_id,
+                    "item_id": parent["item_id"],
+                    "rev": parent["rev"],
+                }
+            )
+
+    _serialize_and_write(WHERE_USED_PATH, rows)
 
 
 def _bom_lookup() -> Dict[Tuple[str, str], BOM]:
@@ -199,6 +241,43 @@ def where_used(component_id: str) -> List[Dict[str, str]]:
     return rows
 
 
+def latest_revision(item_id: str) -> str:
+    revs = sorted({item.rev for item in _ITEMS if item.id == item_id})
+    return revs[-1] if revs else "A"
+
+
+def cli_items_load(argv: List[str] | None = None) -> List[Item]:
+    parser = argparse.ArgumentParser(prog="plm:items:load", description="Load item catalog")
+    parser.add_argument("--dir", required=True)
+    args = parser.parse_args(argv)
+    return load_items(args.dir)
+
+
+def cli_bom_load(argv: List[str] | None = None) -> List[BOM]:
+    parser = argparse.ArgumentParser(prog="plm:bom:load", description="Load BOM definitions")
+    parser.add_argument("--dir", required=True)
+    args = parser.parse_args(argv)
+    return load_boms(args.dir)
+
+
+def cli_bom_explode(argv: List[str] | None = None) -> List[Dict[str, float]]:
+    parser = argparse.ArgumentParser(prog="plm:bom:explode", description="Explode a BOM")
+    parser.add_argument("--item", required=True)
+    parser.add_argument("--rev", required=True)
+    parser.add_argument("--level", type=int, default=1)
+    args = parser.parse_args(argv)
+    return explode(args.item, args.rev, args.level)
+
+
+def cli_bom_where_used(argv: List[str] | None = None) -> List[Dict[str, str]]:
+    parser = argparse.ArgumentParser(
+        prog="plm:bom:where-used", description="List parents that use a component"
+    )
+    parser.add_argument("--component", required=True)
+    args = parser.parse_args(argv)
+    return where_used(args.component)
+
+
 def iter_items() -> Iterator[Item]:
     return iter(_ITEMS)
 
@@ -222,6 +301,11 @@ __all__ = [
     "load_boms",
     "explode",
     "where_used",
+    "latest_revision",
+    "cli_items_load",
+    "cli_bom_load",
+    "cli_bom_explode",
+    "cli_bom_where_used",
     "iter_items",
     "get_item",
     "get_bom",
