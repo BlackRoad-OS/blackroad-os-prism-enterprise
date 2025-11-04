@@ -14,14 +14,16 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
-          token: ${{ secrets.BOT_TOKEN || github.token }}
+          token: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
+        if: ${{ hashFiles('**/package-lock.json', '**/yarn.lock', '**/pnpm-lock.yaml', '**/bun.lockb', '**/package.json') != '' }}
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
       - name: Setup Python
+        if: ${{ hashFiles('**/requirements.txt', '**/requirements-*.txt', '**/pyproject.toml', '**/Pipfile', '**/poetry.lock', '**/setup.py') != '' }}
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
