@@ -7,11 +7,44 @@ from typing import Any, Dict, Optional
 import httpx
 import jwt
 from jwt import exceptions as jwt_exceptions
-from cachetools import TTLCache
 
 from .config import ConfigHolder
 
-_jwks_cache: TTLCache[str, Dict[str, Any]] = TTLCache(maxsize=1, ttl=600)  # 10 min
+
+class _SimpleTTLCache:
+    """Minimal TTL cache to avoid optional dependencies."""
+
+    def __init__(self, ttl_seconds: int) -> None:
+        self._ttl = ttl_seconds
+        self._store: Dict[str, tuple[Dict[str, Any], float]] = {}
+
+    def _is_valid(self, key: str) -> bool:
+        item = self._store.get(key)
+        if not item:
+            return False
+        _, expires_at = item
+        if expires_at <= time.time():
+            self._store.pop(key, None)
+            return False
+        return True
+
+    def __contains__(self, key: str) -> bool:
+        return self._is_valid(key)
+
+    def __getitem__(self, key: str) -> Dict[str, Any]:
+        if not self._is_valid(key):
+            raise KeyError(key)
+        value, _ = self._store[key]
+        return value
+
+    def __setitem__(self, key: str, value: Dict[str, Any]) -> None:
+        self._store[key] = (value, time.time() + self._ttl)
+
+    def clear(self) -> None:
+        self._store.clear()
+
+
+_jwks_cache = _SimpleTTLCache(ttl_seconds=600)
 
 
 def _get_jwks(jwks_url: str) -> Dict[str, Any]:
