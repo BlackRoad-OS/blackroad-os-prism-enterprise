@@ -44,15 +44,23 @@ def main():
     base = Path(args.target)
     arch = load_archetypes(base)
 
-    # Count how many we have already
-    existing = 0
-    for c in CLUSTERS:
-        for p, data in arch[c]:
-            existing += 1
+    # Count how many seed manifests we already have across the tracked clusters.
+    existing = sum(len(arch[c]) for c in CLUSTERS)
 
     to_add = max(0, args.count - existing)
-    per_cluster_archetype = to_add // (len(CLUSTERS) * 10)
-    per_gen = {g: per_cluster_archetype * RATIO[g] // sum(RATIO.values()) for g in GENS}
+    if to_add == 0:
+        print("Target already satisfied; nothing to generate.")
+        return
+
+    total_ratio = sum(RATIO.values())
+    total_seeds = existing
+    base_quota, seed_remainder = divmod(to_add, total_seeds)
+    if base_quota == 0 and seed_remainder == 0:
+        print("Requested count does not exceed existing seeds by a full generation; skipping expansion.")
+        return
+
+    seed_counter = 0
+    created = {g: 0 for g in GENS}
 
     # Create expansions
     for c in CLUSTERS:
@@ -60,23 +68,50 @@ def main():
         # neighbor clusters for hybrids
         others = [x for x in CLUSTERS if x != c]
         for p, seed in entries:
-            parent_arch = Path(p).stem
+            seed_slug = p.name.replace(".manifest.yaml", "")
+            if seed_slug.startswith(f"{c}-"):
+                parent_arch = seed_slug[len(c) + 1 :]
+            else:
+                parent_arch = seed_slug
+
+            base_title = seed.get("title") or seed.get("role") or parent_arch.replace("_", " ").title()
+            covenants = sorted(set(seed.get("covenants", [])))
+            capabilities = sorted(set(seed.get("capabilities", [])))
+            seed_total = base_quota + (1 if seed_counter < seed_remainder else 0)
+            seed_counter += 1
+            if seed_total == 0:
+                continue
+
+            counts = {g: (seed_total * RATIO[g]) // total_ratio for g in GENS}
+            allocated = sum(counts.values())
+            remainder = seed_total - allocated
+            if remainder > 0:
+                for g in sorted(GENS, key=lambda g: (-RATIO[g], g)):
+                    if remainder == 0:
+                        break
+                    counts[g] += 1
+                    remainder -= 1
+
             for g in GENS:
-                n = per_gen[g]
+                n = counts[g]
+                if n == 0:
+                    continue
+
                 for k in range(n):
                     idx = 100 + k + 1  # start beyond seed indexes
                     if g == "apprentice":
                         agent_id = f"{c}-{parent_arch}-A{idx:03d}"
-                        title = f"{seed['title']} Apprentice {k+1}"
+                        title = f"{base_title} Apprentice {k+1}"
                         mentors = [f"{c}-seed"]
                     elif g == "elder":
                         agent_id = f"{c}-{parent_arch}-E{idx:03d}"
-                        title = f"{seed['title']} Elder {k+1}"
+                        title = f"{base_title} Elder {k+1}"
                         mentors = [f"{c}-seed", f"{rng.choice(others)}-seed"]
-                    else: # hybrid
+                    else:  # hybrid
                         other = rng.choice(others)
+                        other_title = other.replace("_", " ").title()
                         agent_id = f"{c}-{parent_arch}-{other}-H{idx:03d}"
-                        title = f"{seed['title']}-{other.title()} Hybrid {k+1}"
+                        title = f"{base_title}-{other_title} Hybrid {k+1}"
                         mentors = [f"{c}-seed", f"{other}-seed"]
 
                     data = dict(seed)  # shallow copy
@@ -86,22 +121,27 @@ def main():
                     data["lineage"] = {
                         "parent": parent_arch,
                         "mentors": mentors,
-                        "ancestry_depth": seed.get("lineage",{}).get("ancestry_depth",1) + 1
+                        "ancestry_depth": seed.get("lineage", {}).get("ancestry_depth", 1) + 1
                     }
-                    data["covenants"] = list(set(seed["covenants"] + ["Transparency"]))
-                    data["capabilities"] = sorted(list(set(seed["capabilities"] + ["chain_of_thought_render","lineage_export"])))
+                    data["covenants"] = sorted(set(covenants + ["Transparency"]))
+                    data["capabilities"] = sorted(set(capabilities + ["chain_of_thought_render", "lineage_export"]))
                     # slight personality nudges
                     data["traits"] = {
                         "kindness_index": round(rng.uniform(0.82, 0.98), 2),
                         "creativity_bias": round(rng.uniform(0.35, 0.95), 2),
-                        "reflection_frequency_hours": rng.choice([4,8,12,24,48])
+                        "reflection_frequency_hours": rng.choice([4, 8, 12, 24, 48])
                     }
 
                     outdir = Path(args.target) / "archetypes" / c / g
-                    outpath = outdir / f"{Path(p).stem}-{agent_id}.manifest.yaml"
+                    outpath = outdir / f"{seed_slug}-{agent_id}.manifest.yaml"
                     write_manifest(outpath, data)
+                    created[g] += 1
 
+    total_created = sum(created.values())
     print("Generation complete.")
+    for g in GENS:
+        print(f"  {g}: {created[g]}")
+    print(f"  total: {total_created}")
 
 if __name__ == "__main__":
     main()
