@@ -43,6 +43,29 @@ def _write_markdown(path: Path, period: str, totals: Dict[str, float]) -> None:
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
+def _parse_amount(raw: object) -> float:
+    """Return a float for cost fields that may include currency formatting."""
+
+    if isinstance(raw, (int, float)):
+        return float(raw)
+
+    text = str(raw or "").strip()
+    if not text:
+        return 0.0
+
+    negative = False
+    if text.startswith("(") and text.endswith(")"):
+        negative = True
+        text = text[1:-1]
+
+    cleaned = text.replace("$", "").replace(",", "")
+    try:
+        amount = float(cleaned)
+    except ValueError:
+        return 0.0
+    return -amount if negative else amount
+
+
 def compute(period: str) -> Dict[str, float]:
     """Emit a simple COQ report for dashboards and tests."""
 
@@ -66,7 +89,7 @@ def build(period: str) -> Dict[str, float]:
         reader = csv.DictReader(handle)
         for row in reader:
             bucket = row.get("bucket", "").strip() or "Unknown"
-            amount = float(row.get("cost") or row.get("amount") or 0)
+            amount = _parse_amount(row.get("cost") or row.get("amount"))
             totals[bucket] = totals.get(bucket, 0.0) + amount
 
     art_dir = _ensure_art_dir()
