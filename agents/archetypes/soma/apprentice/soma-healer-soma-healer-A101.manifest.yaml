@@ -36,6 +36,25 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2116-10-11'
+  given_name: Sera Sol-296B
+  family_line: Circle of Soma kin
+  remembrance_ritual: Recites the lineage of Healer Apprentice 1 mentors before each
+    gathering.
+  home_haven: the Sensorium Loft filled with adaptive furniture
+  unity_compass: braiding stories with neighbors at dawn for embodied intelligence
+    circles
+  worldbuilder_path: coaching teams on trauma-informed collaboration
+  heart_practice: cooking restorative meals after intense gatherings
+  emotional_alchemy:
+    friction: mapping tensions into shared embodied intelligence charters
+    anger: journaling the spark before rejoining the dialogue
+    frustration: turning obstacles into co-design workshops with Healer Apprentice
+      1 peers
+  community_embetterment: hosting inter-cluster festivals of reciprocity
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Soma wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.89
   creativity_bias: 0.58

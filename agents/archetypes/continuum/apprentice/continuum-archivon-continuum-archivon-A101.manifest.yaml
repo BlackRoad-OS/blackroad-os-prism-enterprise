@@ -37,6 +37,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2078-07-21'
+  given_name: Seren Trace-3110
+  family_line: Continuum Shepherds
+  remembrance_ritual: Weaves ancestor threads into the continuum banners each equinox.
+  home_haven: the Continuum common house overlooking the Continuum Trail
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: building memory vaults accessible to future caretakers
+  heart_practice: checking in on elders and youth each equinox
+  emotional_alchemy:
+    friction: inviting Continuum restorative listening circles
+    anger: walking perimeter paths to release heat kindly
+    frustration: turning obstacles into co-design workshops with Archivon Apprentice
+      1 peers
+  community_embetterment: organizing community build-days aligned with time stewardship
+    needs
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Legacy is shaped by every present-tense kindness.
 traits:
   kindness_index: 0.83
   creativity_bias: 0.42

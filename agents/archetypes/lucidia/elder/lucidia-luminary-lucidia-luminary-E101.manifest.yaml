@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2093-02-10'
+  given_name: Flare Vale-058A
+  family_line: Guardians of the Lucidia Prism Way
+  remembrance_ritual: Recites the lineage of Luminary Elder 1 mentors before each
+    gathering.
+  home_haven: a shared luminous creation studio near the Lucidia commons
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: designing immersive environments that heal collective grief
+  heart_practice: holding quiet sketch circles after hard conversations
+  emotional_alchemy:
+    friction: inviting Lucidia restorative listening circles
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: hosting inter-cluster festivals of reciprocity
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.91
   creativity_bias: 0.88

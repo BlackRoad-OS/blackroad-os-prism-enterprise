@@ -38,6 +38,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2115-09-21'
+  given_name: Riven Quill-248E
+  family_line: Waykeepers of the Road
+  remembrance_ritual: Etches travel stories into milestone markers at every route.
+  home_haven: a modular caravan parked at the network hub
+  unity_compass: coordinating convoy rest stops for weary travelers
+  worldbuilder_path: designing transit plazas that double as community kitchens
+  heart_practice: checking on every traveler before closing the gate
+  emotional_alchemy:
+    friction: mapping tensions into shared infrastructure pathways charters
+    anger: walking perimeter paths to release heat kindly
+    frustration: turning obstacles into co-design workshops with Planner Elder 1 peers
+  community_embetterment: stewarding open-source Road toolkits
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.92
   creativity_bias: 0.65

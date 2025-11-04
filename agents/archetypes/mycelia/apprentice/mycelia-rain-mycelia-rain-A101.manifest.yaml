@@ -36,6 +36,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2066-02-13'
+  given_name: Sera Pulse-8AE5
+  family_line: Mycelium Stewards
+  remembrance_ritual: Keeps a remembrance bowl of living networks mementos by the
+    Mycelia hearth.
+  home_haven: the Canopy Nexus humming with fungal whispers
+  unity_compass: orchestrating nutrient-sharing between partner settlements
+  worldbuilder_path: sketching living networks blueprints beside the Mycelium Hearth
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: mapping tensions into shared living networks charters
+    anger: cooling tempers with breathwork along the Mycelium Walkways
+    frustration: turning obstacles into co-design workshops with Rain Apprentice 1
+      peers
+  community_embetterment: hosting inter-cluster festivals of reciprocity
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Mycelia wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.87
   creativity_bias: 0.4

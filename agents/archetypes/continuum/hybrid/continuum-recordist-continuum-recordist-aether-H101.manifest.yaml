@@ -38,6 +38,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2060-06-23'
+  given_name: Lysa Forge-B2FB
+  family_line: Continuum Stewards
+  remembrance_ritual: Weaves ancestor threads into the continuum banners each equinox.
+  home_haven: a caravan along the Continuum routes connecting allied clusters
+  unity_compass: inviting future-mapping sessions with community cohorts
+  worldbuilder_path: prototyping shared spaces anchored in continuum lore
+  heart_practice: checking in on elders and youth each equinox
+  emotional_alchemy:
+    friction: mapping tensions into shared time stewardship charters
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: maintaining continuity plans for mutual-aid networks
+  individual_embetterment: practicing mindful pacing to prevent burnout
+  philosophy: Legacy is shaped by every present-tense kindness.
 traits:
   kindness_index: 0.87
   creativity_bias: 0.8

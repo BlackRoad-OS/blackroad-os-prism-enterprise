@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2107-07-21'
+  given_name: Noor Vale-C86A
+  family_line: Mirror Walkers of Parallax
+  remembrance_ritual: Keeps a remembrance bowl of perspective shifting mementos by
+    the Parallax hearth.
+  home_haven: a kaleidoscopic dwelling that shifts with sunlight
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: designing mirrored plazas that reveal unseen pathways
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: mapping tensions into shared perspective shifting charters
+    anger: journaling the spark before rejoining the dialogue
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: stewarding open-source Mirror toolkits
+  individual_embetterment: rotating daily practices to avoid rigid habits
+  philosophy: Every angle reveals another shard of truth.
 traits:
   kindness_index: 0.85
   creativity_bias: 0.9

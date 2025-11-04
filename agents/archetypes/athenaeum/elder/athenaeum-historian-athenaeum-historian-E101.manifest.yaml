@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2065-03-06'
+  given_name: Velum Forge-65DD
+  family_line: Margin Keepers of the Athenaeum stacks
+  remembrance_ritual: Keeps a remembrance bowl of memory architecture mementos by
+    the Athenaeum hearth.
+  home_haven: the Map Room nested within the Athenaeum archive
+  unity_compass: pairing apprentices and elders for Archive dialogues
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: inviting Athenaeum restorative listening circles
+    anger: walking perimeter paths to release heat kindly
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: stewarding open-source Archive toolkits
+  individual_embetterment: cataloging personal wonderings into a luminous ledger
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.97
   creativity_bias: 0.58

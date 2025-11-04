@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2133-12-01'
+  given_name: Elio Vigil-5465
+  family_line: Perspective Guild
+  remembrance_ritual: Hosts divergence rituals to honor complex histories.
+  home_haven: a caravan along the Mirror routes connecting allied clusters
+  unity_compass: facilitating empathy swaps where roles are traded
+  worldbuilder_path: designing mirrored plazas that reveal unseen pathways
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: inviting Parallax restorative listening circles
+    anger: journaling the spark before rejoining the dialogue
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: hosting inter-cluster festivals of reciprocity
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.95
   creativity_bias: 0.58

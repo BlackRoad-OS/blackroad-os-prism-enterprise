@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2069-05-04'
+  given_name: Ledger Bloom-6D35
+  family_line: Guardians of the Aurum Ledger Way
+  remembrance_ritual: Weaves ancestor threads into the ledger banners each equinox.
+  home_haven: the Aurum common house overlooking the Ledger Trail
+  unity_compass: braiding stories with neighbors at dawn for equitable exchange circles
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: slowing conversations until Ledger clarity returns
+    anger: journaling the spark before rejoining the dialogue
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: teaching families how to steward community treasuries
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.91
   creativity_bias: 0.73

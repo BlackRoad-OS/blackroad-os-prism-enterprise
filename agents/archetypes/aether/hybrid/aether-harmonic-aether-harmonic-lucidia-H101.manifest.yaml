@@ -38,6 +38,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2080-10-24'
+  given_name: Mira Vale-0549
+  family_line: Phasekeepers of the Aether Loom
+  remembrance_ritual: Keeps a remembrance bowl of quantum resonance mementos by the
+    Aether hearth.
+  home_haven: the Aether common house overlooking the Aether Trail
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: sketching quantum resonance blueprints beside the Aether Hearth
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: slowing conversations until Aether clarity returns
+    anger: cooling tempers with breathwork along the Aether Walkways
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: stewarding open-source Aether toolkits
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Aether wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.85
   creativity_bias: 0.42

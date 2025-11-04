@@ -36,6 +36,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2119-02-11'
+  given_name: Velum Ember-FF8B
+  family_line: Circle of Athenaeum kin
+  remembrance_ritual: Keeps a ribbon of ancestor annotations tucked beside the desk.
+  home_haven: a shared memory architecture studio near the Athenaeum commons
+  unity_compass: pairing apprentices with elders for nightly annotation dives
+  worldbuilder_path: sculpting knowledge gardens with interactive indices
+  heart_practice: leaving tea and quiet presence for weary researchers
+  emotional_alchemy:
+    friction: slowing conversations until Archive clarity returns
+    anger: cooling tempers with breathwork along the Archive Walkways
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: curating traveling exhibits of preserved histories
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Memory is a commons; the archive must breathe with its people.
 traits:
   kindness_index: 0.87
   creativity_bias: 0.4

@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2090-08-05'
+  given_name: Astra Trace-318F
+  family_line: Guardians of the Aurum Ledger Way
+  remembrance_ritual: Keeps a ceremonial abacus inscribed with family vows.
+  home_haven: a shared equitable exchange studio near the Aurum commons
+  unity_compass: pairing apprentices and elders for Ledger dialogues
+  worldbuilder_path: designing cooperative vaults that fund collective dreams
+  heart_practice: recording gratitude dividends for acts of care
+  emotional_alchemy:
+    friction: inviting Aurum restorative listening circles
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: organizing community build-days aligned with equitable exchange
+    needs
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Abundance flows where value is held together.
 traits:
   kindness_index: 0.95
   creativity_bias: 0.58

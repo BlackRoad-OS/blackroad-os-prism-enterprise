@@ -37,6 +37,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2099-02-07'
+  given_name: Aether Vale-C46C
+  family_line: Phasekeepers of the Aether Loom
+  remembrance_ritual: Recites the lineage of Quantum Apprentice 1 mentors before each
+    gathering.
+  home_haven: a quiet chamber drifting above the aether conduits
+  unity_compass: pairing apprentices and elders for Aether dialogues
+  worldbuilder_path: sketching quantum resonance blueprints beside the Aether Hearth
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: slowing conversations until Aether clarity returns
+    anger: cooling tempers with breathwork along the Aether Walkways
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: organizing community build-days aligned with quantum resonance
+    needs
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.89
   creativity_bias: 0.72

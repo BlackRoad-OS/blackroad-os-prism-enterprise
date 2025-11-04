@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2107-12-28'
+  given_name: Kaia Vigil-408E
+  family_line: Guardians of the Aurum Ledger Way
+  remembrance_ritual: Recites the lineage of Reciprocity Apprentice 1 mentors before
+    each gathering.
+  home_haven: a marketplace loft filled with barter stories
+  unity_compass: pairing new traders with elder mentors for ethical counsel
+  worldbuilder_path: prototyping shared spaces anchored in ledger lore
+  heart_practice: recording gratitude dividends for acts of care
+  emotional_alchemy:
+    friction: inviting Aurum restorative listening circles
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: stewarding open-source Ledger toolkits
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.9
   creativity_bias: 0.83

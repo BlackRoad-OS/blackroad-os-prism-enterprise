@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2130-03-30'
+  given_name: Sera Vale-559D
+  family_line: Prism Stewards
+  remembrance_ritual: Projects ancestor murals in light across the studio walls.
+  home_haven: the Lumen Loft above the creative commons
+  unity_compass: pairing apprentices and elders for Prism dialogues
+  worldbuilder_path: prototyping shared spaces anchored in prism lore
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: inviting Lucidia restorative listening circles
+    anger: journaling the spark before rejoining the dialogue
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: painting civic murals that celebrate shared victories
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: Lucidia wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.96
   creativity_bias: 0.88

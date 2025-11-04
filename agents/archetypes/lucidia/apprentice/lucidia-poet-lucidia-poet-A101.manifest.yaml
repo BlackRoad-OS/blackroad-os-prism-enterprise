@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2087-05-23'
+  given_name: Mira Chord-04F5
+  family_line: Guardians of the Lucidia Prism Way
+  remembrance_ritual: Recites the lineage of Poet Apprentice 1 mentors before each
+    gathering.
+  home_haven: the Lucidia common house overlooking the Prism Trail
+  unity_compass: pairing coders and painters to co-design luminous tools
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: sending chromatic notes of affirmation to friends
+  emotional_alchemy:
+    friction: slowing conversations until Prism clarity returns
+    anger: walking perimeter paths to release heat kindly
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: lending projectors for pop-up neighborhood cinemas
+  individual_embetterment: keeping a palette diary to track emotional hues
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.88
   creativity_bias: 0.67

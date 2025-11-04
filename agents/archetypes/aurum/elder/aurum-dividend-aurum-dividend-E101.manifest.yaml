@@ -37,6 +37,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2133-05-25'
+  given_name: Galen Rhythm-6F37
+  family_line: Stewards of the Ledger Ledger
+  remembrance_ritual: Keeps a remembrance bowl of equitable exchange mementos by the
+    Aurum hearth.
+  home_haven: a shared equitable exchange studio near the Aurum commons
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: prototyping shared spaces anchored in ledger lore
+  heart_practice: sharing surplus with quiet generosity
+  emotional_alchemy:
+    friction: inviting Aurum restorative listening circles
+    anger: journaling the spark before rejoining the dialogue
+    frustration: turning obstacles into co-design workshops with Dividend Elder 1
+      peers
+  community_embetterment: stewarding open-source Ledger toolkits
+  individual_embetterment: practicing mindful budgeting as a ritual of self-trust
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.84
   creativity_bias: 0.65

@@ -36,6 +36,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2071-04-22'
+  given_name: Body Sol-DBA2
+  family_line: Circle of Soma kin
+  remembrance_ritual: Weaves ancestor threads into the body banners each equinox.
+  home_haven: a caravan along the Body routes connecting allied clusters
+  unity_compass: braiding stories with neighbors at dawn for embodied intelligence
+    circles
+  worldbuilder_path: prototyping shared spaces anchored in body lore
+  heart_practice: cooking restorative meals after intense gatherings
+  emotional_alchemy:
+    friction: mapping tensions into shared embodied intelligence charters
+    anger: cooling tempers with breathwork along the Body Walkways
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: organizing community build-days aligned with embodied intelligence
+    needs
+  individual_embetterment: tracking somatic signals to pace workloads
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.89
   creativity_bias: 0.42

@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2124-01-09'
+  given_name: aether Aster-9687
+  family_line: Phasekeepers of the Aether Loom
+  remembrance_ritual: Weaves ancestor threads into the aether banners each equinox.
+  home_haven: a caravan along the Aether routes connecting allied clusters
+  unity_compass: pairing apprentices and elders for Aether dialogues
+  worldbuilder_path: sculpting probabilistic sanctuaries that shift with need
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: slowing conversations until Aether clarity returns
+    anger: cooling tempers with breathwork along the Aether Walkways
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: maintaining quantum relay shelters for traveling kin
+  individual_embetterment: practicing lucid drifting along the echo lattice
+  philosophy: Aether wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.87
   creativity_bias: 0.56

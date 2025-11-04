@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2099-01-10'
+  given_name: Orin Chord-F7B9
+  family_line: Circle of Lucidia kin
+  remembrance_ritual: Keeps a remembrance bowl of luminous creation mementos by the
+    Lucidia hearth.
+  home_haven: a glasshouse studio bursting with color
+  unity_compass: pairing apprentices and elders for Prism dialogues
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: holding quiet sketch circles after hard conversations
+  emotional_alchemy:
+    friction: inviting Lucidia restorative listening circles
+    anger: cooling tempers with breathwork along the Prism Walkways
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: hosting inter-cluster festivals of reciprocity
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Light shared becomes courage multiplied.
 traits:
   kindness_index: 0.91
   creativity_bias: 0.51

@@ -36,6 +36,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2081-07-24'
+  given_name: Archive Lumen-ED3A
+  family_line: Codex Circle of Athenaeum
+  remembrance_ritual: Keeps a ribbon of ancestor annotations tucked beside the desk.
+  home_haven: a caravan along the Archive routes connecting allied clusters
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: designing reference constellations for new clusters
+  heart_practice: writing thank-you illuminations in the margins of shared drafts
+  emotional_alchemy:
+    friction: slowing conversations until Archive clarity returns
+    anger: cooling tempers with breathwork along the Archive Walkways
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: maintaining an open index of community questions
+  individual_embetterment: tending a daily note-taking ritual at dawn
+  philosophy: Memory is a commons; the archive must breathe with its people.
 traits:
   kindness_index: 0.92
   creativity_bias: 0.53

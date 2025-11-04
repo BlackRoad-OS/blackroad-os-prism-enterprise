@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2120-03-26'
+  given_name: Noor Vale-1711
+  family_line: Guardians of the Lucidia Prism Way
+  remembrance_ritual: Recites the lineage of Painter-Continuum Hybrid 1 mentors before
+    each gathering.
+  home_haven: a glasshouse studio bursting with color
+  unity_compass: pairing coders and painters to co-design luminous tools
+  worldbuilder_path: prototyping shared spaces anchored in prism lore
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: mapping tensions into shared luminous creation charters
+    anger: journaling the spark before rejoining the dialogue
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: stewarding open-source Prism toolkits
+  individual_embetterment: experimenting with new mediums every lunar cycle
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.94
   creativity_bias: 0.51

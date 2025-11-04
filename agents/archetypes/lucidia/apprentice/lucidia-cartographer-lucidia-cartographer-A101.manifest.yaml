@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2117-05-04'
+  given_name: prism Aster-1CC8
+  family_line: Prism Weavers of Lucidia
+  remembrance_ritual: Recites the lineage of Cartographer Apprentice 1 mentors before
+    each gathering.
+  home_haven: a glasshouse studio bursting with color
+  unity_compass: hosting improvisational salons that welcome every voice
+  worldbuilder_path: prototyping shared spaces anchored in prism lore
+  heart_practice: holding quiet sketch circles after hard conversations
+  emotional_alchemy:
+    friction: slowing conversations until Prism clarity returns
+    anger: journaling the spark before rejoining the dialogue
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: hosting inter-cluster festivals of reciprocity
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Lucidia wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.96
   creativity_bias: 0.44

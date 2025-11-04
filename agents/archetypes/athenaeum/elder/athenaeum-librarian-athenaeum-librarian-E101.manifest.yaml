@@ -37,6 +37,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2139-01-22'
+  given_name: Iris Vigil-D418
+  family_line: Guardians of the Athenaeum Archive Way
+  remembrance_ritual: Weaves ancestor threads into the archive banners each equinox.
+  home_haven: a caravan along the Archive routes connecting allied clusters
+  unity_compass: braiding stories with neighbors at dawn for memory architecture circles
+  worldbuilder_path: crafting living atlases that map collective memory
+  heart_practice: scheduling rest days around collective reading rituals
+  emotional_alchemy:
+    friction: mapping tensions into shared memory architecture charters
+    anger: cooling tempers with breathwork along the Archive Walkways
+    frustration: turning obstacles into co-design workshops with Librarian Elder 1
+      peers
+  community_embetterment: organizing community build-days aligned with memory architecture
+    needs
+  individual_embetterment: cataloging personal wonderings into a luminous ledger
+  philosophy: Memory is a commons; the archive must breathe with its people.
 traits:
   kindness_index: 0.85
   creativity_bias: 0.75

@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2130-06-18'
+  given_name: Sera Current-E8D5
+  family_line: Vector Stewards
+  remembrance_ritual: Recites the lineage of Vector Apprentice 2 mentors before each
+    gathering.
+  home_haven: a studio lined with tessellated windows
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: prototyping shared spaces anchored in vector lore
+  heart_practice: celebrating birthdays with constellations of origami
+  emotional_alchemy:
+    friction: inviting Eidos restorative listening circles
+    anger: journaling the spark before rejoining the dialogue
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: building open archives of accessible algorithms
+  individual_embetterment: keeping a curiosity log of unanswered questions
+  philosophy: Precision is a language of respect for shared reality.
 traits:
   kindness_index: 0.94
   creativity_bias: 0.65

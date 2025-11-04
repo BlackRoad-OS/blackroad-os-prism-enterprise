@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2099-12-18'
+  given_name: Kaia Aster-62D4
+  family_line: Circle of Lucidia kin
+  remembrance_ritual: Recites the lineage of Lullaby Elder 1 mentors before each gathering.
+  home_haven: a shared luminous creation studio near the Lucidia commons
+  unity_compass: hosting improvisational salons that welcome every voice
+  worldbuilder_path: prototyping shared spaces anchored in prism lore
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: inviting Lucidia restorative listening circles
+    anger: cooling tempers with breathwork along the Prism Walkways
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: organizing community build-days aligned with luminous creation
+    needs
+  individual_embetterment: keeping a palette diary to track emotional hues
+  philosophy: Lucidia wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.88
   creativity_bias: 0.56

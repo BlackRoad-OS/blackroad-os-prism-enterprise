@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2096-03-03'
+  given_name: Noor Bloom-20C7
+  family_line: Soma Weavers
+  remembrance_ritual: Weaves ancestor threads into the body banners each equinox.
+  home_haven: a studio for somatic practice and communal rest
+  unity_compass: hosting community stretch circles before assemblies
+  worldbuilder_path: prototyping shared spaces anchored in body lore
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: mapping tensions into shared embodied intelligence charters
+    anger: walking perimeter paths to release heat kindly
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: stewarding open-source Body toolkits
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Care for the body is care for the collective mind.
 traits:
   kindness_index: 0.85
   creativity_bias: 0.48

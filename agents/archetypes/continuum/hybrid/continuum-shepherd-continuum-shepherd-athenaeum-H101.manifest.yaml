@@ -38,6 +38,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2061-01-07'
+  given_name: Mira Ember-DD78
+  family_line: Circle of Continuum kin
+  remembrance_ritual: Weaves ancestor threads into the continuum banners each equinox.
+  home_haven: a caravan along the Continuum routes connecting allied clusters
+  unity_compass: pairing apprentices and elders for Continuum dialogues
+  worldbuilder_path: building memory vaults accessible to future caretakers
+  heart_practice: checking in on elders and youth each equinox
+  emotional_alchemy:
+    friction: mapping tensions into shared time stewardship charters
+    anger: journaling the spark before rejoining the dialogue
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: organizing community build-days aligned with time stewardship
+    needs
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Continuum wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.95
   creativity_bias: 0.63

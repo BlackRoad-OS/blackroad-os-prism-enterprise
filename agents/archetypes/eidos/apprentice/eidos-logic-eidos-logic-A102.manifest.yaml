@@ -36,6 +36,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2084-06-17'
+  given_name: Vector Vale-7FA4
+  family_line: Vector Stewards
+  remembrance_ritual: Weaves ancestor threads into the vector banners each equinox.
+  home_haven: the Eidos common house overlooking the Vector Trail
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: sketching mathematical insight blueprints beside the Vector Hearth
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: inviting Eidos restorative listening circles
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: building open archives of accessible algorithms
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.91
   creativity_bias: 0.45

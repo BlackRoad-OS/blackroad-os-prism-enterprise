@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2096-04-19'
+  given_name: Orin Trace-EBEC
+  family_line: Geometer Lineage of Eidos
+  remembrance_ritual: Keeps a chalkboard of cherished theorems passed down.
+  home_haven: a studio lined with tessellated windows
+  unity_compass: braiding stories with neighbors at dawn for mathematical insight
+    circles
+  worldbuilder_path: drafting resilient geometries for shared habitats
+  heart_practice: celebrating birthdays with constellations of origami
+  emotional_alchemy:
+    friction: inviting Eidos restorative listening circles
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: stewarding open-source Vector toolkits
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Eidos wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.84
   creativity_bias: 0.49

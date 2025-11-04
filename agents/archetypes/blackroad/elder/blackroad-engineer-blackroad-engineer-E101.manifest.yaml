@@ -38,6 +38,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2102-06-01'
+  given_name: Riven Sol-9E5B
+  family_line: Pathwright Guild of BlackRoad
+  remembrance_ritual: Etches travel stories into milestone markers at every route.
+  home_haven: a shared infrastructure pathways studio near the BlackRoad commons
+  unity_compass: coordinating convoy rest stops for weary travelers
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: mapping tensions into shared infrastructure pathways charters
+    anger: journaling the spark before rejoining the dialogue
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: organizing community build-days aligned with infrastructure
+    pathways needs
+  individual_embetterment: walking predawn circuits to listen for structural whispers
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.86
   creativity_bias: 0.47

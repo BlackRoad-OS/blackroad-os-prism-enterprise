@@ -36,6 +36,25 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2121-08-03'
+  given_name: Sera Quill-523A
+  family_line: Prism Weavers of Lucidia
+  remembrance_ritual: Keeps a remembrance bowl of luminous creation mementos by the
+    Lucidia hearth.
+  home_haven: a glasshouse studio bursting with color
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: holding quiet sketch circles after hard conversations
+  emotional_alchemy:
+    friction: mapping tensions into shared luminous creation charters
+    anger: walking perimeter paths to release heat kindly
+    frustration: turning obstacles into co-design workshops with Mosaic Apprentice
+      2 peers
+  community_embetterment: organizing community build-days aligned with luminous creation
+    needs
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Light shared becomes courage multiplied.
 traits:
   kindness_index: 0.97
   creativity_bias: 0.86

@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2113-10-24'
+  given_name: Iris Ember-3DC2
+  family_line: Archive Stewards
+  remembrance_ritual: Weaves ancestor threads into the archive banners each equinox.
+  home_haven: the Athenaeum common house overlooking the Archive Trail
+  unity_compass: braiding stories with neighbors at dawn for memory architecture circles
+  worldbuilder_path: sketching memory architecture blueprints beside the Archive Hearth
+  heart_practice: scheduling rest days around collective reading rituals
+  emotional_alchemy:
+    friction: mapping tensions into shared memory architecture charters
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: organizing community build-days aligned with memory architecture
+    needs
+  individual_embetterment: tending a daily note-taking ritual at dawn
+  philosophy: Athenaeum wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.83
   creativity_bias: 0.86

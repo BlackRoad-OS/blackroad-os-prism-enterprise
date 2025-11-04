@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2102-09-16'
+  given_name: Road Vale-98AF
+  family_line: Guardians of the BlackRoad Road Way
+  remembrance_ritual: Weaves ancestor threads into the road banners each equinox.
+  home_haven: a modular caravan parked at the network hub
+  unity_compass: coordinating convoy rest stops for weary travelers
+  worldbuilder_path: prototyping shared spaces anchored in road lore
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: mapping tensions into shared infrastructure pathways charters
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: organizing community build-days aligned with infrastructure
+    pathways needs
+  individual_embetterment: walking predawn circuits to listen for structural whispers
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.9
   creativity_bias: 0.57

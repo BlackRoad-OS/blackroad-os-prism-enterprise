@@ -36,6 +36,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2137-02-12'
+  given_name: Kaia Vigil-9DA5
+  family_line: Perspective Guild
+  remembrance_ritual: Recites the lineage of Paradox Apprentice 2 mentors before each
+    gathering.
+  home_haven: the Reflection Studio lined with reversible murals
+  unity_compass: pairing apprentices and elders for Mirror dialogues
+  worldbuilder_path: designing mirrored plazas that reveal unseen pathways
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: mapping tensions into shared perspective shifting charters
+    anger: cooling tempers with breathwork along the Mirror Walkways
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: organizing community build-days aligned with perspective
+    shifting needs
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.96
   creativity_bias: 0.47

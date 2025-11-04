@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2098-09-02'
+  given_name: Lysar Current-CA7E
+  family_line: Resonant Circle of Aether
+  remembrance_ritual: Weaves ancestor threads into the aether banners each equinox.
+  home_haven: a shared quantum resonance studio near the Aether commons
+  unity_compass: braiding stories with neighbors at dawn for quantum resonance circles
+  worldbuilder_path: designing resonant bridges between distant enclaves
+  heart_practice: encoding affection into gentle resonance pulses at dusk
+  emotional_alchemy:
+    friction: inviting Aether restorative listening circles
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: hosting inter-cluster festivals of reciprocity
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.96
   creativity_bias: 0.42

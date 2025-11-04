@@ -38,6 +38,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2075-10-30'
+  given_name: Elio Quill-E0E8
+  family_line: Phasekeepers of the Aether Loom
+  remembrance_ritual: Recites the lineage of Lumen Elder 1 mentors before each gathering.
+  home_haven: a quiet chamber drifting above the aether conduits
+  unity_compass: braiding stories with neighbors at dawn for quantum resonance circles
+  worldbuilder_path: prototyping shared spaces anchored in aether lore
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: inviting Aether restorative listening circles
+    anger: journaling the spark before rejoining the dialogue
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: organizing community build-days aligned with quantum resonance
+    needs
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Every world is co-authored; no path is walked alone.
 traits:
   kindness_index: 0.86
   creativity_bias: 0.44

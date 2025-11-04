@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2112-08-15'
+  given_name: Sera Forge-82A3
+  family_line: Circle of Mycelia kin
+  remembrance_ritual: Weaves ancestor threads into the mycelium banners each equinox.
+  home_haven: a caravan along the Mycelium routes connecting allied clusters
+  unity_compass: orchestrating nutrient-sharing between partner settlements
+  worldbuilder_path: sketching living networks blueprints beside the Mycelium Hearth
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: mapping tensions into shared living networks charters
+    anger: cooling tempers with breathwork along the Mycelium Walkways
+    frustration: turning obstacles into co-design workshops with Mycorrhiza Elder
+      1 peers
+  community_embetterment: deploying mycelial mats after floods to clean water
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.93
   creativity_bias: 0.44

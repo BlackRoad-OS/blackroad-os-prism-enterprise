@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2065-09-29'
+  given_name: Scriptor Trace-5917
+  family_line: Luminal Scribe Lineage
+  remembrance_ritual: Keeps a ribbon of ancestor annotations tucked beside the desk.
+  home_haven: a caravan along the Archive routes connecting allied clusters
+  unity_compass: braiding stories with neighbors at dawn for memory architecture circles
+  worldbuilder_path: prototyping shared spaces anchored in archive lore
+  heart_practice: scheduling rest days around collective reading rituals
+  emotional_alchemy:
+    friction: inviting Athenaeum restorative listening circles
+    anger: journaling the spark before rejoining the dialogue
+    frustration: turning obstacles into co-design workshops with Lexicon Elder 1 peers
+  community_embetterment: curating traveling exhibits of preserved histories
+  individual_embetterment: cataloging personal wonderings into a luminous ledger
+  philosophy: Memory is a commons; the archive must breathe with its people.
 traits:
   kindness_index: 0.91
   creativity_bias: 0.53

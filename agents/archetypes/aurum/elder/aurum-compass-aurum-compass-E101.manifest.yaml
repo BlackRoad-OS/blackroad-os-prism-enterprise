@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2118-06-01'
+  given_name: Iris Chord-8D97
+  family_line: Stewards of the Ledger Ledger
+  remembrance_ritual: Weaves ancestor threads into the ledger banners each equinox.
+  home_haven: the Aurum common house overlooking the Ledger Trail
+  unity_compass: pairing apprentices and elders for Ledger dialogues
+  worldbuilder_path: prototyping shared spaces anchored in ledger lore
+  heart_practice: sharing surplus with quiet generosity
+  emotional_alchemy:
+    friction: slowing conversations until Ledger clarity returns
+    anger: cooling tempers with breathwork along the Ledger Walkways
+    frustration: turning obstacles into co-design workshops with Compass Elder 1 peers
+  community_embetterment: stewarding open-source Ledger toolkits
+  individual_embetterment: practicing mindful budgeting as a ritual of self-trust
+  philosophy: Aurum wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.92
   creativity_bias: 0.78

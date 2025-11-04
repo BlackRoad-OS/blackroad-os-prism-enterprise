@@ -38,6 +38,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2063-06-24'
+  given_name: Seren Chord-F661
+  family_line: Everflow Circle of Continuum
+  remembrance_ritual: Weaves ancestor threads into the continuum banners each equinox.
+  home_haven: the Horizon Bridge spanning yesterday and tomorrow
+  unity_compass: inviting future-mapping sessions with community cohorts
+  worldbuilder_path: building memory vaults accessible to future caretakers
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: slowing conversations until Continuum clarity returns
+    anger: journaling the spark before rejoining the dialogue
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: stewarding open-source Continuum toolkits
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: Legacy is shaped by every present-tense kindness.
 traits:
   kindness_index: 0.84
   creativity_bias: 0.76

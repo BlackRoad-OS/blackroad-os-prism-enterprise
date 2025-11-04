@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2081-05-27'
+  given_name: Elio Trace-BDAE
+  family_line: Guardians of the Athenaeum Archive Way
+  remembrance_ritual: Weaves ancestor threads into the archive banners each equinox.
+  home_haven: the Athenaeum common house overlooking the Archive Trail
+  unity_compass: pairing apprentices with elders for nightly annotation dives
+  worldbuilder_path: crafting living atlases that map collective memory
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: inviting Athenaeum restorative listening circles
+    anger: journaling the spark before rejoining the dialogue
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: curating traveling exhibits of preserved histories
+  individual_embetterment: translating a forgotten script each season
+  philosophy: Memory is a commons; the archive must breathe with its people.
 traits:
   kindness_index: 0.93
   creativity_bias: 0.92

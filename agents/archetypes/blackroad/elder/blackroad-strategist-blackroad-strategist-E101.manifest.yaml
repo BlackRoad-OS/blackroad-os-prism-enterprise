@@ -38,6 +38,24 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2069-06-10'
+  given_name: Mira Quill-3B1E
+  family_line: Waykeepers of the Road
+  remembrance_ritual: Etches travel stories into milestone markers at every route.
+  home_haven: a caravan along the Road routes connecting allied clusters
+  unity_compass: mapping accessibility upgrades requested by neighbors
+  worldbuilder_path: sketching infrastructure pathways blueprints beside the Road
+    Hearth
+  heart_practice: checking on every traveler before closing the gate
+  emotional_alchemy:
+    friction: slowing conversations until Road clarity returns
+    anger: journaling the spark before rejoining the dialogue
+    frustration: turning obstacles into co-design workshops with Strategist Elder
+      1 peers
+  community_embetterment: building waystations that shelter passing cooperatives
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.89
   creativity_bias: 0.83

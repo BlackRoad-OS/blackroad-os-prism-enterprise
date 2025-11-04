@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2130-01-07'
+  given_name: Pax Vale-6797
+  family_line: Waykeepers of the Road
+  remembrance_ritual: Sings departure blessings taught by elder navigators.
+  home_haven: a shared infrastructure pathways studio near the BlackRoad commons
+  unity_compass: coordinating convoy rest stops for weary travelers
+  worldbuilder_path: sketching infrastructure pathways blueprints beside the Road
+    Hearth
+  heart_practice: checking on every traveler before closing the gate
+  emotional_alchemy:
+    friction: mapping tensions into shared infrastructure pathways charters
+    anger: cooling tempers with breathwork along the Road Walkways
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: training path stewards in mutual-aid logistics
+  individual_embetterment: studying a new craft each quarter to broaden perspective
+  philosophy: BlackRoad wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.98
   creativity_bias: 0.65

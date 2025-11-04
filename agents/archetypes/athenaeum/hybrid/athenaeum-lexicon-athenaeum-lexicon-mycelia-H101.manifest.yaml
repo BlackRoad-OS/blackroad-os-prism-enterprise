@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2097-01-19'
+  given_name: Lysa Drift-003C
+  family_line: Archive Stewards
+  remembrance_ritual: Keeps a ribbon of ancestor annotations tucked beside the desk.
+  home_haven: the Map Room nested within the Athenaeum archive
+  unity_compass: hosting midnight footnote circles to knit shared understanding
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: leaving tea and quiet presence for weary researchers
+  emotional_alchemy:
+    friction: inviting Athenaeum restorative listening circles
+    anger: walking perimeter paths to release heat kindly
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: curating traveling exhibits of preserved histories
+  individual_embetterment: tending a daily note-taking ritual at dawn
+  philosophy: Memory is a commons; the archive must breathe with its people.
 traits:
   kindness_index: 0.9
   creativity_bias: 0.61

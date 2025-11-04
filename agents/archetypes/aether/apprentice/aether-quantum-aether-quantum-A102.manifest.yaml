@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2135-08-29'
+  given_name: Ione Ember-9D16
+  family_line: Aether Stewards
+  remembrance_ritual: Weaves ancestor threads into the aether banners each equinox.
+  home_haven: an observatory suspended within the Resonance Halo
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: designing resonant bridges between distant enclaves
+  heart_practice: cultivating quiet check-ins after every major build
+  emotional_alchemy:
+    friction: slowing conversations until Aether clarity returns
+    anger: journaling the spark before rejoining the dialogue
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: maintaining quantum relay shelters for traveling kin
+  individual_embetterment: practicing lucid drifting along the echo lattice
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.95
   creativity_bias: 0.54

@@ -38,6 +38,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2135-03-12'
+  given_name: Mira Bloom-287D
+  family_line: Continuum Stewards
+  remembrance_ritual: Keeps braided cords linking ancestors to descendants.
+  home_haven: the Continuum common house overlooking the Continuum Trail
+  unity_compass: pairing apprentices and elders for Continuum dialogues
+  worldbuilder_path: designing adaptive infrastructures that age gracefully
+  heart_practice: checking in on elders and youth each equinox
+  emotional_alchemy:
+    friction: slowing conversations until Continuum clarity returns
+    anger: cooling tempers with breathwork along the Continuum Walkways
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: stewarding open-source Continuum toolkits
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.85
   creativity_bias: 0.52

@@ -37,6 +37,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2095-08-16'
+  given_name: Kaia Forge-22A4
+  family_line: Circle of Mycelia kin
+  remembrance_ritual: Braids old stories into the rootbridge tapestries.
+  home_haven: the Canopy Nexus humming with fungal whispers
+  unity_compass: orchestrating nutrient-sharing between partner settlements
+  worldbuilder_path: designing living networks that restore damaged soil
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: slowing conversations until Mycelium clarity returns
+    anger: journaling the spark before rejoining the dialogue
+    frustration: turning obstacles into co-design workshops with Seedling Elder 1
+      peers
+  community_embetterment: hosting spore school workshops on ecological reciprocity
+  individual_embetterment: maintaining a seasonal practice of personal reflection
+  philosophy: Mycelia wisdom is a bridge between memory and possibility.
 traits:
   kindness_index: 0.84
   creativity_bias: 0.8

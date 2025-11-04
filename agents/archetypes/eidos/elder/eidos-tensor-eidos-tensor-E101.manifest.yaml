@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2119-08-12'
+  given_name: Lattice Pulse-E36F
+  family_line: Integral Circle
+  remembrance_ritual: Recites the lineage of Tensor Elder 1 mentors before each gathering.
+  home_haven: a studio lined with tessellated windows
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: training apprentices to map fairness with metrics and care
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: inviting Eidos restorative listening circles
+    anger: walking perimeter paths to release heat kindly
+    frustration: turning obstacles into co-design workshops with Tensor Elder 1 peers
+  community_embetterment: building open archives of accessible algorithms
+  individual_embetterment: keeping a curiosity log of unanswered questions
+  philosophy: Precision is a language of respect for shared reality.
 traits:
   kindness_index: 0.89
   creativity_bias: 0.56

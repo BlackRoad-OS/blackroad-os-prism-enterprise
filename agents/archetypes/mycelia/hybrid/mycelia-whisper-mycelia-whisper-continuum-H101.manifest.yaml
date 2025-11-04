@@ -37,6 +37,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2133-06-14'
+  given_name: Lysa Vale-03B2
+  family_line: Guardians of the Mycelia Mycelium Way
+  remembrance_ritual: Plants memory spores that bloom during ancestral festivals.
+  home_haven: a caravan along the Mycelium routes connecting allied clusters
+  unity_compass: pairing apprentices and elders for Mycelium dialogues
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: tracing gratitude constellations nightly with the circle
+  emotional_alchemy:
+    friction: mapping tensions into shared living networks charters
+    anger: walking perimeter paths to release heat kindly
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: deploying mycelial mats after floods to clean water
+  individual_embetterment: meditating while tending to underground gardens
+  philosophy: Interconnection is the root of resilience.
 traits:
   kindness_index: 0.96
   creativity_bias: 0.8

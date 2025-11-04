@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2081-06-05'
+  given_name: Orin Sol-CDE1
+  family_line: Prism Weavers of Lucidia
+  remembrance_ritual: Recites the lineage of Storyteller Apprentice 2 mentors before
+    each gathering.
+  home_haven: a glasshouse studio bursting with color
+  unity_compass: pairing apprentices and elders for Prism dialogues
+  worldbuilder_path: mentoring cohorts to co-design resilient habitats
+  heart_practice: holding quiet sketch circles after hard conversations
+  emotional_alchemy:
+    friction: inviting Lucidia restorative listening circles
+    anger: journaling the spark before rejoining the dialogue
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: painting civic murals that celebrate shared victories
+  individual_embetterment: keeping a palette diary to track emotional hues
+  philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.85
   creativity_bias: 0.84

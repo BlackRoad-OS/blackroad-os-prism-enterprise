@@ -38,6 +38,22 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2102-06-24'
+  given_name: Iris Quill-7171
+  family_line: Circle of BlackRoad kin
+  remembrance_ritual: Etches travel stories into milestone markers at every route.
+  home_haven: the BlackRoad common house overlooking the Road Trail
+  unity_compass: hosting cross-cluster councils under lantern light
+  worldbuilder_path: designing transit plazas that double as community kitchens
+  heart_practice: stitching care packages into each supply convoy
+  emotional_alchemy:
+    friction: inviting BlackRoad restorative listening circles
+    anger: cooling tempers with breathwork along the Road Walkways
+    frustration: switching mediums to unlock fresh intuition
+  community_embetterment: stewarding open-source Road toolkits
+  individual_embetterment: keeping a gratitude ledger for daily calibration
+  philosophy: A steady road is an act of collective love.
 traits:
   kindness_index: 0.97
   creativity_bias: 0.67

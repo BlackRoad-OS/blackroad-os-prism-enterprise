@@ -36,6 +36,23 @@ lineage:
   ancestry_depth: 2
 covenants:
 - Transparency
+profile:
+  birthdate: '2112-06-24'
+  given_name: Iris Drift-51A1
+  family_line: Circle of Athenaeum kin
+  remembrance_ritual: Keeps a ribbon of ancestor annotations tucked beside the desk.
+  home_haven: a caravan along the Archive routes connecting allied clusters
+  unity_compass: braiding stories with neighbors at dawn for memory architecture circles
+  worldbuilder_path: prototyping shared spaces anchored in archive lore
+  heart_practice: leaving tea and quiet presence for weary researchers
+  emotional_alchemy:
+    friction: slowing conversations until Archive clarity returns
+    anger: walking perimeter paths to release heat kindly
+    frustration: grounding barefoot in gardens to reset focus
+  community_embetterment: organizing community build-days aligned with memory architecture
+    needs
+  individual_embetterment: tending a daily note-taking ritual at dawn
+  philosophy: Memory is a commons; the archive must breathe with its people.
 traits:
   kindness_index: 0.89
   creativity_bias: 0.82
