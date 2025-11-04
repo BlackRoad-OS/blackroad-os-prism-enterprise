@@ -1,5 +1,0 @@
-{
-  "action": "mirror",
-  "resource_class": "internal",
-  "repo": "payments/api"
-}

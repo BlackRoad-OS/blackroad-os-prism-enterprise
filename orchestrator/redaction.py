@@ -1,50 +1,65 @@
+"""PII redaction utilities."""
+
 from __future__ import annotations
 
 import hashlib
 import re
-from typing import Any
+from dataclasses import dataclass
+from typing import Any, Dict, Mapping, Sequence
 
-from orchestrator import metrics
+from orchestrator.exceptions import RedactionError
 
-EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
-PHONE_RE = re.compile(r"\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b")
-SSN_RE = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
-CC_RE = re.compile(r"\b(?:\d[ -]*?){13,16}\b")
+EMAIL_PATTERN = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+PHONE_PATTERN = re.compile(r"\+?[0-9][0-9\-]{8,}[0-9]")
 
 
-def _token(value: str, kind: str) -> str:
+@dataclass(slots=True)
+class RedactionStats:
+    """Summary of redaction operations."""
+
+    emails: int = 0
+    phones: int = 0
+
+
+def _tokenise(value: str, token_type: str) -> str:
     digest = hashlib.sha256(value.encode("utf-8")).hexdigest()[:8]
-    return f"{{{{REDACTED:{kind}:{digest}}}}}"
+    return f"{{{{REDACTED:{token_type}:{digest}}}}}"
 
 
-def _scrub_str(text: str) -> tuple[str, int]:
-    count = 0
-    for kind, regex in {
-        "email": EMAIL_RE,
-        "phone": PHONE_RE,
-        "ssn": SSN_RE,
-        "cc": CC_RE,
-    }.items():
-        def repl(match: re.Match[str]) -> str:
-            nonlocal count
-            count += 1
-            return _token(match.group(0), kind)
+def redact_text(text: str) -> tuple[str, RedactionStats]:
+    """Redact known PII tokens within text."""
 
-        text = regex.sub(repl, text)
-    return text, count
+    stats = RedactionStats()
+    if EMAIL_PATTERN.search(text):
+        matches = EMAIL_PATTERN.findall(text)
+        for match in matches:
+            text = text.replace(match, _tokenise(match, "email"))
+            stats.emails += 1
+    if PHONE_PATTERN.search(text):
+        matches = PHONE_PATTERN.findall(text)
+        for match in matches:
+            text = text.replace(match, _tokenise(match, "phone"))
+            stats.phones += 1
+    return text, stats
 
 
-def scrub(obj: Any) -> Any:
-    """Recursively scrub PII from the provided object."""
-    if obj is None:
-        return None
-    if isinstance(obj, str):
-        cleaned, cnt = _scrub_str(obj)
-        if cnt:
-            metrics.inc("redactions_applied", cnt)
-        return cleaned
-    if isinstance(obj, list):
-        return [scrub(x) for x in obj]
-    if isinstance(obj, dict):
-        return {k: scrub(v) for k, v in obj.items()}
-    return obj
+def redact_payload(payload: Any) -> Any:
+    """Recursively redact PII from a JSON-serialisable payload."""
+
+    if isinstance(payload, str):
+        redacted, _ = redact_text(payload)
+        return redacted
+    if isinstance(payload, Mapping):
+        return {key: redact_payload(value) for key, value in payload.items()}
+    if isinstance(payload, Sequence) and not isinstance(payload, (bytes, bytearray)):
+        return [redact_payload(item) for item in payload]
+    return payload
+
+
+def ensure_redacted(payload: Mapping[str, Any]) -> Dict[str, Any]:
+    """Return a redacted copy of *payload* or raise if redaction fails."""
+
+    try:
+        return {key: redact_payload(value) for key, value in payload.items()}
+    except Exception as exc:  # noqa: BLE001
+        raise RedactionError("Unable to redact payload") from exc

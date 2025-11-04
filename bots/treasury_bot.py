@@ -1,75 +1,49 @@
-from orchestrator.base import BaseBot
+"""Treasury bot implementation."""
+
+from __future__ import annotations
+
+from datetime import datetime, timedelta
+
+from orchestrator import BaseBot, BotMetadata
 from orchestrator.protocols import BotResponse, Task
 
 
 class TreasuryBot(BaseBot):
-    """
-    MISSION: Provide treasury analysis for cash forecasting and hedging.
-    INPUTS: Task context containing financial parameters.
-    OUTPUTS: Cash forecast or hedging plan summaries.
-    KPIS: Cash position accuracy, hedge coverage.
-    GUARDRAILS: Uses deterministic mock data only; no external systems.
-    HANDOFFS: Finance team for execution.
-    """
+    """Finance bot specialising in treasury planning."""
 
-    name = "Treasury-BOT"
-    mission = "Assist with cash forecasting and hedging outlines."
+    metadata = BotMetadata(
+        name="Treasury-BOT",
+        mission="Deliver short- and mid-term cash forecasts and hedging suggestions.",
+        inputs=["task.goal", "config.finance.treasury"],
+        outputs=["cash_forecast", "hedging_plan"],
+        kpis=["cash_floor", "hedge_coverage"],
+        guardrails=["Offline deterministic calculations", "No external integrations"],
+        handoffs=["Treasury operations"],
+    )
 
-    def run(self, task: Task) -> BotResponse:
-        goal = task.goal.lower()
-        if "13-week" in goal:
-            summary = "Generated mock 13-week cash forecast including KPIs."
-            data = {
-                "weekly_cash": [10000 + i * 100 for i in range(13)],
-                "currency": "USD",
-                "kpis": {"accuracy": 0.9},
+    def handle_task(self, task: Task) -> BotResponse:
+        """Generate a deterministic cash plan based on the task goal."""
+
+        horizon_weeks = 13 if "13" in task.goal else 8
+        base_amount = 2_500_000
+        forecast = [base_amount + index * 75_000 for index in range(horizon_weeks)]
+        hedges = [
+            {
+                "instrument": "forward",
+                "currency": "EUR",
+                "notional": 500_000,
+                "maturity": (datetime.utcnow() + timedelta(days=90)).date().isoformat(),
             }
-            artifacts = [f"/artifacts/{task.id}/cash_forecast.csv"]
-            next_actions = ["Review forecast", "Adjust assumptions"]
-        elif "hedging" in goal:
-            summary = "Outlined mock hedging plan with KPI coverage ratios."
-            data = {
-                "hedges": [
-                    {"instrument": "forward", "amount": 50000, "rate": 1.1}
-                ],
-                "kpis": {"coverage": 0.8},
-            }
-            artifacts = [f"/artifacts/{task.id}/hedging_plan.md"]
-            next_actions = ["Confirm exposures", "Execute hedges"]
-        else:
-            summary = "Unable to process request."
-            data = {}
-            artifacts = []
-            next_actions = []
-
-        steps = ["gather data", "analyze", "summarize"]
-        risks = ["Mock data may not reflect reality"]
+        ]
+        summary = f"Generated {horizon_weeks}-week cash outlook"
         return BotResponse(
             task_id=task.id,
             summary=summary,
-            steps=steps,
-            data=data,
-            risks=risks,
-            artifacts=artifacts,
-            next_actions=next_actions,
-            ok=bool(data),
+            steps=["ingest goal", "simulate cash flow", "prepare hedging"],
+            data={"weekly_cash": forecast, "hedging": hedges},
+            risks=["Forecast uses static fixtures"],
+            artifacts=[f"artifacts/{task.id}/cash_forecast.csv"],
+            next_actions=["Review forecast", "Capture approvals if required"],
+            ok=True,
+            metrics={"cash_floor": min(forecast)},
         )
-from orchestrator.protocols import BotResponse, Task
-
-from .base import BaseBot
-
-
-class TreasuryBot(BaseBot):
-    """Treasury-BOT
-    Mission: optimize cash, liquidity, and FX exposure.
-    Inputs: bank feeds, AP/AR, cash forecasts.
-    Outputs: 13-week cash view, hedging recommendations, covenant tracker.
-    KPIs: minimum cash, DSO/DPO, hedge P&L.
-    Guardrails: treasury policy, FX limits, banking security.
-    Hand-offs: CFO/treasury team.
-    """
-
-    name = "Treasury-BOT"
-
-    def run(self, task: Task) -> BotResponse:
-        return super().run(task)

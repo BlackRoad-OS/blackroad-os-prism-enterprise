@@ -1,92 +1,55 @@
-# API Reference
+# CLI Reference
 
-_Generated 2025-10-25T03:13:37.058780+00:00Z_
+All commands follow the `module:action[:subaction]` pattern.
 
-## `/auth/refresh`
-### POST
-- **Summary:** Refresh Tokens
-- **Request Body:** application/json
-- **Responses:**
-  - `200` Successful Response
-  - `422` Validation Error
+## Global Flags
 
-## `/config/rate-limit`
-### GET
-- **Summary:** Rate Limit Config
-- **Responses:**
-  - `200` Successful Response
+- `--log-level [debug|info|warning|error]`
+- `--memory <path>` override memory log location
 
-### PUT
-- **Summary:** Update Rate Limit
-- **Request Body:** application/json
-- **Responses:**
-  - `200` Successful Response
-  - `422` Validation Error
+## Commands
 
-## `/controls/cache-flush`
-### POST
-- **Summary:** Control Cache Flush
-- **Request Body:** application/json
-- **Responses:**
-  - `200` Successful Response
-  - `422` Validation Error
+### `bot:list`
+Lists available bots and their missions.
 
-## `/controls/restart`
-### POST
-- **Summary:** Control Restart
-- **Request Body:** application/json
-- **Responses:**
-  - `200` Successful Response
-  - `422` Validation Error
+```bash
+python -m cli.console bot:list
+```
 
-## `/health`
-### GET
-- **Summary:** Health
-- **Responses:**
-  - `200` Successful Response
+### `task:create`
+Creates a task and stores it in the registry.
 
-## `/health/live`
-### GET
-- **Summary:** Live
-- **Responses:**
-  - `200` Successful Response
+```bash
+python -m cli.console task:create --goal "Build Q3 cash forecast" \
+    --owner finance.ops --priority high --due-date 2025-07-01
+```
 
-## `/health/ready`
-### GET
-- **Summary:** Ready
-- **Responses:**
-  - `200` Successful Response
+### `task:route`
+Routes a task to a bot.
 
-## `/maintenance/activate`
-### POST
-- **Summary:** Maintenance Activate
-- **Request Body:** application/json
-- **Responses:**
-  - `200` Successful Response
-  - `422` Validation Error
+```bash
+python -m cli.console task:route --id TSK-20250214-001 --bot Treasury-BOT
+```
 
-## `/maintenance/deactivate`
-### POST
-- **Summary:** Maintenance Deactivate
-- **Request Body:** application/json
-- **Responses:**
-  - `200` Successful Response
-  - `422` Validation Error
+### `task:history`
+Shows the audit history for a task.
 
-## `/maintenance/status`
-### GET
-- **Summary:** Maintenance Status
-- **Responses:**
-  - `200` Successful Response
+```bash
+python -m cli.console task:history --id TSK-20250214-001
+```
 
-## `/metrics`
-### GET
-- **Summary:** Metrics
-- **Responses:**
-  - `200` Successful Response
+### `policy:list`
+Displays policy rules and approval requirements.
 
-## `/system/status`
-### GET
-- **Summary:** System Status
-- **Responses:**
-  - `200` Successful Response
+```bash
+python -m cli.console policy:list
+```
+
+### `config:validate`
+Validates configuration files against the Pydantic models.
+
+```bash
+python -m cli.console config:validate
+```
+
+See `python -m cli.console --help` for the complete command tree.
