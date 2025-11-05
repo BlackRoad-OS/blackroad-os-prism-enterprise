@@ -6,6 +6,8 @@ import { NavLink, Route, Routes } from "react-router-dom";
 import AStarLab from "./pages/AStarLab.jsx";
 import Agents from "./pages/Agents.jsx";
 import Backroad from "./pages/Backroad.jsx";
+import { NavLink, Routes, Route } from "react-router-dom";
+import Chat from "./pages/Chat.jsx";
 import Canvas from "./pages/Canvas.jsx";
 import Chat from "./pages/Chat.jsx";
 import CodexPromptPage from "./pages/CodexPrompt.jsx";

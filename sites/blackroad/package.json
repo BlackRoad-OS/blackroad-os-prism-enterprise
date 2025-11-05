@@ -9,7 +9,7 @@
     "watch-content": "node ./scripts/watch-content.cjs",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx || true",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "format": "prettier -w .",
     "test": "vitest run",
     "test:ui": "vitest run",

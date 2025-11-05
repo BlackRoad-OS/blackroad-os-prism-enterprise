@@ -34,6 +34,7 @@
     "typecheck": "echo 'no typecheck'",
     "health": "node scripts/health.js",
     "lint": "eslint . --ext .js,.jsx,.mjs,.cjs || true",
+    "lint": "eslint . --ext .js,.jsx,.mjs,.cjs",
     "format": "prettier -w .",
     "test:jest": "cross-env NODE_ENV=test jest --runInBand",
     "test-db": "node tests/test_db.js",
