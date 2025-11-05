@@ -7,7 +7,7 @@ import csv
 import json
 import math
 from pathlib import Path
-from typing import Dict, List
+from typing import List, Sequence
 
 ART_DIR: Path = Path("artifacts/mfg/spc")
 RULE_POINT_BEYOND_3SIG = "SPC_POINT_BEYOND_3SIG"
@@ -33,22 +33,44 @@ def _stdev(values: List[float]) -> float:
     return math.sqrt(variance)
 
 
+_VALUE_FIELDS: Sequence[str] = ("value", "measure", "measurement")
+
+
 def _load_series(op: str, csv_dir: str | Path) -> List[float]:
-    path = Path(csv_dir) / f"{op}_sample.csv"
-    if not path.exists():
-        raise FileNotFoundError(path)
+    """Load inspection measurements for an operation.
+
+    The fixtures evolved over time which means some datasets use the
+    ``*_sample.csv`` convention with a ``measure`` column while newer
+    fixtures follow the simpler ``<op>.csv`` pattern with a ``value``
+    column.  To remain compatible with both layouts we probe in order of
+    preference and normalise whichever numeric field is present.
+    """
+
+    csv_dir = Path(csv_dir)
+    candidates = [csv_dir / f"{op}.csv", csv_dir / f"{op}_sample.csv"]
+    path = next((candidate for candidate in candidates if candidate.exists()), None)
+    if path is None:
+        raise FileNotFoundError(candidates[0])
+
     series: List[float] = []
     with path.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
         for row in reader:
-            try:
-                series.append(float(row.get("measure", 0)))
-            except ValueError:
-                continue
+            for field in _VALUE_FIELDS:
+                raw = row.get(field)
+                if raw is None:
+                    continue
+                try:
+                    value = float(str(raw).strip())
+                except ValueError:
+                    continue
+                else:
+                    series.append(value)
+                    break
     return series
 
 
-def analyze(op: str, window: int, csv_dir: str | Path = Path("fixtures/mfg/spc")) -> Dict[str, object]:
+def analyze(op: str, window: int, csv_dir: str | Path = Path("fixtures/mfg/spc")) -> List[str]:
     series = _load_series(op, csv_dir)
     if window > 0:
         series = series[-window:]
@@ -91,6 +113,7 @@ def analyze(op: str, window: int, csv_dir: str | Path = Path("fixtures/mfg/spc")
         "unstable": bool(findings),
     }
     (art_dir / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
+    (art_dir / "findings.json").write_text(json.dumps(findings, indent=2), encoding="utf-8")
 
     chart_lines = ["index,value"] + [f"{idx + 1},{value}" for idx, value in enumerate(series)]
     (art_dir / "charts.csv").write_text("\n".join(chart_lines), encoding="utf-8")
@@ -100,13 +123,17 @@ def analyze(op: str, window: int, csv_dir: str | Path = Path("fixtures/mfg/spc")
         encoding="utf-8",
     )
 
+    markdown_lines = ["| index | value |", "| --- | --- |"]
+    markdown_lines.extend(f"| {idx + 1} | {value:.4f} |" for idx, value in enumerate(series))
+    (art_dir / "charts.md").write_text("\n".join(markdown_lines), encoding="utf-8")
+
     flag_path = art_dir / "blocking.flag"
     if RULE_POINT_BEYOND_3SIG in findings:
         flag_path.write_text("SPC_BLOCK", encoding="utf-8")
     elif flag_path.exists():
         flag_path.unlink()
 
-    return report
+    return findings
 
 
 def _write_charts_md(path: Path, series: List[float], mean: float) -> None:
@@ -117,6 +144,7 @@ def _write_charts_md(path: Path, series: List[float], mean: float) -> None:
 
 
 def cli_spc_analyze(argv: List[str] | None = None) -> Dict[str, object]:
+def cli_spc_analyze(argv: List[str] | None = None) -> List[str]:
     parser = argparse.ArgumentParser(prog="mfg:spc:analyze", description="Evaluate SPC rules")
     parser.add_argument("--op", required=True)
     parser.add_argument("--window", type=int, default=50)
