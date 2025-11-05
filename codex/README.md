@@ -78,9 +78,10 @@ extension points for future integrations.
 | 017 | The Energy Oath        | Energy stewardship with transparency and green defaults. |
 | 025 | The Time Accord        | Guard time with clear rhythms, estimates, and rest. |
 | 011 | The Ethical North Star | Ethical guardrails: consent, equity, no harm.   |
-=======
 | 046 | The Sustainability Charter | Ethical, diversified funding keeps Lucidia stable. |
->>>>>>> origin/codex/develop-codex-47-on-emotional-transparency
+=======
+| 029 | The Balance Law        | Dynamic equilibrium across speed, safety, creativity, and care. |
+>>>>>>> origin/codex/establish-codex-29-balance-law
 
 ## BlackRoad Pipeline
 

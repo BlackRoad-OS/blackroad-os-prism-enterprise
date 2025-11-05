@@ -5,6 +5,9 @@
 ## Summary
 
 Provide a short (1-2 line) summary of the change.
+## Balance Note
+- Impact across speed, safety, creativity, and care
+
 ## Checks
 - [ ] CI green
 - [ ] API /api/health returns 200
