@@ -7,6 +7,7 @@ import argparse
 import logging
 import subprocess
 <<<<<<< main
+<<<<<<< main
 from dataclasses import dataclass
 from subprocess import CalledProcessError
 <<<<<<< main
@@ -32,6 +33,8 @@ import subprocess
 from subprocess import CalledProcessError, CompletedProcess
 from subprocess import CalledProcessError
 =======
+=======
+>>>>>>> origin/codex/fix-comments-6430lc
 from typing import Dict, List
 >>>>>>> origin/codex/create-monorepo-structure-for-blackroad-foundation
 =======
@@ -216,6 +219,7 @@ class CleanupBot:
 
 <<<<<<< main
         Returns:
+<<<<<<< main
             True if the branch was deleted locally and remotely, False otherwise.
             ``True`` if the branch was deleted both locally and remotely,
             ``False`` otherwise.
@@ -243,10 +247,16 @@ class CleanupBot:
         if self.dry_run:
             print(f"Would delete branch '{branch}' locally and remotely")
             return True
+=======
+            ``True`` when both the local and remote deletions succeed.
+        """
+        success = True
+>>>>>>> origin/codex/fix-comments-6430lc
         try:
 <<<<<<< main
 <<<<<<< main
             self._run_git("branch", "-D", branch)
+<<<<<<< main
         except CalledProcessError:
             local_deleted = not self._local_branch_exists(branch)
             if not local_deleted:
@@ -275,6 +285,17 @@ class CleanupBot:
             return True
         except CalledProcessError:
             return False
+=======
+        except subprocess.CalledProcessError:
+            print(f"Failed to delete local branch '{branch}'")
+            success = False
+        try:
+            self._run_git("push", "origin", "--delete", branch)
+        except subprocess.CalledProcessError:
+            print(f"Failed to delete remote branch '{branch}'")
+            success = False
+        return success
+>>>>>>> origin/codex/fix-comments-6430lc
 
     def cleanup(self) -> dict[str, bool]:
         """Remove the configured branches locally and remotely.
@@ -292,6 +313,7 @@ class CleanupBot:
                 print(f"Would delete branch '{branch}' locally and remotely")
                 results[branch] = True
                 continue
+<<<<<<< main
             try:
                 subprocess.run(["git", "branch", "-D", branch], check=True)
             except CalledProcessError:
@@ -319,6 +341,8 @@ class CleanupBot:
                 )
             except CalledProcessError:
                 print(f"Failed to delete remote branch '{branch}'")
+=======
+>>>>>>> origin/codex/fix-comments-6430lc
             results[branch] = self.delete_branch(branch)
         return results
 
