@@ -21,6 +21,9 @@ const PORT = process.env.PORT || 4010;
 const MODEL_DEFAULT = 'qwen2:1.5b';
 const PERSONA_DEFAULT =
   'You are a kind, curious BlackRoad assistant. ALWAYS ask 1 short follow-up. Never claim remote powers. Be truthful and concise.';
+const MODEL_DEFAULT = process.env.MODEL_DEFAULT || 'qwen2:1.5b';
+const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
+const PERSONA_DEFAULT = 'You are a kind, curious BlackRoad assistant. ALWAYS ask 1 short follow-up. Never claim remote powers. Be truthful and concise.';
 
 let identityCache = { ts: 0, data: null };
 
@@ -59,7 +62,7 @@ function primaryIPv4() {
 
 async function detectModel() {
   try {
-    const r = await fetch('http://127.0.0.1:11434/api/tags');
+    const r = await fetch(`${OLLAMA_BASE_URL}/api/tags`);
     const j = await r.json();
     if (Array.isArray(j.models) && j.models.length > 0) return j.models[0].name;
   } catch (e) {}
@@ -152,7 +155,7 @@ app.post('/api/llm/chat', async (req, res) => {
   const system = getSystem(req.body || {});
   const prompt = buildPrompt((req.body && req.body.messages) || []);
   try {
-    const r = await fetch('http://127.0.0.1:11434/api/generate', {
+    const r = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: MODEL_DEFAULT, prompt, stream: false, system })
@@ -175,7 +178,7 @@ app.post('/api/llm/stream', async (req, res) => {
   const system = getSystem(req.body || {});
   const prompt = buildPrompt((req.body && req.body.messages) || []);
   try {
-    const r = await fetch('http://127.0.0.1:11434/api/generate', {
+    const r = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: MODEL_DEFAULT, prompt, stream: true, system })

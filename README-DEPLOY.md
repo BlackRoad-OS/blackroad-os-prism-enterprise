@@ -220,6 +220,39 @@ The secrets/variables called out in `environments/production.yml` must stay in
 sync with GitHub repository settings so these jobs can assume the correct AWS
 roles and reference the ALB listener or target groups. For step-by-step
 procedures, see [`docs/ops/rollback-forward.md`](docs/ops/rollback-forward.md).
+## Ollama bridge (Fly.io)
+
+The Ollama bridge now deploys via Fly.io using
+`.github/workflows/ollama-bridge-deploy.yml`. The workflow builds the container
+image from `srv/ollama-bridge/Dockerfile`, pushes it with the current commit SHA
+label, and performs a health probe against
+`https://blackroad-ollama-bridge.fly.dev/api/llm/health` before finishing.
+
+### Required configuration
+
+Add a Fly API token under repository secrets:
+
+- `FLY_API_TOKEN` — generated with `fly auth token`. Required to deploy via the
+  workflow.
+
+Provision runtime configuration directly in Fly secrets:
+
+- `OLLAMA_BASE_URL` — base URL for the upstream Ollama runtime (e.g.,
+  `https://ollama.internal:11434`).
+- Optional overrides like `MODEL_DEFAULT` can be supplied the same way.
+
+### Manual rollbacks
+
+If a release needs to be reverted, run the following locally with a valid Fly
+token:
+
+```bash
+flyctl releases --app blackroad-ollama-bridge        # inspect recent releases
+flyctl deploy --config deploy/fly/ollama-bridge/fly.toml --image <previous>
+```
+
+Alternatively, run the GitHub workflow manually and provide the `image_label`
+input matching a previous release image tag.
 
 ## Related documentation
 
