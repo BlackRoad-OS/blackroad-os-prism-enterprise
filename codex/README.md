@@ -15,6 +15,7 @@ integrations.
 | 003 | The Workflow Circle    | Work runs in visible capture → adjust loops.    |
 | 004 | The Autonomy Manifest  | Data autonomy through consent, export, and wipe. |
 | 022 | The Security Spine     | Security backbone with layered zero-trust defenses. |
+<<<<<<< main
 | 043 | The Equity Oath        | Fairness, access, and inclusion are systemic.   |
 | 044 | The Transparency of Process | Trust grows when workflows stay visible end-to-end. |
 workflows.  The new **BlackRoad pipeline** script provides a single entry
@@ -75,6 +76,8 @@ extension points for future integrations.
 | 016 | The Simplicity Mandate | Simplicity is safety; keep workflows lean.      |
 | 044 | The Translational Tier | Pipeline of prompts that convert ideas into testable assets. |
 | 017 | The Energy Oath        | Energy stewardship with transparency and green defaults. |
+=======
+>>>>>>> origin/codex/define-dialogue-doctrine-for-communication
 
 ## BlackRoad Pipeline
 
