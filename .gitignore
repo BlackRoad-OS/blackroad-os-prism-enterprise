@@ -29,3 +29,44 @@ config/dev_signing_key.txt
 # OS
 .DS_Store
 Thumbs.db
+
+# Artifacts
+artifacts/
+coverage/
+
+# Project-specific
+repos/
+runtime/
+__pycache__/
+codex/runtime/
+benchmarks/
+
+# Lucidia artifacts
+secrets/*
+datasets/
+models/
+checkpoints/
+outputs/
+rag/index/*.faiss
+rag/index/meta.json
+*.enc
+!secrets/README.md
+!secrets/*.env.example
+
+# Codex CI kit
+tests/_codex_autogen/
+.tmp/
+*.out.md
+
+# Allow random field datasets
+!lucidia/modules/random_fields/datasets/
+!lucidia/modules/random_fields/datasets/*.py
+lucidia/modules/random_fields/datasets/__pycache__/
+services/quantum_lab/*.db
+!opt/blackroad/tdb/.env
+
+# Rust build artifacts
+target/
+**/target/
+*.db
+*.sqlite

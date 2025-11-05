@@ -12,4 +12,9 @@ npm run lint
 npm test
 pip install fastapi pydantic pytest httpx >/dev/null 2>&1 || true
 pytest srv/lucidia-llm/test_app.py
+npm run format:check || true
+npm run lint || true
+npm test || true
+pip install fastapi pydantic pytest httpx >/dev/null 2>&1 || true
+pytest srv/lucidia-llm/test_app.py || true
 echo "Setup complete. Run 'npm start' to launch the API."

@@ -31,6 +31,10 @@
     "test": "npx jest",
     "format:check": "prettier package.json tests/api_health.test.js srv/lucidia-llm/test_app.py srv/blackroad-api/.prettierrc.json var/www/blackroad/.prettierrc.json .prettierrc.json RUNME.sh Makefile .github/workflows/ci.yml CLEANUP_PLAN.md CLEANUP_DECISIONS.md CLEANUP_RESULTS.md ROLLBACK.md CHANGELOG.md --check --ignore-unknown",
     "test": "node --test tests/api_health.test.js tests/backend-validation.test.js",
+    "lint": "eslint srv/blackroad-api/server_full.js tests/api_health.test.js",
+    "format": "prettier . --write",
+    "format:check": "prettier package.json srv/lucidia-llm/test_app.py srv/blackroad-api/.prettierrc.json var/www/blackroad/.prettierrc.json .prettierrc.json RUNME.sh Makefile .github/workflows/ci.yml CLEANUP_PLAN.md CLEANUP_DECISIONS.md CLEANUP_RESULTS.md ROLLBACK.md CHANGELOG.md --check --ignore-unknown",
+    "test": "jest tests/api_health.test.js",
     "typecheck": "echo 'no typecheck'",
     "health": "node scripts/health.js",
     "lint": "eslint . --ext .js,.jsx,.mjs,.cjs || true",
@@ -107,6 +111,12 @@
   "devDependencies": {
     "nodemon": "^3.0.2",
     "supertest": "^6.3.4",
+    "stripe": "^12.18.0",
+    "systeminformation": "^5.25.11",
+    "uuid": "^9.0.1",
+    "winston": "^3.14.2"
+  },
+  "devDependencies": {
     "cross-env": "^7.0.3",
     "eslint": "^9.12.0",
     "husky": "^9.0.10",

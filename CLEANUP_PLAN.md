@@ -41,3 +41,35 @@
 ## Deletions
 
 - Move tracked `logs/` directories to `_trash/` with restoration notes.
+### (a) Obvious Dead Files / Assets
+
+- `srv/blackroad-api/server.js` superseded by `server_full.js`.
+- Legacy configs in `srv/blackroad-api` (`.eslintrc.json`, `package.json`, `.env.example`).
+- Committed environment files at repo root (`.env*`).
+- Unreferenced scaffold `var/www/blackroad/blackroad-io-scaffold.html`.
+
+### (b) Duplicate or Outdated Configs
+
+- `eslint.config.cjs` duplicates `.eslintrc.cjs`.
+- Multiple environment samples in repo root (`.env.example`, `.env.local.example`, `.env.docker.example`).
+- Duplicate `package.json` inside `srv/blackroad-api/`.
+
+### (c) Unsafe Patterns
+
+- `server_full.js` lacks top-level `/health` route (only `/api/health`).
+- Default session secret and `root/Codex2025` credentials left in code.
+- `ALLOW_SHELL` flag permits shell execution when enabled.
+
+### (d) Missing Scripts/Tests
+
+- No Jest coverage for root `/health` or security headers.
+- Python LLM stub has no pytest.
+- `Makefile` lacks common `dev`, `start`, `format`, `lint`, and `test` targets.
+- No CI workflow to run format, lint, and tests.
+
+## Risk Notes
+
+- Tightening CORS or session settings could block valid clients if env vars mis‑set.
+- Removing env files or configs may disrupt developer workflows.
+- Moving frontend assets might break unseen references.
+- Adding middleware must not alter `/health` or `/api/health` semantics.

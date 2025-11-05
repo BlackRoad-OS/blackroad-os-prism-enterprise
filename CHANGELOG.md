@@ -43,6 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * scaffold regdesk compliance automation ([#1958](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1958)) ([8a6f57a](https://github.com/blackboxprogramming/blackroad-prism-console/commit/8a6f57a3b3d19cb615279b5ef64db9e490fe9143))
 * support additional fix comments aliases ([#1826](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1826)) ([1981ac5](https://github.com/blackboxprogramming/blackroad-prism-console/commit/1981ac538823830c2d633dcc5168212b115212c9))
 
+# Changelog
+
 ## [1.7.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.6.0...v1.7.0) (2025-09-29)
 
 
@@ -193,6 +195,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 2025-08-16
 
 - Cleanup: hardened API, added tests and CI tooling.
+
+- Cleanup: hardened API, added tests and CI tooling.
+- Add `scripts/blackroad_sync.py` CI/CD helper script.
+- Harden API security middleware and add health tests.
 
 - Cleanup: hardened API, added tests and CI tooling.
 - Add `scripts/blackroad_sync.py` CI/CD helper script.

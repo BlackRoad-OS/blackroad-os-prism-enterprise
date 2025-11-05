@@ -75,7 +75,7 @@ const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
 const LLM_URL = process.env.LLM_URL || 'http://127.0.0.1:8000/chat';
 const ALLOW_SHELL =
   String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
-const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
+<<const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
 const BILLING_DISABLE =
   String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
 const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || 'change-me';
@@ -91,7 +91,11 @@ const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
 const BILLING_DISABLE = String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
 const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
 const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
-const BILLING_DISABLE =
+>>>>>>>+main
+=====
+coconst WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
+>>>>>>>+origin/codex/cr
+nst BILLING_DISABLE =
   String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
 const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || 'change-me';
 const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || '';
@@ -100,7 +104,7 @@ const BRANCH_STAGING = process.env.BRANCH_STAGING || 'staging';
 const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
 const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
-const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim()) : [];
+<<const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim()) : [];
 const DEBUG_MODE =
   String(process.env.DEBUG_MODE || process.env.DEBUG_PROBES || 'false').toLowerCase() ===
   'true';
@@ -128,6 +132,9 @@ const PRISM_PLACEHOLDER = {
     churnRate: 1.8,
   },
 };
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
 const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS
   ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim())
   : [];
@@ -404,10 +411,13 @@ app.use(async (req, res, next) => {
 app.use(compression());
 app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: false, limit: '1mb' }));
+<<app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 app.use(morgan('tiny'));
 attachDebugProbes({ app, logger, enabled: DEBUG_MODE });
 app.use(compression());
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
 app.use(
   cookieSession({
     name: 'brsess',
@@ -428,7 +438,7 @@ app.use(maintenanceGuard({ logger }));
 app.get('/', (_, res) => {
   res.sendFile(path.join(WEB_ROOT, 'index.html'));
 });
-app.head('/health/live', (_req, res) => {
+<<app.head('/health/live', (_req, res) => {
   res.setHeader('Cache-Control', 'max-age=10');
   res.status(200).end();
 });
@@ -442,11 +452,17 @@ app.head('/health/ready', (_req, res) => {
 app.get('/health/ready', (_req, res) => {
   res.json({ status: 'ok', ts: new Date().toISOString() });
 });
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
 app.head('/health', (_req, res) => res.status(200).end());
 app.get('/health', (_req, res) => {
   res.json({ ok: true, version: '1.0.0', uptime: process.uptime() });
 });
-
+<<
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
 
 // --- Health
 app.head('/api/health', (_, res) => res.status(200).end());
@@ -461,7 +477,10 @@ app.get('/api/health', async (_req, res) => {
     version: '1.0.0',
     uptime: process.uptime(),
     services: { api: true, llm },
-    services: { api: true, llm }
+<<    services: { api: true, llm }
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
   });
 });
 
@@ -528,8 +547,11 @@ app.post(
       (username === 'root' && password === 'Codex2025') ||
       process.env.BYPASS_LOGIN === 'true'
     ) {
-    if ((username === 'root' && password === 'Codex2025') || process.env.BYPASS_LOGIN === 'true') {
+<<    if ((username === 'root' && password === 'Codex2025') || process.env.BYPASS_LOGIN === 'true') {
       req.session.user = { username, role: 'dev', plan: 'free' };
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
       req.session.user = { username, role: 'dev' };
       return res.json({ ok: true, user: req.session.user });
     }
@@ -621,7 +643,10 @@ for (const t of TABLES) {
       updated_at TEXT NOT NULL DEFAULT (datetime('now')),
       meta JSON
     )
-  `
+<<  `
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
   `,
   ).run();
 }
@@ -629,7 +654,10 @@ for (const t of TABLES) {
 // Subscription tables
 db.prepare(
   `
-db.prepare(`
+<<db.prepare(`
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
   CREATE TABLE IF NOT EXISTS subscribers (
     id TEXT PRIMARY KEY,
     email TEXT UNIQUE,
@@ -638,12 +666,15 @@ db.prepare(`
     created_at TEXT,
     source TEXT
   )
-`
+<<`
 ).run();
 db.prepare(
   `
 `).run();
 db.prepare(`
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
 `,
 ).run();
 db.prepare(
@@ -659,12 +690,15 @@ db.prepare(
     created_at TEXT,
     updated_at TEXT
   )
-`
+<<`
 ).run();
 db.prepare(
   `
 `).run();
 db.prepare(`
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
 `,
 ).run();
 db.prepare(
@@ -679,12 +713,15 @@ db.prepare(
     raw JSON,
     created_at TEXT
   )
-`
+<<`
 ).run();
 db.prepare(
   `
 `).run();
 db.prepare(`
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
 `,
 ).run();
 db.prepare(
@@ -698,13 +735,16 @@ db.prepare(
     detail TEXT,
     created_at TEXT
   )
-`
+<<`
 ).run();
 
 // Billing tables (minimal subset)
 db.prepare(
   `
 `).run();
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
 `,
 ).run();
 
@@ -719,9 +759,12 @@ db.prepare(
     features TEXT NOT NULL,
     is_active INTEGER NOT NULL DEFAULT 1
   )
-`
+<<`
 ).run();
 `).run();
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
 `,
 ).run();
 
@@ -757,7 +800,7 @@ if (planCount === 0) {
       yearly: 0,
       features: ['Custom pricing', 'Dedicated support'],
     },
-  ];
+<<  ];
   const stmt = db.prepare(
     'INSERT INTO plans (id, name, monthly_price_cents, yearly_price_cents, features, is_active) VALUES (?, ?, ?, ?, ?, 1)'
   );
@@ -765,6 +808,9 @@ if (planCount === 0) {
     { id: 'builder', name: 'Builder', monthly: 1500, yearly: 15000, features: ['Builder tools', 'Email support'] },
     { id: 'pro', name: 'Pro', monthly: 4000, yearly: 40000, features: ['All builder features', 'Priority support'] },
     { id: 'enterprise', name: 'Enterprise', monthly: 0, yearly: 0, features: ['Custom pricing', 'Dedicated support'] },
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
   ];
   const stmt = db.prepare(
     'INSERT INTO plans (id, name, monthly_price_cents, yearly_price_cents, features, is_active) VALUES (?, ?, ?, ?, ?, 1)',
@@ -825,14 +871,20 @@ for (const row of quantumSeed) {
 function listRows(t) {
   return db
     .prepare(
-      `SELECT id, name, updated_at, meta FROM ${t} ORDER BY datetime(updated_at) DESC`
+<<      `SELECT id, name, updated_at, meta FROM ${t} ORDER BY datetime(updated_at) DESC`
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
       `SELECT id, name, updated_at, meta FROM ${t} ORDER BY datetime(updated_at) DESC`,
     )
     .all();
 }
 function createRow(t, name, meta = null) {
   const stmt = db.prepare(
-    `INSERT INTO ${t} (name, updated_at, meta) VALUES (?, datetime('now'), ?)`
+<<    `INSERT INTO ${t} (name, updated_at, meta) VALUES (?, datetime('now'), ?)`
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
     `INSERT INTO ${t} (name, updated_at, meta) VALUES (?, datetime('now'), ?)`,
   );
   const info = stmt.run(name, meta ? JSON.stringify(meta) : null);
@@ -840,7 +892,10 @@ function createRow(t, name, meta = null) {
 }
 function updateRow(t, id, name, meta = null) {
   const stmt = db.prepare(
-    `UPDATE ${t} SET name = COALESCE(?, name), meta = COALESCE(?, meta), updated_at = datetime('now') WHERE id = ?`
+<<    `UPDATE ${t} SET name = COALESCE(?, name), meta = COALESCE(?, meta), updated_at = datetime('now') WHERE id = ?`
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
     `UPDATE ${t} SET name = COALESCE(?, name), meta = COALESCE(?, meta), updated_at = datetime('now') WHERE id = ?`,
   );
   stmt.run(name ?? null, meta ? JSON.stringify(meta) : null, id);
@@ -894,7 +949,7 @@ app.delete('/api/:kind/:id', requireAuth, (req, res) => {
   } catch (e) {
     res.status(500).json({ error: 'db_delete_failed', detail: String(e) });
   }
-});
+<<<<});
 
 // --- Subscribe & connectors
 const VALID_PLANS = ['free', 'builder', 'guardian'];
@@ -1060,6 +1115,9 @@ app.get('/api/subscribe/plans', requireAuth, (_req, res) => {
   } catch (e) {
     res.status(500).json({ error: 'db_plans_failed', detail: String(e) });
   }
+>>>>>>>+main
+===
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
 });
 
 // --- Subscribe & connectors
@@ -1429,11 +1487,14 @@ io.on('connection', (socket) => {
 setInterval(() => {
   const total = os.totalmem(),
     free = os.freemem();
-const metricsInterval = setInterval(() => {
+<<<<const metricsInterval = setInterval(() => {
   const total = os.totalmem(), free = os.freemem();
 const metricsInterval = setInterval(() => {
   const total = os.totalmem(),
     free = os.freemem();
+>>>>>>>+main
+===
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
   const payload = {
     t: Date.now(),
     load: os.loadavg()[0],
@@ -1463,7 +1524,7 @@ server.on('close', () => {
 
 // --- Start
 server.listen(PORT, () => {
-  logger.info({
+<<<<  logger.info({
     event: 'server_start',
     port: PORT,
     db: DB_PATH,
@@ -1471,6 +1532,9 @@ server.listen(PORT, () => {
     shell: ALLOW_SHELL,
     debug: DEBUG_MODE,
   });
+>>>>>>>+main
+===
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
   console.log(
     `[blackroad-api] listening on ${PORT} (db: ${DB_PATH}, llm: ${LLM_URL}, shell: ${ALLOW_SHELL})`,
   );
