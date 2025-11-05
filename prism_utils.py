@@ -19,6 +19,16 @@ def parse_numeric_prefix(text: str) -> float:
     as ``".5 kg"`` or ``"-.25"``, are also recognized. If no valid number is
     found, ``1.0`` is returned. Inputs such as ``"-3.5 apples"`` or ``"2, rest"``
     are recognized; malformed values default to ``1.0``.
+# Matches a decimal number with optional leading whitespace, sign, and fractional part.
+_NUMERIC_PREFIX = re.compile(r"^\s*([+-]?\d+(?:\.\d+)?)")
+
+
+def parse_numeric_prefix(text: str) -> float:
+    """Return the leading decimal value in ``text``.
+
+    Allows leading whitespace, an optional sign, and fractional part while
+    ignoring trailing characters. Returns ``1.0`` when no valid number is
+    found.
     """
     match = _NUMERIC_PREFIX.match(text)
     if match:
