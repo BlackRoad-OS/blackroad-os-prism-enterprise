@@ -21,6 +21,12 @@ reports/
 
 # Logs and local data
 *.log
+# Exclude Node.js dependencies everywhere
+**/node_modules/
+dist/
+.cache/
+# Ignore environment files for the health sidecar service
+services/health-sidecar/.env
 
 # Secrets
 secrets/
@@ -33,6 +39,10 @@ Thumbs.db
 # Artifacts
 artifacts/
 coverage/
+tests/_codex_autogen/
+.tmp/
+*.out.md
+services/quantum_lab/*.db
 
 # Project-specific
 repos/
@@ -63,10 +73,14 @@ tests/_codex_autogen/
 !lucidia/modules/random_fields/datasets/*.py
 lucidia/modules/random_fields/datasets/__pycache__/
 services/quantum_lab/*.db
+!lucidia/modules/random_fields/datasets/
+!lucidia/modules/random_fields/datasets/*.py
+lucidia/modules/random_fields/datasets/__pycache__/
+
+# Environment
 !opt/blackroad/tdb/.env
 
 # Rust build artifacts
-target/
 **/target/
 *.db
 *.sqlite
