@@ -411,7 +411,7 @@ app.use(async (req, res, next) => {
 app.use(compression());
 app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 app.use(express.json({ limit: '1mb' }));
-<<<<app.use(express.urlencoded({ extended: false, limit: '1mb' }));
+<<<<<<app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 app.use(morgan('tiny'));
 attachDebugProbes({ app, logger, enabled: DEBUG_MODE });
 app.use(compression());
@@ -421,6 +421,9 @@ app.use(compression());
 >>>>>>>+main
 =====
 >>>>>>> origin/codex/create-cleanup-plan-and-decisions-ffrkxr
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-g3t14t
 app.use(
   cookieSession({
     name: 'brsess',
@@ -441,7 +444,7 @@ app.use(maintenanceGuard({ logger }));
 app.get('/', (_, res) => {
   res.sendFile(path.join(WEB_ROOT, 'index.html'));
 });
-<<<<app.head('/health/live', (_req, res) => {
+<<<<<<app.head('/health/live', (_req, res) => {
   res.setHeader('Cache-Control', 'max-age=10');
   res.status(200).end();
 });
@@ -461,18 +464,25 @@ app.get('/health/ready', (_req, res) => {
 >>>>>>>+main
 =====
 >>>>>>> origin/codex/create-cleanup-plan-and-decisions-ffrkxr
+>>>>>>>+main
+=====
+>>>>>>> origin/codex/create-cleanup-plan-and-decisions-g3t14t
 app.head('/health', (_req, res) => res.status(200).end());
 app.get('/health', (_req, res) => {
   res.json({ ok: true, version: '1.0.0', uptime: process.uptime() });
 });
-<<<<
+<<<<<<
 >>>>>>>+main
 =====
 >>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
 >>>>>>>+main
 =====
+>>>>>>>+main
+=====
 
 >
+>>>>>>>+origin/codex/cr
+
 >>>>>>>+origin/codex/cr
 / --- Health
 app.head('/api/health', (_, res) => res.status(200).end());
