@@ -1,4 +1,4 @@
-"""Statistical process control helpers for the unit tests."""
+"""Statistical process control helpers used in the PLM/MFG tests."""
 
 from __future__ import annotations
 
@@ -13,6 +13,8 @@ ART_DIR: Path = Path("artifacts/mfg/spc")
 RULE_POINT_BEYOND_3SIG = "SPC_POINT_BEYOND_3SIG"
 RULE_TREND_7 = "SPC_TREND_7"
 RULE_RUN_8_ONE_SIDE = "SPC_RUN_8_ONE_SIDE"
+
+_VALUE_FIELDS: Sequence[str] = ("value", "measure", "measurement")
 
 
 def _ensure_art_dir() -> Path:
@@ -33,19 +35,7 @@ def _stdev(values: List[float]) -> float:
     return math.sqrt(variance)
 
 
-_VALUE_FIELDS: Sequence[str] = ("value", "measure", "measurement")
-
-
 def _load_series(op: str, csv_dir: str | Path) -> List[float]:
-    """Load inspection measurements for an operation.
-
-    The fixtures evolved over time which means some datasets use the
-    ``*_sample.csv`` convention with a ``measure`` column while newer
-    fixtures follow the simpler ``<op>.csv`` pattern with a ``value``
-    column.  To remain compatible with both layouts we probe in order of
-    preference and normalise whichever numeric field is present.
-    """
-
     csv_dir = Path(csv_dir)
     candidates = [csv_dir / f"{op}.csv", csv_dir / f"{op}_sample.csv"]
     path = next((candidate for candidate in candidates if candidate.exists()), None)
@@ -64,13 +54,19 @@ def _load_series(op: str, csv_dir: str | Path) -> List[float]:
                     value = float(str(raw).strip())
                 except ValueError:
                     continue
-                else:
-                    series.append(value)
-                    break
+                series.append(value)
+                break
     return series
 
 
-def analyze(op: str, window: int, csv_dir: str | Path = Path("fixtures/mfg/spc")) -> List[str]:
+def _write_charts_md(path: Path, series: List[float], mean: float) -> None:
+    lines = ["# SPC Series", "", "| Sample | Value | Deviation |", "| --- | --- | --- |"]
+    for idx, value in enumerate(series, 1):
+        lines.append(f"| {idx} | {value:.4f} | {value - mean:.4f} |")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def analyze(op: str, window: int, csv_dir: str | Path = Path("fixtures/mfg/spc")) -> dict[str, object]:
     series = _load_series(op, csv_dir)
     if window > 0:
         series = series[-window:]
@@ -104,7 +100,7 @@ def analyze(op: str, window: int, csv_dir: str | Path = Path("fixtures/mfg/spc")
             findings.append(RULE_TREND_7)
 
     art_dir = _ensure_art_dir()
-    report = {
+    report: dict[str, object] = {
         "op": op,
         "mean": mu,
         "sigma": sigma,
@@ -113,19 +109,14 @@ def analyze(op: str, window: int, csv_dir: str | Path = Path("fixtures/mfg/spc")
         "unstable": bool(findings),
     }
     (art_dir / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
-    (art_dir / "findings.json").write_text(json.dumps(findings, indent=2), encoding="utf-8")
-
-    chart_lines = ["index,value"] + [f"{idx + 1},{value}" for idx, value in enumerate(series)]
-    (art_dir / "charts.csv").write_text("\n".join(chart_lines), encoding="utf-8")
-    _write_charts_md(art_dir / "charts.md", series, mu)
     (art_dir / "findings.json").write_text(
         json.dumps({"op": op, "findings": findings}, indent=2, sort_keys=True),
         encoding="utf-8",
     )
 
-    markdown_lines = ["| index | value |", "| --- | --- |"]
-    markdown_lines.extend(f"| {idx + 1} | {value:.4f} |" for idx, value in enumerate(series))
-    (art_dir / "charts.md").write_text("\n".join(markdown_lines), encoding="utf-8")
+    chart_lines = ["index,value"] + [f"{idx + 1},{value}" for idx, value in enumerate(series)]
+    (art_dir / "charts.csv").write_text("\n".join(chart_lines), encoding="utf-8")
+    _write_charts_md(art_dir / "charts.md", series, mu)
 
     flag_path = art_dir / "blocking.flag"
     if RULE_POINT_BEYOND_3SIG in findings:
@@ -133,18 +124,10 @@ def analyze(op: str, window: int, csv_dir: str | Path = Path("fixtures/mfg/spc")
     elif flag_path.exists():
         flag_path.unlink()
 
-    return findings
+    return report
 
 
-def _write_charts_md(path: Path, series: List[float], mean: float) -> None:
-    lines = ["# SPC Series", "", "| Sample | Value | Deviation |", "| --- | --- | --- |"]
-    for idx, value in enumerate(series, 1):
-        lines.append(f"| {idx} | {value:.4f} | {value - mean:.4f} |")
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-
-
-def cli_spc_analyze(argv: List[str] | None = None) -> Dict[str, object]:
-def cli_spc_analyze(argv: List[str] | None = None) -> List[str]:
+def cli_spc_analyze(argv: List[str] | None = None) -> dict[str, object]:
     parser = argparse.ArgumentParser(prog="mfg:spc:analyze", description="Evaluate SPC rules")
     parser.add_argument("--op", required=True)
     parser.add_argument("--window", type=int, default=50)
@@ -154,13 +137,14 @@ def cli_spc_analyze(argv: List[str] | None = None) -> List[str]:
 
 
 __all__ = [
+    "ART_DIR",
+    "RULE_POINT_BEYOND_3SIG",
+    "RULE_TREND_7",
+    "RULE_RUN_8_ONE_SIDE",
     "analyze",
     "cli_spc_analyze",
     "_mean",
     "_stdev",
     "_write_charts_md",
-    "ART_DIR",
-    "RULE_POINT_BEYOND_3SIG",
-    "RULE_TREND_7",
-    "RULE_RUN_8_ONE_SIDE",
 ]
+

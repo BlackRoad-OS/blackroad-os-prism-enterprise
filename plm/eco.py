@@ -1,19 +1,13 @@
-"""Minimal engineering change helpers used by the test-suite.
+"""Deterministic Engineering Change Control helpers for the PLM tests.
 
-The historical version of :mod:`plm.eco` in this repository contained
-conflicted merges which removed the helper functions relied upon by the
-``tests/test_eco.py`` regression tests.  The goal of this file is not to
-reinstate the entire production surface but to supply a deterministic,
-file-backed workflow that mirrors the behaviour exercised in the tests:
-
-* create a new change record on disk with :func:`new_change`
-* compute a simple cost impact between revisions with :func:`impact`
-* collect approvals while enforcing dual-approval for high-risk changes
-* block releases whenever Statistical Process Control (SPC) findings are
-  present on disk.
-
-Only the pieces that the tests interact with are implemented which keeps
-the module compact and removes a class of brittle merge conflicts.
+The historical repository snapshot for this module contained partially
+applied merges which left duplicated function bodies, missing helpers and
+name mismatches (``new_change`` vs ``create_change``).  The regression
+suite in ``tests/plm_mfg/test_eco.py`` exercises a small, file-backed ECO
+workflow: creating a change, inspecting impact information, enforcing
+dual approvals for high-risk changes, and blocking release whenever SPC
+findings are present.  This rewrite provides a compact, fully tested
+implementation focused on that surface area.
 """
 
 from __future__ import annotations
@@ -23,13 +17,14 @@ import json
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Iterable, List
-from typing import Dict, List
+from typing import Any, Dict, Iterable, List
 
 ART_DIR: Path = Path("artifacts/plm/changes")
 COUNTER_FILE: Path = ART_DIR / "_counter"
 PLM_CATALOG_DIR: Path = Path("artifacts/plm")
 ROUTING_DIR: Path = Path("artifacts/mfg/routing")
+SPC_FINDINGS_PATH: Path = Path("artifacts/mfg/spc/findings.json")
+SPC_BLOCK_FLAG: Path = Path("artifacts/mfg/spc/blocking.flag")
 
 
 @dataclass
@@ -75,58 +70,19 @@ def _load(change_id: str) -> Change:
     return Change(**data)
 
 
-def _write(change: Change) -> None:
-    payload = json.dumps(asdict(change), indent=2, sort_keys=True)
-    _path(change.id).write_text(payload, encoding="utf-8")
-
-
-def _unique(seq: Iterable[str]) -> List[str]:
+def _unique(values: Iterable[str]) -> List[str]:
     seen: set[str] = set()
     ordered: List[str] = []
-    for value in seq:
+    for value in values:
         if value not in seen:
             seen.add(value)
             ordered.append(value)
     return ordered
 
 
-def _get_item_cost(item_id: str, rev: str) -> float:
-    """Return the unit cost for ``item_id`` at revision ``rev``.
-
-    Item data is loaded through :mod:`plm.bom` fixtures during the tests,
-    therefore we reuse the cached ``_ITEMS`` collection instead of hitting
-    disk again.  A ``ValueError`` is raised when the revision is unknown so
-    callers can surface a helpful failure mode.
-    """
-
-    from plm import bom  # Imported lazily to avoid circular imports.
-
-    for item in reversed(list(getattr(bom, "_ITEMS", []))):
-        # ``_ITEMS`` contains ``Item`` dataclasses.  Accessing via ``getattr``
-        # keeps the helper resilient in the unlikely event of dict rows.
-        if getattr(item, "id", None) == item_id and getattr(item, "rev", None) == rev:
-            try:
-                return float(getattr(item, "cost"))
-            except (TypeError, ValueError):
-                break
-    raise ValueError(f"Unknown item/revision combination: {item_id} rev {rev}")
-
-
-def new_change(
-    item_id: str,
-    from_rev: str,
-    to_rev: str,
-    reason: str,
-    *,
-    risk: str = "medium",
-    change_type: str = "ECO",
-) -> Change:
-    """Create and persist a new engineering change order.
-
-    The fixture-driven tests only require a subset of metadata so we
-    initialise the JSON payload with that core information and return the
-    dataclass for convenience.
-    """
+def _write(change: Change) -> None:
+    payload = json.dumps(asdict(change), indent=2, sort_keys=True)
+    _path(change.id).write_text(payload, encoding="utf-8")
     _write_markdown(change)
 
 
@@ -135,6 +91,7 @@ def _markdown_path(change_id: str) -> Path:
 
 
 def _write_markdown(change: Change) -> None:
+    timestamp = datetime.utcnow().isoformat(timespec="seconds") + "Z"
     lines = [
         f"# Engineering Change {change.id}",
         "",
@@ -146,102 +103,20 @@ def _write_markdown(change: Change) -> None:
         "",
         f"Reason: {change.reason}",
         "",
-        f"Updated: {datetime.utcnow().isoformat(timespec='seconds')}Z",
+        f"Updated: {timestamp}",
     ]
     _markdown_path(change.id).write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def _catalog_path(name: str) -> Path:
-    return PLM_CATALOG_DIR / name
-
-
-def _load_catalog(name: str) -> List[Dict[str, object]]:
-    path = _catalog_path(name)
-    if not path.exists():
-        return []
-    with path.open(encoding="utf-8") as handle:
-        data = json.load(handle)
-    if isinstance(data, list):
-        return data
-    # support legacy dict payloads
-    return list(data.values())
-
-
-def _items_index() -> Dict[str, Dict[str, object]]:
-    index: Dict[str, Dict[str, object]] = {}
-    for row in _load_catalog("items.json"):
-        item_id = str(row.get("id", "")).strip()
-        if not item_id:
-            continue
-        index.setdefault(item_id, {})[str(row.get("rev", "A"))] = row
-    return index
-
-
-def _boms_index() -> Dict[tuple[str, str], Dict[str, object]]:
-    index: Dict[tuple[str, str], Dict[str, object]] = {}
-    for row in _load_catalog("boms.json"):
-        item_id = str(row.get("item_id", "")).strip()
-        rev = str(row.get("rev", "A")).strip() or "A"
-        if not item_id:
-            continue
-        index[(item_id, rev)] = row
-    return index
-
-
-def _routing_index() -> Dict[str, Dict[str, object]]:
-    try:
-        from mfg import routing as routing_mod  # type: ignore
-
-        if getattr(routing_mod, "ROUT_DB", {}):
-            return routing_mod.ROUT_DB
-    except Exception:  # pragma: no cover - routing module optional during tests
-        pass
-
-    path = ROUTING_DIR / "routings.json"
-    if not path.exists():
-        return {}
-    with path.open(encoding="utf-8") as handle:
-        data = json.load(handle)
-    if isinstance(data, dict):
-        return data
-    index: Dict[str, Dict[str, object]] = {}
-    if isinstance(data, list):
-        for entry in data:
-            if not isinstance(entry, dict):
-                continue
-            key = f"{entry.get('item')}" + "_" + f"{entry.get('rev')}"
-            index[key] = entry
-    return index
-
-
-def _bom_cost(bom_row: Dict[str, object], item_costs: Dict[str, float]) -> float:
-    total = 0.0
-    for line in bom_row.get("lines", []) or []:
-        if not isinstance(line, dict):
-            continue
-        component = str(line.get("component_id", ""))
-        qty = float(line.get("qty", 0) or 0.0)
-        scrap = float(line.get("scrap_pct", 0) or 0.0)
-        total += qty * (1 + scrap / 100.0) * item_costs.get(component, 0.0)
-    return total
-
-
-def _supplier_risk(components: List[str], items: Dict[str, Dict[str, object]]) -> str:
-    for component in components:
-        options = items.get(component, {})
-        if not options:
-            continue
-        latest = options.get(sorted(options)[-1])
-        suppliers = (latest or {}).get("suppliers", []) if latest else []
-        if isinstance(suppliers, list) and len(suppliers) < 2:
-            return "single_source"
-    return "ok"
-
-
-def _impact_path(change_id: str) -> Path:
-    return _ensure_art_dir() / f"{change_id}_impact.json"
-
-
+def create_change(
+    item_id: str,
+    from_rev: str,
+    to_rev: str,
+    reason: str,
+    *,
+    risk: str = "medium",
+    change_type: str = "ECO",
+) -> Change:
     change = Change(
         id=_next_id(),
         item_id=item_id,
@@ -257,52 +132,132 @@ def _impact_path(change_id: str) -> Path:
     return change
 
 
-def impact(change_id: str) -> float:
-    """Return the cost delta between the change's revisions."""
-
-    change = _load(change_id)
-    to_cost = _get_item_cost(change.item_id, change.to_rev)
-    from_cost = _get_item_cost(change.item_id, change.from_rev)
-    delta = round(to_cost - from_cost, 4)
-    return delta
-new_change = create_change
+def new_change(*args, **kwargs) -> Change:  # pragma: no cover - compatibility shim
+    return create_change(*args, **kwargs)
 
 
 def approve(change_id: str, user: str) -> Change:
     change = _load(change_id)
     change.approvals = _unique([*change.approvals, user])
-    if change.risk != "high" or len(change.approvals) >= 2:
+    if change.risk.lower() != "high" or len(change.approvals) >= 2:
         change.status = "approved"
     _write(change)
     return change
 
 
-def _spc_findings_path() -> Path:
-    return Path("artifacts/mfg/spc/findings.json")
+def _catalog_path(name: str) -> Path:
+    return PLM_CATALOG_DIR / name
 
 
-def impact(change_id: str) -> Dict[str, object]:
+def _load_catalog(name: str) -> List[Dict[str, Any]]:
+    path = _catalog_path(name)
+    if not path.exists():
+        return []
+    with path.open(encoding="utf-8") as handle:
+        data = json.load(handle)
+    if isinstance(data, list):
+        return data
+    if isinstance(data, dict):
+        return list(data.values())
+    return []
+
+
+def _items_index() -> Dict[str, Dict[str, Dict[str, Any]]]:
+    index: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    for row in _load_catalog("items.json"):
+        item_id = str(row.get("id", "")).strip()
+        rev = str(row.get("rev", "A")).strip() or "A"
+        if not item_id:
+            continue
+        index.setdefault(item_id, {})[rev] = row
+    return index
+
+
+def _boms_index() -> Dict[tuple[str, str], Dict[str, Any]]:
+    index: Dict[tuple[str, str], Dict[str, Any]] = {}
+    for row in _load_catalog("boms.json"):
+        item_id = str(row.get("item_id", "")).strip()
+        rev = str(row.get("rev", "A")).strip() or "A"
+        if item_id:
+            index[(item_id, rev)] = row
+    return index
+
+
+def _routing_index() -> Dict[str, Dict[str, Any]]:
+    path = ROUTING_DIR / "routings.json"
+    if not path.exists():
+        return {}
+    with path.open(encoding="utf-8") as handle:
+        data = json.load(handle)
+    if isinstance(data, dict):
+        return data
+    index: Dict[str, Dict[str, Any]] = {}
+    if isinstance(data, list):
+        for entry in data:
+            if isinstance(entry, dict):
+                key = f"{entry.get('item')}" + "_" + f"{entry.get('rev')}"
+                index[key] = entry
+    return index
+
+
+def _bom_cost(bom_row: Dict[str, Any], item_costs: Dict[str, float]) -> float:
+    total = 0.0
+    for line in bom_row.get("lines", []) or []:
+        if not isinstance(line, dict):
+            continue
+        component = str(line.get("component_id", ""))
+        qty = float(line.get("qty", 0) or 0.0)
+        scrap = float(line.get("scrap_pct", 0) or 0.0)
+        total += qty * (1 + scrap / 100.0) * item_costs.get(component, 0.0)
+    return total
+
+
+def _supplier_risk(components: Iterable[str], items: Dict[str, Dict[str, Any]]) -> str:
+    for component in components:
+        options = items.get(component, {})
+        if not options:
+            return "single_source"
+        latest_rev = sorted(options)[-1]
+        suppliers = options.get(latest_rev, {}).get("suppliers", [])
+        if not isinstance(suppliers, list):
+            return "single_source"
+        supplier_count = len([str(s).strip() for s in suppliers if str(s).strip()])
+        if supplier_count < 2:
+            return "single_source"
+    return "ok"
+
+
+def _impact_path(change_id: str) -> Path:
+    return _ensure_art_dir() / f"{change_id}_impact.json"
+
+
+def impact(change_id: str) -> Dict[str, Any]:
     change = _load(change_id)
 
-    items = _items_index()
-    item_costs = {
-        item_id: float((options.get(sorted(options)[-1]) or {}).get("cost", 0) or 0.0)
-        for item_id, options in items.items()
-        if options
-    }
+    items_index = _items_index()
+    item_costs: Dict[str, float] = {}
+    for item_id, revs in items_index.items():
+        if not revs:
+            continue
+        latest_rev = sorted(revs)[-1]
+        row = revs.get(latest_rev, {})
+        try:
+            item_costs[item_id] = float(row.get("cost", 0) or 0.0)
+        except (TypeError, ValueError):
+            item_costs[item_id] = 0.0
 
     boms = _boms_index()
     from_bom = boms.get((change.item_id, change.from_rev)) or {"lines": []}
     to_bom = boms.get((change.item_id, change.to_rev)) or {"lines": []}
 
-    def _components(bom_row: Dict[str, object]) -> List[str]:
-        comps: List[str] = []
+    def _components(bom_row: Dict[str, Any]) -> List[str]:
+        components: List[str] = []
         for line in bom_row.get("lines", []) or []:
             if isinstance(line, dict):
-                comp = str(line.get("component_id", ""))
-                if comp:
-                    comps.append(comp)
-        return comps
+                component = str(line.get("component_id", ""))
+                if component:
+                    components.append(component)
+        return components
 
     from_components = set(_components(from_bom))
     to_components = set(_components(to_bom))
@@ -311,7 +266,7 @@ def impact(change_id: str) -> Dict[str, object]:
 
     cost_from = _bom_cost(from_bom, item_costs)
     cost_to = _bom_cost(to_bom, item_costs)
-    cost_delta = cost_to - cost_from
+    cost_delta = round(cost_to - cost_from, 4)
 
     routing_key = f"{change.item_id}_{change.to_rev}"
     routing = _routing_index().get(routing_key, {})
@@ -323,38 +278,52 @@ def impact(change_id: str) -> Dict[str, object]:
         }
     )
 
-    impact_payload = {
+    payload = {
         "id": change.id,
         "item_id": change.item_id,
         "from_rev": change.from_rev,
         "to_rev": change.to_rev,
-        "cost_delta": round(cost_delta, 4),
+        "cost_delta": cost_delta,
         "components_added": components_added,
         "components_removed": components_removed,
-        "supplier_risk": _supplier_risk(list(to_components), items),
+        "supplier_risk": _supplier_risk(to_components, items_index),
         "impacted_work_centers": work_centers,
     }
 
     _impact_path(change.id).write_text(
-        json.dumps(impact_payload, indent=2, sort_keys=True), encoding="utf-8"
+        json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8"
     )
-    return impact_payload
+    return payload
+
+
+def _spc_findings() -> List[str]:
+    findings: List[str] = []
+    if SPC_FINDINGS_PATH.exists():
+        try:
+            raw = json.loads(SPC_FINDINGS_PATH.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            raw = None
+        if isinstance(raw, dict):
+            data = raw.get("findings")
+            if isinstance(data, list):
+                findings = [str(entry) for entry in data if entry]
+        elif isinstance(raw, list):
+            findings = [str(entry) for entry in raw if entry]
+    return findings
 
 
 def release(change_id: str) -> Change:
     change = _load(change_id)
 
-    if change.risk == "high" and len(change.approvals) < 2:
-        raise RuntimeError("Policy: dual approval required for high risk changes")
+    if change.risk.lower() == "high" and len(change.approvals) < 2:
+        raise SystemExit("Policy: dual approval required for high risk changes")
 
-    findings_path = _spc_findings_path()
-    if findings_path.exists():
-        try:
-            findings = json.loads(findings_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError:
-            findings = ["unparseable"]
-        if findings:
-            raise RuntimeError("DUTY_SPC_UNSTABLE: SPC findings detected")
+    if SPC_BLOCK_FLAG.exists():
+        raise SystemExit("DUTY_SPC_UNSTABLE: SPC blocking flag present")
+
+    findings = _spc_findings()
+    if findings:
+        raise SystemExit("DUTY_SPC_UNSTABLE: SPC findings detected")
 
     change.status = "released"
     _write(change)
@@ -367,11 +336,20 @@ def cli_eco_new(argv: List[str] | None = None) -> Change:
     parser.add_argument("--from", dest="from_rev", required=True)
     parser.add_argument("--to", dest="to_rev", required=True)
     parser.add_argument("--reason", required=True)
+    parser.add_argument("--risk", default="medium")
+    parser.add_argument("--type", dest="change_type", default="ECO")
     args = parser.parse_args(argv)
-    return new_change(args.item, args.from_rev, args.to_rev, args.reason)
+    return create_change(
+        args.item,
+        args.from_rev,
+        args.to_rev,
+        args.reason,
+        risk=args.risk,
+        change_type=args.change_type,
+    )
 
 
-def cli_eco_impact(argv: List[str] | None = None) -> Dict[str, object]:
+def cli_eco_impact(argv: List[str] | None = None) -> Dict[str, Any]:
     parser = argparse.ArgumentParser(prog="plm:eco:impact", description="Summarise ECO impact")
     parser.add_argument("--id", required=True)
     args = parser.parse_args(argv)
@@ -387,19 +365,14 @@ def cli_eco_release(argv: List[str] | None = None) -> Change:
 
 __all__ = [
     "Change",
-    "new_change",
-    "impact",
+    "ART_DIR",
     "create_change",
     "new_change",
     "approve",
-    "release",
     "impact",
+    "release",
     "cli_eco_new",
     "cli_eco_impact",
     "cli_eco_release",
-    "ART_DIR",
-    "_path",
 ]
 
-# Backwards compatibility: some callers still import ``create_change``.
-create_change = new_change
