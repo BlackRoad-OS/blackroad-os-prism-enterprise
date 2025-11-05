@@ -70,6 +70,7 @@ class TaskRepository:
             due_date=datetime.fromisoformat(due_value) if due_value else None,
             tags=tuple(payload.get("tags", [])),
             metadata=dict(payload.get("metadata", {})),
+            config=dict(payload.get("config", {})),
         )
 
     def list(self) -> Sequence[Task]:
@@ -87,6 +88,7 @@ class TaskRepository:
                     due_date=datetime.fromisoformat(due_value) if due_value else None,
                     tags=tuple(payload.get("tags", [])),
                     metadata=dict(payload.get("metadata", {})),
+                    config=dict(payload.get("config", {})),
                 )
             )
         return tasks
@@ -99,6 +101,7 @@ class RouteContext:
     policy_engine: PolicyEngine
     memory: MemoryLog
     lineage: LineageTracker
+    config: Mapping[str, object] = None
     approved_by: Sequence[str] | None = None
 
 
@@ -111,6 +114,9 @@ class Router:
 
     def route(self, task_id: str, bot_name: str, context: RouteContext) -> BotResponse:
         task = self.repository.get(task_id)
+        # Merge context config into task config if provided
+        if context.config:
+            task.config = dict(context.config)
         bot = self.registry.get(bot_name)
         context.policy_engine.enforce(bot_name, context.approved_by)
         response = bot.run(task)

@@ -22,14 +22,31 @@ class SopBot(BaseBot):
     def handle_task(self, task: Task) -> BotResponse:
         """Create a deterministic plan with mock metrics."""
 
-        allocations = [
-            {"sku": "WIDGET-001", "plant": "SFO", "qty": 450},
-            {"sku": "WIDGET-002", "plant": "DFW", "qty": 320},
-        ]
-        logistics = [
-            {"lane": "NA-EU", "carrier": "Acme Freight", "mode": "ocean"},
-            {"lane": "NA-APAC", "carrier": "Blue Skies", "mode": "air"},
-        ]
+        # Read S&OP configuration from task config
+        sop_config = task.config.get("supply", {}).get("sop", {})
+        inventory_targets = sop_config.get("inventory_targets", [])
+        logistics_partners = sop_config.get("logistics_partners", [])
+
+        # Generate allocations based on inventory targets
+        allocations = []
+        for target in inventory_targets:
+            sku = target.get("sku", "UNKNOWN")
+            # Use midpoint between min and max as target quantity
+            min_qty = target.get("min", 0)
+            max_qty = target.get("max", 0)
+            target_qty = (min_qty + max_qty) // 2
+            # Assign to a default plant for simplicity
+            allocations.append({"sku": sku, "plant": "SFO", "qty": target_qty})
+
+        # Generate logistics recommendations based on configured partners
+        logistics = []
+        for partner in logistics_partners:
+            carrier = partner.get("carrier", "UNKNOWN")
+            lanes = partner.get("lanes", [])
+            for lane in lanes:
+                # Use ocean mode for demo; real logic may vary
+                logistics.append({"lane": lane, "carrier": carrier, "mode": "ocean"})
+
         return BotResponse(
             task_id=task.id,
             summary="Generated S&OP allocation scenario",

@@ -28,6 +28,7 @@ class Task:
     due_date: Optional[datetime] = None
     tags: Sequence[str] = field(default_factory=tuple)
     metadata: MutableMapping[str, Any] = field(default_factory=dict)
+    config: Mapping[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the task to a serialisable dictionary."""
@@ -40,6 +41,7 @@ class Task:
             "created_at": self.created_at.isoformat(),
             "tags": list(self.tags),
             "metadata": dict(self.metadata),
+            "config": dict(self.config),
         }
         if self.due_date:
             payload["due_date"] = self.due_date.isoformat()

@@ -48,10 +48,28 @@ def _load_route_context(approved_by: Iterable[str] | None = None) -> RouteContex
     policy_engine = PolicyEngine.from_file(APPROVALS_PATH)
     memory = MemoryLog()
     lineage = LineageTracker(LINEAGE_LOG)
+    # Load configuration bundle
+    bundle = ConfigurationBundle.from_files(Path("config"))
+    config_dict = {
+        "finance": {
+            "treasury": {
+                "cash_floor": bundle.treasury.cash_floor,
+                "hedge_policies": bundle.treasury.hedge_policies,
+            }
+        },
+        "supply": {
+            "sop": {
+                "planning_horizon_weeks": bundle.sop.planning_horizon_weeks,
+                "inventory_targets": [t.model_dump() for t in bundle.sop.inventory_targets],
+                "logistics_partners": [p.model_dump() for p in bundle.sop.logistics_partners],
+            }
+        },
+    }
     return RouteContext(
         policy_engine=policy_engine,
         memory=memory,
         lineage=lineage,
+        config=config_dict,
         approved_by=list(approved_by or []),
     )
 

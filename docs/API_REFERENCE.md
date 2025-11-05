@@ -52,4 +52,4 @@ Validates configuration files against the Pydantic models.
 python -m cli.console config:validate
 ```
 
-See `python -m cli.console --help` for the complete command tree.
+See `python -m cli.console --help` for the complete command tree. The examples above represent commonly used commands.

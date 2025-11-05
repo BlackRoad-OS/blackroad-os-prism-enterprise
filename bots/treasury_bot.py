@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timedelta
 
 from orchestrator import BaseBot, BotMetadata
@@ -24,17 +25,31 @@ class TreasuryBot(BaseBot):
     def handle_task(self, task: Task) -> BotResponse:
         """Generate a deterministic cash plan based on the task goal."""
 
-        horizon_weeks = 13 if "13" in task.goal else 8
-        base_amount = 2_500_000
+        # Extract horizon from task goal using regex, or use config default
+        horizon_match = re.search(r'(\d+)[- ]week', task.goal, re.IGNORECASE)
+        if horizon_match:
+            horizon_weeks = int(horizon_match.group(1))
+        else:
+            # Default to 8 weeks if not specified in goal
+            horizon_weeks = 8
+
+        # Read treasury config
+        treasury_config = task.config.get("finance", {}).get("treasury", {})
+        base_amount = treasury_config.get("cash_floor", 2_500_000)
+
         forecast = [base_amount + index * 75_000 for index in range(horizon_weeks)]
-        hedges = [
-            {
+
+        # Generate hedges based on config policies
+        hedge_policies = treasury_config.get("hedge_policies", [])
+        hedges = []
+        for policy in hedge_policies[:1]:  # Use first policy for demo
+            hedges.append({
                 "instrument": "forward",
-                "currency": "EUR",
-                "notional": 500_000,
+                "currency": policy.get("currency", "EUR"),
+                "notional": policy.get("max_notional", 500_000),
                 "maturity": (datetime.utcnow() + timedelta(days=90)).date().isoformat(),
-            }
-        ]
+            })
+
         summary = f"Generated {horizon_weeks}-week cash outlook"
         return BotResponse(
             task_id=task.id,
