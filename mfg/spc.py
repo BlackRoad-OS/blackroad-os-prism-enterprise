@@ -94,6 +94,11 @@ def analyze(op: str, window: int, csv_dir: str | Path = Path("fixtures/mfg/spc")
 
     chart_lines = ["index,value"] + [f"{idx + 1},{value}" for idx, value in enumerate(series)]
     (art_dir / "charts.csv").write_text("\n".join(chart_lines), encoding="utf-8")
+    _write_charts_md(art_dir / "charts.md", series, mu)
+    (art_dir / "findings.json").write_text(
+        json.dumps({"op": op, "findings": findings}, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
 
     flag_path = art_dir / "blocking.flag"
     if RULE_POINT_BEYOND_3SIG in findings:
@@ -102,6 +107,13 @@ def analyze(op: str, window: int, csv_dir: str | Path = Path("fixtures/mfg/spc")
         flag_path.unlink()
 
     return report
+
+
+def _write_charts_md(path: Path, series: List[float], mean: float) -> None:
+    lines = ["# SPC Series", "", "| Sample | Value | Deviation |", "| --- | --- | --- |"]
+    for idx, value in enumerate(series, 1):
+        lines.append(f"| {idx} | {value:.4f} | {value - mean:.4f} |")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def cli_spc_analyze(argv: List[str] | None = None) -> Dict[str, object]:
@@ -118,6 +130,7 @@ __all__ = [
     "cli_spc_analyze",
     "_mean",
     "_stdev",
+    "_write_charts_md",
     "ART_DIR",
     "RULE_POINT_BEYOND_3SIG",
     "RULE_TREND_7",
