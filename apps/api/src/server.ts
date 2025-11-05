@@ -624,9 +624,11 @@ app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
 app.use('/api/csat', csat);
+import invoices from './routes/invoices.js';
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
+app.use('/api/invoices', invoices);
 
 const port = process.env.PORT || 4000;
 
