@@ -49,6 +49,7 @@
     "lint": "eslint . --ext .js,.jsx,.mjs,.cjs",
     "format": "prettier -w .",
     "test:jest": "cross-env NODE_ENV=test jest --runInBand",
+    "test:jest": "jest --runInBand",
     "test-db": "node tests/test_db.js",
     "test-auth": "node tests/test_auth.js",
     "test-projects-tasks": "node tests/test_projects_tasks.js",
@@ -155,5 +156,6 @@
       "prettier -w"
     ],
     "*": "prettier -w --ignore-unknown"
+    "supertest": "^6.3.4"
   }
 }
