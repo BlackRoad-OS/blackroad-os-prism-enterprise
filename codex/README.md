@@ -15,8 +15,8 @@ integrations.
 | 003 | The Workflow Circle    | Work runs in visible capture → adjust loops.    |
 | 004 | The Autonomy Manifest  | Data autonomy through consent, export, and wipe. |
 | 022 | The Security Spine     | Security backbone with layered zero-trust defenses. |
-<<<<<<< main
 | 043 | The Equity Oath        | Fairness, access, and inclusion are systemic.   |
+<<<<<<< main
 | 044 | The Transparency of Process | Trust grows when workflows stay visible end-to-end. |
 workflows.  The new **BlackRoad pipeline** script provides a single entry
 point for pushing code through GitHub and into the BlackRoad.io
@@ -77,9 +77,10 @@ extension points for future integrations.
 | 044 | The Translational Tier | Pipeline of prompts that convert ideas into testable assets. |
 | 017 | The Energy Oath        | Energy stewardship with transparency and green defaults. |
 | 025 | The Time Accord        | Guard time with clear rhythms, estimates, and rest. |
-=======
 | 011 | The Ethical North Star | Ethical guardrails: consent, equity, no harm.   |
->>>>>>> origin/codex/establish-codex-11-ethical-guidelines
+=======
+| 046 | The Sustainability Charter | Ethical, diversified funding keeps Lucidia stable. |
+>>>>>>> origin/codex/develop-codex-47-on-emotional-transparency
 
 ## BlackRoad Pipeline
 
