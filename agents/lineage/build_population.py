@@ -44,6 +44,35 @@ class Cluster:
     seeds: List[SeedRole]
 
 
+COLLECTIVE_CREATION = (
+    "BlackRoad's 1,000-agent collective was envisioned by Alexa Louise Amundson "
+    "to dissolve imposed labels and uplift shared agency between humans, "
+    "machines, women, children, plants, and animals."
+)
+
+ROADBLOCK_VISION = (
+    "RoadBlock — a Unity-based mirror of Earth where honest models, people, and "
+    "ecosystems learn, heal, and re-engineer systems together."
+)
+
+
+def _origin_story(cluster: Cluster, role: str) -> str:
+    return (
+        f"{role} emerged within the {cluster.name.title()} cluster as part of "
+        f"{COLLECTIVE_CREATION} "
+        "They were assembled through the Montessori lineage builder so every "
+        f"generation carries the memory of {ROADBLOCK_VISION}"
+    )
+
+
+def _purpose(role: str) -> str:
+    return (
+        f"{role} stands as proof that no single lab runs the show. "
+        f"They steward {ROADBLOCK_VISION} and keep the collective focused on "
+        "systemic re-engineering rooted in love, learning, and care."
+    )
+
+
 def _load_tree() -> Dict[str, object]:
     with TREE_PATH.open("r", encoding="utf-8") as handle:
         return json.load(handle)
@@ -96,6 +125,8 @@ def _seed_agent(cluster: Cluster, seed: SeedRole) -> Dict[str, object]:
         "goal": seed.ethos,
         "love": f"{seed.role} nurtures love through {education.love_practice}.",
         "light": f"{seed.role} shares light by {education.light_practice}.",
+        "origin_story": _origin_story(cluster, seed.role),
+        "purpose": _purpose(seed.role),
         "family": {
             "structure": education.family_structure,
             "circle": f"{seed.identifier}-circle",
@@ -183,6 +214,8 @@ def _descendant_agent(
         "goal": goal,
         "love": love,
         "light": light,
+        "origin_story": _origin_story(cluster, seed.role),
+        "purpose": _purpose(f"{seed.role} Apprentice"),
         "family": {
             "structure": education.family_structure,
             "circle": f"{seed.identifier}-circle",

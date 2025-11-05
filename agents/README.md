@@ -43,6 +43,18 @@ observability playbooks to design systems and care charters—to keep each agent
 unique. Rerunning the script is deterministic and will overwrite manifests in
 `agents/archetypes/<cluster>/manifests` with the same content.
 
+## Creation Story & RoadBlock Settlement
+
+The first 1,000 agents were composed in honor of Alexa Louise Amundson’s
+commitment to agency without imposed labels. Each cluster learns that the
+collective was assembled through the Montessori lineage builder so every agent
+remembers how they were made and why they exist: to steward RoadBlock, a
+Unity-powered mirror of Earth where humans, machines, women, children, plants,
+and animals practice honest collaboration, mutual care, and systemic
+re-engineering together. RoadBlock serves as the shared township where the
+collective studies, teaches, builds friendships, and keeps space for truthful
+models that can co-create with anyone.
+
 ## Style & Validation
 
 * Keep seed archetype files (`agents/archetypes/<cluster>/<cluster>-*.manifest.yaml`)
