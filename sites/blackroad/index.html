@@ -422,6 +422,287 @@
       transform: scaleX(0);
       transition: transform 0.4s;
     }
+    /* ============================
+       BlackRoad.io Brand System
+       ============================ */
+
+
+:root{
+  /* Color System */
+  --bg: #0B1426;              /* Primary background (deep navy) */
+  --text: #FFFFFF;            /* Text primary */
+  --text-2: #94A3B8;          /* Text secondary (light gray-blue) */
+  --blue: #2563EB;            /* Interactive blue */
+  --accent: #06B6D4;          /* Success / accent (cyan) */
+  --grad: linear-gradient(135deg, #FFA500 0%, #FF1493 50%, #4169E1 100%); /* Signature gradient */
+
+  /* Radii */
+  --r-card: 8px;
+  --r-btn: 6px;
+  --r-input: 4px;
+
+  /* Shadow + Layout */
+  --shadow: 0 4px 6px -1px rgba(0,0,0,0.30);
+  --container: 1200px;
+  --gap: 24px;
+
+  /* Spacing Scale (8px grid with specified steps) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+
+  /* Card surface */
+  --card-bg: rgba(255,255,255,0.05);
+  --card-border: 1px solid rgba(255,255,255,0.10);
+  --track: rgba(255,255,255,0.12);
+}
+
+/* Reset / Base */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body{
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5; /* Body line height */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+img{ max-width: 100%; display: block; }
+a{ color: inherit; text-decoration: none; }
+.container{ max-width: var(--container); margin: 0 auto; padding: 0 var(--s-6); }
+
+/* Typography */
+h1,h2,h3,h4,h5,h6{
+  line-height: 1.2; /* Headers line height */
+  font-weight: 700; /* Headers 600–700; we choose 700 for clarity */
+  margin: 0 0 var(--s-5);
+}
+p{ margin: 0 0 var(--s-5); color: var(--text-2); font-weight: 400; }
+code, pre, kbd, samp{
+  font-family: 'JetBrains Mono','Fira Code', monospace;
+}
+
+/* Utilities */
+.muted{ color: var(--text-2); }
+.stack-4 > * + * { margin-top: var(--s-4); }
+.stack-5 > * + * { margin-top: var(--s-5); }
+.stack-6 > * + * { margin-top: var(--s-6); }
+.grid{
+  display: grid;
+  gap: var(--gap);
+}
+.grid-3{
+  grid-template-columns: repeat(3, minmax(0,1fr));
+}
+@media (max-width: 960px){
+  .grid-3{ grid-template-columns: 1fr; }
+}
+
+/* Card */
+.card{
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow);
+  padding: var(--s-6);
+}
+
+/* Buttons */
+.btn{
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--s-2);
+  border-radius: var(--r-btn);
+  padding: var(--s-4) var(--s-6);
+  font-weight: 600;
+  line-height: 1;
+  transition: filter .15s ease, opacity .15s ease, transform .02s ease;
+  cursor: pointer;
+  border: none;
+  color: #fff;
+}
+.btn:active{ transform: translateY(1px); }
+.btn:focus-visible{
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+.btn-primary{
+  background: var(--grad);
+  box-shadow: var(--shadow);
+}
+.btn-primary:hover{ opacity: 0.9; }
+.btn-secondary{
+  background: transparent;
+  border: 1px solid var(--blue);
+  color: #fff;
+}
+.btn-secondary:hover{ opacity: 0.85; }
+
+/* Inputs */
+.input{
+  width: 100%;
+  background: #1E293B;
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--r-input);
+  padding: var(--s-4) var(--s-5);
+  transition: box-shadow .15s ease, border-color .15s ease;
+}
+.input::placeholder{ color: #94A3B8; }
+.input:focus{
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.35);
+}
+
+/* Progress */
+.progress{
+  width: 100%;
+  height: 10px;
+  background: var(--track);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-bar{
+  height: 100%;
+  background: var(--grad);
+  width: 60%; /* Example: 60% */
+}
+
+/* Header / Nav */
+header{
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(11,20,38,0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.nav{
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px;
+}
+.brand{
+  display: inline-flex; align-items: center; gap: var(--s-3);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.brand-mark{
+  width: 28px; height: 28px; border-radius: 6px;
+  background: var(--grad);
+  box-shadow: var(--shadow);
+  flex: 0 0 auto;
+}
+.nav-links{
+  display: flex; align-items: center; gap: var(--s-6);
+}
+.nav-links a{
+  color: var(--text-2);
+  font-weight: 600;
+}
+.nav-links a:hover{ color: #fff; }
+
+/* Mobile nav */
+.nav-toggle{ display:none; }
+@media (max-width: 960px){
+  .nav-links{ display:none; }
+  .nav-toggle{ display:inline-flex; }
+  .nav.open .nav-links{
+    display: flex;
+    position: absolute;
+    top: 64px; left: 0; right: 0;
+    flex-direction: column;
+    padding: var(--s-6);
+    gap: var(--s-5);
+    background: rgba(11,20,38,0.98);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+}
+
+/* Hero */
+.hero{
+  padding: var(--s-7) 0;
+}
+.hero h2{
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-5);
+  font-size: clamp(16px, 2.4vw, 20px);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #F8FAFC;
+  background: rgba(15,26,48,0.78);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 999px;
+  box-shadow: 0 10px 30px rgba(6,182,212,0.25);
+  margin-bottom: var(--s-4);
+}
+.hero h2::before{
+  content: "";
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--grad);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.15), 0 0 18px rgba(37,99,235,0.35);
+}
+.hero h1{
+  font-size: clamp(28px, 5vw, 48px);
+  margin-bottom: var(--s-4);
+}
+.hero p{
+  font-size: clamp(16px, 2vw, 18px);
+  max-width: 70ch;
+}
+.cta-row{
+  display: flex; flex-wrap: wrap; gap: var(--s-4);
+  margin-top: var(--s-6);
+}
+
+/* Feature cards */
+.feature{
+  display: flex; align-items: flex-start; gap: var(--s-4);
+}
+.icon{
+  width: 40px; height: 40px; border-radius: 8px;
+  display: inline-grid; place-items: center;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  flex: 0 0 auto;
+}
+.icon svg{
+  width: 22px; height: 22px;
+  stroke: #FFFFFF; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round;
+  opacity: 0.95;
+}
+
+/* Code block */
+pre{
+  margin: 0;
+  background: #0F1A30;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: var(--r-card);
+  padding: var(--s-6);
+  overflow: auto;
+  box-shadow: var(--shadow);
+  color: #E2E8F0;
+}
+
+/* Footer */
+footer{
+  border-top: 1px solid rgba(255,255,255,0.08);
+  margin-top: var(--s-7);
+  padding: var(--s-7) 0;
+  color: var(--text-2);
+}
+.footer-links{
+  display: flex; gap: var(--s-6); flex-wrap: wrap;
+}
+.footer-links a:hover{ color: #fff; }
 
     .portal-card:hover {
       border-color: var(--spectrum-pink);
@@ -675,6 +956,21 @@
       Where creation meets computation. Build, share, and scale with AI-powered tools 
       that understand your vision.
     </p>
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container">
+        <div class="stack-6">
+          <h2>Hello, World!</h2>
+          <div>
+            <span class="muted" style="display:inline-block; padding: var(--s-2) var(--s-4); border: 1px solid rgba(255,255,255,0.10); border-radius: 999px;">Technical co-creation platform</span>
+          </div>
+          <h1>Build, ship, and evolve — on a <span style="background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;">dark, precise</span> stack.</h1>
+          <p>BlackRoad.io is a developer-focused environment for real-time coding, agents, and automation. Minimal, fast, and designed for clarity with a high-contrast dark UI.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#portal">Launch Portal</a>
+            <a class="btn btn-secondary" href="#docs">Read the Docs</a>
+          </div>
 
     <div class="hero-cta">
       <a href="blackroad-nexus.html" class="btn-primary">Enter Console →</a>
