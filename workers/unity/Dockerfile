@@ -18,5 +18,8 @@ COPY server.js ./
 COPY template ./template
 COPY README.md ./README.md
 
+RUN npm install --omit=dev
+COPY server.js ./
+COPY template ./template
 EXPOSE 3000
 CMD ["node", "server.js"]
