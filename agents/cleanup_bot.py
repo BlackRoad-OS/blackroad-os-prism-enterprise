@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import logging
 import subprocess
+<<<<<<< main
 from dataclasses import dataclass
 from subprocess import CalledProcessError
 <<<<<<< main
@@ -42,6 +43,8 @@ import subprocess
 from dataclasses import dataclass
 from subprocess import CalledProcessError
 >>>>>>> origin/codex/complete-next-project-step-0o96zy
+=======
+>>>>>>> origin/codex/complete-next-step-of-project-582c2w
 
 =======
 >>>>>>> origin/codex/fix-comments-54tl1o
@@ -53,6 +56,7 @@ class CleanupBot:
     branches: Iterable[str]
     """Delete local and remote branches after merges.
 
+<<<<<<< main
 <<<<<<< main
     Attributes
     ----------
@@ -83,6 +87,11 @@ class CleanupBot:
         branches: Branch names to delete.
         dry_run: If ``True``, commands are printed instead of executed.
 >>>>>>> origin/codex/complete-next-project-step-0o96zy
+=======
+    Args:
+        branches: Branch names to remove.
+        dry_run: If ``True``, print commands instead of executing them.
+>>>>>>> origin/codex/complete-next-step-of-project-582c2w
     """
 
     branches: list[str]
@@ -134,6 +143,7 @@ class CleanupBot:
         return cls(branches=cls.merged_branches(base), dry_run=dry_run)
 
 <<<<<<< main
+<<<<<<< main
     def _run(self, *cmd: str) -> CompletedProcess | None:
         """Execute ``cmd`` unless running in dry-run mode."""
 
@@ -176,6 +186,8 @@ class CleanupBot:
 >>>>>>> origin/codex/fix-comments-54tl1o
 =======
 >>>>>>> origin/codex/complete-next-project-step-0o96zy
+=======
+>>>>>>> origin/codex/complete-next-step-of-project-582c2w
     def _run(self, *cmd: str) -> None:
         """Run a command unless in dry-run mode."""
         if self.dry_run:
@@ -186,6 +198,7 @@ class CleanupBot:
     def delete_branch(self, branch: str) -> bool:
         """Delete a branch locally and remotely.
 
+<<<<<<< main
 <<<<<<< main
         Returns
         -------
@@ -373,6 +386,34 @@ def cleanup(branches: Iterable[str], dry_run: bool = False) -> Dict[str, bool]:
                 print(f"Failed to delete branch '{branch}' locally or remotely")
             results[branch] = success
         return results
+=======
+    def delete_branch(self, branch: str) -> dict[str, bool]:
+        """Delete a branch locally and remotely.
+
+        Returns:
+            A mapping indicating success for ``"local"`` and ``"remote"``
+            deletions.
+        """
+        results: dict[str, bool] = {"local": False, "remote": False}
+        try:
+            self._run("git", "branch", "-D", branch)
+            results["local"] = True
+        except subprocess.CalledProcessError:
+            pass
+        try:
+            self._run("git", "push", "origin", "--delete", branch)
+            results["remote"] = True
+        except subprocess.CalledProcessError:
+            pass
+        return results
+
+    def cleanup(self) -> dict[str, dict[str, bool]]:
+        """Remove the configured branches locally and remotely."""
+        results: dict[str, dict[str, bool]] = {}
+        for branch in self.branches:
+            results[branch] = self.delete_branch(branch)
+        return results
+>>>>>>> origin/codex/complete-next-step-of-project-582c2w
 
     return CleanupBot(branches=branches, dry_run=dry_run).cleanup()
 
@@ -428,5 +469,10 @@ def main(argv: List[str] | None = None) -> int:
 if __name__ == "__main__":  # pragma: no cover
     sys.exit(main())
 if __name__ == "__main__":
+<<<<<<< main
     print("CleanupBot ready to delete branches.")
 
+=======
+    bot = CleanupBot(["example"], dry_run=True)
+    print(bot.cleanup())
+>>>>>>> origin/codex/complete-next-step-of-project-582c2w
