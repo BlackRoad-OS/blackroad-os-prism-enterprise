@@ -113,3 +113,41 @@ services:
       - .:/workspace
     working_dir: /workspace
     command: bash -lc "pytest -q"
+  blackroad-api:
+    build:
+      context: .
+      target: backend
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: production
+      BLACKROAD_DB_PATH: /srv/blackroad-api/data/blackroad.db
+    volumes:
+      - blackroad-db:/srv/blackroad-api/data
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  blackroad-ui:
+    build:
+      context: .
+      target: frontend
+    ports:
+      - "5173:5173"
+    environment:
+      NODE_ENV: production
+    depends_on:
+      blackroad-api:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  blackroad-db:
