@@ -162,7 +162,7 @@ paths:
       summary: List logged contradictions
       responses:
         '200':
-          description: Recent contradictions
+          description: Contradiction summary
           content:
             application/json:
               schema:
