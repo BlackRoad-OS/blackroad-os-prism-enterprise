@@ -356,3 +356,116 @@ framework is functional, but APIs may change. Tool adapters are currently stubbe
 make no external calls for safety during development.
 
 We welcome feedback and contributions! See CONTRIBUTING.md for guidelines.
+---
+
+## Codex Deploy Flow
+
+`codex/jobs/blackroad-sync-deploy.sh` provides a chat-focused pipeline tying
+together git pushes, connector syncs, working-copy refreshes and server deploys.
+Typical usage:
+
+```bash
+# commit local changes, push and deploy to the droplet
+bash codex/jobs/blackroad-sync-deploy.sh push-latest "chore: update"
+
+# refresh the iOS Working Copy checkout and redeploy
+bash codex/jobs/blackroad-sync-deploy.sh refresh
+
+# rebase current branch onto origin/main then deploy
+bash codex/jobs/blackroad-sync-deploy.sh rebase-update
+
+# run Salesforce → Airtable → Droplet syncs
+bash codex/jobs/blackroad-sync-deploy.sh sync-connectors
+```
+
+It honours environment variables like `DROPLET_HOST`,
+`WORKING_COPY_PATH`, and `SLACK_WEBHOOK` for remote access and
+status notifications.
+
+- **/geodesic**: Compute Fubini–Study distance `d_FS = arccos(|⟨ψ|φ⟩|)` and sample the **CP² geodesic** points between |ψ₀⟩ and |ψ₁⟩.
+
+## Codex Sync Helper
+
+Use `scripts/blackroad_sync.py` for chat-driven CI/CD tasks. It can commit and
+push changes, refresh a working copy, rebase branches, or stub out connector
+sync jobs.
+
+Examples:
+
+```bash
+scripts/blackroad_sync.py push -m "feat: update site"
+scripts/blackroad_sync.py refresh
+scripts/blackroad_sync.py sync-connectors
+```
+
+## Backbone Equations Reference
+
+See [docs/blackroad-equation-backbone.md](docs/blackroad-equation-backbone.md) for a curated list of one hundred foundational equations across mathematics, physics, computer science, and engineering.
+
+_Last updated on 2025-09-11_
+
+## Prism Developer Mode
+
+Start the development server:
+
+```bash
+cd prism/server
+npm install
+npm run dev
+```
+
+Run the web console with Approvals panel:
+
+```bash
+cd apps/prismweb
+npm install
+npm run dev
+```
+
+## Program Board
+
+The CLI exposes a lightweight portfolio view that persists to `program/board.json`.
+Example:
+
+```bash
+python -m cli.console program:add --id P001 --title "APAC Launch" --owner "Regional-Ops" --bot "Regional-Ops-BOT" --start 2025-10-01 --due 2026-01-15
+python -m cli.console program:list
+python -m cli.console program:roadmap
+```
+
+Roadmap output is rendered as an ASCII Gantt chart with 13 week buckets.
+
+## Dependencies & Scheduling
+
+Tasks may depend on other tasks and be scheduled for a specific time.  The
+polling scheduler will run tasks whose dependencies are complete:
+
+```bash
+python -m cli.console scheduler:run --every-seconds 5
+```
+
+Metrics about dependency blocks and schedule SLAs are written to
+`orchestrator/metrics.jsonl`.
+
+## CSV Import/Export
+
+Bulk task management is supported with CSV files.  Columns:
+
+`id, goal, context_json, depends_on_csv, scheduled_for_iso, bot`
+
+```bash
+python -m cli.console task:import --csv samples/sample_tasks.csv
+python -m cli.console task:export --csv out.csv
+```
+
+Sample files live under `samples/`.
+
+## Retail Industry Pack
+
+The repository ships with a minimal retail example consisting of two bots:
+
+- **Merchandising-BOT** – plans seasonal assortments from sales history.
+- **Store-Ops-BOT** – generates labor plans and checklists for promotions.
+
+Fixtures are under `fixtures/retail/` and an example workflow is available at
+`examples/retail_launch.md`.
