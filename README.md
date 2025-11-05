@@ -50,6 +50,10 @@ The complete security model is documented in [docs/SECURITY.md](docs/SECURITY.md
 
 Developer workflow, testing, and contribution expectations are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Merge Queue Primer
+
+Learn how to keep `main` green and releasable with serialized merges in [docs/MERGE_QUEUE_PRIMER.md](docs/MERGE_QUEUE_PRIMER.md).
+
 ## Project Status
 
 ⚠️ **Alpha Stage**: This project is under active development. The core orchestration 
