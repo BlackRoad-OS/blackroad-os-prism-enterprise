@@ -1,3 +1,4 @@
+import { createRoadblockWorld } from '@/lib/presets/roadblockWorld';
 import { worldSchema, type World } from '@/shared/schema';
 
 const STORAGE_KEY = 'roadworld:last';
@@ -5,42 +6,7 @@ const STORAGE_KEY = 'roadworld:last';
 const nowIso = () => new Date().toISOString();
 
 export const createDefaultWorld = (): World => {
-  const rootId = 'root';
-  const timestamp = nowIso();
-  return {
-    version: 'rw-1',
-    meta: {
-      name: 'Untitled World',
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    },
-    settings: {
-      gridSize: 1,
-      snapTranslate: 0.5,
-      snapRotateDeg: 15,
-      snapScale: 0.1,
-      unit: 'm',
-      background: '#0e1116',
-      environment: 'studio',
-    },
-    materials: [],
-    root: rootId,
-    entities: {
-      [rootId]: {
-        id: rootId,
-        kind: 'group',
-        name: 'Scene Root',
-        position: [0, 0, 0],
-        rotation: [0, 0, 0],
-        scale: [1, 1, 1],
-        visible: true,
-        locked: true,
-        layer: 'default',
-        params: {},
-        children: [],
-      },
-    },
-  };
+  return createRoadblockWorld(nowIso());
 };
 
 export const exportWorld = (world: World): Blob => {
