@@ -77,7 +77,8 @@ extension points for future integrations.
 | 044 | The Translational Tier | Pipeline of prompts that convert ideas into testable assets. |
 | 017 | The Energy Oath        | Energy stewardship with transparency and green defaults. |
 =======
->>>>>>> origin/codex/define-dialogue-doctrine-for-communication
+| 025 | The Time Accord        | Guard time with clear rhythms, estimates, and rest. |
+>>>>>>> origin/codex/draft-codex-25-the-time-accord
 
 ## BlackRoad Pipeline
 
