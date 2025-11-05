@@ -76,9 +76,9 @@ extension points for future integrations.
 | 016 | The Simplicity Mandate | Simplicity is safety; keep workflows lean.      |
 | 044 | The Translational Tier | Pipeline of prompts that convert ideas into testable assets. |
 | 017 | The Energy Oath        | Energy stewardship with transparency and green defaults. |
-=======
 | 025 | The Time Accord        | Guard time with clear rhythms, estimates, and rest. |
->>>>>>> origin/codex/draft-codex-25-the-time-accord
+=======
+>>>>>>> origin/codex/draft-codex-4-data-autonomy-manifest
 
 ## BlackRoad Pipeline
 
