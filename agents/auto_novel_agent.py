@@ -3,10 +3,39 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import ClassVar, Iterable
+
+import sys
+
+if __package__ is None or __package__ == "":
+    sys.path.append(str(Path(__file__).resolve().parent))
+    from consent_policy import ConsentRecord, ensure_full_consent  # type: ignore
+else:
+    from .consent_policy import ConsentRecord, ensure_full_consent
 
 
 DEFAULT_SUPPORTED_ENGINES: tuple[str, ...] = ("unity", "unreal")
+
+_OPERATION_SCOPE_MAP: dict[str, str] = {
+    "deploy": "agent:deploy",
+    "create_game": "game:create",
+    "generate_game_idea": "story:ideate",
+    "generate_story": "story:create",
+    "generate_story_series": "story:create",
+    "generate_coding_challenge": "content:create",
+    "generate_code_snippet": "code:suggest",
+    "proofread_paragraph": "content:edit",
+    "validate_scopes": "consent:validate",
+    "add_supported_engine": "agent:configure",
+    "remove_supported_engine": "agent:configure",
+    "set_gamma": "agent:configure",
+}
+
+_BASE_CONSENT_SCOPES = {"outline:read", "outline:write"}
+DEFAULT_CONSENT_SCOPES = frozenset(
+    _BASE_CONSENT_SCOPES.union(_OPERATION_SCOPE_MAP.values())
+)
 
 
 @dataclass
@@ -18,13 +47,20 @@ class AutoNovelAgent:
     supported_engines: set[str] = field(
         default_factory=lambda: set(DEFAULT_SUPPORTED_ENGINES)
     )
+    consent: ConsentRecord = field(
+        default_factory=lambda: ConsentRecord.full(
+            scopes=DEFAULT_CONSENT_SCOPES,
+            evidence="AutoNovelAgent default configuration",
+        )
+    )
 
     SAMPLE_SNIPPETS: ClassVar[dict[str, str]] = {
         "python": "def solve():\n    pass\n",
         "javascript": "function solve() {\n  return null;\n}\n",
         "java": "class Solution {\n    void solve() {\n    }\n}\n",
     }
-    LEAST_PRIVILEGE_SCOPES: ClassVar[set[str]] = {"outline:read", "outline:write"}
+    OPERATION_SCOPE_MAP: ClassVar[dict[str, str]] = dict(_OPERATION_SCOPE_MAP)
+    LEAST_PRIVILEGE_SCOPES: ClassVar[set[str]] = set(DEFAULT_CONSENT_SCOPES)
 
     def __post_init__(self) -> None:
         if self.gamma <= 0:
@@ -32,6 +68,15 @@ class AutoNovelAgent:
         self.supported_engines = {
             self._normalize_engine(engine) for engine in self.supported_engines
         }
+
+    def _require_scope(self, operation: str) -> None:
+        """Ensure the agent has full consent for the requested operation."""
+
+        ensure_full_consent(
+            self.consent,
+            scope=self.OPERATION_SCOPE_MAP.get(operation),
+            actor=f"{self.name}.{operation}",
+        )
 
     # ------------------------------------------------------------------
     # Engine helpers
@@ -60,11 +105,13 @@ class AutoNovelAgent:
     def add_supported_engine(self, engine: str) -> None:
         """Register a new game engine."""
 
+        self._require_scope("add_supported_engine")
         self.supported_engines.add(self._normalize_engine(engine))
 
     def remove_supported_engine(self, engine: str) -> None:
         """Remove a game engine, raising ``ValueError`` if it is unknown."""
 
+        self._require_scope("remove_supported_engine")
         normalized = self._normalize_engine(engine)
         if normalized not in self.supported_engines:
             supported = ", ".join(self.list_supported_engines())
@@ -80,6 +127,7 @@ class AutoNovelAgent:
     def deploy(self) -> None:
         """Deploy the agent by printing a greeting."""
 
+        self._require_scope("deploy")
         print(f"{self.name} deployed and ready to generate novels!")
 
     def _indefinite_article(self, engine_name: str) -> str:
@@ -105,6 +153,7 @@ class AutoNovelAgent:
     def create_game(self, engine: str, include_weapons: bool = False) -> str:
         """Create a basic game using a supported engine."""
 
+        self._require_scope("create_game")
         normalized = self._normalize_engine(engine)
         if normalized not in self.supported_engines:
             supported = ", ".join(self.list_supported_engines())
@@ -123,6 +172,7 @@ class AutoNovelAgent:
     def generate_game_idea(self, theme: str, engine: str) -> str:
         """Return a short description for a themed game."""
 
+        self._require_scope("generate_game_idea")
         theme_clean = theme.strip()
         if not theme_clean:
             raise ValueError("Theme must be a non-empty string.")
@@ -143,6 +193,7 @@ class AutoNovelAgent:
     def generate_story(self, theme: str, protagonist: str = "An adventurer") -> str:
         """Generate a short themed story."""
 
+        self._require_scope("generate_story")
         theme_clean = theme.strip()
         if not theme_clean:
             raise ValueError("Theme must be a non-empty string.")
@@ -173,6 +224,7 @@ class AutoNovelAgent:
     def generate_coding_challenge(self, topic: str, difficulty: str = "medium") -> str:
         """Return a concise coding challenge prompt."""
 
+        self._require_scope("generate_coding_challenge")
         topic_clean = topic.strip()
         if not topic_clean:
             raise ValueError("Topic must be a non-empty string.")
@@ -190,6 +242,7 @@ class AutoNovelAgent:
     def generate_code_snippet(self, description: str, language: str = "python") -> str:
         """Produce a starter code snippet in the requested language."""
 
+        self._require_scope("generate_code_snippet")
         description_clean = description.strip()
         if not description_clean:
             raise ValueError("Description must be provided for code generation.")
@@ -209,6 +262,7 @@ class AutoNovelAgent:
     def proofread_paragraph(self, paragraph: str) -> str:
         """Proofread a paragraph by normalising spacing and punctuation."""
 
+        self._require_scope("proofread_paragraph")
         if not paragraph or not paragraph.strip():
             raise ValueError("Paragraph must be a non-empty string.")
 
@@ -221,6 +275,7 @@ class AutoNovelAgent:
     def validate_scopes(self, requested_scopes: Iterable[str]) -> None:
         """Validate that requested scopes adhere to the least-privilege policy."""
 
+        self._require_scope("validate_scopes")
         scopes = {scope.strip() for scope in requested_scopes if scope.strip()}
         invalid_scopes = sorted(scopes - self.LEAST_PRIVILEGE_SCOPES)
         if invalid_scopes:
@@ -233,6 +288,7 @@ class AutoNovelAgent:
     def set_gamma(self, gamma: float) -> None:
         """Update the creativity scaling factor."""
 
+        self._require_scope("set_gamma")
         if gamma <= 0:
             raise ValueError("gamma must be positive.")
         self.gamma = gamma
@@ -241,7 +297,11 @@ class AutoNovelAgent:
 def main() -> None:
     """Run a tiny demonstration when executed as a script."""
 
-    agent = AutoNovelAgent()
+    consent = ConsentRecord.full(
+        scopes=DEFAULT_CONSENT_SCOPES,
+        evidence="AutoNovelAgent demo execution",
+    )
+    agent = AutoNovelAgent(consent=consent)
     agent.deploy()
     agent.create_game("unity")
     print(agent.generate_story("mystery", protagonist="Explorer"))
