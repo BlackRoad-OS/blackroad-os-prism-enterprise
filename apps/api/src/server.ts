@@ -382,6 +382,12 @@ import consIC from './routes/cons/ic.js';
 import consRun from './routes/cons/run.js';
 import consTasks from './routes/cons/tasks.js';
 import consPack from './routes/cons/pack.js';
+import cpqCatalog from './routes/cpq/catalog.js';
+import cpqPricing from './routes/cpq/pricing.js';
+import cpqQuotes from './routes/cpq/quotes.js';
+import cpqApprovals from './routes/cpq/approvals.js';
+import cpqOrders from './routes/cpq/orders.js';
+import cpqSubs from './routes/cpq/subscriptions.js';
 
 dotenv.config();
 import express from "express";
@@ -638,6 +644,7 @@ app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
 app.use('/api/invoices', invoices);
 app.use('/api/cons', consEntities, consCOA, consTB, consFX, consIC, consRun, consTasks, consPack);
+app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
 
 const port = process.env.PORT || 4000;
 
