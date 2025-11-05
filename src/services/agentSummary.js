@@ -25,6 +25,19 @@ async function getService(id, base) {
       uptime: health.uptime || '-',
       errors: logs.count || (Array.isArray(logs.logs) ? logs.logs.length : 0),
       contradictions: health.contradictions || 0,
+    const [health, logs] = await Promise.all([
+      fetchJson(`${base}/health`),
+      fetchJson(`${base}/logs?level=error&limit=1`).catch(() => ({ count: 0, logs: [] }))
+    ]);
+    const status =
+      health.status ??
+      (typeof health.ok === 'boolean' ? (health.ok ? 'OK' : 'FAIL') : 'UNKNOWN');
+
+    return {
+      status,
+      uptime: health.uptime ?? '-',
+      errors: logs.count ?? (Array.isArray(logs.logs) ? logs.logs.length : 0),
+      contradictions: health.contradictions ?? 0
     };
   } catch {
     return { status: 'FAIL', uptime: '-', errors: 0, contradictions: 0 };
@@ -37,6 +50,11 @@ async function getAgentsSummary() {
     Object.entries(SERVICES).map(async ([id, base]) => [id, await getService(id, base)])
   );
   return Object.fromEntries(entries);
+  const entries = Object.entries(SERVICES);
+  const results = await Promise.all(
+    entries.map(([id, base]) => getService(id, base).then(data => [id, data]))
+  );
+  return Object.fromEntries(results);
 }
 
 module.exports = { getAgentsSummary };
