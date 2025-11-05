@@ -12,6 +12,8 @@ COPY server.js ./
 COPY template ./template
 RUN npm install
 
+COPY package.json package-lock.json ./
+RUN npm install --production
 COPY server.js ./
 COPY template ./template
 COPY README.md ./README.md
