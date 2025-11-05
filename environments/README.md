@@ -84,3 +84,4 @@ Each file in this directory captures the reviewers and routing details for one d
 - `preview.yml` — Ephemeral per-PR preview routed through AWS ALB and Route53 under `*.dev.blackroad.io`
 
 Extend these files with additional metadata (e.g., deploy workflows, health checks) as automation matures.
+- `preview-env.yml` — ephemeral PR preview infrastructure under dev.blackroad.io.

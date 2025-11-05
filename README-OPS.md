@@ -5,6 +5,11 @@ quickstart highlights how to operate the system without stepping outside the
 guardrails defined in `environments/*.yml` and `DEPLOYMENT.md`.
 
 ## Environment map
+| Environment | Domains | Primary workflow | Notes |
+| --- | --- | --- | --- |
+| Preview (`pr`) | `https://dev.blackroad.io`, `https://pr-<n>.dev.blackroad.io` | `.github/workflows/preview-env.yml` | Spins up ephemeral ECS services + ALB rules per pull request. Terraform config lives in `infra/preview-env/` and the manifest is documented in `environments/preview.yml`. |
+| Staging (`stg`) | `https://stage.blackroad.io` | `.github/workflows/pages-stage.yml` | Builds and archives the static site proof artifact. API wiring is planned; see `environments/staging.yml` for current status. |
+| Production (`prod`) | `https://blackroad.io`, `https://www.blackroad.io`, `https://api.blackroad.io` | `.github/workflows/blackroad-deploy.yml` | GitHub Pages publishes the marketing site; API gateway will promote via the same workflow once the ECS module is enabled. Full manifest: `environments/production.yml`. |
 
 | Environment | Branch | Domains | Required workflows | Notes |
 | --- | --- | --- | --- | --- |
@@ -17,6 +22,11 @@ Refer to `environments/preview.yml`, `environments/staging.yml`, and
 Terraform backends, and change-management requirements.
 
 ## Release flow
+### Preview (per PR)
+- Triggered automatically on pull request open/update via `preview-env.yml`.
+- Builds the image, applies Terraform (`infra/preview-env`), and comments with the preview URL.
+- Closing the PR or re-running the `destroy` job removes ALB rules, target groups, ECS services, and Route53 aliases.
+- Smoke test: `curl -sSfL https://pr-<n>.dev.blackroad.io/healthz/ui` (already executed in the workflow).
 
 1. **Pull request** — Apply the `automerge` label so the queue serialises the
    change. Preview workflows must pass before merge.
@@ -67,3 +77,9 @@ Terraform backends, and change-management requirements.
 - Change management: `.github/workflows/change-approve.yml`,
   `runbooks/examples/infra_release_policy.yaml`
 - Monitoring stack: `deploy/k8s/monitoring.yaml`
+- Environment manifests: `environments/*.yml`
+- Preview Terraform stack: `infra/preview-env/`
+- Reusable module: `modules/preview-env/`
+- Deployment workflows: `.github/workflows/preview-env.yml`, `pages-stage.yml`, `blackroad-deploy.yml`, `prism-ssh-deploy.yml`
+
+_Last updated on 2025-10-06_
