@@ -78,7 +78,8 @@ extension points for future integrations.
 | 017 | The Energy Oath        | Energy stewardship with transparency and green defaults. |
 | 025 | The Time Accord        | Guard time with clear rhythms, estimates, and rest. |
 =======
->>>>>>> origin/codex/draft-codex-4-data-autonomy-manifest
+| 011 | The Ethical North Star | Ethical guardrails: consent, equity, no harm.   |
+>>>>>>> origin/codex/establish-codex-11-ethical-guidelines
 
 ## BlackRoad Pipeline
 
