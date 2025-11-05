@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node --require ./src/lib/otel.ts dist/server.js || tsx src/server.ts",
+    "dev": "tsx src/server.ts",
     "build": "tsc -p tsconfig.json && prisma generate || true",
     "start": "node dist/server.js",
     "migrate": "prisma migrate deploy || true",
@@ -77,6 +78,13 @@
     "openid-client": "^6.6.0",
     "node-fetch": "^3.3.2",
     "mustache": "^4.2.0"
+    "release": "semantic-release"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.0",
+    "express": "^4.19.2",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "semantic-release": "^24.0.0",
