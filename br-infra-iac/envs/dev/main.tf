@@ -178,3 +178,5 @@ output "api_https_listener_arn" { value = module.api_service.https_listener_arn 
 output "api_alb_arn_suffix"     { value = module.api_service.alb_arn_suffix }
 output "api_waf_arn"     { value = module.api_waf.web_acl_arn }
 output "waf_logs_s3"     { value = module.waf_logging.s3_log_path_hint }
+output "api_service_name" { value = module.api_service.service_name }
+output "api_url"          { value = module.api_service.https_url }
