@@ -26,6 +26,11 @@ changed=false
 git_add() { git add "$@" && changed=true; }
 
 # Step 1: Ensure package.json exists with basic npm scripts
+# Track whether auto-heal made modifications
+changed=false
+git_add() { git add "$@" && changed=true; }
+
+# Step 0: ensure package.json exists with basic npm scripts
 if [ ! -f package.json ]; then
   npm init -y >/dev/null 2>&1 || true
   git_add package.json
@@ -51,6 +56,7 @@ add package.json || true
 git_add package.json || true
 
 # Step 2: Ensure baseline lint/format configs
+# Step 1: ensure baseline lint/format configs
 [ -f .prettierrc.json ] || {
   echo '{ "printWidth": 100, "singleQuote": true, "trailingComma": "es5" }' > .prettierrc.json
   git_add .prettierrc.json
@@ -83,6 +89,7 @@ add package.json || true
 }
 
 # Step 3: Install tools and apply formatting/lint fixes (best effort)
+# Step 2: install tools and apply formatting/lint fixes (best effort)
 npm i -D prettier eslint eslint-config-prettier >/dev/null 2>&1 || true
 npx --yes prettier -w .  >/dev/null 2>&1 || true
 npx --yes eslint . --ext .js,.mjs,.cjs --fix >/dev/null 2>&1 || true
@@ -91,6 +98,10 @@ npx --yes eslint . --ext .js,.mjs,.cjs --fix >/dev/null 2>&1 || true
 git diff --quiet || { git add -A && changed=true; }
 
 # Step 5: Commit if any files changed
+# Stage any changes produced by formatters or linters
+git diff --quiet || { git add -A && changed=true; }
+
+# Step 3: commit if any files changed
 if $changed; then
   git commit -m "chore(auto-heal): baseline configs + prettier/eslint --fix" || true
   echo "committed=1" >> "$GITHUB_OUTPUT"
