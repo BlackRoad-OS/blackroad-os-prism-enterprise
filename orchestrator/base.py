@@ -1,32 +1,55 @@
+"""Base classes for bot implementations."""
+
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from .protocols import Task, BotResponse
+from dataclasses import dataclass, field
+from typing import Mapping, Sequence
+
+from orchestrator.protocols import BotResponse, Task
 
 
-class BaseBot(ABC):
-    """Abstract base class for bots."""
+@dataclass(slots=True)
+class BotMetadata:
+    """Structured metadata describing bot responsibilities."""
 
     name: str
     mission: str
+    inputs: Sequence[str]
+    outputs: Sequence[str]
+    kpis: Sequence[str]
+    guardrails: Sequence[str]
+    handoffs: Sequence[str]
+    tags: Sequence[str] = field(default_factory=tuple)
+
+
+class BaseBot(ABC):
+    """Abstract base class for all bots."""
+
+    metadata: BotMetadata
+
+    def __init__(self) -> None:
+        if not hasattr(self, "metadata"):
+            raise ValueError("Bots must define metadata of type BotMetadata")
 
     @abstractmethod
-    def run(self, task: Task) -> BotResponse:  # pragma: no cover - interface
-        """Run the bot on a task."""
-        raise NotImplementedError
+    def handle_task(self, task: Task) -> BotResponse:
+        """Execute the task and return a structured response."""
 
+    def run(self, task: Task) -> BotResponse:
+        """Wrapper around :meth:`handle_task` for future instrumentation."""
 
-def assert_guardrails(response: BotResponse) -> None:
-    """Ensure required fields in a BotResponse."""
-    if not response.summary or not response.summary.strip():
-        raise AssertionError("Summary required")
-    if not response.steps:
-        raise AssertionError("Steps required")
-    if not isinstance(response.data, dict):
-        raise AssertionError("Data must be a dict")
-    if not response.risks:
-        raise AssertionError("Risks required")
-    if not response.artifacts:
-        raise AssertionError("Artifacts required")
-    if not response.next_actions:
-        raise AssertionError("Next actions required")
-    if response.ok is None:
-        raise AssertionError("ok flag required")
+        return self.handle_task(task)
+
+    def describe(self) -> Mapping[str, Sequence[str]]:
+        """Return human-readable metadata about the bot."""
+
+        return {
+            "mission": [self.metadata.mission],
+            "inputs": list(self.metadata.inputs),
+            "outputs": list(self.metadata.outputs),
+            "kpis": list(self.metadata.kpis),
+            "guardrails": list(self.metadata.guardrails),
+            "handoffs": list(self.metadata.handoffs),
+            "tags": list(self.metadata.tags),
+        }

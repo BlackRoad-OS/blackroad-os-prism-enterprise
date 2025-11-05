@@ -1,33 +1,69 @@
+"""Data lineage helpers."""
+
 from __future__ import annotations
 
-import uuid
+import json
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Dict, List, Sequence
 
-from orchestrator import metrics
-from tools import storage
-
-_lineage_path = Path(__file__).resolve().with_name("lineage.jsonl")
-_active: Dict[str, Dict[str, Any]] = {}
+from orchestrator.protocols import BotResponse, Task
 
 
-def start_trace(task_id: str) -> str:
-    trace_id = uuid.uuid4().hex
-    _active[trace_id] = {"task_id": task_id, "usage": []}
-    metrics.inc("lineage_events")
-    return trace_id
+@dataclass(slots=True)
+class LineageEvent:
+    """Represents a relationship between a task and a bot execution."""
+
+    task_id: str
+    bot_name: str
+    timestamp: datetime
+    artifacts: Sequence[str]
+
+    def to_dict(self) -> Dict[str, object]:
+        return {
+            "task_id": self.task_id,
+            "bot_name": self.bot_name,
+            "timestamp": self.timestamp.isoformat(),
+            "artifacts": list(self.artifacts),
+        }
 
 
-def record_usage(trace_id: str, dataset: str, columns: List[str]) -> None:
-    if trace_id in _active:
-        _active[trace_id]["usage"].append({"dataset": dataset, "columns": columns})
-        metrics.inc("lineage_events")
+class LineageTracker:
+    """In-memory tracker for lineage events persisted to disk."""
 
+    def __init__(self, path: Path):
+        self.path = path
+        self._events: List[LineageEvent] = []
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        if self.path.exists():
+            self._load()
 
-def finalize(trace_id: str) -> None:
-    record = _active.pop(trace_id, None)
-    if record is None:
-        return
-    record["trace_id"] = trace_id
-    storage.write(str(_lineage_path), record)
-    metrics.inc("lineage_events")
+    def _load(self) -> None:
+        for line in self.path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            payload = json.loads(line)
+            self._events.append(
+                LineageEvent(
+                    task_id=payload["task_id"],
+                    bot_name=payload["bot_name"],
+                    timestamp=datetime.fromisoformat(payload["timestamp"]),
+                    artifacts=tuple(payload.get("artifacts", [])),
+                )
+            )
+
+    def record(self, task: Task, bot_name: str, response: BotResponse) -> LineageEvent:
+        event = LineageEvent(
+            task_id=task.id,
+            bot_name=bot_name,
+            timestamp=datetime.utcnow(),
+            artifacts=response.artifacts,
+        )
+        self._events.append(event)
+        with self.path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(event.to_dict()) + "\n")
+        return event
+
+    def events(self) -> Sequence[LineageEvent]:
+        return tuple(self._events)
