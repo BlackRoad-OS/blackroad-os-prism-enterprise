@@ -204,6 +204,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `scripts/blackroad_sync.py` CI/CD helper script.
 - Harden API security middleware and add health tests.
 
+## 2025-08-16
+
+- Cleanup: hardened API, added tests and CI tooling.
+
 ## 1.0.0 (2025-08-16)
 
 ### Features

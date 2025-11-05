@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 from app import app
 # <!-- FILE: srv/lucidia-llm/test_app.py -->
 from importlib import util
+import sys
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -22,6 +23,11 @@ def _load_app():
 
 app = _load_app()
 
+HERE = Path(__file__).resolve().parent
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+
+from app import app
 
 def test_health():
     client = TestClient(app)
