@@ -8,6 +8,8 @@ import re
 import subprocess
 import sys
 import subprocess
+import subprocess
+import sys
 from contextlib import redirect_stdout
 from pathlib import Path
 
@@ -160,6 +162,16 @@ def install_package():
         env=pip_env,
     proc = subprocess.run(
         ["pip", "install", package],
+@app.post("/install")
+def install_package():
+    """Install a Python package via ``pip`` within the environment."""
+    data = request.get_json(silent=True) or {}
+    package = data.get("package")
+    if not isinstance(package, str) or not package.strip():
+        return jsonify({"error": "missing package"}), 400
+    package = package.strip()
+    proc = subprocess.run(
+        [sys.executable, "-m", "pip", "install", package],
         capture_output=True,
         text=True,
     )
@@ -178,6 +190,15 @@ def git_clean():
         return jsonify({"error": "invalid path"}), 400
     if not (repo_path / ".git").exists():
         return jsonify({"error": "not a git repo"}), 400
+    raw_path = data.get("path", ".")
+    try:
+        repo_path = Path(raw_path).expanduser().resolve()
+    except (TypeError, RuntimeError):
+        return jsonify({"error": "invalid path"}), 400
+    if not repo_path.is_dir():
+        return jsonify({"error": "invalid path"}), 400
+    if not (repo_path / ".git").is_dir():
+        return jsonify({"error": "invalid path"}), 400
     reset = subprocess.run(
         ["git", "reset", "--hard"],
         cwd=repo_path,

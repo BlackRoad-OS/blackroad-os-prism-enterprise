@@ -76,6 +76,24 @@ def test_install_package_allowlisted(monkeypatch):
     assert called["env"].get("PIP_NO_INPUT") == "1"
 def test_install_package():
     client = app.test_client()
+def test_install_package(monkeypatch):
+    client = app.test_client()
+
+    class FakeCompletedProcess:
+        returncode = 0
+        stdout = "installed"
+        stderr = ""
+
+    calls: list[list[str]] = []
+
+    def fake_run(
+        cmd, capture_output, text, **kwargs
+    ):  # noqa: ANN001, ARG002 - match subprocess signature
+        calls.append(cmd)
+        return FakeCompletedProcess()
+
+    monkeypatch.setattr("lucidia.app.subprocess.run", fake_run)
+
     resp = client.post("/install", json={"package": "itsdangerous==2.2.0"})
     data = resp.get_json()
     assert resp.status_code == 200
@@ -94,6 +112,15 @@ def test_install_package_rejected():
     data = resp.get_json()
     assert resp.status_code == 403
     assert data["error"] == "package not allowed"
+
+
+    assert calls == [[sys.executable, "-m", "pip", "install", "itsdangerous==2.2.0"]]
+
+
+def test_install_package_missing_value():
+    client = app.test_client()
+    resp = client.post("/install", json={})
+    assert resp.status_code == 400
 
 
 def test_git_clean(tmp_path):
@@ -126,3 +153,15 @@ def test_math_endpoint():
     assert data["result"] == "x**2"
     assert data["derivative"] == "2*x"
 
+def test_git_clean_invalid_path():
+    client = app.test_client()
+    resp = client.post("/git/clean", json={"path": "/does/not/exist"})
+    assert resp.status_code == 400
+
+
+def test_git_clean_requires_git_repo(tmp_path):
+    folder = tmp_path / "plain"
+    folder.mkdir()
+    client = app.test_client()
+    resp = client.post("/git/clean", json={"path": str(folder)})
+    assert resp.status_code == 400
