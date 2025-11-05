@@ -115,6 +115,49 @@ cp .env.production .env
 docker-compose -f docker-compose.prod.yml build --no-cache
 docker-compose -f docker-compose.prod.yml up -d
 docker-compose -f docker-compose.prod.yml logs -f
+# BlackRoad Deployment
+
+## Environment
+
+1. Copy `srv/blackroad-api/.env.example` to `.env` and fill secrets.
+2. `INTERNAL_TOKEN` is used for privileged API calls.
+3. `GITHUB_WEBHOOK_SECRET` verifies GitHub webhooks.
+
+## GitHub App
+
+1. Visit GitHub → Settings → Developer settings → GitHub Apps → New GitHub App.
+2. Use `srv/blackroad-api/github_app_manifest.json` as a template.
+3. Set webhook URL to `https://blackroad.io/api/webhooks/github` and secret to `GITHUB_WEBHOOK_SECRET`.
+4. Install the app on repositories under `blackboxprogramming`.
+
+## Fallback Webhook
+
+If not using a GitHub App, create a classic webhook pointing to `/api/webhooks/github` with the same secret.
+
+## Branch Policy
+
+- `main` → production
+- `staging` → staging
+
+## Environment Manifests
+
+The canonical description of each deploy surface now lives in
+`infra/environments/environments.yaml`. Automation should read this
+file to determine which GitHub Actions workflow to trigger, which
+provider (Fly.io or AWS ECS) to target, and the required policy
+gates before a release can be promoted. Update the manifest before
+changing Terraform modules or workflow logic so all tooling shares
+the same source of truth.
+
+## Admin UI
+
+Serve `var/www/blackroad/admin/index.html` and access it. Enter the internal token to use deployment actions.
+
+## Backups
+
+Nightly cron:
+```
+0 3 * * * /usr/local/bin/blackroad-backup-sqlite.sh
 ```
 
 Expose `/healthz` through the bundled Caddy configuration or install Nginx per
