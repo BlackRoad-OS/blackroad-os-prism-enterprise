@@ -74,6 +74,7 @@ extension points for future integrations.
 | 023 | The Dialogue Doctrine   | Conversations stay clear, attributed, and consensual. |
 | 016 | The Simplicity Mandate | Simplicity is safety; keep workflows lean.      |
 | 044 | The Translational Tier | Pipeline of prompts that convert ideas into testable assets. |
+| 017 | The Energy Oath        | Energy stewardship with transparency and green defaults. |
 
 ## BlackRoad Pipeline
 
