@@ -374,6 +374,14 @@ import trMkt from './routes/treasury/market.js';
 import trCred from './routes/treasury/credit.js';
 import trHedge from './routes/treasury/hedges.js';
 import trPol from './routes/treasury/policy.js';
+import consEntities from './routes/cons/entities.js';
+import consCOA from './routes/cons/coa.js';
+import consTB from './routes/cons/tb.js';
+import consFX from './routes/cons/fx.js';
+import consIC from './routes/cons/ic.js';
+import consRun from './routes/cons/run.js';
+import consTasks from './routes/cons/tasks.js';
+import consPack from './routes/cons/pack.js';
 
 dotenv.config();
 import express from "express";
@@ -629,6 +637,7 @@ app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
 app.use('/api/invoices', invoices);
+app.use('/api/cons', consEntities, consCOA, consTB, consFX, consIC, consRun, consTasks, consPack);
 
 const port = process.env.PORT || 4000;
 
