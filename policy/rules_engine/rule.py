@@ -43,14 +43,18 @@ class Rule:
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> "Rule":
+        """Construct a :class:`Rule` from a rule definition mapping."""
+
         rule_id = payload.get("id") or payload.get("rule_id")
         if not rule_id:
             raise KeyError("rule id is required")
+
         expr = payload["expr"]
         mode_value = payload.get("mode") or payload.get("category") or RuleMode.OBSERVE.value
         mode = RuleMode(mode_value)
         severity = payload.get("severity", "low")
         block_on_error = bool(payload.get("block_on_error", False))
+
         metadata = dict(payload.get("metadata", {}))
         passthrough_keys = (
             "name",
@@ -65,18 +69,20 @@ class Rule:
             "docs_chart",
             "comments",
             "category",
+            "version",
         )
         for key in passthrough_keys:
-        for key in ("name", "owners", "docs_url"):
             if key in payload and key not in metadata:
                 metadata[key] = payload[key]
-        rule_id = payload["id"]
-        expr = payload["expr"]
-        mode = RuleMode(payload.get("mode", RuleMode.OBSERVE.value))
-        severity = payload.get("severity", "low")
-        block_on_error = bool(payload.get("block_on_error", False))
-        metadata = dict(payload.get("metadata", {}))
-        return cls(rule_id, expr, mode=mode, severity=severity, block_on_error=block_on_error, metadata=metadata)
+
+        return cls(
+            rule_id,
+            expr,
+            mode=mode,
+            severity=severity,
+            block_on_error=block_on_error,
+            metadata=metadata,
+        )
 
     def evaluate(self, event: Mapping[str, Any], ctx: EvaluationContext) -> RuleEvaluationResult:
         ctx.captures = {}
@@ -84,34 +90,24 @@ class Rule:
         try:
             outcome = bool(self._evaluator.evaluate(event, ctx))
         except Exception as exc:
-            details = ctx.to_details()
-            rule_details = details.setdefault(
-                "rule", {"id": self.id, "mode": self.mode.value, "severity": self.severity}
-            )
-            if isinstance(self.metadata, dict):
-                if "name" in self.metadata:
-                    rule_details.setdefault("name", self.metadata["name"])
-                if "owners" in self.metadata:
-                    rule_details.setdefault("owners", self.metadata["owners"])
-                if "docs_url" in self.metadata:
-                    rule_details.setdefault("docs_url", self.metadata["docs_url"])
+            details = self._build_details(ctx)
             return RuleEvaluationResult(False, details, error=exc)
+
+        details = self._build_details(ctx)
+        return RuleEvaluationResult(outcome, details)
+
+    # -----------------------------------------------------------------
+    def _build_details(self, ctx: EvaluationContext) -> Dict[str, Any]:
         details = ctx.to_details()
         rule_details = details.setdefault(
             "rule", {"id": self.id, "mode": self.mode.value, "severity": self.severity}
         )
         if isinstance(self.metadata, dict):
-            if "name" in self.metadata:
-                rule_details.setdefault("name", self.metadata["name"])
-            if "owners" in self.metadata:
-                rule_details.setdefault("owners", self.metadata["owners"])
-            if "docs_url" in self.metadata:
-                rule_details.setdefault("docs_url", self.metadata["docs_url"])
-            details.setdefault("rule", {"id": self.id, "mode": self.mode.value, "severity": self.severity})
-            return RuleEvaluationResult(False, details, error=exc)
-        details = ctx.to_details()
-        details.setdefault("rule", {"id": self.id, "mode": self.mode.value, "severity": self.severity})
-        return RuleEvaluationResult(outcome, details)
+            for key in ("name", "owners", "docs_url"):
+                value = self.metadata.get(key)
+                if value is not None:
+                    rule_details.setdefault(key, value)
+        return details
 
 
 @dataclass

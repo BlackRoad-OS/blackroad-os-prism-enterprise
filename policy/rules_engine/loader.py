@@ -16,7 +16,6 @@ from .rule import Rule
 class RuleTestCase:
     name: str
     want: Any
-    want: bool
     input: Optional[Dict[str, Any]] = None
     series: Optional[List[Dict[str, Any]]] = None
     window: Optional[str] = None
@@ -58,34 +57,36 @@ def load_rule_file(path: str | Path) -> tuple[Rule, List[RuleTestCase]]:
 
     tests: List[RuleTestCase] = []
     for entry in payload.get("tests", []):
+        input_payload = entry.get("input")
+        baseline_payload = entry.get("baseline")
+        metadata_payload = entry.get("metadata")
+        expect_details_payload = entry.get("expect_details")
+
         tc = RuleTestCase(
             name=entry["name"],
             want=entry.get("want"),
-            want=bool(entry.get("want")),
-            input=dict(entry.get("input", {})),
-            window=entry.get("window"),
-            baseline=dict(entry.get("baseline", {})),
-            metadata=dict(entry.get("metadata", {})),
+            input=dict(input_payload) if isinstance(input_payload, Mapping) else None,
+            window=str(entry["window"]) if "window" in entry and entry["window"] is not None else None,
+            baseline=dict(baseline_payload) if isinstance(baseline_payload, Mapping) else None,
+            metadata=dict(metadata_payload) if isinstance(metadata_payload, Mapping) else None,
             now=entry.get("now"),
             fixture=entry.get("fixture"),
-            expect_details=entry.get("expect_details"),
+            expect_details=dict(expect_details_payload) if isinstance(expect_details_payload, Mapping) else None,
             expect_error=entry.get("expect_error"),
             guid=entry.get("guid"),
         )
-        if "series" in entry:
-            series_entry = entry["series"]
-            if isinstance(series_entry, Mapping):
-                events = series_entry.get("events", [])
-                if isinstance(events, list):
-                    tc.series = _expand_series(events)
-                window = series_entry.get("window")
-                if window:
-                    tc.window = str(window)
-            else:
-                tc.series = _expand_series(series_entry)
-        )
-        if "series" in entry:
-            tc.series = _expand_series(entry["series"])
+
+        series_entry = entry.get("series")
+        if isinstance(series_entry, Mapping):
+            events = series_entry.get("events")
+            if isinstance(events, list):
+                tc.series = _expand_series(events)
+            window = series_entry.get("window")
+            if window:
+                tc.window = str(window)
+        elif isinstance(series_entry, list):
+            tc.series = _expand_series(series_entry)
+
         tests.append(tc)
     return rule, tests
 
