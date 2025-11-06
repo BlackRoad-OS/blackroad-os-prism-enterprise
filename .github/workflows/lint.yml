@@ -10,6 +10,8 @@ permissions:
   pull_request:
     branches: [main]
 permissions: { contents: read }
+permissions:
+  contents: read
 
 jobs:
   eslint:
@@ -25,6 +27,8 @@ jobs:
       - name: Use Node.js 20.x
         # v4.4.0 https://github.com/actions/setup-node/releases/tag/v4.4.0
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
       - name: Install dependencies
