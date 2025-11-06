@@ -39,7 +39,8 @@ def _sign_payload(payload: str, key: bytes) -> str:
 
 def _iter_memory(path: Path) -> Iterator[dict[str, object]]:
     if not path.exists():
-        return iter(())
+        yield from ()
+        return
     with path.open("r", encoding="utf-8") as handle:
         for line in handle:
             line = line.strip()
