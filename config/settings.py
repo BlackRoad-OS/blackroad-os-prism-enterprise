@@ -1,9 +1,5 @@
-"""Application settings.
+"""Centralised runtime configuration for the console."""
 
-This module centralises runtime configuration for the console.  Values are
-kept simple so tests can tweak them easily.  Environment variables are not
-used to keep the code fully offline and deterministic.
-"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -11,7 +7,7 @@ from dataclasses import dataclass
 
 @dataclass(slots=True)
 class Settings:
-    """Basic settings container."""
+    """Basic settings container used across the console."""
 
     CACHE_TTL_SECONDS: int = 60
     CACHE_BACKEND: str = "memory"

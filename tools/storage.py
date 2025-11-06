@@ -1,4 +1,5 @@
 """Storage helpers for Prism console utilities."""
+"""File-system backed storage helpers used by the console."""
 
 from __future__ import annotations
 
@@ -9,9 +10,9 @@ from typing import Any, Iterable, Union
 
 import yaml
 
-BASE_DIR = Path(__file__).resolve().parents[1]
-DATA_ROOT = Path(os.environ.get("PRISM_DATA_ROOT", BASE_DIR / "data"))
+BASE_DIR = Path.cwd()
 CONFIG_ROOT = BASE_DIR / "config"
+DATA_ROOT = BASE_DIR / "data"
 READ_ONLY = os.environ.get("PRISM_READ_ONLY", "0") == "1"
 
 
@@ -19,7 +20,7 @@ def _ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
 
-def write(path: str, content: Union[dict, str]) -> None:
+def write(path: Union[str, Path], content: Union[dict[str, Any], str]) -> None:
     target = Path(path)
     _ensure_parent(target)
     mode = "a" if target.suffix == ".jsonl" else "w"
@@ -32,6 +33,7 @@ def write(path: str, content: Union[dict, str]) -> None:
 
 
 def read(path: str) -> str:
+def read(path: Union[str, Path]) -> str:
     target = Path(path)
     if not target.exists():
         return ""
@@ -95,6 +97,8 @@ def read_text(path: str, *, from_data: bool = False) -> str:
     if not from_data and not target.exists():
         target = BASE_DIR / path
     return target.read_text(encoding="utf-8")
+    with target.open("r", encoding="utf-8") as handle:
+        return handle.read()
 
 
 def write_text(path: str, text: str, *, from_data: bool = False) -> None:
@@ -111,6 +115,21 @@ def save(path: str, content: bytes) -> None:
 
 
 def load_json(path: Path, default: Any) -> Any:
+    with target.open("w", encoding="utf-8") as handle:
+        handle.write(text)
+
+
+def save(path: str, content: bytes) -> None:
+    """Stubbed storage write used by legacy callers."""
+
+    raise NotImplementedError(
+        "Storage adapter not implemented. TODO: connect to object store"
+    )
+
+
+def load_json(path: Path, default: Any) -> Any:
+    """Load JSON data from *path* if it exists, otherwise return *default*."""
+
     if path.exists():
         with path.open("r", encoding="utf-8") as handle:
             return json.load(handle)
@@ -119,6 +138,9 @@ def load_json(path: Path, default: Any) -> Any:
 
 def save_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    """Persist *data* as JSON to *path*."""
+
+    _ensure_parent(path)
     with path.open("w", encoding="utf-8") as handle:
         json.dump(data, handle, indent=2, default=str)
 
@@ -137,3 +159,4 @@ __all__ = [
     "load_json",
     "save_json",
 ]
+

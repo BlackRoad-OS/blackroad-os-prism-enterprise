@@ -1,4 +1,4 @@
-"""Command line interface for the Prism Console."""
+"""Typer-based CLI entry points for the Prism console."""
 
 from __future__ import annotations
 

@@ -1,4 +1,5 @@
 """Shared typing contracts for Prism Console bots and tasks."""
+"""Core data structures and protocols for the orchestrator."""
 
 from __future__ import annotations
 
@@ -6,6 +7,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, Mapping, MutableMapping, Optional, Protocol, Sequence, runtime_checkable
+from typing import Any, Dict, List, Mapping, MutableMapping, Optional, Sequence, Protocol, runtime_checkable
 
 
 class TaskPriority(str, Enum):
@@ -34,8 +36,14 @@ class Task:
     status: str = "pending"
     depends_on: Sequence[str] = field(default_factory=tuple)
     scheduled_for: datetime | None = None
+    metadata: MutableMapping[str, Any] = field(default_factory=dict)
+    config: MutableMapping[str, Any] = field(default_factory=dict)
+    context: MutableMapping[str, Any] = field(default_factory=dict)
+    status: str = "pending"
+    depends_on: Sequence[str] = field(default_factory=tuple)
+    scheduled_for: Optional[datetime] = None
 
-    def __post_init__(self) -> None:
+    def __post_init__(self) -> None:  # pragma: no cover - trivial conversions
         if isinstance(self.priority, str):
             self.priority = TaskPriority(self.priority.lower())
 
@@ -49,6 +57,10 @@ class Task:
         self.tags = tuple(self.tags)
         self.depends_on = tuple(self.depends_on)
 
+        if not isinstance(self.tags, tuple):
+            self.tags = tuple(self.tags)
+        if not isinstance(self.depends_on, tuple):
+            self.depends_on = tuple(self.depends_on)
         if self.metadata is None:
             self.metadata = {}
         if not isinstance(self.metadata, MutableMapping):
@@ -158,6 +170,7 @@ class BaseBot(Protocol):
     """Protocol describing the runtime contract for lightweight bots."""
 
     NAME: str
+    metadata: Any
 
     def run(self, task: Task) -> Any:  # pragma: no cover - implementation specific
         ...
@@ -171,3 +184,4 @@ __all__ = [
     "BotExecutionError",
     "BaseBot",
 ]
+

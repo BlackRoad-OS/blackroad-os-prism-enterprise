@@ -1,4 +1,5 @@
 """Bot discovery helpers used by the Prism Console orchestrator."""
+"""Bot discovery utilities."""
 
 from __future__ import annotations
 
@@ -18,6 +19,18 @@ def _iter_bot_modules() -> Iterable[str]:
     for module_path in package_path.glob("*_bot.py"):
         if module_path.name == "simple.py":
             # ``simple.py`` contains fixtures used in tests rather than a bot module.
+__all__ = ["BOT_REGISTRY", "build_registry", "list_bots"]
+
+BOT_REGISTRY: Dict[str, BaseBot | object] = {}
+
+
+def _iter_bot_modules() -> Iterable[str]:
+    """Yield module names for all bot implementations in this package."""
+
+    package_path = Path(__file__).resolve().parent
+    for module_path in package_path.glob("*_bot.py"):
+        if module_path.stem == "simple":
+            # ``simple.py`` hosts fixtures rather than a runnable bot.
             continue
         yield module_path.stem
 
@@ -30,7 +43,7 @@ def _instantiate_bots(module_name: str) -> Iterator[Tuple[str, object]]:
     bot_cls = getattr(module, "Bot", None)
     if bot_cls is not None:
         bot = bot_cls()
-        name = getattr(bot, "NAME", bot_cls.__name__)
+        name = getattr(bot, "NAME", getattr(bot_cls, "NAME", bot_cls.__name__))
         yield name, bot
 
     for attr_name in dir(module):
@@ -44,6 +57,8 @@ def _instantiate_bots(module_name: str) -> Iterator[Tuple[str, object]]:
 
 
 def _discover() -> None:
+    """Populate :data:`BOT_REGISTRY` with discovered bot instances."""
+
     for module_name in _iter_bot_modules():
         for name, bot in _instantiate_bots(module_name):
             BOT_REGISTRY[name] = bot
