@@ -1,6 +1,4 @@
-"""Bot discovery helpers used by the Prism Console orchestrator."""
-"""Bot discovery utilities."""
-"""Bot registry helpers for the Prism Console orchestrator."""
+"""Bot discovery helpers used by integration tests."""
 
 from __future__ import annotations
 
@@ -10,38 +8,21 @@ from typing import Dict, Iterable, Iterator, Sequence, Tuple
 
 from orchestrator import BaseBot, BotRegistry
 
-BOT_REGISTRY: Dict[str, object] = {}
-
-
-def _iter_bot_modules() -> Iterable[str]:
-    """Yield module names for available bot implementations."""
-
-    package_path = Path(__file__).resolve().parent
-    for module_path in package_path.glob("*_bot.py"):
-        if module_path.name == "simple.py":
-            # ``simple.py`` contains fixtures used in tests rather than a bot module.
-__all__ = ["BOT_REGISTRY", "build_registry", "list_bots"]
-
-BOT_REGISTRY: Dict[str, BaseBot | object] = {}
 BotLike = BaseBot | object
-
-# Public mapping used by tests to access lightweight script-style bots.
 BOT_REGISTRY: Dict[str, BotLike] = {}
 
 
 def _iter_bot_modules() -> Iterable[str]:
-    """Yield module names for all bot implementations in this package."""
+    """Yield module names for concrete bot implementations."""
 
     package_path = Path(__file__).resolve().parent
     for module_path in package_path.glob("*_bot.py"):
         if module_path.stem == "simple":
-            # ``simple.py`` hosts fixtures rather than a runnable bot.
+            # ``simple.py`` contains fixtures used only in tests.
             continue
         yield module_path.stem
 
 
-def _instantiate_bots(module_name: str) -> Iterator[Tuple[str, object]]:
-    """Instantiate bot objects exposed by *module_name*."""
 def _instantiate_bots(module_name: str) -> Iterator[Tuple[str, BotLike]]:
     """Instantiate bots exposed by ``module_name``."""
 
@@ -79,7 +60,7 @@ def build_registry() -> BotRegistry:
     """Instantiate a :class:`BotRegistry` populated with discovered bots."""
 
     registry = BotRegistry()
-    for name, bot in BOT_REGISTRY.items():
+    for bot in BOT_REGISTRY.values():
         if isinstance(bot, BaseBot):
             registry.register(bot)
     return registry
@@ -92,4 +73,3 @@ def list_bots() -> Sequence[str]:
 
 
 __all__ = ["BOT_REGISTRY", "build_registry", "list_bots"]
-
