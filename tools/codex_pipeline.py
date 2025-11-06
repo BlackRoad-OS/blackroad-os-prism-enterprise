@@ -52,6 +52,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 from urllib import error, request
+from urllib import request
 
 import requests
 from dotenv import load_dotenv
