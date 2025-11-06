@@ -11,6 +11,9 @@ import re
 # match is not immediately followed by an alphanumeric character so that
 # strings such as ``"1a"`` are treated as invalid.
 _NUMERIC_PREFIX = re.compile(r"^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))(?![0-9A-Za-z_])")
+# Matches optional leading whitespace, an optional sign, digits, and an optional
+# fractional part.
+_NUMERIC_PREFIX = re.compile(r"^\s*([+-]?\d+(?:\.\d+)?)")
 
 
 def parse_numeric_prefix(text: str) -> float:
