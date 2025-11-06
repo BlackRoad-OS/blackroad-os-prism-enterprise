@@ -119,6 +119,20 @@ class AutoNovelAgent:
 
         self._require_scope("add_supported_engine")
         self.supported_engines.add(self._normalize_engine(engine))
+        Args:
+            engine: Name of the engine to allow.
+
+        Raises:
+            TypeError: If ``engine`` is not a string.
+            ValueError: If ``engine`` is empty or only whitespace.
+        """
+        if not isinstance(engine, str):
+            raise TypeError("Engine name must be provided as a string.")
+
+        engine_clean = engine.strip()
+        if not engine_clean:
+            raise ValueError("Engine name must be a non-empty string.")
+        self.SUPPORTED_ENGINES.add(engine_clean.lower())
 
     def remove_supported_engine(self, engine: str) -> None:
         """Remove a game engine, raising ``ValueError`` if it is unknown."""
