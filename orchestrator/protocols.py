@@ -1,12 +1,11 @@
-"""Core data structures for the Prism orchestrator."""
-"""Protocols and dataclasses for task orchestration."""
+"""Core data structures shared across orchestrator components."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Mapping, MutableMapping, Optional, Sequence
+from typing import Any, Dict, List, Mapping, MutableMapping, Optional, Sequence
 
 
 class TaskPriority(str, Enum):
@@ -19,17 +18,36 @@ class TaskPriority(str, Enum):
 
 @dataclass(slots=True)
 class Task:
-    """Normalized task representation."""
+    """Normalised task representation used by bots and the router."""
 
     id: str
     goal: str
-    owner: str
-    priority: TaskPriority
-    created_at: datetime
+    bot: str = ""
+    owner: str = ""
+    priority: TaskPriority | str = TaskPriority.MEDIUM
+    created_at: datetime = field(default_factory=datetime.utcnow)
     due_date: Optional[datetime] = None
     tags: Sequence[str] = field(default_factory=tuple)
     metadata: MutableMapping[str, Any] = field(default_factory=dict)
     config: Mapping[str, Any] = field(default_factory=dict)
+    context: Dict[str, Any] = field(default_factory=dict)
+    status: str = "pending"
+    depends_on: List[str] = field(default_factory=list)
+    scheduled_for: Optional[datetime] = None
+
+    def __post_init__(self) -> None:
+        if isinstance(self.priority, str):
+            self.priority = TaskPriority(self.priority.lower())
+        if not isinstance(self.tags, tuple):
+            self.tags = tuple(self.tags)
+        if not isinstance(self.metadata, MutableMapping):
+            self.metadata = dict(self.metadata)
+        if not isinstance(self.config, Mapping):
+            self.config = dict(self.config)
+        if not isinstance(self.context, dict):
+            self.context = dict(self.context)
+        if not isinstance(self.depends_on, list):
+            self.depends_on = list(self.depends_on)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the task to a serialisable dictionary."""
@@ -37,15 +55,21 @@ class Task:
         payload: Dict[str, Any] = {
             "id": self.id,
             "goal": self.goal,
+            "bot": self.bot,
             "owner": self.owner,
             "priority": self.priority.value,
             "created_at": self.created_at.isoformat(),
             "tags": list(self.tags),
             "metadata": dict(self.metadata),
             "config": dict(self.config),
+            "context": dict(self.context),
+            "status": self.status,
+            "depends_on": list(self.depends_on),
         }
         if self.due_date:
             payload["due_date"] = self.due_date.isoformat()
+        if self.scheduled_for:
+            payload["scheduled_for"] = self.scheduled_for.isoformat()
         return payload
 
 
@@ -103,7 +127,6 @@ class MemoryRecord:
             "previous_hash": self.previous_hash,
             "hash": self.hash,
         }
-from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
 
 
 class BotExecutionError(Exception):
@@ -115,22 +138,10 @@ class BotExecutionError(Exception):
         self.details = details
 
 
-@dataclass
-class Task:
-    id: str
-    goal: str
-    bot: str
-    context: Dict[str, Any] = field(default_factory=dict)
-    status: str = "pending"
-    depends_on: List[str] = field(default_factory=list)
-    scheduled_for: Optional[datetime] = None
-
-
-@runtime_checkable
-class BaseBot(Protocol):
-    NAME: str
-    SUPPORTED_TASKS: List[str]
-
-    def run(self, task: Task) -> Any:  # pragma: no cover - implementation specific
-        ...
-
+__all__ = [
+    "TaskPriority",
+    "Task",
+    "BotResponse",
+    "MemoryRecord",
+    "BotExecutionError",
+]
