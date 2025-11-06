@@ -45,6 +45,67 @@ LLM stub on port **8000** if none is running.
 - `srv/lucidia-llm/` — minimal FastAPI echo stub (only used if you don’t already run an LLM on 8000)
 - `srv/lucia-llm/` — same stub (duplicate dir name for compatibility with earlier scripts)
 
+## Modular Arithmetic Toolkit
+
+This repository now ships a focused toolkit for modular exponentiation and multiplicative order
+analysis, suitable for demonstrating classical number-theoretic routines that underpin
+Shor-style period finding. The implementation is deterministic, relies on Python 3.11 standard
+libraries, and exposes both programmatic and CLI entry points.
+
+### Quickstart
+
+```bash
+python -m pip install -e .
+python cli.py modexp --a 7 --e 560 --modulus 561
+```
+
+### Examples
+
+```bash
+# Fast modular exponentiation
+python cli.py modexp --a 7 --e 560 --modulus 561 --json
+
+# Compute a multiplicative order with verbose diagnostics
+python cli.py order --a 4 --modulus 21 --verbose
+
+# Benchmark the exponentiation routine
+python cli.py bench --a 2 --e 2048 --modulus 8191 --iterations 500
+```
+
+### API Highlights
+
+- `modmath.modexp(base, exponent, modulus)` → `int`
+- `modmath.multiplicative_order(base, modulus, max_iter=None)` → `int`
+- `modmath.benchmark_modexp(base, exponent, modulus, iterations=10)` → `BenchmarkResult`
+
+See `src/modmath/__init__.py` for docstrings, parameter validation details, and error classes.
+
+### I/O Contract
+
+- **Inputs:** integers `base`, `exponent ≥ 0`, `modulus ≥ 1`; optional `max_iter ≥ 1` and
+  `iterations ≥ 1`. All values validated before execution.
+- **Outputs:** integers for modular exponentiation and order; benchmarking returns structured
+  timings via `BenchmarkResult` or JSON payloads when requested from the CLI.
+- **Edge cases:** zero exponents yield `1` modulo `N`; modulus of `1` collapses results to `0` or
+  `1`; non-coprime pairs for order raise `MultiplicativeOrderError`; negative values are
+  accepted after modular reduction.
+- **Performance target:** handles moduli up to ~64-bit comfortably; `modexp` runs in `O(log e)`;
+  order finding relies on trial division factoring and is suitable for toy RSA composites.
+
+### Complexity & Performance
+
+- `modexp` performs `O(log exponent)` modular multiplications via exponentiation by squaring.
+- `multiplicative_order` factors Euler’s totient φ(n) by trial division—fast for 64-bit composites
+  but not intended for cryptographic-scale moduli.
+- The CLI benchmark reports aggregate and per-iteration timings to help profile repeated calls.
+
+### Limitations
+
+- Inputs must be integers; non-integer values raise type errors.
+- Multiplicative order requires `gcd(base, modulus) == 1` and may be slow for moduli with large
+  prime factors due to naive factorisation.
+- The toolkit is educational and **not** suitable for production cryptography.
+
 > Nothing here overwrites your existing code. The scripts are defensive: they detect paths,
 > **merge** deps, and only generate files if missing.
 
