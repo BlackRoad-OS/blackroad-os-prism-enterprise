@@ -81,7 +81,8 @@ extension points for future integrations.
 | 046 | The Sustainability Charter | Ethical, diversified funding keeps Lucidia stable. |
 | 029 | The Balance Law        | Dynamic equilibrium across speed, safety, creativity, and care. |
 =======
->>>>>>> origin/codex/draft-codex-entries-2-to-10
+| 055 | Generative Care Frameworks | Signal loops, micro-AIs, and rituals that propagate care inventions. |
+>>>>>>> origin/codex/explore-generative-frameworks-for-inventions
 
 ## BlackRoad Pipeline
 
