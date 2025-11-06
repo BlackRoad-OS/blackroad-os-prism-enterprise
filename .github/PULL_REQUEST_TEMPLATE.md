@@ -8,6 +8,12 @@ Provide a short (1-2 line) summary of the change.
 ## Balance Note
 - Impact across speed, safety, creativity, and care
 
+## What
+- Summary
+
+## Why
+- Business / reliability impact
+
 ## Checks
 - [ ] CI green
 - [ ] API /api/health returns 200
@@ -149,3 +155,6 @@ Notes for reviewers / special instructions:
 **Checklist**
 - [ ] Tests added or updated
 - [ ] Docs updated
+
+> Comment `@codex fix comments` to trigger bot autofix.
+

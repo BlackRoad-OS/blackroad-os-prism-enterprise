@@ -20,3 +20,7 @@ lightning/** @blackboxprogramming/maintainers
 /runbooks/         @platform-team
 miners/** @blackboxprogramming/maintainers
 lightning/** @blackboxprogramming/maintainers
+/apps/api/       @platform-team
+/apps/web-public/ @platform-team
+/ops/            @sre-team
+/scripts/        @platform-team

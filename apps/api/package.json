@@ -93,6 +93,7 @@
     "@semantic-release/commit-analyzer": "^13.0.0",
     "@semantic-release/release-notes-generator": "^14.0.1",
   "version": "0.1.2",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -101,6 +102,8 @@
     "start": "node dist/server.js",
     "lint": "eslint . || true",
     "test": "node --test"
+    "test": "node --test",
+    "test:jest": "jest --passWithNoTests"
   },
   "dependencies": {
     "express": "^4.19.2",
@@ -108,6 +111,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.0",
     "stripe": "^16.0.0"
+    "dotenv": "^16.4.0"
   },
   "devDependencies": {
     "typescript": "^5.4.0",
@@ -151,6 +155,9 @@
     "typescript": "^5.4.0",
     "@types/express": "^4.17.21",
     "@types/node": "^20.11.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "@types/jest": "^29.5.12",
     "eslint": "^9.0.0",
     "prettier": "^3.3.3"
   }

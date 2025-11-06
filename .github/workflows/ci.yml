@@ -213,3 +213,28 @@ jobs:
           python-version: '3.11'
       - run: pip install fastapi pydantic pytest httpx
       - run: pytest srv/lucidia-llm/test_app.py
+          python -m pip install .
+          brc plm:items:load --dir fixtures/plm/items
+          brc plm:bom:load --dir fixtures/plm/boms
+          A1=$(sha256sum artifacts/plm/items.json | cut -d' ' -f1)
+          A2=$(sha256sum artifacts/plm/items.json | cut -d' ' -f1)
+          test "$A1" = "$A2"
+      - name: Contract validation
+        run: python scripts/validate_contracts.py
+      - name: Artifacts hash
+        run: bash scripts/hash_artifacts.sh || true
+
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci --prefix apps/api
+      - run: npm run build --prefix apps/api
+      - run: npm test --prefix apps/api --if-present
+      - name: Upload API dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-dist
+          path: apps/api/dist

@@ -652,6 +652,13 @@ app.use('/api/invoices', invoices);
 app.use('/api/cons', consEntities, consCOA, consTB, consFX, consIC, consRun, consTasks, consPack);
 app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
 
+app.get('/api/health', (_req, res) => res.json({ ok: true }));
+
+import hooks from './routes/hooks.js';
+import metrics from './routes/metrics.js';
+app.use('/api/hooks', hooks);
+app.use('/api/metrics', metrics);
+
 const port = process.env.PORT || 4000;
 
 if (import.meta.url === `file://${process.argv[1]}`) {

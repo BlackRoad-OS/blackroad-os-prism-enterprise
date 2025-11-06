@@ -99,4 +99,6 @@ r.get('/github/open_bugs', (req, res) => {
   res.json({ points: [{ t: new Date().toISOString(), v: issues.length }] });
 });
 
+const r = Router();
+r.get('/', (_req, res) => res.json({ uptime: process.uptime(), ts: Date.now() }));
 export default r;
