@@ -43,6 +43,18 @@ _ASSETS: Dict[str, Asset] = {
         filename="cover_note_micro_template.txt",
         media_type="text/plain",
     ),
+    "openai_cover_letter": Asset(
+        key="openai_cover_letter",
+        description="Revised OpenAI cover letter grounded in repository evidence.",
+        filename="openai_cover_letter.md",
+        media_type="text/markdown",
+    ),
+    "openai_resume": Asset(
+        key="openai_resume",
+        description="Revised OpenAI-facing resume highlighting compliance architecture and orchestration.",
+        filename="openai_resume.md",
+        media_type="text/markdown",
+    ),
     "application_qa_schema": Asset(
         key="application_qa_schema",
         description="Structured JSON of common application questions and placeholders.",
