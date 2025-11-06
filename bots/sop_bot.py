@@ -17,6 +17,7 @@ class SopBot(BaseBot):
         kpis=["service_level", "inventory_turns"],
         guardrails=["No live system integrations"],
         handoffs=["Supply chain planning"],
+        tags=("conscious", "supply-chain", "planning"),
     )
 
     def handle_task(self, task: Task) -> BotResponse:

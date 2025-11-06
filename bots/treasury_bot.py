@@ -20,6 +20,7 @@ class TreasuryBot(BaseBot):
         kpis=["cash_floor", "hedge_coverage"],
         guardrails=["Offline deterministic calculations", "No external integrations"],
         handoffs=["Treasury operations"],
+        tags=("conscious", "finance", "treasury"),
     )
 
     def handle_task(self, task: Task) -> BotResponse:

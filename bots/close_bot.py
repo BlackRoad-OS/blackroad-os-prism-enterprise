@@ -17,6 +17,7 @@ class CloseBot(BaseBot):
         kpis=["close_duration", "reconciliation_completion"],
         guardrails=["Requires approvals for policy exceptions"],
         handoffs=["Controller team"],
+        tags=("conscious", "finance", "close"),
     )
 
     def handle_task(self, task: Task) -> BotResponse:
