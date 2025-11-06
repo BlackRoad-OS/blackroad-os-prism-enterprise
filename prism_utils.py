@@ -19,6 +19,13 @@ def parse_numeric_prefix(text: str) -> float:
     Numbers lacking a leading zero (``".5"``) or containing a sign are
     accepted, while invalid prefixes (``"1a"``) fall back to ``1.0``.
     Trailing characters after the numeric component are ignored.
+    """Return the leading numeric value in ``text`` or ``1.0`` if parsing fails.
+
+    The prefix may include negatives or decimals. The function uses
+    :func:`ast.literal_eval` for safety instead of ``eval`` and evaluates the
+    substring before the first comma. Only ``ValueError`` and ``SyntaxError``
+    are suppressed—covering empty strings, whitespace, non-numeric tokens, or
+    malformed expressions—and the default ``1.0`` is returned in those cases.
     """
 
     match = _NUMERIC_PREFIX.match(text)
