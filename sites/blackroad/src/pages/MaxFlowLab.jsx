@@ -178,6 +178,38 @@ export default function MaxFlowLab() {
   useEffect(() => {
     nodesRef.current = nodes;
   }, [nodes]);
+  // drag nodes
+  const drag = useRef(null);
+  const down = useRef(false);
+  const nodesRef = useRef(nodes);
+  useEffect(()=>{ nodesRef.current = nodes; }, [nodes]);
+  useEffect(()=>{
+    const svg = svgRef.current; if(!svg) return;
+    const downH=(e)=>{
+      const {x,y} = clientToSvg(e, svg);
+      const id = nodesRef.current.findIndex(p=> (p.x-x)**2+(p.y-y)**2 < 18**2);
+      if(id>=0){ down.current=true; drag.current=id; }
+    };
+    const moveH=(e)=>{
+      if(!down.current || drag.current==null) return;
+      const {x,y} = clientToSvg(e, svg);
+      setNodes(ns=> ns.map((p,i)=> i===drag.current ? {...p,x,y} : p));
+    };
+    const upH=()=>{ down.current=false; drag.current=null; };
+    svg.addEventListener("mousedown",downH);
+    window.addEventListener("mousemove",moveH);
+    window.addEventListener("mouseup",upH);
+    return ()=>{ svg.removeEventListener("mousedown",downH); window.removeEventListener("mousemove",moveH); window.removeEventListener("mouseup",upH); };
+  },[]);
+
+  // augmenting path step-by-step
+  const step = ()=>{
+    const r = edmondsKarp(C, 0, n-1);
+    setResult(r);
+    if(!r.paths.length) return setLastAug(null);
+    const idx = lastAug==null ? 0 : Math.min(r.paths.length-1, lastAug+1);
+    setLastAug(idx);
+  };
 
   return (
     <div className="p-4 space-y-3">
