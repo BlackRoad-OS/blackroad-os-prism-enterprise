@@ -1,5 +1,4 @@
 """Task routing, persistence, and scheduling helpers."""
-"""Routing helpers for executing tasks with bots."""
 
 from __future__ import annotations
 
@@ -7,16 +6,8 @@ import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Mapping, Sequence
+from typing import Dict, Mapping, Sequence
 
-from orchestrator.base import BaseBot
-from orchestrator.exceptions import BotNotRegisteredError, TaskNotFoundError
-from orchestrator.lineage import LineageTracker
-from orchestrator.memory import MemoryLog
-from orchestrator.policy import PolicyEngine
-from orchestrator.protocols import BotExecutionError, BotResponse, Task, TaskPriority
-
-from .metrics import log_metric
 from .base import BaseBot
 from .exceptions import BotNotRegisteredError, TaskNotFoundError
 from .lineage import LineageTracker
@@ -48,7 +39,7 @@ class BotRegistry:
 class TaskRepository:
     """Simple file-backed store for tasks."""
 
-    def __init__(self, path: Path):
+    def __init__(self, path: Path) -> None:
         self.path = path
         self.path.parent.mkdir(parents=True, exist_ok=True)
         if not self.path.exists():
@@ -63,6 +54,31 @@ class TaskRepository:
     def _save(self, data: Mapping[str, dict[str, object]]) -> None:
         self.path.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
+    @staticmethod
+    def _task_from_payload(payload: Mapping[str, object]) -> Task:
+        due_value = payload.get("due_date")
+        scheduled_value = payload.get("scheduled_for")
+        priority_value = payload.get("priority", TaskPriority.MEDIUM.value)
+
+        return Task(
+            id=str(payload["id"]),
+            goal=str(payload["goal"]),
+            owner=payload.get("owner"),
+            priority=priority_value,
+            created_at=datetime.fromisoformat(str(payload["created_at"])),
+            due_date=datetime.fromisoformat(str(due_value)) if due_value else None,
+            tags=tuple(payload.get("tags", [])),
+            metadata=dict(payload.get("metadata", {})),
+            config=dict(payload.get("config", {})),
+            bot=payload.get("bot"),
+            context=dict(payload.get("context", {})),
+            status=str(payload.get("status", "pending")),
+            depends_on=tuple(payload.get("depends_on", [])),
+            scheduled_for=(
+                datetime.fromisoformat(str(scheduled_value)) if scheduled_value else None
+            ),
+        )
+
     def add(self, task: Task) -> None:
         data = self._load()
         data[task.id] = task.to_dict()
@@ -71,79 +87,12 @@ class TaskRepository:
     def get(self, task_id: str) -> Task:
         data = self._load()
         payload = data.get(task_id)
-        if not payload:
+        if payload is None:
             raise TaskNotFoundError(f"Task '{task_id}' not found")
-        due_value = payload.get("due_date")
-        scheduled = payload.get("scheduled_for")
-        return Task(
-            id=payload["id"],
-            goal=payload["goal"],
-            owner=payload.get("owner"),
-            priority=TaskPriority(payload["priority"]),
-        scheduled_value = payload.get("scheduled_for")
-        return Task(
-            id=payload["id"],
-            goal=payload["goal"],
-            bot=payload.get("bot", ""),
-            owner=payload.get("owner", ""),
-            priority=payload.get("priority", TaskPriority.MEDIUM.value),
-            created_at=datetime.fromisoformat(payload["created_at"]),
-            due_date=datetime.fromisoformat(due_value) if due_value else None,
-            tags=tuple(payload.get("tags", [])),
-            metadata=dict(payload.get("metadata", {})),
-            config=dict(payload.get("config", {})),
-            bot=payload.get("bot"),
-            context=dict(payload.get("context", {})),
-            status=payload.get("status", "pending"),
-            depends_on=tuple(payload.get("depends_on", [])),
-            scheduled_for=datetime.fromisoformat(scheduled) if scheduled else None,
-            context=dict(payload.get("context", {})),
-            status=payload.get("status", "pending"),
-            depends_on=list(payload.get("depends_on", [])),
-            scheduled_for=(
-                datetime.fromisoformat(scheduled_value)
-                if scheduled_value
-                else None
-            ),
-        )
+        return self._task_from_payload(payload)
 
     def list(self) -> Sequence[Task]:
-        data = self._load()
-        tasks = []
-        for payload in data.values():
-            due_value = payload.get("due_date")
-            scheduled = payload.get("scheduled_for")
-            scheduled_value = payload.get("scheduled_for")
-            tasks.append(
-                Task(
-                    id=payload["id"],
-                    goal=payload["goal"],
-                    owner=payload.get("owner"),
-                    priority=TaskPriority(payload["priority"]),
-                    bot=payload.get("bot", ""),
-                    owner=payload.get("owner", ""),
-                    priority=payload.get("priority", TaskPriority.MEDIUM.value),
-                    created_at=datetime.fromisoformat(payload["created_at"]),
-                    due_date=datetime.fromisoformat(due_value) if due_value else None,
-                    tags=tuple(payload.get("tags", [])),
-                    metadata=dict(payload.get("metadata", {})),
-                    config=dict(payload.get("config", {})),
-                    bot=payload.get("bot"),
-                    context=dict(payload.get("context", {})),
-                    status=payload.get("status", "pending"),
-                    depends_on=tuple(payload.get("depends_on", [])),
-                    scheduled_for=datetime.fromisoformat(scheduled) if scheduled else None,
-                    context=dict(payload.get("context", {})),
-                    status=payload.get("status", "pending"),
-                    depends_on=list(payload.get("depends_on", [])),
-                    scheduled_for=(
-                        datetime.fromisoformat(scheduled_value)
-                        if scheduled_value
-                        else None
-                    ),
-                )
-            )
-        return tasks
+        return [self._task_from_payload(payload) for payload in self._load().values()]
 
 
 @dataclass(slots=True)
@@ -160,16 +109,18 @@ class RouteContext:
 class Router:
     """Orchestrates task routing to bots."""
 
-    def __init__(self, registry: BotRegistry, repository: TaskRepository):
+    def __init__(self, registry: BotRegistry, repository: TaskRepository) -> None:
         self.registry = registry
         self.repository = repository
 
     def route(self, task_id: str, bot_name: str, context: RouteContext) -> BotResponse:
         task = self.repository.get(task_id)
         if context.config:
-            task.config = dict(context.config)
+            task.config.update(context.config)
+
         bot = self.registry.get(bot_name)
         context.policy_engine.enforce(bot_name, context.approved_by)
+
         response = bot.run(task)
         context.memory.append(task, bot.metadata.name, response)
         context.lineage.record(task, bot.metadata.name, response)
@@ -210,3 +161,4 @@ __all__ = [
     "dependencies_met",
     "route_task",
 ]
+
