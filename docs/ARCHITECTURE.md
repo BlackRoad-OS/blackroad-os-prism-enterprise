@@ -55,6 +55,14 @@ The console is a Python application that can be executed locally or packaged int
 container. Integration with the optional Prism web UI happens through the same
 orchestrator APIs. Deployment guidance is documented in [docs/DEPLOYMENT.md](DEPLOYMENT.md).
 
+## Mathematical Assurance Topology
+
+For a system-level view of how linear algebra, graph theory, logic, cryptography, and
+other mathematical disciplines support the architecture, see the
+[Math Topology Map](math_topology_map.md). Use it during design reviews to confirm that
+new features inherit the correct assurance model and to guide audit conversations about
+the controls embedded in each subsystem.
+
 ## Extensibility
 
 - **Bots**: Implement additional bots by extending the base class.
