@@ -14,6 +14,11 @@ _api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=_api_key) if _api_key else None
 if not _api_key:
     st.warning("OpenAI API key not set; responses will be unavailable.")
+# Initialize the OpenAI client if an API key is provided
+api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key) if api_key else None
+if client is None:
+    st.warning("OpenAI API key not set. Set OPENAI_API_KEY to enable responses.")
 
 
 @st.cache_resource
