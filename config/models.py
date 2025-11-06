@@ -127,4 +127,4 @@ class ConfigurationBundle(BaseModel):
     def validate(self) -> None:
         """Trigger validation for the bundle."""
 
-        self.model_validate(self.model_dump())
+        type(self).model_validate(self.model_dump())
