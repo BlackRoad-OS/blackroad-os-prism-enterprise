@@ -1,5 +1,4 @@
 """Configuration models validated with Pydantic."""
-
 from __future__ import annotations
 
 import json
