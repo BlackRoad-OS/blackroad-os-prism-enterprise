@@ -123,6 +123,7 @@ router.get('/status', async (_req, res) => {
     ] = lastCommitRaw;
     res.json({
       ok,
+      ok: true,
       branch,
       ahead,
       behind,
@@ -335,6 +336,7 @@ router.get('/branches', async (_req, res) => {
     res
       .status(500)
       .json({ error: 'branches_failed', detail: String(e.stderr || e.message) });
+    res.status(500).json({ ok: false, error: e.message });
   }
 });
 
