@@ -1,8 +1,15 @@
-"""Auto novel agent with creative and coding abilities."""
+"""Runtime implementation of the AutoNovel agent.
+
+The project documentation makes frequent references to an "AutoNovel" agent
+that can ideate small games, produce story snippets, and help with coding
+exercises.  The previous incarnation of this module had an unresolved merge
+conflict which left most behaviours unusable.  This implementation restores the
+agent so that it behaves like a real piece of production code that can be
+imported, instantiated and exercised from tests.
+"""
 
 from __future__ import annotations
 
-<<<<<<< main
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import ClassVar, Iterable
@@ -12,15 +19,11 @@ import sys
 if __package__ is None or __package__ == "":
     sys.path.append(str(Path(__file__).resolve().parent))
     from consent_policy import ConsentRecord, ensure_full_consent  # type: ignore
-else:
+else:  # pragma: no cover - executed when the package is installed
     from .consent_policy import ConsentRecord, ensure_full_consent
 
 
 DEFAULT_SUPPORTED_ENGINES: tuple[str, ...] = ("unity", "unreal")
-=======
-from dataclasses import dataclass
-from typing import ClassVar
->>>>>>> origin/codex/complete-next-step-of-project-582c2w
 
 _OPERATION_SCOPE_MAP: dict[str, str] = {
     "deploy": "agent:deploy",
@@ -35,6 +38,7 @@ _OPERATION_SCOPE_MAP: dict[str, str] = {
     "add_supported_engine": "agent:configure",
     "remove_supported_engine": "agent:configure",
     "set_gamma": "agent:configure",
+    "write_novel": "story:create",
 }
 
 _BASE_CONSENT_SCOPES = {"outline:read", "outline:write"}
@@ -74,6 +78,9 @@ class AutoNovelAgent:
             self._normalize_engine(engine) for engine in self.supported_engines
         }
 
+    # ------------------------------------------------------------------
+    # Consent helpers
+    # ------------------------------------------------------------------
     def _require_scope(self, operation: str) -> None:
         """Ensure the agent has full consent for the requested operation."""
 
@@ -129,11 +136,13 @@ class AutoNovelAgent:
     # ------------------------------------------------------------------
     # Primary abilities
     # ------------------------------------------------------------------
-    def deploy(self) -> None:
-        """Deploy the agent by printing a greeting."""
+    def deploy(self) -> str:
+        """Deploy the agent by returning a greeting."""
 
         self._require_scope("deploy")
-        print(f"{self.name} deployed and ready to generate novels!")
+        message = f"{self.name} deployed and ready to generate novels!"
+        print(message)
+        return message
 
     def _indefinite_article(self, engine_name: str) -> str:
         """Return the appropriate indefinite article for ``engine_name``."""
@@ -170,7 +179,6 @@ class AutoNovelAgent:
         if include_weapons:
             raise ValueError("Weapons are not allowed in generated games.")
 
-<<<<<<< main
         message = self._build_creation_message(normalized)
         print(message)
         return message
@@ -216,6 +224,7 @@ class AutoNovelAgent:
     ) -> list[str]:
         """Generate short stories for each theme in ``themes``."""
 
+        self._require_scope("generate_story_series")
         stories: list[str] = []
         for theme in themes:
             theme_text = str(theme).strip()
@@ -223,6 +232,22 @@ class AutoNovelAgent:
                 raise ValueError("Each theme must be a non-empty string.")
             stories.append(self.generate_story(theme_text, protagonist))
         return stories
+
+    def write_novel(self, title: str, chapters: int = 3) -> list[str]:
+        """Create a simple outline for a novel."""
+
+        self._require_scope("write_novel")
+        title_clean = title.strip()
+        if not title_clean:
+            raise ValueError("Title must be a non-empty string.")
+        if chapters < 1:
+            raise ValueError("Novel must have at least one chapter.")
+
+        outline = [f"Chapter {i}: TBD" for i in range(1, chapters + 1)]
+        print(f"Drafting novel '{title_clean}' with {chapters} chapters...")
+        for heading in outline:
+            print(heading)
+        return outline
 
     # ------------------------------------------------------------------
     # Coding and English assistance
@@ -302,31 +327,6 @@ class AutoNovelAgent:
 
 def main() -> None:
     """Run a tiny demonstration when executed as a script."""
-=======
-    def list_supported_engines(self) -> list[str]:
-        """Return a list of supported game engines."""
-        return sorted(self.SUPPORTED_ENGINES)
-
-    def write_novel(self, title: str, chapters: int = 3) -> list[str]:
-        """Create a simple outline for a novel.
-
-        Args:
-            title: Title of the novel to draft.
-            chapters: Number of chapter headings to generate.
-
-        Returns:
-            A list of generated chapter headings.
-        """
-        if chapters < 1:
-            raise ValueError("Novel must have at least one chapter.")
-
-        outline = [f"Chapter {i}: TBD" for i in range(1, chapters + 1)]
-        print(f"Drafting novel '{title}' with {chapters} chapters...")
-        for heading in outline:
-            print(heading)
-        return outline
-
->>>>>>> origin/codex/complete-next-step-of-project-582c2w
 
     consent = ConsentRecord.full(
         scopes=DEFAULT_CONSENT_SCOPES,
@@ -335,12 +335,12 @@ def main() -> None:
     agent = AutoNovelAgent(consent=consent)
     agent.deploy()
     agent.create_game("unity")
-<<<<<<< main
     print(agent.generate_story("mystery", protagonist="Explorer"))
+    agent.write_novel("The Adventure")
 
 
 if __name__ == "__main__":
     main()
-=======
-    agent.write_novel("The Adventure")
->>>>>>> origin/codex/complete-next-step-of-project-582c2w
+
+
+__all__ = ["AutoNovelAgent", "DEFAULT_SUPPORTED_ENGINES", "DEFAULT_CONSENT_SCOPES"]
