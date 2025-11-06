@@ -1,3 +1,5 @@
+"""Persistent storage helpers for Prism Console modules."""
+
 from __future__ import annotations
 
 import json
@@ -18,22 +20,20 @@ def _ensure_parent(path: Path) -> None:
 
 
 def write(path: str, content: Union[dict, str]) -> None:
-    p = Path(path)
-    _ensure_parent(p)
-    mode = "a" if p.suffix == ".jsonl" else "w"
+    target = Path(path)
+    _ensure_parent(target)
+    mode = "a" if target.suffix == ".jsonl" else "w"
     text = json.dumps(content) if isinstance(content, dict) else str(content)
-    with open(p, mode, encoding="utf-8") as fh:
+    with target.open(mode, encoding="utf-8") as handle:
         if mode == "a":
-            fh.write(text + "\n")
+            handle.write(text + "\n")
         else:
-            fh.write(text)
+            handle.write(text)
 
 
 def read(path: str) -> str:
-    p = Path(path)
     try:
-        with open(p, "r", encoding="utf-8") as fh:
-            return fh.read()
+        return Path(path).read_text(encoding="utf-8")
     except FileNotFoundError:
         return ""
 
@@ -47,8 +47,8 @@ def read_json(path: str, *, from_data: bool = False) -> Any:
     target = _resolve(path, root)
     if not from_data and not target.exists():
         target = BASE_DIR / path
-    with open(target, "r", encoding="utf-8") as f:
-        return json.load(f)
+    with target.open("r", encoding="utf-8") as handle:
+        return json.load(handle)
 
 
 def write_json(path: str, data: Any, *, from_data: bool = True) -> None:
@@ -57,8 +57,8 @@ def write_json(path: str, data: Any, *, from_data: bool = True) -> None:
     root = DATA_ROOT if from_data else CONFIG_ROOT
     target = _resolve(path, root)
     _ensure_parent(target)
-    with open(target, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, sort_keys=True)
+    with target.open("w", encoding="utf-8") as handle:
+        json.dump(data, handle, indent=2, sort_keys=True)
 
 
 def append_jsonl(path: str, record: Any, *, from_data: bool = True) -> None:
@@ -67,8 +67,8 @@ def append_jsonl(path: str, record: Any, *, from_data: bool = True) -> None:
     root = DATA_ROOT if from_data else CONFIG_ROOT
     target = _resolve(path, root)
     _ensure_parent(target)
-    with open(target, "a", encoding="utf-8") as f:
-        f.write(json.dumps(record) + "\n")
+    with target.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record) + "\n")
 
 
 def read_jsonl(path: str, *, from_data: bool = True) -> Iterable[Any]:
@@ -76,8 +76,8 @@ def read_jsonl(path: str, *, from_data: bool = True) -> Iterable[Any]:
     target = _resolve(path, root)
     if not target.exists():
         return []
-    with open(target, "r", encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
+    with target.open("r", encoding="utf-8") as handle:
+        return [json.loads(line) for line in handle if line.strip()]
 
 
 def read_yaml(path: str, *, from_data: bool = False) -> Any:
@@ -85,8 +85,8 @@ def read_yaml(path: str, *, from_data: bool = False) -> Any:
     target = _resolve(path, root)
     if not from_data and not target.exists():
         target = BASE_DIR / path
-    with open(target, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
+    with target.open("r", encoding="utf-8") as handle:
+        return yaml.safe_load(handle)
 
 
 def read_text(path: str, *, from_data: bool = False) -> str:
@@ -94,8 +94,7 @@ def read_text(path: str, *, from_data: bool = False) -> str:
     target = _resolve(path, root)
     if not from_data and not target.exists():
         target = BASE_DIR / path
-    with open(target, "r", encoding="utf-8") as f:
-        return f.read()
+    return target.read_text(encoding="utf-8")
 
 
 def write_text(path: str, text: str, *, from_data: bool = False) -> None:
@@ -104,48 +103,21 @@ def write_text(path: str, text: str, *, from_data: bool = False) -> None:
     root = DATA_ROOT if from_data else CONFIG_ROOT
     target = _resolve(path, root)
     _ensure_parent(target)
-    with open(target, "w", encoding="utf-8") as f:
-        f.write(text)
-"""Stub storage adapter."""
+    target.write_text(text, encoding="utf-8")
 
 
 def save(path: str, content: bytes) -> None:
-    """Stubbed storage write."""
     raise NotImplementedError("Storage adapter not implemented. TODO: connect to object store")
-"""Lightweight JSON storage helpers used by CLI modules."""
-
-from __future__ import annotations
-
-import json
-from pathlib import Path
-from typing import Any
 
 
 def load_json(path: Path, default: Any) -> Any:
-    """Load JSON data from *path* if it exists, otherwise return *default*.
-
-    Parameters
-    ----------
-    path:
-        Location of the JSON file.
-    default:
-        Value returned when the file does not yet exist.
-    """
-
     if path.exists():
-        with path.open("r", encoding="utf-8") as f:
-            return json.load(f)
+        with path.open("r", encoding="utf-8") as handle:
+            return json.load(handle)
     return default
 
 
 def save_json(path: Path, data: Any) -> None:
-    """Persist *data* as JSON to *path*.
-
-    The parent directory is created if necessary.  Datetime and date objects
-    are serialised using their ISO representation via ``default=str``.
-    """
-
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, default=str)
-
+    with path.open("w", encoding="utf-8") as handle:
+        json.dump(data, handle, indent=2, default=str)

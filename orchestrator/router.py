@@ -1,4 +1,4 @@
-"""Task routing and bot execution."""
+"""Task routing, persistence, and scheduling helpers."""
 
 from __future__ import annotations
 
@@ -13,7 +13,9 @@ from orchestrator.exceptions import BotNotRegisteredError, TaskNotFoundError
 from orchestrator.lineage import LineageTracker
 from orchestrator.memory import MemoryLog
 from orchestrator.policy import PolicyEngine
-from orchestrator.protocols import BotResponse, Task, TaskPriority
+from orchestrator.protocols import BotExecutionError, BotResponse, Task, TaskPriority
+
+from .metrics import log_metric
 
 
 class BotRegistry:
@@ -28,7 +30,7 @@ class BotRegistry:
     def get(self, name: str) -> BaseBot:
         try:
             return self._bots[name]
-        except KeyError as exc:
+        except KeyError as exc:  # pragma: no cover - defensive guard
             raise BotNotRegisteredError(f"Bot '{name}' is not registered") from exc
 
     def list(self) -> Sequence[BaseBot]:
@@ -36,7 +38,7 @@ class BotRegistry:
 
 
 class TaskRepository:
-    """File-backed store for tasks."""
+    """Simple file-backed store for tasks."""
 
     def __init__(self, path: Path):
         self.path = path
@@ -61,16 +63,22 @@ class TaskRepository:
         if not payload:
             raise TaskNotFoundError(f"Task '{task_id}' not found")
         due_value = payload.get("due_date")
+        scheduled = payload.get("scheduled_for")
         return Task(
             id=payload["id"],
             goal=payload["goal"],
-            owner=payload["owner"],
+            owner=payload.get("owner"),
             priority=TaskPriority(payload["priority"]),
             created_at=datetime.fromisoformat(payload["created_at"]),
             due_date=datetime.fromisoformat(due_value) if due_value else None,
             tags=tuple(payload.get("tags", [])),
             metadata=dict(payload.get("metadata", {})),
             config=dict(payload.get("config", {})),
+            bot=payload.get("bot"),
+            context=dict(payload.get("context", {})),
+            status=payload.get("status", "pending"),
+            depends_on=tuple(payload.get("depends_on", [])),
+            scheduled_for=datetime.fromisoformat(scheduled) if scheduled else None,
         )
 
     def list(self) -> Sequence[Task]:
@@ -78,17 +86,23 @@ class TaskRepository:
         tasks = []
         for payload in data.values():
             due_value = payload.get("due_date")
+            scheduled = payload.get("scheduled_for")
             tasks.append(
                 Task(
                     id=payload["id"],
                     goal=payload["goal"],
-                    owner=payload["owner"],
+                    owner=payload.get("owner"),
                     priority=TaskPriority(payload["priority"]),
                     created_at=datetime.fromisoformat(payload["created_at"]),
                     due_date=datetime.fromisoformat(due_value) if due_value else None,
                     tags=tuple(payload.get("tags", [])),
                     metadata=dict(payload.get("metadata", {})),
                     config=dict(payload.get("config", {})),
+                    bot=payload.get("bot"),
+                    context=dict(payload.get("context", {})),
+                    status=payload.get("status", "pending"),
+                    depends_on=tuple(payload.get("depends_on", [])),
+                    scheduled_for=datetime.fromisoformat(scheduled) if scheduled else None,
                 )
             )
         return tasks
@@ -101,7 +115,7 @@ class RouteContext:
     policy_engine: PolicyEngine
     memory: MemoryLog
     lineage: LineageTracker
-    config: Mapping[str, object] = None
+    config: Mapping[str, object] | None = None
     approved_by: Sequence[str] | None = None
 
 
@@ -114,7 +128,6 @@ class Router:
 
     def route(self, task_id: str, bot_name: str, context: RouteContext) -> BotResponse:
         task = self.repository.get(task_id)
-        # Merge context config into task config if provided
         if context.config:
             task.config = dict(context.config)
         bot = self.registry.get(bot_name)
@@ -123,33 +136,29 @@ class Router:
         context.memory.append(task, bot.metadata.name, response)
         context.lineage.record(task, bot.metadata.name, response)
         return response
-"""Routing helpers for executing tasks with bots."""
-
-from __future__ import annotations
-
-from typing import List
-
-from .metrics import log_metric
-from .protocols import BotExecutionError, Task
 
 
-def dependencies_met(task: Task, tasks: List[Task]) -> bool:
+def dependencies_met(task: Task, tasks: Sequence[Task]) -> bool:
+    """Check whether a task's dependencies are satisfied."""
+
     done_ids = {t.id for t in tasks if t.status == "done"}
     return all(dep in done_ids for dep in task.depends_on)
 
 
-def route_task(task: Task, tasks: List[Task]) -> None:
-    from bots import BOT_REGISTRY
+def route_task(task: Task, tasks: Sequence[Task]) -> None:
+    """Route an individual scheduled task using the global bot registry."""
+
+    from bots import BOT_REGISTRY  # Imported lazily to avoid circular dependency
 
     if not dependencies_met(task, tasks):
         log_metric("dependency_block", task.id)
         raise BotExecutionError("dependencies_not_met")
 
-    bot = BOT_REGISTRY.get(task.bot)
+    bot = BOT_REGISTRY.get(task.bot or "")
     if bot is None:
+        log_metric("bot_not_found", task.id)
         raise BotExecutionError("bot_not_found")
 
     bot.run(task)
     task.status = "done"
     log_metric("scheduled_run", task.id)
-
