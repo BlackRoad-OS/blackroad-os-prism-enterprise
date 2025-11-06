@@ -18,3 +18,9 @@ def record(event: str, data: dict[str, Any] | None = None) -> None:
     if data:
         payload.update(data)
     storage.write(str(_EVENTS_PATH), payload)
+
+METRICS = Counter()
+
+
+def record(event: str) -> None:
+    METRICS[event] += 1
