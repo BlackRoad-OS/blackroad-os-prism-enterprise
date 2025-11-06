@@ -1,5 +1,6 @@
 """Bot discovery helpers used by the Prism Console orchestrator."""
 """Bot discovery utilities."""
+"""Bot registry helpers for the Prism Console orchestrator."""
 
 from __future__ import annotations
 
@@ -22,6 +23,10 @@ def _iter_bot_modules() -> Iterable[str]:
 __all__ = ["BOT_REGISTRY", "build_registry", "list_bots"]
 
 BOT_REGISTRY: Dict[str, BaseBot | object] = {}
+BotLike = BaseBot | object
+
+# Public mapping used by tests to access lightweight script-style bots.
+BOT_REGISTRY: Dict[str, BotLike] = {}
 
 
 def _iter_bot_modules() -> Iterable[str]:
@@ -37,6 +42,8 @@ def _iter_bot_modules() -> Iterable[str]:
 
 def _instantiate_bots(module_name: str) -> Iterator[Tuple[str, object]]:
     """Instantiate bot objects exposed by *module_name*."""
+def _instantiate_bots(module_name: str) -> Iterator[Tuple[str, BotLike]]:
+    """Instantiate bots exposed by ``module_name``."""
 
     module = import_module(f"bots.{module_name}")
 
@@ -59,6 +66,7 @@ def _instantiate_bots(module_name: str) -> Iterator[Tuple[str, object]]:
 def _discover() -> None:
     """Populate :data:`BOT_REGISTRY` with discovered bot instances."""
 
+    BOT_REGISTRY.clear()
     for module_name in _iter_bot_modules():
         for name, bot in _instantiate_bots(module_name):
             BOT_REGISTRY[name] = bot
@@ -84,3 +92,4 @@ def list_bots() -> Sequence[str]:
 
 
 __all__ = ["BOT_REGISTRY", "build_registry", "list_bots"]
+

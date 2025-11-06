@@ -26,6 +26,15 @@ from orchestrator.policy import PolicyEngine
 from orchestrator.protocols import BotExecutionError, BotResponse, Task, TaskPriority
 
 from .metrics import log_metric
+from typing import Dict, Mapping, Sequence
+
+from .base import BaseBot
+from .exceptions import BotNotRegisteredError, TaskNotFoundError
+from .lineage import LineageTracker
+from .memory import MemoryLog
+from .metrics import log_metric
+from .policy import PolicyEngine
+from .protocols import BotExecutionError, BotResponse, Task, TaskPriority
 
 
 class BotRegistry:
@@ -54,7 +63,7 @@ def _parse_datetime(value: str | None) -> datetime | None:
 class TaskRepository:
     """Simple file-backed store for tasks."""
 
-    def __init__(self, path: Path):
+    def __init__(self, path: Path) -> None:
         self.path = path
         self.path.parent.mkdir(parents=True, exist_ok=True)
         if not self.path.exists():
@@ -111,16 +120,32 @@ class TaskRepository:
             priority=payload.get("priority", TaskPriority.MEDIUM.value),
             created_at=datetime.fromisoformat(payload["created_at"]),
             due_date=_parse_datetime(payload.get("due_date")),
+    @staticmethod
+    def _task_from_payload(payload: Mapping[str, object]) -> Task:
+        due_value = payload.get("due_date")
+        scheduled_value = payload.get("scheduled_for")
+        priority_value = payload.get("priority", TaskPriority.MEDIUM.value)
+
+        return Task(
+            id=str(payload["id"]),
+            goal=str(payload["goal"]),
+            owner=payload.get("owner"),
+            priority=priority_value,
+            created_at=datetime.fromisoformat(str(payload["created_at"])),
+            due_date=datetime.fromisoformat(str(due_value)) if due_value else None,
             tags=tuple(payload.get("tags", [])),
             metadata=dict(payload.get("metadata", {})),
             config=dict(payload.get("config", {})),
             context=dict(payload.get("context", {})),
-            status=payload.get("status", "pending"),
+            status=str(payload.get("status", "pending")),
             depends_on=tuple(payload.get("depends_on", [])),
             scheduled_for=_parse_datetime(payload.get("scheduled_for")),
+            scheduled_for=(
+                datetime.fromisoformat(str(scheduled_value)) if scheduled_value else None
+            ),
         )
 
-    def list(self) -> Sequence[Task]:
+    def add(self, task: Task) -> None:
         data = self._load()
         tasks = []
         for payload in data.values():
@@ -143,6 +168,18 @@ class TaskRepository:
                 )
             )
         return tuple(tasks)
+        data[task.id] = task.to_dict()
+        self._save(data)
+
+    def get(self, task_id: str) -> Task:
+        data = self._load()
+        payload = data.get(task_id)
+        if payload is None:
+            raise TaskNotFoundError(f"Task '{task_id}' not found")
+        return self._task_from_payload(payload)
+
+    def list(self) -> Sequence[Task]:
+        return [self._task_from_payload(payload) for payload in self._load().values()]
 
 
 @dataclass(slots=True)
@@ -159,7 +196,7 @@ class RouteContext:
 class Router:
     """Orchestrates task routing to bots."""
 
-    def __init__(self, registry: BotRegistry, repository: TaskRepository):
+    def __init__(self, registry: BotRegistry, repository: TaskRepository) -> None:
         self.registry = registry
         self.repository = repository
 
@@ -169,8 +206,11 @@ class Router:
             merged_config: Dict[str, Any] = copy.deepcopy(context.config)
             merged_config.update(task.config)
             task.config = merged_config
+            task.config.update(context.config)
+
         bot = self.registry.get(bot_name)
         context.policy_engine.enforce(bot_name, context.approved_by)
+
         response = bot.run(task)
         task.status = "done" if response.ok else "failed"
         self.repository.update(task)
@@ -207,4 +247,13 @@ def route_task(task: Task, tasks: Sequence[Task]) -> None:
         task.status = "done" if response.ok else task.status
     else:
         task.status = "done"
+
+__all__ = [
+    "BotRegistry",
+    "TaskRepository",
+    "RouteContext",
+    "Router",
+    "dependencies_met",
+    "route_task",
+]
 

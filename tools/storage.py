@@ -1,16 +1,18 @@
 """Storage helpers for Prism console utilities."""
 """File-system backed storage helpers used by the console."""
+"""Lightweight file system helpers used across the project."""
 
 from __future__ import annotations
 
 import json
 import os
 from pathlib import Path
-from typing import Any, Iterable, Union
+from typing import Any, Iterable, Mapping, Union
 
 import yaml
 
 BASE_DIR = Path.cwd()
+BASE_DIR = Path(__file__).resolve().parents[1]
 CONFIG_ROOT = BASE_DIR / "config"
 DATA_ROOT = BASE_DIR / "data"
 READ_ONLY = os.environ.get("PRISM_READ_ONLY", "0") == "1"
@@ -21,10 +23,11 @@ def _ensure_parent(path: Path) -> None:
 
 
 def write(path: Union[str, Path], content: Union[dict[str, Any], str]) -> None:
+def write(path: str, content: Union[Mapping[str, Any], str]) -> None:
     target = Path(path)
     _ensure_parent(target)
     mode = "a" if target.suffix == ".jsonl" else "w"
-    text = json.dumps(content) if isinstance(content, dict) else str(content)
+    text = json.dumps(content) if isinstance(content, Mapping) else str(content)
     with target.open(mode, encoding="utf-8") as handle:
         if mode == "a":
             handle.write(text + "\n")
@@ -36,12 +39,18 @@ def read(path: str) -> str:
 def read(path: Union[str, Path]) -> str:
     target = Path(path)
     if not target.exists():
+    try:
+        return Path(path).read_text(encoding="utf-8")
+    except FileNotFoundError:
         return ""
     return target.read_text(encoding="utf-8")
 
 
 def _resolve(path: str, root: Path) -> Path:
-    return root / path
+    candidate = Path(path)
+    if candidate.is_absolute():
+        return candidate
+    return root / candidate
 
 
 def read_json(path: str, *, from_data: bool = False) -> Any:
@@ -96,7 +105,6 @@ def read_text(path: str, *, from_data: bool = False) -> str:
     target = _resolve(path, root)
     if not from_data and not target.exists():
         target = BASE_DIR / path
-    return target.read_text(encoding="utf-8")
     with target.open("r", encoding="utf-8") as handle:
         return handle.read()
 
@@ -111,25 +119,14 @@ def write_text(path: str, text: str, *, from_data: bool = False) -> None:
 
 
 def save(path: str, content: bytes) -> None:
-    raise NotImplementedError("Storage adapter not implemented. TODO: connect to object store")
+    if READ_ONLY:
+        raise RuntimeError("read-only mode")
+    target = Path(path)
+    _ensure_parent(target)
+    target.write_bytes(content)
 
 
 def load_json(path: Path, default: Any) -> Any:
-    with target.open("w", encoding="utf-8") as handle:
-        handle.write(text)
-
-
-def save(path: str, content: bytes) -> None:
-    """Stubbed storage write used by legacy callers."""
-
-    raise NotImplementedError(
-        "Storage adapter not implemented. TODO: connect to object store"
-    )
-
-
-def load_json(path: Path, default: Any) -> Any:
-    """Load JSON data from *path* if it exists, otherwise return *default*."""
-
     if path.exists():
         with path.open("r", encoding="utf-8") as handle:
             return json.load(handle)

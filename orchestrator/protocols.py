@@ -1,5 +1,6 @@
 """Shared typing contracts for Prism Console bots and tasks."""
 """Core data structures and protocols for the orchestrator."""
+"""Shared data contracts for bots and the orchestrator."""
 
 from __future__ import annotations
 
@@ -8,6 +9,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, Mapping, MutableMapping, Optional, Protocol, Sequence, runtime_checkable
 from typing import Any, Dict, List, Mapping, MutableMapping, Optional, Sequence, Protocol, runtime_checkable
+from typing import Any, Dict, Mapping, MutableMapping, Optional, Sequence
 
 
 class TaskPriority(str, Enum):
@@ -26,6 +28,7 @@ class Task:
     goal: str
     bot: str = ""
     owner: str = ""
+    owner: Optional[str] = None
     priority: TaskPriority | str = TaskPriority.MEDIUM
     created_at: datetime = field(default_factory=datetime.utcnow)
     due_date: datetime | None = None
@@ -56,6 +59,20 @@ class Task:
 
         self.tags = tuple(self.tags)
         self.depends_on = tuple(self.depends_on)
+        if self.metadata is None:
+            self.metadata = {}
+        if not isinstance(self.metadata, MutableMapping):
+            self.metadata = dict(self.metadata)
+
+        if self.config is None:
+            self.config = {}
+        if not isinstance(self.config, MutableMapping):
+            self.config = dict(self.config)
+
+        if self.context is None:
+            self.context = {}
+        if not isinstance(self.context, MutableMapping):
+            self.context = dict(self.context)
 
         if not isinstance(self.tags, tuple):
             self.tags = tuple(self.tags)
@@ -82,7 +99,6 @@ class Task:
         payload: Dict[str, Any] = {
             "id": self.id,
             "goal": self.goal,
-            "bot": self.bot,
             "owner": self.owner,
             "priority": self.priority.value,
             "created_at": self.created_at.isoformat(),
@@ -94,6 +110,9 @@ class Task:
             "depends_on": list(self.depends_on),
         }
         if self.due_date is not None:
+        if self.bot:
+            payload["bot"] = self.bot
+        if self.due_date:
             payload["due_date"] = self.due_date.isoformat()
         if self.scheduled_for is not None:
             payload["scheduled_for"] = self.scheduled_for.isoformat()
