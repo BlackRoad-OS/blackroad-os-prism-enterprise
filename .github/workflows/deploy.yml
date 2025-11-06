@@ -91,3 +91,16 @@ jobs:
           curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
       - name: Redeploy Droplet
         run: ssh root@${DO_HOST} 'cd /root/codex-infinity && docker compose pull && docker compose up -d'
+      - name: Notify success
+        if: success()
+        run: bash scripts/notify.sh "deploy" "success" "${{ github.sha }}"
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+
+      - name: Notify failure
+        if: failure()
+        run: bash scripts/notify.sh "deploy" "failure" "${{ github.sha }}"
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
