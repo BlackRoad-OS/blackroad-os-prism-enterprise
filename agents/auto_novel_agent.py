@@ -100,6 +100,24 @@ class AutoNovelAgent:
         if not engine_normalized:
             raise ValueError("Engine name must be a non-empty string.")
         return engine_normalized
+        Args:
+            engine: Game engine to use.
+            include_weapons: If True, raise a ``ValueError`` because weapons are not
+                allowed.
+
+        Raises:
+            ValueError: If ``engine`` is empty or ``include_weapons`` is ``True``.
+        """
+        engine_clean = engine.strip()
+        if not engine_clean:
+            raise ValueError("Engine name must be a non-empty string.")
+        engine_lower = engine_clean.lower()
+        if not self.supports_engine(engine_lower):
+            supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
+            raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
+        if include_weapons:
+            raise ValueError("Weapons are not allowed in generated games.")
+        print(f"Creating a {engine_lower.capitalize()} game without weapons...")
 
     def supports_engine(self, engine: str) -> bool:
         """Return ``True`` when ``engine`` is present in the supported set."""
@@ -129,6 +147,8 @@ class AutoNovelAgent:
         if not isinstance(engine, str):
             raise TypeError("Engine name must be provided as a string.")
 
+            ValueError: If ``engine`` is empty or only whitespace.
+        """
         engine_clean = engine.strip()
         if not engine_clean:
             raise ValueError("Engine name must be a non-empty string.")
