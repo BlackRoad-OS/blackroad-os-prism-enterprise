@@ -507,6 +507,20 @@ import Kalman1DLab from './pages/Kalman1DLab.jsx';
 import PageRankLab from './pages/PageRankLab.jsx';
 import NewtonFractalLab from './pages/NewtonFractalLab.jsx';
 
+import { NavLink, Routes, Route } from 'react-router-dom';
+import Chat from './pages/Chat.jsx';
+import Canvas from './pages/Canvas.jsx';
+import Editor from './pages/Editor.jsx';
+import Terminal from './pages/Terminal.jsx';
+import RoadView from './pages/RoadView.jsx';
+import BackRoad from './pages/BackRoad.jsx';
+import Subscribe from './pages/Subscribe.jsx';
+import Lucidia from './pages/Lucidia.jsx';
+import InfinityMath from './pages/InfinityMath.jsx';
+import Agents from './pages/Agents.jsx';
+import Desktop from './pages/Desktop.jsx';
+import { useEffect, useState } from 'react';
+
 function useApiHealth() {
   const [state, setState] = useState({ ok: null, info: '' });
   useEffect(() => {
@@ -548,6 +562,7 @@ function StatusPill() {
       {info ? `${label} — ${info}` : label}
   const tone =
     ok == null ? 'opacity-60' : ok ? 'text-green-400' : 'text-red-400';
+  const tone = ok == null ? 'opacity-60' : ok ? 'text-green-400' : 'text-red-400';
   const label = ok == null ? 'Checking API…' : ok ? 'API healthy' : 'API error';
   return (
     <span className={`text-sm ${tone}`}>
@@ -604,6 +619,9 @@ function useSessionRole(){
 
 export default function App(){
   const session = useSessionRole();
+}
+
+export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Desktop/>} />
@@ -667,6 +685,10 @@ function LegacyApp({session}){
           </NavLink>
           <NavLink className="nav-link" to="/backroad">
             Backroad
+            BackRoad
+          </NavLink>
+          <NavLink className="nav-link" to="/desktop">
+            Desktop
           </NavLink>
           <NavLink className="nav-link" to="/agents">
             Agents
@@ -743,6 +765,8 @@ function LegacyApp({session}){
             target="_blank"
             rel="noreferrer"
           >
+          <h1 className="brand-gradient text-xl font-semibold">Co-coding Portal</h1>
+          <a className="btn-primary" href="/api/health" target="_blank" rel="noreferrer">
             API Health
           </a>
         </header>
@@ -784,6 +808,8 @@ function LegacyApp({session}){
             <Route path="/terminal" element={<Terminal />} />
             <Route path="/roadview" element={<RoadView />} />
             <Route path="/backroad" element={<Backroad />} />
+            <Route path="/backroad" element={<BackRoad />} />
+            <Route path="/desktop" element={<Desktop />} />
             <Route path="/agents" element={<Agents />} />
             <Route path="/subscribe" element={<Subscribe />} />
             <Route path="/lucidia" element={<Lucidia />} />
