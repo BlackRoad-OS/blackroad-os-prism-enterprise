@@ -14,13 +14,15 @@ dependencies = [
     "pydantic>=2.6.4,<3",
     "pyyaml>=6.0.2,<7",
     "hypothesis>=6.103.4,<7",
+    "numpy>=1.26,<3",
 ]
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["src", "packages"]
 
 [tool.setuptools.package-dir]
 "" = "src"
+"amundson_blackroad" = "packages/amundson_blackroad"
 
 [tool.black]
 line-length = 100
