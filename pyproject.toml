@@ -1,0 +1,40 @@
+[project]
+name = "qlm-lab"
+version = "0.1.0"
+description = "Quantum Language Model laboratory"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "sympy",
+    "matplotlib",
+    "nbformat",
+    "nbconvert",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "mypy",
+    "ruff",
+]
+
+[tool.pytest.ini_options]
+addopts = "-q --cov=qlm_lab.tools.quantum_np --cov-report=term-missing --cov-fail-under=90"
+testpaths = [
+    "tests/test_quantum_np.py",
+    "tests/test_proto_and_policies.py",
+    "tests/test_agents_loop.py",
+]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
