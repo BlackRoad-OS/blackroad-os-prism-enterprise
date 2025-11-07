@@ -9,3 +9,11 @@
 .env* -text
 # Ensure encrypted env files are treated as binary blobs
 .env.enc binary
+*.svg text
+*.json text
+*.yaml text
+*.yml text
+*.md text
+*.csv text
+*.ndjson text
+*.pgm text
