@@ -1,5 +1,7 @@
 # BlackRoad.io — Dependency & Ops Bundle
 
+[![prism-ci](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/prism-ci.yml/badge.svg)](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/prism-ci.yml)
+
 Date: 2025-08-22
 
 Requires Node.js 20 or later.
