@@ -1,263 +1,33 @@
-name: prism-console-ci
-name: CI
+name: ci
 
 on:
-  workflow_call:
-    inputs:
-      run-preview:
-        description: "Deploy preview environment (pull requests only)"
-        default: true
-        required: false
-        type: boolean
-    secrets:
-      vercel-token:
-        required: false
-      vercel-org-id:
-        required: false
-      vercel-project-id:
-        required: false
-
-permissions:
-  contents: read
-  checks: read
+  push:
+    branches: [ main ]
+  pull_request:
 
 jobs:
-  quality:
-    name: Web quality checks
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      checks: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-      - name: Checkout
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0 https://github.com/actions/checkout/releases/tag/v4.3.0
-
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0 https://github.com/actions/setup-node/releases/tag/v4.4.0
-        # v4.3.0 https://github.com/actions/checkout/releases/tag/v4.3.0
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
-
-      - name: Use Node.js 20.x
-        # v4.4.0 https://github.com/actions/setup-node/releases/tag/v4.4.0
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
-
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install, Lint, Test (root if present)
-        run: |
-          if [ -f package.json ]; then
-            npm ci
-            npm run lint --if-present
-            npm test --if-present
-            npm run build --if-present
-          fi
-
-      - name: Install & Build Web (if web/)
-        run: |
-          if [ -d web ] && [ -f web/package.json ]; then
-            cd web
-            npm ci
-            npm run lint --if-present
-            npm test --if-present
-            npm run build --if-present
-          fi
-
-      - name: Install API deps (if api/)
-        run: |
-          if [ -d api ] && [ -f api/package.json ]; then
-            cd api
-            npm ci
-            npm run lint --if-present
-            npm test --if-present
-          fi
-
-      - name: Assemble release bundle
-        run: |
-          set -eu
-          mkdir -p release/web release/api
-
-          # --- Web assets ---
-          if [ -d web ] && [ -f web/package.json ]; then
-            if [ -d web/dist ]; then cp -r web/dist/* release/web/; fi
-            if [ -d web/build ]; then cp -r web/build/* release/web/; fi
-            # Fallback: copy public if no build output
-            if [ ! -d release/web ] || [ -z "$(ls -A release/web 2>/dev/null || true)" ]; then
-              if [ -d web/public ]; then cp -r web/public/* release/web/; fi
-            fi
-          else
-            # Root web build fallback
-            if [ -d dist ]; then cp -r dist/* release/web/; fi
-            if [ -d build ]; then cp -r build/* release/web/; fi
-          fi
-
-          # --- API sources ---
-          if [ -d api ] && [ -f api/package.json ]; then
-            rsync -a --delete --exclude=node_modules --exclude='.git' --exclude='**/*.test.*' api/ release/api/
-          fi
-
-          tar -czf release.tar.gz -C release .
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2 https://github.com/actions/upload-artifact/releases/tag/v4.6.2
-        # v4.6.2 https://github.com/actions/upload-artifact/releases/tag/v4.6.2
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: apps/prism-console-web/pnpm-lock.yaml
-
-      - name: Install dependencies
-        working-directory: apps/prism-console-web
-        run: pnpm install --ignore-workspace
-
-      - name: Lint
-        working-directory: apps/prism-console-web
-        run: pnpm lint
-
-      - name: Type check
-        working-directory: apps/prism-console-web
-        run: pnpm type-check
-
-      - name: Unit tests
-        working-directory: apps/prism-console-web
-        run: pnpm test
-
-      - name: Install Playwright browsers
-        working-directory: apps/prism-console-web
-        run: pnpm exec playwright install --with-deps
-
-      - name: E2E tests
-        working-directory: apps/prism-console-web
-        run: pnpm test:e2e
-
-      - name: Build
-        working-directory: apps/prism-console-web
-        env:
-          NEXT_DISABLE_LOCKFILE_CHECK: "1"
-          NODE_ENV: production
-        run: pnpm build
-
-  preview:
-    name: Deploy preview environment
-    needs: quality
-    if: ${{ inputs.run-preview && github.event_name == 'pull_request' && inputs.vercel-token != '' && inputs.vercel-org-id != '' && inputs.vercel-project-id != '' }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Checkout
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0 https://github.com/actions/checkout/releases/tag/v4.3.0
-
-      - name: Download artifact
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0 https://github.com/actions/download-artifact/releases/tag/v4.3.0
-        with:
-          version: 8
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        # v4.3.0 https://github.com/actions/checkout/releases/tag/v4.3.0
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
-
-      - name: Download artifact
-        # v4.3.0 https://github.com/actions/download-artifact/releases/tag/v4.3.0
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
-
-      - name: Download artifact
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        with:
-          node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: apps/prism-console-web/pnpm-lock.yaml
-
-      - name: Install dependencies
-        working-directory: apps/prism-console-web
-        run: pnpm install --ignore-workspace
-
-      - name: Pull Vercel environment information
-        working-directory: apps/prism-console-web
-        env:
-          VERCEL_TOKEN: ${{ inputs.vercel-token }}
-          VERCEL_ORG_ID: ${{ inputs.vercel-org-id }}
-          VERCEL_PROJECT_ID: ${{ inputs.vercel-project-id }}
-        run: pnpm dlx vercel pull --yes --environment=preview
-
-      - name: Build preview
-        working-directory: apps/prism-console-web
-        env:
-          VERCEL_TOKEN: ${{ inputs.vercel-token }}
-          VERCEL_ORG_ID: ${{ inputs.vercel-org-id }}
-          VERCEL_PROJECT_ID: ${{ inputs.vercel-project-id }}
-          NEXT_DISABLE_LOCKFILE_CHECK: "1"
-        run: pnpm dlx vercel build
-
-      - name: Deploy preview
-        working-directory: apps/prism-console-web
-        env:
-          VERCEL_TOKEN: ${{ inputs.vercel-token }}
-          VERCEL_ORG_ID: ${{ inputs.vercel-org-id }}
-          VERCEL_PROJECT_ID: ${{ inputs.vercel-project-id }}
-        run: pnpm dlx vercel deploy --prebuilt
-          node-version: 20
-      - run: npm install
-      - run: npm run format:check
-      - run: npm run lint
-      - run: npm test
-      - uses: actions/setup-python@v5
-        with:
-          node-version: 20
-      - run: npm install
-      - run: npm run format:check
-      - run: npm run lint
-      - run: npm test
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - run: pip install fastapi pydantic pytest httpx
-      - run: pytest srv/lucidia-llm/test_app.py
-          python -m pip install .
-          brc plm:items:load --dir fixtures/plm/items
-          brc plm:bom:load --dir fixtures/plm/boms
-          A1=$(sha256sum artifacts/plm/items.json | cut -d' ' -f1)
-          A2=$(sha256sum artifacts/plm/items.json | cut -d' ' -f1)
-          test "$A1" = "$A2"
-      - name: Contract validation
-        run: python scripts/validate_contracts.py
-      - name: Artifacts hash
-        run: bash scripts/hash_artifacts.sh || true
-
-  build-test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - run: npm ci --prefix apps/api
-      - run: npm run build --prefix apps/api
-      - run: npm test --prefix apps/api --if-present
-      - name: Upload API dist
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: pip install -e .[viz]
+      - name: Lint
+        run: |
+          pip install ruff mypy
+          ruff check quantum_lab tests
+          mypy quantum_lab
+      - name: Test
+        run: pytest
+      - name: Demo
+        run: |
+          python quantum_lab/examples/bell_pair.py
+          ls artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: api-dist
-          path: apps/api/dist
+          name: demo-artifacts
+          path: artifacts

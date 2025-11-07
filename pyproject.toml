@@ -3,38 +3,35 @@ requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "blackroad-prism-console"
+name = "quantum-lab"
 version = "0.1.0"
-description = "Bot orchestration framework for enterprise operations."
+description = "Quantum computing teaching lab"
 readme = "README.md"
 requires-python = ">=3.11"
-authors = [{ name = "BlackRoad", email = "eng@blackroadinc.us" }]
+authors = [{ name = "Quantum Lab", email = "labs@example.com" }]
 dependencies = [
-    "typer>=0.15.1,<0.22",
-    "pydantic>=2.6.4,<3",
-    "pyyaml>=6.0.2,<7",
-    "hypothesis>=6.103.4,<7",
-    "numpy>=1.26,<3",
-    "regopy>=1.0.0,<2",
+    "numpy>=1.26",
+    "matplotlib>=3.8",
+    "pyyaml>=6.0",
 ]
 
-[tool.setuptools.packages.find]
-where = ["src", "packages"]
+[project.optional-dependencies]
+qiskit = ["qiskit", "qiskit-aer", "qiskit-ibm-runtime"]
+viz = ["matplotlib"]
 
-[tool.setuptools.package-dir]
-"" = "src"
-"amundson_blackroad" = "packages/amundson_blackroad"
+[project.urls]
+Homepage = "https://example.com/quantum-lab"
 
-[tool.black]
-line-length = 100
-target-version = ["py311"]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
 
-[tool.ruff.lint]
-select = ["E", "F", "I", "N", "W"]
+[tool.mypy]
+python_version = "3.11"
+plugins = []
 
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["quantum_lab*"]
