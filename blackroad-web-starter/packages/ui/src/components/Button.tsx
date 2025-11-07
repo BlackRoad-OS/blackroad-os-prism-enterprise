@@ -1,6 +1,6 @@
+import React, { ButtonHTMLAttributes } from "react";
 import clsx from "clsx";
 import { Slot } from "@radix-ui/react-slot";
-import { ButtonHTMLAttributes } from "react";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary";
