@@ -1,5 +1,6 @@
 """Runtime implementation of the AutoNovel agent.
 
+<<<<<<< main
 The project documentation makes frequent references to an "AutoNovel" agent
 that can ideate small games, produce story snippets, and help with coding
 exercises.  The previous incarnation of this module had an unresolved merge
@@ -45,6 +46,12 @@ _BASE_CONSENT_SCOPES = {"outline:read", "outline:write"}
 DEFAULT_CONSENT_SCOPES = frozenset(
     _BASE_CONSENT_SCOPES.union(_OPERATION_SCOPE_MAP.values())
 )
+=======
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import ClassVar
+>>>>>>> origin/codex/fix-comments-06kghq
 
 
 @dataclass
@@ -52,6 +59,7 @@ class AutoNovelAgent:
     """A small agent that can build games and craft stories."""
 
     name: str = "AutoNovelAgent"
+<<<<<<< main
     gamma: float = 1.0
     supported_engines: set[str] = field(
         default_factory=lambda: set(DEFAULT_SUPPORTED_ENGINES)
@@ -70,6 +78,10 @@ class AutoNovelAgent:
     }
     OPERATION_SCOPE_MAP: ClassVar[dict[str, str]] = dict(_OPERATION_SCOPE_MAP)
     LEAST_PRIVILEGE_SCOPES: ClassVar[set[str]] = set(DEFAULT_CONSENT_SCOPES)
+=======
+    SUPPORTED_ENGINES: ClassVar[set[str]] = {"unity", "unreal"}
+    games: list[str] = field(default_factory=list)
+>>>>>>> origin/codex/fix-comments-06kghq
 
     def __post_init__(self) -> None:
         if self.gamma <= 0:
@@ -78,11 +90,16 @@ class AutoNovelAgent:
             self._normalize_engine(engine) for engine in self.supported_engines
         }
 
+<<<<<<< main
     # ------------------------------------------------------------------
     # Consent helpers
     # ------------------------------------------------------------------
     def _require_scope(self, operation: str) -> None:
         """Ensure the agent has full consent for the requested operation."""
+=======
+    def create_game(self, engine: str, include_weapons: bool = False) -> str:
+        """Create a basic game using a supported engine without weapons.
+>>>>>>> origin/codex/fix-comments-06kghq
 
         ensure_full_consent(
             self.consent,
@@ -102,11 +119,19 @@ class AutoNovelAgent:
         return engine_normalized
         Args:
             engine: Game engine to use.
+<<<<<<< main
             include_weapons: If True, raise a ``ValueError`` because weapons are not
                 allowed.
 
         Raises:
             ValueError: If ``engine`` is empty or ``include_weapons`` is ``True``.
+=======
+            include_weapons: If ``True``, raise a ``ValueError`` because weapons are
+                not allowed.
+
+        Returns:
+            The message describing the created game.
+>>>>>>> origin/codex/fix-comments-06kghq
         """
         engine_clean = engine.strip()
         if not engine_clean:
@@ -117,8 +142,12 @@ class AutoNovelAgent:
             raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
         if include_weapons:
             raise ValueError("Weapons are not allowed in generated games.")
-        print(f"Creating a {engine_lower.capitalize()} game without weapons...")
+        message = f"Creating a {engine_lower.capitalize()} game without weapons..."
+        print(message)
+        self.games.append(engine_lower)
+        return message
 
+<<<<<<< main
     def supports_engine(self, engine: str) -> bool:
         """Return ``True`` when ``engine`` is present in the supported set."""
 
@@ -126,6 +155,20 @@ class AutoNovelAgent:
             return self._normalize_engine(engine) in self.supported_engines
         except ValueError:
             return False
+=======
+    def list_supported_engines(self) -> list[str]:
+        """Return a list of supported game engines."""
+        return sorted(self.SUPPORTED_ENGINES)
+
+    def list_created_games(self) -> list[str]:
+        """Return a list of engines used for created games.
+
+        Returns:
+            A copy of the internal list tracking created games.
+        """
+        return self.games.copy()
+
+>>>>>>> origin/codex/fix-comments-06kghq
 
     def list_supported_engines(self) -> list[str]:
         """Return a sorted snapshot of supported engines."""
@@ -369,6 +412,7 @@ def main() -> None:
     agent = AutoNovelAgent(consent=consent)
     agent.deploy()
     agent.create_game("unity")
+<<<<<<< main
     print(agent.generate_story("mystery", protagonist="Explorer"))
     agent.write_novel("The Adventure")
 
@@ -378,3 +422,6 @@ if __name__ == "__main__":
 
 
 __all__ = ["AutoNovelAgent", "DEFAULT_SUPPORTED_ENGINES", "DEFAULT_CONSENT_SCOPES"]
+=======
+    print(agent.list_created_games())
+>>>>>>> origin/codex/fix-comments-06kghq

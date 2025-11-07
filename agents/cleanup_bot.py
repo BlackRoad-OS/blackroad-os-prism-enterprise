@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from subprocess import CalledProcessError
 <<<<<<< main
 <<<<<<< main
+<<<<<<< main
 from typing import List
 import sys
 from dataclasses import dataclass, field
@@ -39,6 +40,8 @@ from typing import Dict, List
 >>>>>>> origin/codex/create-monorepo-structure-for-blackroad-foundation
 =======
 """Bot for removing merged Git branches."""
+=======
+>>>>>>> origin/codex/fix-comments-06kghq
 
 from __future__ import annotations
 
@@ -54,6 +57,7 @@ from subprocess import CalledProcessError
 
 @dataclass
 class CleanupBot:
+<<<<<<< main
     """Delete local and remote Git branches once work is merged."""
 
     branches: Iterable[str]
@@ -97,6 +101,10 @@ class CleanupBot:
 >>>>>>> origin/codex/complete-next-step-of-project-582c2w
     """
 
+=======
+    """Delete local and remote branches after merges."""
+
+>>>>>>> origin/codex/fix-comments-06kghq
     branches: list[str]
     dry_run: bool = False
     _normalized_branches: List[str] = field(init=False, repr=False)
@@ -158,6 +166,7 @@ class CleanupBot:
     def _run_git(self, *args: str) -> CompletedProcess | None:
         """Run a ``git`` command, respecting the dry-run flag."""
 
+<<<<<<< main
         return self._run("git", *args)
 
     def _local_branch_exists(self, branch: str) -> bool:
@@ -191,6 +200,8 @@ class CleanupBot:
 >>>>>>> origin/codex/complete-next-project-step-0o96zy
 =======
 >>>>>>> origin/codex/complete-next-step-of-project-582c2w
+=======
+>>>>>>> origin/codex/fix-comments-06kghq
     def _run(self, *cmd: str) -> None:
         """Run a command unless in dry-run mode."""
         if self.dry_run:
@@ -214,6 +225,7 @@ class CleanupBot:
     def delete_branch(self, branch: str) -> bool:
         """Delete a branch locally and remotely.
 
+<<<<<<< main
         Args:
             branch: The branch name to remove.
 
@@ -280,6 +292,11 @@ class CleanupBot:
 >>>>>>> origin/codex/fix-comments-54tl1o
 =======
 >>>>>>> origin/codex/complete-next-project-step-0o96zy
+=======
+    def delete_branch(self, branch: str) -> bool:
+        """Delete a branch locally and remotely."""
+        try:
+>>>>>>> origin/codex/fix-comments-06kghq
             self._run("git", "branch", "-D", branch)
             self._run("git", "push", "origin", "--delete", branch)
             return True
@@ -313,6 +330,7 @@ class CleanupBot:
                 print(f"Would delete branch '{branch}' locally and remotely")
                 results[branch] = True
                 continue
+<<<<<<< main
 <<<<<<< main
             try:
                 subprocess.run(["git", "branch", "-D", branch], check=True)
@@ -395,6 +413,10 @@ class CleanupBot:
             results[branch] = self.delete_branch(branch)
         return results
 >>>>>>> origin/codex/fix-comments-54tl1o
+=======
+            results[branch] = self.delete_branch(branch)
+        return results
+>>>>>>> origin/codex/fix-comments-06kghq
 
         results: Dict[str, bool] = {}
         for branch in self.branches:
@@ -496,7 +518,10 @@ if __name__ == "__main__":
 <<<<<<< main
     print("CleanupBot ready to delete branches.")
 
+<<<<<<< main
 =======
     bot = CleanupBot(["example"], dry_run=True)
     print(bot.cleanup())
 >>>>>>> origin/codex/complete-next-step-of-project-582c2w
+=======
+>>>>>>> origin/codex/fix-comments-06kghq
