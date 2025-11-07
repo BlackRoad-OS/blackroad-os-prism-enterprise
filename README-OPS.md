@@ -81,5 +81,6 @@ Terraform backends, and change-management requirements.
 - Preview Terraform stack: `infra/preview-env/`
 - Reusable module: `modules/preview-env/`
 - Deployment workflows: `.github/workflows/preview-env.yml`, `pages-stage.yml`, `blackroad-deploy.yml`, `prism-ssh-deploy.yml`
+- Branch guardrails: `docs/ops/merge-queue.md`, `docs/ops/required-checks.md`, `docs/ops/branch-policy.md`
 
 _Last updated on 2025-10-06_
