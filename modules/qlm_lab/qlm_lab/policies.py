@@ -1,10 +1,33 @@
-"""Policy helpers for QLM Lab demos and agents."""
 from __future__ import annotations
+
+"""Policy helpers for QLM Lab demos and agents."""
 
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable, List, Mapping
+
+
+def _default_artifact_dir() -> Path:
+    """Return the default artifact directory for the lab."""
+
+    return Path(__file__).resolve().parents[1] / "artifacts"
+
+
+@dataclass
+class Policy:
+    """Runtime policy applied to tool-calling flows."""
+
+    allow_network: bool = False
+    artifact_dir: Path = field(default_factory=_default_artifact_dir)
+    lineage_path: Path = field(init=False)
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.artifact_dir, Path):
+            self.artifact_dir = Path(self.artifact_dir)
+        self.artifact_dir.mkdir(parents=True, exist_ok=True)
+        self.lineage_path = self.artifact_dir / "lineage.jsonl"
+        self.lineage_path.parent.mkdir(parents=True, exist_ok=True)
 
 
 @dataclass
@@ -17,10 +40,7 @@ class PolicyConfig:
 
 
 def artifact_paths(root: Path, patterns: Iterable[str]) -> List[Path]:
-    """Resolve artifact paths relative to ``root``.
-
-    Missing paths are returned as-is so callers can report the failure.
-    """
+    """Resolve artifact paths relative to ``root``."""
 
     resolved: List[Path] = []
     for pattern in patterns:
@@ -68,6 +88,7 @@ def network_allowed(config: PolicyConfig | None = None) -> bool:
 
 
 __all__ = [
+    "Policy",
     "PolicyConfig",
     "artifact_paths",
     "check_artifact_quota",

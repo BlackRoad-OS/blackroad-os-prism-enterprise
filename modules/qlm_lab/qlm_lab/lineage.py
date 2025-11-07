@@ -9,6 +9,20 @@ from typing import List
 from .proto import Msg
 
 
+DEFAULT_LINEAGE_PATH = Path(__file__).resolve().parents[1] / "artifacts" / "lineage.jsonl"
+
+
+def append(event: dict[str, object], path: Path | None = None) -> None:
+    """Append a lightweight lineage ``event`` to the JSONL log."""
+
+    target = Path(path) if path is not None else DEFAULT_LINEAGE_PATH
+    target.parent.mkdir(parents=True, exist_ok=True)
+    line = json.dumps(event, default=str)
+    with target.open("a", encoding="utf-8") as handle:
+        handle.write(line + "\n")
+
+
+
 @dataclass
 class LineageRecord:
     """Serializable lineage record for agent activity."""
@@ -56,4 +70,4 @@ class LineageLogger:
         return list(self._records)
 
 
-__all__ = ["LineageLogger", "LineageRecord"]
+__all__ = ["LineageLogger", "LineageRecord", "append"]
