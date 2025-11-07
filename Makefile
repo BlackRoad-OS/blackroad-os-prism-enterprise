@@ -1,98 +1,21 @@
-.PHONY: help install test lint format clean
+.PHONY: setup test lint docs demo
 
-help:  ## Show this help
-@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+setup:
+pip install -e .[viz]
 
-install:  ## Install dependencies
-pip install -r requirements.txt -r requirements-dev.txt
-
-test:  ## Run tests
-pytest --cov=orchestrator --cov-report=term-missing
-
-lint:  ## Lint code
-ruff check .
-mypy orchestrator
-
-format:  ## Format code
-black .
-ruff check --fix .
-
-clean:  ## Clean artifacts
-find . -type d -name __pycache__ -exec rm -rf {} +
-find . -type f -name '*.pyc' -delete
-rm -rf .pytest_cache .coverage .mypy_cache
-rm -rf artifacts/*
-# <!-- FILE: Makefile -->
-.RECIPEPREFIX = >
-.PHONY: install dev start format lint test health migrate clean
-
-install:
->npm install
-
-dev:
->npm run dev
-
-start:
->npm start
-
-format:
->npm run format
-
-lint:
->npm run lint
+setup-qiskit:
+pip install -e .[qiskit]
 
 test:
->npm test
-
-health:
->npm run health
-
-migrate:
->@echo "no migrations"
-
-
-dev:
->npm run dev
-
-start:
->npm start
-
-format:
->npm run format
+pytest
 
 lint:
->npm run lint
+ruff check quantum_lab tests
+mypy quantum_lab
 
-test:
->npm test
+docs:
+@echo "Docs available in docs/"
 
-health:
->npm run health
-
-migrate:
->@echo "no migrations"
-
-
-dev:
->npm run dev
-
-start:
->npm start
-
-format:
->npm run format
-
-lint:
->npm run lint
-
-test:
->npm test
-
-health:
->npm run health
-
-migrate:
->@echo "no migrations"
-
-clean:
->rm -rf node_modules coverage
+demo:
+python quantum_lab/examples/bell_pair.py
+python quantum_lab/examples/grover_demo.py
