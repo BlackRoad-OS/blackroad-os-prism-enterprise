@@ -1,9 +1,9 @@
 {
-  "name": "@blackroad/ui",
+  "name": "@blackroad/config",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    "./domain.config": "./domain.config.ts"
   }
 }
