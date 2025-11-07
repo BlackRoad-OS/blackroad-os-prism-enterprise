@@ -25,3 +25,6 @@
 - name: no-rerun
   color: "b60205"
   description: Opt out of automatic reruns
+- name: queue:ready
+  color: "0052cc"
+  description: Ready for merge queue ingestion once all required checks are green

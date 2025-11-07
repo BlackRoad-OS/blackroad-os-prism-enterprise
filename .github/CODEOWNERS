@@ -1,26 +1,17 @@
-# CODEOWNERS ensures reviews from the right people.
-# Adjust teams/users as needed for BlackRoad.
+# CODEOWNERS ensures reviews from the right teams without guesswork.
+# Update the assignments as ownership evolves.
+
+# Default owners
 *       @blackboxprogramming/maintainers
 
-# Example: require core reviewers for security-sensitive areas
-docs/** @blackboxprogramming/maintainers
-.github/** @blackboxprogramming/maintainers
-scripts/** @blackboxprogramming/maintainers
-prs.csv @blackboxprogramming/maintainers
-miners/** @blackboxprogramming/maintainers
-lightning/** @blackboxprogramming/maintainers
-# Default reviewers for all files
-* @blackboxprogramming/core
+# Critical areas that must always page the core maintainers
+/docs/**                @blackboxprogramming/maintainers
+/.github/workflows/**   @blackboxprogramming/maintainers
+/policies/**            @blackboxprogramming/maintainers
+/deploy/**              @blackboxprogramming/maintainers
 
-* @blackboxprogramming
- 
-/infra/            @platform-team
-/flows/            @integration-team
-/monitors/         @sre-team
-/runbooks/         @platform-team
-miners/** @blackboxprogramming/maintainers
-lightning/** @blackboxprogramming/maintainers
-/apps/api/       @platform-team
-/apps/web-public/ @platform-team
-/ops/            @sre-team
-/scripts/        @platform-team
+# Domain teams (extend as services mature)
+/apps/**                @blackboxprogramming/platform
+/infra/**               @blackboxprogramming/platform
+/runbooks/**            @blackboxprogramming/platform
+/scripts/**             @blackboxprogramming/platform
