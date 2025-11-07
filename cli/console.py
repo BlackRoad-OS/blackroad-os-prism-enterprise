@@ -16,6 +16,7 @@ from orchestrator import (
     PolicyEngine,
     RouteContext,
     Router,
+    SecRule2042Gate,
     Task,
     TaskPriority,
     TaskRepository,
@@ -65,12 +66,14 @@ def _load_route_context(approved_by: Iterable[str] | None = None) -> RouteContex
             }
         },
     }
+    sec_gate = SecRule2042Gate()
     return RouteContext(
         policy_engine=policy_engine,
         memory=memory,
         lineage=lineage,
         config=config_dict,
         approved_by=list(approved_by or []),
+        sec_gate=sec_gate,
     )
 
 

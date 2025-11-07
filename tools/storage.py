@@ -1,4 +1,5 @@
 """File-system storage helpers used across Prism Console."""
+"""Lightweight helpers for reading and writing configuration artifacts."""
 
 from __future__ import annotations
 
@@ -29,12 +30,12 @@ def write(path: Union[str, Path], content: Union[Mapping[str, Any], str]) -> Non
     target = Path(path)
     _ensure_parent(target)
     mode = "a" if target.suffix == ".jsonl" else "w"
-    text = json.dumps(content) if isinstance(content, Mapping) else str(content)
+    payload = json.dumps(content) if isinstance(content, Mapping) else str(content)
     with target.open(mode, encoding="utf-8") as handle:
         if mode == "a":
-            handle.write(text + "\n")
+            handle.write(payload + "\n")
         else:
-            handle.write(text)
+            handle.write(payload)
 
 
 def read(path: Union[str, Path]) -> str:
@@ -47,7 +48,7 @@ def read(path: Union[str, Path]) -> str:
         return ""
 
 
-def _resolve(path: str, root: Path) -> Path:
+def _resolve(path: Union[str, Path], root: Path) -> Path:
     candidate = Path(path)
     if candidate.is_absolute():
         return candidate

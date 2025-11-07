@@ -14,6 +14,7 @@ from orchestrator import (
     PolicyEngine,
     RouteContext,
     Router,
+    SecRule2042Gate,
     Task,
     TaskPriority,
     TaskRepository,
@@ -52,7 +53,14 @@ def policy_engine(policy_file: Path) -> PolicyEngine:
 def route_context(tmp_path: Path, policy_engine: PolicyEngine) -> RouteContext:
     memory = MemoryLog(tmp_path / "memory.jsonl")
     lineage = LineageTracker(tmp_path / "lineage.jsonl")
-    return RouteContext(policy_engine=policy_engine, memory=memory, lineage=lineage, approved_by=[])
+    sec_gate = SecRule2042Gate()
+    return RouteContext(
+        policy_engine=policy_engine,
+        memory=memory,
+        lineage=lineage,
+        approved_by=[],
+        sec_gate=sec_gate,
+    )
 
 
 @pytest.fixture()

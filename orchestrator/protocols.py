@@ -1,4 +1,5 @@
 """Shared typing contracts for Prism Console bots and tasks."""
+"""Shared data contracts for bots and the orchestrator."""
 
 from __future__ import annotations
 
@@ -31,11 +32,15 @@ class Task:
     metadata: MutableMapping[str, Any] = field(default_factory=dict)
     config: MutableMapping[str, Any] = field(default_factory=dict)
     context: MutableMapping[str, Any] = field(default_factory=dict)
+    metadata: MutableMapping[str, Any] | None = None
+    config: MutableMapping[str, Any] | None = None
+    context: MutableMapping[str, Any] | None = None
     status: str = "pending"
     depends_on: Sequence[str] = field(default_factory=tuple)
     scheduled_for: Optional[datetime] = None
 
     def __post_init__(self) -> None:  # pragma: no cover - normalisation helper
+    def __post_init__(self) -> None:  # pragma: no cover - normalisation logic
         if isinstance(self.priority, str):
             self.priority = TaskPriority(self.priority.lower())
 
@@ -65,6 +70,15 @@ class Task:
             self.context = {}
         elif not isinstance(self.context, MutableMapping):
             self.context = dict(self.context)
+        self.tags = tuple(self.tags)
+        self.depends_on = tuple(self.depends_on)
+
+        if not isinstance(self.metadata, MutableMapping):
+            self.metadata = dict(self.metadata or {})
+        if not isinstance(self.config, MutableMapping):
+            self.config = dict(self.config or {})
+        if not isinstance(self.context, MutableMapping):
+            self.context = dict(self.context or {})
 
     def to_dict(self) -> Dict[str, Any]:
         """Serialise the task for persistence or transport."""
@@ -78,11 +92,13 @@ class Task:
             "created_at": self.created_at.isoformat(),
             "status": self.status,
             "tags": list(self.tags),
-            "metadata": dict(self.metadata),
-            "config": dict(self.config),
-            "context": dict(self.context),
+            "metadata": dict(self.metadata or {}),
+            "config": dict(self.config or {}),
+            "context": dict(self.context or {}),
             "depends_on": list(self.depends_on),
         }
+        if self.bot:
+            payload["bot"] = self.bot
         if self.due_date is not None:
             payload["due_date"] = self.due_date.isoformat()
         if self.scheduled_for is not None:

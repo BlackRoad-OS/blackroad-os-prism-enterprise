@@ -70,6 +70,22 @@ Terraform backends, and change-management requirements.
 - **Rollback** — Use `POST /api/rollback/:releaseId` with the internal token or
   re-run `blackroad-deploy.yml` against a known-good commit.
 
+## Policy gates
+
+- **SEC rule 204-2 (forecast guardrail)** — `policies/sec_rule_204_2.rego`
+  enforces citations for revenue forecasts that exceed a 10% deviation. The
+  orchestrator loads this via `SecRule2042Gate` and the `task:route` command
+  will fail fast when the policy denies execution.
+  - Add supporting links under `task.metadata["forecast"]["citations"]` (or
+    attach baseline/projection values so the gate can compute the variance).
+  - Policy coverage lives in `tests/policies/test_sec_rule_204_2.py`; run `pytest
+    tests/policies` for a focused check.
+- **Emergency override** — When compliance signs off, set the environment
+  variable `PRISM_SEC_204_2_OVERRIDE=I_ACKNOWLEDGE_SEC_204_2_RISK` for the CLI or
+  worker invocation performing the reroute. The orchestrator logs the override
+  and skips the denial once. Clear the variable immediately after the run and
+  document the exception in the change record.
+
 ## References
 
 - Deployment playbook: `DEPLOYMENT.md`

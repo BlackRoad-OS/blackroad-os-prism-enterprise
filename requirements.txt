@@ -4,6 +4,7 @@ pyyaml==6.0.2
 anthropic
 boto3
 fastapi
+regopy==1.0.0
 matplotlib==3.9.4
 mpmath
 notion-client

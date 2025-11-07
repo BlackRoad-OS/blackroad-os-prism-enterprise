@@ -12,6 +12,7 @@ from orchestrator import (
     PolicyEngine,
     RouteContext,
     Router,
+    SecRule2042Gate,
     Task,
     TaskPriority,
     TaskRepository,
@@ -47,6 +48,7 @@ def test_route_records_memory_and_lineage(tmp_path: Path) -> None:
         memory=MemoryLog(tmp_path / "memory.jsonl"),
         lineage=LineageTracker(tmp_path / "lineage.jsonl"),
         approved_by=["cfo"],
+        sec_gate=SecRule2042Gate(),
     )
     response = router.route(task.id, "Treasury-BOT", context)
     assert response.ok
