@@ -18,9 +18,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-12">{children}</main>
         <Footer
           links={[
-            { label: "Docs", href: "/docs" },
-            { label: "Status", href: "/status" },
-            { label: "Privacy", href: "/privacy" }
+            { label: "Vitals", href: "https://blackroad.network/agents" },
+            { label: "Graph", href: "https://blackroad.network/agents?tab=graph" },
+            { label: "Bootcamp", href: "https://lucidia.earth/bootcamp" },
+            { label: "API", href: "/agents" }
           ]}
         />
         <Analytics />
