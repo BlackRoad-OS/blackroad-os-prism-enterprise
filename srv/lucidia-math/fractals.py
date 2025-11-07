@@ -1,72 +1,129 @@
-"""Ψ′ fractal explorations.
-
-A light‑weight Mandelbrot style fractal is implemented.  The function
-:func:`generate_fractal` writes the resulting image into
-``output/fractals`` and returns the file path.
-"""
+"""Mandelbrot and related fractal utilities for the math service."""
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
+from typing import Dict, Tuple
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
+from .storage import ensure_domain
 
-def generate_fractal(
-    width: int = 400, height: int = 400, max_iter: int = 50, output_dir: Path | str = Path("output/fractals")
-) -> str:
-    """Generate a simple Mandelbrot fractal and save it."""
+matplotlib.use("Agg", force=True)
 
-    out = Path(output_dir)
-    out.mkdir(parents=True, exist_ok=True)
-    x = np.linspace(-2.0, 1.0, width)
-    y = np.linspace(-1.5, 1.5, height)
-    C = x + y[:, None] * 1j
+DOMAIN = "fractals"
+ESCAPE_RADIUS = 2.0
+
+
+@dataclass(slots=True)
+class MandelbrotComputation:
+    """Result of a Mandelbrot generation pass."""
+
+    image_path: Path
+    params: Dict[str, float | int]
+    invariants: Dict[str, float]
+    grid_shape: Tuple[int, int]
+
+
+def _timestamp() -> str:
+    return datetime.utcnow().strftime("%Y%m%dT%H%M%S%f")
+
+
+def _resolve_cmap(name: str) -> str:
+    if name in plt.colormaps():
+        return name
+    raise ValueError(f"Unknown colormap '{name}'")
+
+
+def render_mandelbrot(
+    *,
+    width: int = 512,
+    height: int = 512,
+    max_iter: int = 256,
+    xmin: float = -2.0,
+    xmax: float = 1.0,
+    ymin: float = -1.5,
+    ymax: float = 1.5,
+    cmap: str = "viridis",
+) -> MandelbrotComputation:
+    """Render a Mandelbrot image with configurable bounds."""
+
+    if width <= 0 or height <= 0:
+        raise ValueError("width and height must be positive")
+    if max_iter <= 0:
+        raise ValueError("max_iter must be positive")
+    if xmin >= xmax or ymin >= ymax:
+        raise ValueError("invalid coordinate bounds")
+
+    _resolve_cmap(cmap)
+    output_dir = ensure_domain(DOMAIN)
+    file_path = output_dir / f"mandelbrot_{_timestamp()}.png"
+
+    x = np.linspace(xmin, xmax, width)
+    y = np.linspace(ymin, ymax, height)
+    C = x[None, :] + 1j * y[:, None]
     Z = np.zeros_like(C)
-    div_time = np.zeros(C.shape, dtype=int)
-    for i in range(max_iter):
-        Z = Z**2 + C
-        diverge = np.abs(Z) > 2
-        div_now = diverge & (div_time == 0)
-        div_time[div_now] = i
-        Z[diverge] = 2
-    fig, ax = plt.subplots()
-    ax.imshow(div_time, cmap="magma")
+    divergence = np.zeros(C.shape, dtype=int)
+
+    for idx in range(max_iter):
+        mask = divergence == 0
+        Z[mask] = Z[mask] ** 2 + C[mask]
+        diverged = np.greater(np.abs(Z), ESCAPE_RADIUS) & mask
+        divergence[diverged] = idx
+
+    fig, ax = plt.subplots(figsize=(6, 6), dpi=150)
+    ax.imshow(
+        divergence,
+        extent=(xmin, xmax, ymin, ymax),
+        cmap=cmap,
+        origin="lower",
+    )
     ax.set_axis_off()
-    path = out / "psi_fractal.png"
-    fig.savefig(path, bbox_inches="tight", pad_inches=0)
+    fig.savefig(file_path, bbox_inches="tight", pad_inches=0)
     plt.close(fig)
-    return str(path)
+
+    bounded = int((divergence == 0).sum())
+    total = int(divergence.size)
+    invariants = {
+        "escape_radius": ESCAPE_RADIUS,
+        "bounded_fraction": bounded / total,
+        "max_iter": float(max_iter),
+    }
+    params = {
+        "width": width,
+        "height": height,
+        "xmin": xmin,
+        "xmax": xmax,
+        "ymin": ymin,
+        "ymax": ymax,
+        "cmap": cmap,
+    }
+
+    return MandelbrotComputation(
+        image_path=file_path,
+        params=params,
+        invariants=invariants,
+        grid_shape=(height, width),
+    )
 
 
-def demo() -> str:
-    """Generate an example fractal image."""
+def generate_fractal(**kwargs) -> str:
+    """Compatibility helper returning only the image path."""
 
-    return generate_fractal()
-"""Fractal generation utilities."""
-from pathlib import Path
-import numpy as np
-import matplotlib.pyplot as plt
-
-OUTPUT_DIR = Path(__file__).resolve().parent / "output" / "fractals"
+    result = render_mandelbrot(**kwargs)
+    return str(result.image_path)
 
 
-def generate_mandelbrot(width: int = 200, height: int = 200, max_iter: int = 50) -> Path:
-    """Generate a simple Mandelbrot set image."""
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    out_file = OUTPUT_DIR / "mandelbrot.png"
-    x = np.linspace(-2.0, 1.0, width)
-    y = np.linspace(-1.5, 1.5, height)
-    C = x[:, None] + 1j * y[None, :]
-    Z = np.zeros_like(C)
-    mask = np.zeros(C.shape, dtype=int)
-    for i in range(max_iter):
-        Z = Z ** 2 + C
-        mask += (np.abs(Z) < 2)
-    plt.figure(figsize=(4, 4))
-    plt.imshow(mask.T, cmap="magma", origin="lower")
-    plt.axis("off")
-    plt.savefig(out_file, bbox_inches="tight", pad_inches=0)
-    plt.close()
-    return out_file
+def demo() -> Dict[str, object]:
+    """Generate a demo artefact and return summary information."""
+
+    result = render_mandelbrot(width=256, height=256, max_iter=64)
+    return {
+        "path": str(result.image_path),
+        "params": result.params,
+        "invariants": result.invariants,
+    }

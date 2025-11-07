@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib
+from logging import getLogger
 from typing import Any
 
 from sdk import plugin_api
@@ -23,6 +24,7 @@ from .sec import SecRule2042Gate
 from .tasks import load_tasks, save_tasks
 
 _logger = importlib.import_module("logging").getLogger(__name__)
+logger = getLogger(__name__)
 
 __all__ = [
     "BaseBot",
@@ -44,13 +46,10 @@ __all__ = [
     "save_tasks",
     "route",
 ]
-from logging import getLogger
-from typing import Any
 
 
 def route(bot_name: str, task: plugin_api.Task) -> Any:
     """Entrypoint used by plugins to execute bot handlers."""
-logger = getLogger(__name__)
 
     from . import registry as _registry
 

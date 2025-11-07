@@ -1,4 +1,3 @@
-"""File-system storage helpers used across Prism Console."""
 """Lightweight helpers for reading and writing configuration artifacts."""
 
 from __future__ import annotations

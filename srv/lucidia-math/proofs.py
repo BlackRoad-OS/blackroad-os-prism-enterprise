@@ -1,63 +1,68 @@
-"""Recursive proof and contradiction engine.
-
-This module only sketches the idea of a system that can detect
-self-referential definitions.  It accepts simple recursive definitions
-expressed as strings and heuristically flags ones that contain direct
-self-reference, logging them to ``contradiction_log.json``.
-"""
+"""Simple proof recording utilities."""
 
 from __future__ import annotations
 
-import json
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
+from typing import Dict
 
-LOG_FILE = Path("contradiction_log.json")
+from .storage import ensure_domain, write_json
 
-
-def is_contradictory(expr: str) -> bool:
-    """Return ``True`` if ``expr`` appears self-referential.
-
-    The heuristic simply checks for nested occurrences of ``f(f(`` which is
-    characteristic of some Gödel-like undecidable constructions.
-    """
-
-    needle = "f(f("
-    return needle in expr.replace(" ", "")
+DOMAIN = "proofs"
 
 
-def log_contradiction(expr: str) -> None:
-    """Append ``expr`` to :data:`LOG_FILE`."""
+@dataclass(slots=True)
+class ProofRecord:
+    statement: str
+    assumption: str
+    contradiction: str
+    result: str
+    created_at: str
 
-    data = []
-    if LOG_FILE.exists():
-        data = json.loads(LOG_FILE.read_text())
-    data.append(expr)
-    LOG_FILE.write_text(json.dumps(data, indent=2))
-
-
-def demo() -> bool:
-    """Demonstrate contradiction detection with a toy example."""
-
-    example = "f(x) = f(f(x-1)) + 1"
-    flag = is_contradictory(example)
-    if flag:
-        log_contradiction(example)
-    return flag
-"""Proof utilities for simple contradiction examples."""
-from pathlib import Path
-import json
-
-OUTPUT_DIR = Path(__file__).resolve().parent / "output" / "contradictions"
+    def to_payload(self) -> Dict[str, str]:
+        return {
+            "statement": self.statement,
+            "assumption": self.assumption,
+            "contradiction": self.contradiction,
+            "result": self.result,
+            "created_at": self.created_at,
+        }
 
 
-def save_contradiction() -> Path:
-    """Record a tiny proof by contradiction and save to JSON."""
-    proof = {
-        "statement": "Assume there exists an integer between 2 and 3.",
-        "contradiction": "No integer exists between 2 and 3.",
-        "result": "Therefore, assumption is false."
-    }
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    out_file = OUTPUT_DIR / "contradiction_log.json"
-    out_file.write_text(json.dumps(proof, indent=2))
-    return out_file
+def _timestamp() -> str:
+    return datetime.utcnow().strftime("%Y%m%dT%H%M%S%f")
+
+
+def _derive_contradiction(statement: str, assumption: str) -> str:
+    norm_stmt = statement.strip().lower()
+    norm_assumption = assumption.strip().lower()
+    if norm_assumption.startswith("not ") and norm_assumption[4:] == norm_stmt:
+        return "Direct negation of the statement"
+    return f"{assumption.strip()} contradicts {statement.strip()}"
+
+
+def record_contradiction(statement: str, assumption: str) -> Path:
+    if not statement.strip():
+        raise ValueError("statement must not be empty")
+    if not assumption.strip():
+        raise ValueError("assumption must not be empty")
+
+    contradiction = _derive_contradiction(statement, assumption)
+    record = ProofRecord(
+        statement=statement.strip(),
+        assumption=assumption.strip(),
+        contradiction=contradiction,
+        result="contradiction established",
+        created_at=datetime.utcnow().isoformat(),
+    )
+    output_dir = ensure_domain(DOMAIN)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    path = output_dir / f"proof_{_timestamp()}.json"
+    write_json(path, record.to_payload())
+    return path
+
+
+def demo() -> Dict[str, str]:
+    path = record_contradiction("P", "not P")
+    return {"path": str(path)}

@@ -25,7 +25,8 @@ def field_lift(a: float, theta: float, mode: str = "exponential") -> float:
     """
 
     if mode == "exponential":
-        return float(np.exp(a * theta))
+        argument = np.clip(a * theta, -50.0, 50.0)
+        return float(np.exp(argument))
     if mode == "linear":
         return float(a)
     if mode == "theta":

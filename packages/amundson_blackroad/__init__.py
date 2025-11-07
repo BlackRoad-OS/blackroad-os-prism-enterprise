@@ -14,7 +14,14 @@ from .autonomy import (
     trust_field_step,
 )
 from .coupling import curvature_source, couple_curvature_response
-from .thermo import landauer_floor, irreversible_energy, annotate_run_with_thermo
+from .thermo import (
+    landauer_floor,
+    landauer_min,
+    irreversible_energy,
+    annotate_run_with_thermo,
+    spiral_entropy,
+    energy_increment,
+)
 
 __all__ = [
     "simulate_am2",
@@ -29,6 +36,9 @@ __all__ = [
     "curvature_source",
     "couple_curvature_response",
     "landauer_floor",
+    "landauer_min",
     "irreversible_energy",
     "annotate_run_with_thermo",
+    "spiral_entropy",
+    "energy_increment",
 ]
