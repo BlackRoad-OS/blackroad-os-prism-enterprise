@@ -44,9 +44,10 @@ import RoadChain from './pages/RoadChain.jsx'
 import Homework from './pages/Homework.jsx'
 import Novelty from './pages/Novelty.jsx'
 import Nexus from './pages/Nexus.jsx'
+import LucidiaDemo from './pages/LucidiaDemo.jsx'
 import Login from './components/Login.jsx'
 import RoadCoin from './components/RoadCoin.jsx'
-import { Activity, User, LayoutGrid, HeartPulse, Shield, ShieldCheck, Cpu, Brain, FunctionSquare, Wallet, Rocket, BookOpen, GraduationCap, Sparkles, Music3, GitCommit, Settings } from 'lucide-react'
+import { Activity, User, LayoutGrid, HeartPulse, Shield, ShieldCheck, Cpu, Brain, FunctionSquare, Wallet, Rocket, BookOpen, GraduationCap, Sparkles, Music3, GitCommit, Settings, Atom } from 'lucide-react'
 
 const NAV_ITEMS = [
   { key: 'dashboard', to: '/dashboard', text: 'Dashboard', icon: <Activity size={18} />, match: path => path === '/' || path === '/dashboard' },
@@ -63,6 +64,7 @@ const NAV_ITEMS = [
   { key: 'agents', to: '/agents', text: 'Agent Lineage', icon: <Brain size={18} /> },
   { key: 'equations', to: '/equations', text: 'Equations', icon: <FunctionSquare size={18} /> },
   { key: 'equations-lab', to: '/equations-lab', text: 'Equations Lab', icon: <FunctionSquare size={18} /> },
+  { key: 'lucidia', to: '/lucidia', text: 'Lucidia QLM', icon: <Atom size={18} /> },
   { key: 'roadcoin', to: '/roadcoin', text: 'RoadCoin', icon: <Wallet size={18} /> },
   { key: 'orchestrator', to: '/orchestrator', text: 'Orchestrator', icon: <Rocket size={18} /> },
   { key: 'roadbook', to: '/roadbook', text: 'Roadbook', icon: <BookOpen size={18} /> },
@@ -297,6 +299,7 @@ export default function App(){
               <Route path="/codex" element={<Section><Codex socket={socket} /></Section>} />
               <Route path="/equations" element={<Section><PeriodicTableOfEquations /></Section>} />
               <Route path="/equations-lab" element={<Section><EquationsLab /></Section>} />
+              <Route path="/lucidia" element={<Section><LucidiaDemo /></Section>} />
               <Route path="/roadcoin" element={<Section><RoadCoin onUpdate={handleWalletUpdate} /></Section>} />
               <Route path="/orchestrator" element={<Section><Orchestrator socket={socket} /></Section>} />
               <Route path="/roadbook" element={<Section><Roadbook /></Section>} />
