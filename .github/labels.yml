@@ -25,3 +25,7 @@
 - name: no-rerun
   color: "b60205"
   description: Opt out of automatic reruns
+- name: queue:ready
+  color: "0e8a16"
+  description: Eligible for merge queue automation
+

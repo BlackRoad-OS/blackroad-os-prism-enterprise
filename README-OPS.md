@@ -49,6 +49,11 @@ Terraform backends, and change-management requirements.
   delete merged branches automatically. Override the base with
   `BASE_BRANCH=origin/staging` when pruning staging-specific branches.
 
+## Merge queue guardrails
+
+- `docs/ops/merge-queue.md` explains how to apply branch protection with the CLI, enable the merge queue, and keep the `queue:ready` label in sync.
+- `docs/ops/required-checks.md` lists the commit status contexts that must stay green before labeling a pull request as queue-ready.
+
 ## Health & verification
 
 - Preview: `curl -fsS https://pr-<n>.dev.blackroad.io/healthz/ui` (already run in
