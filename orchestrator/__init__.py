@@ -8,6 +8,7 @@ from .memory import MemoryLog
 from .policy import PolicyEngine
 from .protocols import BotExecutionError, BotResponse, MemoryRecord, Task, TaskPriority
 from .router import BotRegistry, RouteContext, Router, TaskRepository
+from .sec import SecRule2042Gate
 from .tasks import load_tasks, save_tasks
 
 __all__ = [
@@ -25,17 +26,18 @@ __all__ = [
     "RouteContext",
     "Router",
     "TaskRepository",
+    "SecRule2042Gate",
     "load_tasks",
     "save_tasks",
 ]
-import logging
+from logging import getLogger
 from typing import Any
 
 from sdk import plugin_api
 from . import registry
 from .sandbox import run_in_sandbox, BotExecutionError
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 def route(bot_name: str, task: plugin_api.Task) -> Any:

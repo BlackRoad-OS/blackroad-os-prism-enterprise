@@ -14,6 +14,7 @@ dependencies = [
     "pydantic>=2.6.4,<3",
     "pyyaml>=6.0.2,<7",
     "hypothesis>=6.103.4,<7",
+    "regopy>=1.0.0,<2",
 ]
 
 [tool.setuptools.packages.find]

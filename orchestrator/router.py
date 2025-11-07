@@ -1,40 +1,21 @@
 """Task routing, persistence, and scheduling helpers."""
-"""Routing utilities for orchestrating tasks between bots."""
 
 from __future__ import annotations
 
 import copy
 import json
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Mapping, Sequence
 
-from .base import BaseBot
 from .exceptions import BotNotRegisteredError, TaskNotFoundError
 from .lineage import LineageTracker
 from .memory import MemoryLog
 from .metrics import log_metric
 from .policy import PolicyEngine
-from .protocols import BotExecutionError, BotResponse, Task
-from typing import Dict, Mapping, Sequence
-
-from orchestrator.base import BaseBot
-from orchestrator.exceptions import BotNotRegisteredError, TaskNotFoundError
-from orchestrator.lineage import LineageTracker
-from orchestrator.memory import MemoryLog
-from orchestrator.policy import PolicyEngine
-from orchestrator.protocols import BotExecutionError, BotResponse, Task, TaskPriority
-
-from .metrics import log_metric
-from typing import Dict, Mapping, Sequence
-
-from .base import BaseBot
-from .exceptions import BotNotRegisteredError, TaskNotFoundError
-from .lineage import LineageTracker
-from .memory import MemoryLog
-from .metrics import log_metric
-from .policy import PolicyEngine
-from .protocols import BotExecutionError, BotResponse, Task, TaskPriority
+from .protocols import BotExecutionError, BotResponse, Task, TaskPriority, BaseBot
+from .sec import SecRule2042Gate
 
 
 class BotRegistry:
@@ -70,8 +51,6 @@ class TaskRepository:
             self._save({})
 
     def _load(self) -> Dict[str, Dict[str, Any]]:
-        data = self.path.read_text(encoding="utf-8") if self.path.exists() else ""
-    def _load(self) -> Dict[str, dict[str, object]]:
         try:
             data = self.path.read_text(encoding="utf-8")
         except FileNotFoundError:
@@ -96,43 +75,24 @@ class TaskRepository:
         self._save(data)
 
     def get(self, task_id: str) -> Task:
-        data = self._load()
-        payload = data.get(task_id)
-        if not payload:
+        payload = self._load().get(task_id)
+        if payload is None:
             raise TaskNotFoundError(f"Task '{task_id}' not found")
-        return Task(**payload)
+        return self._task_from_payload(payload)
 
     def list(self) -> Sequence[Task]:
-        data = self._load()
-        return tuple(Task(**payload) for payload in data.values())
+        return [self._task_from_payload(payload) for payload in self._load().values()]
 
-    def update(self, task: Task) -> None:
-        data = self._load()
-        if task.id not in data:
-            raise TaskNotFoundError(f"Task '{task.id}' not found")
-        data[task.id] = task.to_dict()
-        self._save(data)
-        return Task(
-            id=payload["id"],
-            goal=payload["goal"],
-            bot=payload.get("bot", ""),
-            owner=payload.get("owner", ""),
-            priority=payload.get("priority", TaskPriority.MEDIUM.value),
-            created_at=datetime.fromisoformat(payload["created_at"]),
-            due_date=_parse_datetime(payload.get("due_date")),
     @staticmethod
-    def _task_from_payload(payload: Mapping[str, object]) -> Task:
-        due_value = payload.get("due_date")
-        scheduled_value = payload.get("scheduled_for")
-        priority_value = payload.get("priority", TaskPriority.MEDIUM.value)
-
+    def _task_from_payload(payload: Mapping[str, Any]) -> Task:
         return Task(
             id=str(payload["id"]),
             goal=str(payload["goal"]),
+            bot=str(payload.get("bot", "")),
             owner=payload.get("owner"),
-            priority=priority_value,
+            priority=payload.get("priority", TaskPriority.MEDIUM.value),
             created_at=datetime.fromisoformat(str(payload["created_at"])),
-            due_date=datetime.fromisoformat(str(due_value)) if due_value else None,
+            due_date=_parse_datetime(payload.get("due_date")),
             tags=tuple(payload.get("tags", [])),
             metadata=dict(payload.get("metadata", {})),
             config=dict(payload.get("config", {})),
@@ -140,46 +100,7 @@ class TaskRepository:
             status=str(payload.get("status", "pending")),
             depends_on=tuple(payload.get("depends_on", [])),
             scheduled_for=_parse_datetime(payload.get("scheduled_for")),
-            scheduled_for=(
-                datetime.fromisoformat(str(scheduled_value)) if scheduled_value else None
-            ),
         )
-
-    def add(self, task: Task) -> None:
-        data = self._load()
-        tasks = []
-        for payload in data.values():
-            tasks.append(
-                Task(
-                    id=payload["id"],
-                    goal=payload["goal"],
-                    bot=payload.get("bot", ""),
-                    owner=payload.get("owner", ""),
-                    priority=payload.get("priority", TaskPriority.MEDIUM.value),
-                    created_at=datetime.fromisoformat(payload["created_at"]),
-                    due_date=_parse_datetime(payload.get("due_date")),
-                    tags=tuple(payload.get("tags", [])),
-                    metadata=dict(payload.get("metadata", {})),
-                    config=dict(payload.get("config", {})),
-                    context=dict(payload.get("context", {})),
-                    status=payload.get("status", "pending"),
-                    depends_on=tuple(payload.get("depends_on", [])),
-                    scheduled_for=_parse_datetime(payload.get("scheduled_for")),
-                )
-            )
-        return tuple(tasks)
-        data[task.id] = task.to_dict()
-        self._save(data)
-
-    def get(self, task_id: str) -> Task:
-        data = self._load()
-        payload = data.get(task_id)
-        if payload is None:
-            raise TaskNotFoundError(f"Task '{task_id}' not found")
-        return self._task_from_payload(payload)
-
-    def list(self) -> Sequence[Task]:
-        return [self._task_from_payload(payload) for payload in self._load().values()]
 
 
 @dataclass(slots=True)
@@ -191,6 +112,7 @@ class RouteContext:
     lineage: LineageTracker
     config: Mapping[str, object] | None = None
     approved_by: Sequence[str] | None = None
+    sec_gate: SecRule2042Gate | None = None
 
 
 class Router:
@@ -202,22 +124,23 @@ class Router:
 
     def route(self, task_id: str, bot_name: str, context: RouteContext) -> BotResponse:
         task = self.repository.get(task_id)
+
         if context.config:
             merged_config: Dict[str, Any] = copy.deepcopy(context.config)
-            merged_config.update(task.config)
+            merged_config.update(task.config or {})
             task.config = merged_config
-            task.config.update(context.config)
+
+        if context.sec_gate is not None:
+            context.sec_gate.enforce(task)
 
         bot = self.registry.get(bot_name)
         context.policy_engine.enforce(bot_name, context.approved_by)
 
         response = bot.run(task)
-        task.status = "done" if response.ok else "failed"
+        task.status = "done" if getattr(response, "ok", False) else "failed"
         self.repository.update(task)
         context.memory.append(task, bot.metadata.name, response)
         context.lineage.record(task, bot.metadata.name, response)
-        task.status = "done"
-        self.repository.update(task)
         return response
 
 
@@ -248,6 +171,7 @@ def route_task(task: Task, tasks: Sequence[Task]) -> None:
     else:
         task.status = "done"
 
+
 __all__ = [
     "BotRegistry",
     "TaskRepository",
@@ -256,4 +180,3 @@ __all__ = [
     "dependencies_met",
     "route_task",
 ]
-

@@ -1,6 +1,4 @@
-"""Storage helpers for Prism console utilities."""
-"""File-system backed storage helpers used by the console."""
-"""Lightweight file system helpers used across the project."""
+"""Lightweight helpers for reading and writing configuration artifacts."""
 
 from __future__ import annotations
 
@@ -11,7 +9,6 @@ from typing import Any, Iterable, Mapping, Union
 
 import yaml
 
-BASE_DIR = Path.cwd()
 BASE_DIR = Path(__file__).resolve().parents[1]
 CONFIG_ROOT = BASE_DIR / "config"
 DATA_ROOT = BASE_DIR / "data"
@@ -22,31 +19,27 @@ def _ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
 
-def write(path: Union[str, Path], content: Union[dict[str, Any], str]) -> None:
-def write(path: str, content: Union[Mapping[str, Any], str]) -> None:
+def write(path: Union[str, Path], content: Union[Mapping[str, Any], str]) -> None:
     target = Path(path)
     _ensure_parent(target)
     mode = "a" if target.suffix == ".jsonl" else "w"
-    text = json.dumps(content) if isinstance(content, Mapping) else str(content)
+    payload = json.dumps(content) if isinstance(content, Mapping) else str(content)
     with target.open(mode, encoding="utf-8") as handle:
         if mode == "a":
-            handle.write(text + "\n")
+            handle.write(payload + "\n")
         else:
-            handle.write(text)
+            handle.write(payload)
 
 
-def read(path: str) -> str:
 def read(path: Union[str, Path]) -> str:
     target = Path(path)
-    if not target.exists():
     try:
-        return Path(path).read_text(encoding="utf-8")
+        return target.read_text(encoding="utf-8")
     except FileNotFoundError:
         return ""
-    return target.read_text(encoding="utf-8")
 
 
-def _resolve(path: str, root: Path) -> Path:
+def _resolve(path: Union[str, Path], root: Path) -> Path:
     candidate = Path(path)
     if candidate.is_absolute():
         return candidate
@@ -134,9 +127,6 @@ def load_json(path: Path, default: Any) -> Any:
 
 
 def save_json(path: Path, data: Any) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    """Persist *data* as JSON to *path*."""
-
     _ensure_parent(path)
     with path.open("w", encoding="utf-8") as handle:
         json.dump(data, handle, indent=2, default=str)
@@ -156,4 +146,3 @@ __all__ = [
     "load_json",
     "save_json",
 ]
-
