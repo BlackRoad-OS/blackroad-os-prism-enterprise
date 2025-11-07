@@ -1,6 +1,4 @@
 """Shared typing contracts for Prism Console bots and tasks."""
-"""Core data structures and protocols for the orchestrator."""
-"""Shared data contracts for bots and the orchestrator."""
 
 from __future__ import annotations
 
@@ -8,8 +6,6 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, Mapping, MutableMapping, Optional, Protocol, Sequence, runtime_checkable
-from typing import Any, Dict, List, Mapping, MutableMapping, Optional, Sequence, Protocol, runtime_checkable
-from typing import Any, Dict, Mapping, MutableMapping, Optional, Sequence
 
 
 class TaskPriority(str, Enum):
@@ -27,18 +23,11 @@ class Task:
     id: str
     goal: str
     bot: str = ""
-    owner: str = ""
     owner: Optional[str] = None
     priority: TaskPriority | str = TaskPriority.MEDIUM
     created_at: datetime = field(default_factory=datetime.utcnow)
-    due_date: datetime | None = None
+    due_date: Optional[datetime] = None
     tags: Sequence[str] = field(default_factory=tuple)
-    metadata: MutableMapping[str, Any] | None = None
-    config: MutableMapping[str, Any] | None = None
-    context: MutableMapping[str, Any] | None = None
-    status: str = "pending"
-    depends_on: Sequence[str] = field(default_factory=tuple)
-    scheduled_for: datetime | None = None
     metadata: MutableMapping[str, Any] = field(default_factory=dict)
     config: MutableMapping[str, Any] = field(default_factory=dict)
     context: MutableMapping[str, Any] = field(default_factory=dict)
@@ -46,7 +35,7 @@ class Task:
     depends_on: Sequence[str] = field(default_factory=tuple)
     scheduled_for: Optional[datetime] = None
 
-    def __post_init__(self) -> None:  # pragma: no cover - trivial conversions
+    def __post_init__(self) -> None:  # pragma: no cover - normalisation helper
         if isinstance(self.priority, str):
             self.priority = TaskPriority(self.priority.lower())
 
@@ -57,40 +46,24 @@ class Task:
         if isinstance(self.scheduled_for, str):
             self.scheduled_for = datetime.fromisoformat(self.scheduled_for)
 
-        self.tags = tuple(self.tags)
-        self.depends_on = tuple(self.depends_on)
-        if self.metadata is None:
-            self.metadata = {}
-        if not isinstance(self.metadata, MutableMapping):
-            self.metadata = dict(self.metadata)
-
-        if self.config is None:
-            self.config = {}
-        if not isinstance(self.config, MutableMapping):
-            self.config = dict(self.config)
-
-        if self.context is None:
-            self.context = {}
-        if not isinstance(self.context, MutableMapping):
-            self.context = dict(self.context)
-
         if not isinstance(self.tags, tuple):
             self.tags = tuple(self.tags)
         if not isinstance(self.depends_on, tuple):
             self.depends_on = tuple(self.depends_on)
+
         if self.metadata is None:
             self.metadata = {}
-        if not isinstance(self.metadata, MutableMapping):
+        elif not isinstance(self.metadata, MutableMapping):
             self.metadata = dict(self.metadata)
 
         if self.config is None:
             self.config = {}
-        if not isinstance(self.config, MutableMapping):
+        elif not isinstance(self.config, MutableMapping):
             self.config = dict(self.config)
 
         if self.context is None:
             self.context = {}
-        if not isinstance(self.context, MutableMapping):
+        elif not isinstance(self.context, MutableMapping):
             self.context = dict(self.context)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -99,6 +72,7 @@ class Task:
         payload: Dict[str, Any] = {
             "id": self.id,
             "goal": self.goal,
+            "bot": self.bot,
             "owner": self.owner,
             "priority": self.priority.value,
             "created_at": self.created_at.isoformat(),
@@ -110,9 +84,6 @@ class Task:
             "depends_on": list(self.depends_on),
         }
         if self.due_date is not None:
-        if self.bot:
-            payload["bot"] = self.bot
-        if self.due_date:
             payload["due_date"] = self.due_date.isoformat()
         if self.scheduled_for is not None:
             payload["scheduled_for"] = self.scheduled_for.isoformat()
@@ -203,4 +174,3 @@ __all__ = [
     "BotExecutionError",
     "BaseBot",
 ]
-

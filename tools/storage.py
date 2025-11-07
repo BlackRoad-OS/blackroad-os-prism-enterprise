@@ -1,6 +1,4 @@
-"""Storage helpers for Prism console utilities."""
-"""File-system backed storage helpers used by the console."""
-"""Lightweight file system helpers used across the project."""
+"""File-system storage helpers used across Prism Console."""
 
 from __future__ import annotations
 
@@ -11,7 +9,6 @@ from typing import Any, Iterable, Mapping, Union
 
 import yaml
 
-BASE_DIR = Path.cwd()
 BASE_DIR = Path(__file__).resolve().parents[1]
 CONFIG_ROOT = BASE_DIR / "config"
 DATA_ROOT = BASE_DIR / "data"
@@ -22,8 +19,13 @@ def _ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
 
-def write(path: Union[str, Path], content: Union[dict[str, Any], str]) -> None:
-def write(path: str, content: Union[Mapping[str, Any], str]) -> None:
+def write(path: Union[str, Path], content: Union[Mapping[str, Any], str]) -> None:
+    """Write *content* to *path*.
+
+    ``*.jsonl`` files are appended to, while all other files are overwritten.
+    Mapping content is serialised to JSON; string content is written verbatim.
+    """
+
     target = Path(path)
     _ensure_parent(target)
     mode = "a" if target.suffix == ".jsonl" else "w"
@@ -35,15 +37,14 @@ def write(path: str, content: Union[Mapping[str, Any], str]) -> None:
             handle.write(text)
 
 
-def read(path: str) -> str:
 def read(path: Union[str, Path]) -> str:
+    """Read text from *path*, returning an empty string if it does not exist."""
+
     target = Path(path)
-    if not target.exists():
     try:
-        return Path(path).read_text(encoding="utf-8")
+        return target.read_text(encoding="utf-8")
     except FileNotFoundError:
         return ""
-    return target.read_text(encoding="utf-8")
 
 
 def _resolve(path: str, root: Path) -> Path:
@@ -54,6 +55,8 @@ def _resolve(path: str, root: Path) -> Path:
 
 
 def read_json(path: str, *, from_data: bool = False) -> Any:
+    """Load JSON data relative to the config or data directories."""
+
     root = DATA_ROOT if from_data else CONFIG_ROOT
     target = _resolve(path, root)
     if not from_data and not target.exists():
@@ -63,6 +66,8 @@ def read_json(path: str, *, from_data: bool = False) -> Any:
 
 
 def write_json(path: str, data: Any, *, from_data: bool = True) -> None:
+    """Persist *data* to *path* as JSON."""
+
     if READ_ONLY:
         raise RuntimeError("read-only mode")
     root = DATA_ROOT if from_data else CONFIG_ROOT
@@ -73,6 +78,8 @@ def write_json(path: str, data: Any, *, from_data: bool = True) -> None:
 
 
 def append_jsonl(path: str, record: Any, *, from_data: bool = True) -> None:
+    """Append a JSON line to *path*."""
+
     if READ_ONLY:
         raise RuntimeError("read-only mode")
     root = DATA_ROOT if from_data else CONFIG_ROOT
@@ -83,6 +90,8 @@ def append_jsonl(path: str, record: Any, *, from_data: bool = True) -> None:
 
 
 def read_jsonl(path: str, *, from_data: bool = True) -> Iterable[Any]:
+    """Yield records from a JSONL file."""
+
     root = DATA_ROOT if from_data else CONFIG_ROOT
     target = _resolve(path, root)
     if not target.exists():
@@ -92,6 +101,8 @@ def read_jsonl(path: str, *, from_data: bool = True) -> Iterable[Any]:
 
 
 def read_yaml(path: str, *, from_data: bool = False) -> Any:
+    """Read YAML content relative to the config or data directories."""
+
     root = DATA_ROOT if from_data else CONFIG_ROOT
     target = _resolve(path, root)
     if not from_data and not target.exists():
@@ -101,6 +112,8 @@ def read_yaml(path: str, *, from_data: bool = False) -> Any:
 
 
 def read_text(path: str, *, from_data: bool = False) -> str:
+    """Read arbitrary text from the configured roots."""
+
     root = DATA_ROOT if from_data else CONFIG_ROOT
     target = _resolve(path, root)
     if not from_data and not target.exists():
@@ -110,6 +123,8 @@ def read_text(path: str, *, from_data: bool = False) -> str:
 
 
 def write_text(path: str, text: str, *, from_data: bool = False) -> None:
+    """Write plain text to *path*."""
+
     if READ_ONLY:
         raise RuntimeError("read-only mode")
     root = DATA_ROOT if from_data else CONFIG_ROOT
@@ -119,6 +134,8 @@ def write_text(path: str, text: str, *, from_data: bool = False) -> None:
 
 
 def save(path: str, content: bytes) -> None:
+    """Write binary *content* to *path*."""
+
     if READ_ONLY:
         raise RuntimeError("read-only mode")
     target = Path(path)
@@ -127,6 +144,8 @@ def save(path: str, content: bytes) -> None:
 
 
 def load_json(path: Path, default: Any) -> Any:
+    """Load JSON content from *path* returning *default* when missing."""
+
     if path.exists():
         with path.open("r", encoding="utf-8") as handle:
             return json.load(handle)
@@ -134,7 +153,6 @@ def load_json(path: Path, default: Any) -> Any:
 
 
 def save_json(path: Path, data: Any) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
     """Persist *data* as JSON to *path*."""
 
     _ensure_parent(path)
@@ -156,4 +174,3 @@ __all__ = [
     "load_json",
     "save_json",
 ]
-
