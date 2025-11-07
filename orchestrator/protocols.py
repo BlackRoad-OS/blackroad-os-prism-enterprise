@@ -1,12 +1,20 @@
-"""Shared typing contracts for Prism Console bots and tasks."""
-"""Shared data contracts for bots and the orchestrator."""
+"""Protocol definitions for orchestrator components."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Mapping, MutableMapping, Optional, Protocol, Sequence, runtime_checkable
+from typing import (
+    Any,
+    Dict,
+    Mapping,
+    MutableMapping,
+    Optional,
+    Protocol,
+    Sequence,
+    runtime_checkable,
+)
 
 
 class TaskPriority(str, Enum):
@@ -29,9 +37,6 @@ class Task:
     created_at: datetime = field(default_factory=datetime.utcnow)
     due_date: Optional[datetime] = None
     tags: Sequence[str] = field(default_factory=tuple)
-    metadata: MutableMapping[str, Any] = field(default_factory=dict)
-    config: MutableMapping[str, Any] = field(default_factory=dict)
-    context: MutableMapping[str, Any] = field(default_factory=dict)
     metadata: MutableMapping[str, Any] | None = None
     config: MutableMapping[str, Any] | None = None
     context: MutableMapping[str, Any] | None = None
@@ -40,7 +45,6 @@ class Task:
     scheduled_for: Optional[datetime] = None
 
     def __post_init__(self) -> None:  # pragma: no cover - normalisation helper
-    def __post_init__(self) -> None:  # pragma: no cover - normalisation logic
         if isinstance(self.priority, str):
             self.priority = TaskPriority(self.priority.lower())
 
@@ -70,15 +74,6 @@ class Task:
             self.context = {}
         elif not isinstance(self.context, MutableMapping):
             self.context = dict(self.context)
-        self.tags = tuple(self.tags)
-        self.depends_on = tuple(self.depends_on)
-
-        if not isinstance(self.metadata, MutableMapping):
-            self.metadata = dict(self.metadata or {})
-        if not isinstance(self.config, MutableMapping):
-            self.config = dict(self.config or {})
-        if not isinstance(self.context, MutableMapping):
-            self.context = dict(self.context or {})
 
     def to_dict(self) -> Dict[str, Any]:
         """Serialise the task for persistence or transport."""

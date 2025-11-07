@@ -1,115 +1,92 @@
-"""Prime and pattern exploration utilities.
-
-Only small illustrative implementations are provided: generation of an Ulam
-spiral, construction of modular residue grids and a Fourier transform of prime
-number gaps.  The produced images are written to ``output/primes`` with a
-timestamp so that runs are reproducible.
-"""
+"""Prime number analytics used by the math API."""
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
+import matplotlib
 import matplotlib.pyplot as plt
-import numpy as np
-import sympy as sp
 
-__all__ = ["ulam_spiral", "residue_grid", "prime_gap_fft", "demo"]
+from .storage import ensure_domain
+
+matplotlib.use("Agg", force=True)
+
+DOMAIN = "primes"
+
+
+@dataclass(slots=True)
+class PrimeComputation:
+    """Container holding prime results and artefacts."""
+
+    limit: int
+    primes: List[int]
+    plot_path: Path | None
+
+    @property
+    def invariants(self) -> Dict[str, float]:
+        density = len(self.primes) / max(self.limit, 1)
+        return {
+            "count": float(len(self.primes)),
+            "density": density,
+            "nth_prime": float(self.primes[-1]) if self.primes else 0.0,
+        }
 
 
 def _timestamp() -> str:
-    return datetime.utcnow().strftime("%Y%m%d-%H%M%S")
+    return datetime.utcnow().strftime("%Y%m%dT%H%M%S%f")
 
 
-def ulam_spiral(size: int = 101) -> np.ndarray:
-    """Return an ``size``\ x\ ``size`` array forming an Ulam prime spiral."""
+def sieve(limit: int) -> List[int]:
+    """Return all primes <= ``limit`` using a simple sieve."""
 
-    if size % 2 == 0:
-        raise ValueError("size must be odd so there is a center cell")
-
-    spiral = np.zeros((size, size), dtype=int)
-    x = y = size // 2
-    dx, dy = 0, -1
-    for n in range(1, size * size + 1):
-        if -size // 2 < x <= size // 2 and -size // 2 < y <= size // 2:
-            if sp.isprime(n):
-                spiral[y + size // 2, x + size // 2] = 1
-        if x == y or (x < 0 and x == -y) or (x > 0 and x == 1 - y):
-            dx, dy = -dy, dx
-        x, y = x + dx, y + dy
-    return spiral
+    if limit < 2:
+        return []
+    candidates = [True] * (limit + 1)
+    candidates[0:2] = [False, False]
+    for p in range(2, int(limit ** 0.5) + 1):
+        if candidates[p]:
+            step = p
+            start = p * p
+            candidates[start : limit + 1 : step] = [False] * len(range(start, limit + 1, step))
+    return [n for n, is_prime in enumerate(candidates) if is_prime]
 
 
-def residue_grid(mod: int = 10) -> np.ndarray:
-    """Return a grid of modular residues for values ``0..mod^2``."""
+def plot_primes(primes: List[int], *, output_dir: Path) -> Path:
+    """Create a scatter plot of primes."""
 
-    numbers = np.arange(mod ** 2).reshape(mod, mod)
-    return numbers % mod
-
-
-def prime_gap_fft(limit: int = 200) -> np.ndarray:
-    """Return the magnitude of the FFT of prime number gaps up to ``limit``."""
-
-    primes: List[int] = list(sp.primerange(2, limit))
-    gaps = np.diff(primes)
-    fft_vals = np.fft.fft(gaps)
-    return np.abs(fft_vals)
-
-
-def _save_image(path: Path, data: np.ndarray, title: str) -> None:
-    fig, ax = plt.subplots()
-    ax.imshow(data, cmap="viridis", interpolation="nearest")
-    ax.set_title(title)
-    fig.savefig(path)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    file_path = output_dir / f"primes_{_timestamp()}.png"
+    fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
+    ax.plot(primes, "o", markersize=2)
+    ax.set_xlabel("Index")
+    ax.set_ylabel("Prime value")
+    ax.set_title("Prime numbers")
+    fig.tight_layout()
+    fig.savefig(file_path)
     plt.close(fig)
+    return file_path
 
 
-def demo(output_dir: Path | str = Path("output/primes")) -> dict:
-    """Generate example artefacts for prime exploration and return metadata."""
+def generate_primes(limit: int, *, with_plot: bool = True) -> PrimeComputation:
+    if limit <= 0:
+        raise ValueError("limit must be positive")
+    primes = sieve(limit)
+    plot_path: Path | None = None
+    if with_plot and primes:
+        plot_path = plot_primes(primes, output_dir=ensure_domain(DOMAIN))
+    return PrimeComputation(limit=limit, primes=primes, plot_path=plot_path)
 
-    out = Path(output_dir)
-    out.mkdir(parents=True, exist_ok=True)
-    ts = _timestamp()
 
-    spiral = ulam_spiral(51)
-    spiral_path = out / f"ulam_spiral_{ts}.png"
-    _save_image(spiral_path, spiral, "Ulam Spiral")
-
-    grid = residue_grid(10)
-    grid_path = out / f"residue_grid_{ts}.png"
-    _save_image(grid_path, grid, "Residue Grid")
-
-    fft_vals = prime_gap_fft(200)
-    fft_path = out / f"prime_gap_fft_{ts}.png"
-    fig, ax = plt.subplots()
-    ax.plot(fft_vals)
-    ax.set_title("FFT of Prime Gaps")
-    fig.savefig(fft_path)
-    plt.close(fig)
-
-    return {
-        "ulam_spiral": str(spiral_path),
-        "residue_grid": str(grid_path),
-        "prime_gap_fft": str(fft_path),
+def demo() -> Dict[str, object]:
+    result = generate_primes(200, with_plot=True)
+    payload: Dict[str, object] = {
+        "limit": result.limit,
+        "count": len(result.primes),
+        "invariants": result.invariants,
     }
-"""Prime number utilities and visualization."""
-from pathlib import Path
-import matplotlib.pyplot as plt
-from sympy import primerange
-
-OUTPUT_DIR = Path(__file__).resolve().parent / "output" / "primes"
-
-
-def generate_plot(limit: int = 50) -> Path:
-    """Plot primes up to ``limit`` and return the file path."""
-    primes = list(primerange(2, limit))
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    out_file = OUTPUT_DIR / "prime_plot.png"
-    plt.figure(figsize=(4, 3))
-    plt.plot(primes, "bo")
-    plt.title("Prime Numbers")
-    plt.savefig(out_file)
-    plt.close()
-    return out_file
+    if result.plot_path:
+        payload["plot_path"] = str(result.plot_path)
+    return payload

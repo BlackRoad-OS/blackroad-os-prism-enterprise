@@ -1,23 +1,23 @@
-"""User interfaces for the Lucidia Infinity Math System."""
+"""User-facing interfaces for the Lucidia math platform."""
 
 from __future__ import annotations
 
 import json
 from typing import Callable, Dict
 
-from flask import Flask, jsonify
-from flask_socketio import SocketIO
-
 from . import finance, fractals, logic, numbers, primes, proofs, waves
+from .api_ambr import app  # FastAPI application exposed for runtime
 
 MENU: Dict[str, Callable[[], object]] = {
-    "Logic": logic.demo,
-    "Primes": primes.demo,
-    "Proofs": proofs.demo,
-    "Waves": waves.demo,
+    "Logic": lambda: logic.persist_truth_table(
+        logic.generate_truth_table(["A", "B"], expression="A and not B")
+    ).as_posix(),
+    "Primes": lambda: primes.demo(),
+    "Proofs": lambda: proofs.demo(),
+    "Waves": lambda: waves.demo(),
     "Finance": finance.demo,
     "Numbers": numbers.demo,
-    "Fractals": fractals.demo,
+    "Fractals": lambda: fractals.demo(),
 }
 
 
@@ -26,8 +26,8 @@ def repl() -> None:
 
     options = list(MENU.keys())
     while True:
-        for i, name in enumerate(options, start=1):
-            print(f"{i}. {name}")
+        for idx, name in enumerate(options, start=1):
+            print(f"{idx}. {name}")
         print("0. Exit")
         try:
             choice = int(input("Select module: "))
@@ -105,3 +105,4 @@ def get_output(subpath: str):
 
 if __name__ == "__main__":
     api_app.run(host="127.0.0.1", port=8500)
+__all__ = ["repl", "app"]

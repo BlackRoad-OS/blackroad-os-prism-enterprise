@@ -1,6 +1,7 @@
 # BlackRoad.io — Dependency & Ops Bundle
 
 [![prism-ci](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/prism-ci.yml/badge.svg)](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/prism-ci.yml)
+[![Math & AMBR CI](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/math-and-ambr-ci.yml/badge.svg)](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/math-and-ambr-ci.yml)
 
 Date: 2025-08-22
 

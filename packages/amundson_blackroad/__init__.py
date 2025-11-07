@@ -25,6 +25,13 @@ from .thermo import (
     landauer_floor,
     irreversible_energy,
     annotate_run_with_thermo,
+from .thermo import (
+    landauer_floor,
+    landauer_min,
+    irreversible_energy,
+    annotate_run_with_thermo,
+    spiral_entropy,
+    energy_increment,
 )
 
 __all__ = [
@@ -47,6 +54,9 @@ __all__ = [
     "energy_increment",
     "landauer_min",
     "landauer_floor",
+    "landauer_min",
     "irreversible_energy",
     "annotate_run_with_thermo",
+    "spiral_entropy",
+    "energy_increment",
 ]

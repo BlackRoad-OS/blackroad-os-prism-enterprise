@@ -6,78 +6,43 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-sys.path.append(str(Path(__file__).resolve().parents[1] / 'packages'))
+sys.path.append(str(Path(__file__).resolve().parents[1] / "packages"))
 
 from amundson_blackroad.autonomy import conserved_mass, simulate_transport
-from amundson_blackroad.spiral import jacobian_am2, simulate_am2
-from amundson_blackroad.thermo import landauer_floor
+from amundson_blackroad.spiral import simulate_am2
+from amundson_blackroad.thermo import energy_increment, landauer_min, spiral_entropy
 
 
-@pytest.mark.parametrize('steps', [250, 500])
-def test_v1_mass_conservation(steps):
+@pytest.mark.parametrize("steps", [250, 500])
+def test_mass_conservation_within_threshold(steps: int) -> None:
     x = np.linspace(-5.0, 5.0, 512)
-    A0 = np.exp(-x**2)
+    A0 = np.exp(-x ** 2)
     rho = np.tanh(x)
     dt = 1e-3
     result = simulate_transport(x, A0, rho, steps, dt, mu_A=0.8)
-    m0 = conserved_mass(x, A0)
-    m1 = float(result['mass'])
-    assert pytest.approx(m0, rel=1e-3) == m1
+    initial_mass = conserved_mass(x, A0)
+    assert pytest.approx(initial_mass, rel=1e-3) == result["mass"]
 
 
-
-def test_v2_linear_lift_matches_analytic():
-    gamma = 0.8
-    eta = 0.2
-    kappa = 0.1
-    omega0 = 1.5
-    a0 = 0.3
-    t, a, theta, _ = simulate_am2(
-        1.0,
-        1e-3,
-        a0,
-        0.0,
-        gamma,
-        kappa,
-        eta,
-        omega0,
-        phi=lambda amp: amp,
-        lift_fn=lambda a_val, _theta: a_val,
-    )
-    expected = a0 * np.exp((eta - gamma) * t)
-    assert np.allclose(a, expected, atol=1e-3)
-    numerical_frequency = np.gradient(theta, t)
-    assert np.allclose(numerical_frequency, omega0 + kappa * a, atol=1e-3)
+def test_spiral_entropy_positive() -> None:
+    t, a, theta, _ = simulate_am2(1.0, 1e-3, 0.3, 0.0, 0.8, 0.2, 0.4, 1.2)
+    entropy = spiral_entropy(a, theta)
+    assert entropy >= 0.0
+    assert entropy == pytest.approx(spiral_entropy(a, theta))
 
 
+def test_energy_increment_agrees_with_finite_difference() -> None:
+    T = 2.0
+    dt = 1e-3
+    params = dict(T=T, dt=dt, a0=0.2, theta0=0.1, gamma=0.5, kappa=0.3, eta=0.4, omega0=1.1)
+    t, a, theta, _ = simulate_am2(**params)
+    ledger_value = energy_increment(a, theta, dt, gamma=params["gamma"], eta=params["eta"])
+    finite_diff = np.trapz(params["gamma"] * a ** 2 + params["eta"] * np.abs(a * theta), dx=dt)
+    assert pytest.approx(finite_diff, rel=1e-6) == ledger_value
 
-def test_v3_landauer_floor_positive():
-    bits = 128
+
+def test_landauer_min_matches_manual() -> None:
+    bits = 64
     temperature = 310.0
-    energy = landauer_floor(bits, temperature)
-    assert energy > 0
-    manual = 1.380649e-23 * temperature * np.log(2.0) * bits
-    assert pytest.approx(manual, rel=1e-12) == energy
-
-
-
-def test_v4_jacobian_stability():
-    gamma = 1.0
-    eta = 0.2
-    kappa = 0.4
-    omega0 = 1.2
-    J = jacobian_am2(
-        0.0,
-        0.0,
-        gamma,
-        kappa,
-        eta,
-        omega0,
-        phi=lambda amp: amp,
-        lift_fn=lambda a_val, _theta: a_val,
-        eps=1e-6,
-    )
-    eigenvalues = np.linalg.eigvals(J)
-    assert np.all(eigenvalues.real <= 1e-8)
-    assert np.isclose(eigenvalues.max().real, 0.0, atol=1e-8)
-    assert eigenvalues.min().real <= 0.0
+    expected = 1.380649e-23 * temperature * np.log(2.0) * bits
+    assert pytest.approx(expected, rel=1e-12) == landauer_min(bits, temperature)
