@@ -1,15 +1,15 @@
-.PHONY: setup demo test lint notebooks
+.PHONY: setup demo test lint gate
 setup:
-python -m venv .venv && . .venv/bin/activate && pip install -e .[viz] -r requirements-dev.txt || true
+	python -m venv .venv && . .venv/bin/activate && pip install -e .[qiskit] pytest pytest-cov ruff mypy jupyter nbconvert
 
 demo:
-python -m qlm_lab.demos.demo_bell
+	python -m qlm_lab.demos.demo_bell
 
 test:
-pytest -q
+	pytest --cov=qlm_lab --cov-report=xml
 
 lint:
-ruff check . && mypy qlm_lab
+	ruff check . && mypy qlm_lab
 
-notebooks:
-jupyter nbconvert --to notebook --execute notebooks/01_bell_chsh.ipynb --output out01.ipynb
+gate:
+	python modules/qlm_lab/scripts/make_gate_input.py && cat prism/ci/qlm_lab.coverage.json

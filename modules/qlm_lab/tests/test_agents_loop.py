@@ -5,21 +5,24 @@ from pathlib import Path
 import pytest
 
 from qlm_lab.agents.orchestrator import Orchestrator
-from qlm_lab.lineage import LineageLogger
+from qlm_lab import lineage
+from qlm_lab.tools import viz
 
 
-def test_orchestrator_executes_workflow(tmp_path: Path):
-    logger = LineageLogger(path=tmp_path / "lineage.jsonl")
-    orchestrator = Orchestrator(logger=logger)
-    results = orchestrator.run("verify bell state", message_budget=64)
-    assert any(msg.op == "solve_quantum" for msg in results)
-    assert logger.path.exists()
-    log_lines = logger.path.read_text().strip().splitlines()
-    assert log_lines, "lineage log should not be empty"
+@pytest.fixture(autouse=True)
+def isolate_artifacts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(lineage, "ARTIFACTS_DIR", tmp_path)
+    monkeypatch.setattr(lineage, "LINEAGE_PATH", tmp_path / "lineage.jsonl")
+    monkeypatch.setattr(viz, "ART_DIR", tmp_path)
+    yield
 
 
-def test_orchestrator_budget_guard(tmp_path: Path):
-    logger = LineageLogger(path=tmp_path / "lineage.jsonl")
-    orchestrator = Orchestrator(logger=logger)
-    with pytest.raises(RuntimeError):
-        orchestrator.run("unreachable", message_budget=0)
+def test_event_loop_generates_required_artifacts(tmp_path: Path):
+    orchestrator = Orchestrator()
+    orchestrator.run_goal("bell-lab-demo")
+    summary = lineage.artifact_index()
+    files = set(summary["files"])
+    expected = {"bell_hist.png", "bell_hist_empirical.png", "lineage.jsonl"}
+    assert expected.issubset(files)
+    lineage_log = (tmp_path / "lineage.jsonl").read_text(encoding="utf-8").strip().splitlines()
+    assert len(lineage_log) >= 10

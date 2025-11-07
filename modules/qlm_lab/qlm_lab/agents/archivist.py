@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from typing import List
 
-from ..lineage import LineageLogger
-from ..proto import Msg, new
+from ..lineage import append
+from ..proto import Msg
 from .base import Agent
 
 
@@ -13,21 +13,16 @@ class Archivist(Agent):
 
     name = "archivist"
 
-    def __init__(self, bus, logger: LineageLogger | None = None):
-        super().__init__(bus)
-        self.logger = logger or LineageLogger()
-
     def can_handle(self, m: Msg) -> bool:
-        return m.recipient == self.name and m.kind in {"result", "critique"}
+        return m.recipient == self.name and m.kind in {"result", "critique", "log"}
 
     def handle(self, m: Msg) -> List[Msg]:
-        return [
-            new(
-                self.name,
-                "orchestrator",
-                "log",
-                "archived",
-                message_id=m.id,
-                ok=m.args.get("ok", True),
-            )
-        ]
+        append({
+            "id": m.id,
+            "sender": m.sender,
+            "recipient": m.recipient,
+            "kind": m.kind,
+            "op": m.op,
+            "args": m.args,
+        })
+        return []

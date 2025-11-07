@@ -5,7 +5,9 @@ Quantum-aware language agents (QLMs) collaborating with classical LLM bots to so
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -e .[qiskit]
-make demo  # saves artifacts/ and lineage.jsonl
+make test  # pytest with coverage
+make demo  # generates bell artifacts
+make gate  # emits prism/ci/qlm_lab.coverage.json
 ```
 
 ## Safety & Policy

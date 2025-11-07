@@ -8,17 +8,12 @@ from typing import Any, Dict
 
 import numpy as np
 
+__version__ = "0.1.0"
 QLAB_DEFAULT_SEED = 1337
 
 
 def _init_seed() -> int:
-    """Initialise the global random seed.
-
-    The seed is taken from the ``QLAB_SEED`` environment variable when present,
-    otherwise a deterministic default is used. The chosen seed is applied to the
-    Python ``random`` module and ``numpy.random`` for reproducibility across the
-    demos, tests, and agent interactions.
-    """
+    """Initialise the global random seed."""
 
     raw = os.environ.get("QLAB_SEED")
     try:
@@ -39,4 +34,4 @@ def package_info() -> Dict[str, Any]:
     return {"seed": SEED, "root": str(Path(__file__).resolve().parent)}
 
 
-__all__ = ["SEED", "package_info"]
+__all__ = ["__version__", "SEED", "package_info"]
