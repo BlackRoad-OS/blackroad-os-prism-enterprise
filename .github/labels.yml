@@ -28,3 +28,6 @@
 - name: queue:ready
   color: "0052cc"
   description: Ready for merge queue ingestion once all required checks are green
+  color: "0e8a16"
+  description: Eligible for merge queue automation
+
