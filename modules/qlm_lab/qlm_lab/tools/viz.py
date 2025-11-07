@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 from pathlib import Path
 from typing import Dict, Iterable
 
@@ -10,7 +11,9 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 - ensures 3D toolkit registered
 
 ART_DIR = Path(__file__).resolve().parents[2] / "artifacts"
-ART_DIR.mkdir(exist_ok=True)
+ART_DIR.mkdir(parents=True, exist_ok=True)
+ROOT_ART_DIR = Path(__file__).resolve().parents[4] / "artifacts"
+ROOT_ART_DIR.mkdir(parents=True, exist_ok=True)
 
 __all__ = ["hist", "bloch", "ascii_circuit"]
 
@@ -32,6 +35,11 @@ def hist(probs: Dict[str, float], fname: str = "hist.png") -> str:
     plt.title("Distribution")
     fig.savefig(path, dpi=160, bbox_inches="tight")
     plt.close(fig)
+    root_path = ROOT_ART_DIR / fname
+    try:
+        shutil.copy2(path, root_path)
+    except Exception:  # pragma: no cover - best effort mirroring
+        pass
     return str(path)
 
 
@@ -56,6 +64,11 @@ def bloch(point: Iterable[float], fname: str = "bloch_q0.png") -> str:
     ax.set_box_aspect([1, 1, 1])
     fig.savefig(path, dpi=160, bbox_inches="tight")
     plt.close(fig)
+    root_path = ROOT_ART_DIR / fname
+    try:
+        shutil.copy2(path, root_path)
+    except Exception:  # pragma: no cover - best effort mirroring
+        pass
     return str(path)
 
 

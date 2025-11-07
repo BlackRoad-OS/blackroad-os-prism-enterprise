@@ -1,13 +1,9 @@
+"""Tool registry helpers for the Toolformer runtime."""
 from __future__ import annotations
-
-"""Tool registry for mapping tag names to callables."""
 
 from typing import Any, Callable, Dict
 
-from . import la
-from . import math_cas
-from . import quantum_np as Q
-from . import viz as V
+from . import la, math_cas, quantum_np, viz
 
 
 class ToolRegistry:
@@ -17,27 +13,28 @@ class ToolRegistry:
         self._map: Dict[str, Callable[..., Any]] = {}
 
     def register(self, name: str, fn: Callable[..., Any]) -> None:
-        """Register ``fn`` under ``name``."""
-
         self._map[name] = fn
 
     def get(self, name: str) -> Callable[..., Any]:
-        """Return the callable registered for ``name``."""
-
         if name not in self._map:
             raise KeyError(f"Unknown tool '{name}'")
         return self._map[name]
+
+    def as_dict(self) -> Dict[str, Callable[..., Any]]:
+        return dict(self._map)
 
 
 def default_registry() -> ToolRegistry:
     """Populate a registry with the standard QLM tools."""
 
     reg = ToolRegistry()
-    reg.register("quantum_np.bell_phi_plus", Q.bell_phi_plus)
-    reg.register("quantum_np.measure_counts", Q.measure_counts)
-    reg.register("quantum_np.chsh_value_phi_plus", Q.chsh_value_phi_plus)
-    reg.register("quantum_np.qft_matrix", Q.qft_matrix)
-    reg.register("viz.hist", V.hist)
+    reg.register("quantum_np.bell_phi_plus", quantum_np.bell_phi_plus)
+    reg.register("quantum_np.measure_counts", quantum_np.measure_counts)
+    reg.register("quantum_np.chsh_value_phi_plus", quantum_np.chsh_value_phi_plus)
+    reg.register("quantum_np.qft_matrix", quantum_np.qft_matrix)
+    reg.register("viz.hist", viz.hist)
+    reg.register("viz.bloch", viz.bloch)
+    reg.register("viz.ascii_circuit", viz.ascii_circuit)
     if hasattr(la, "eig"):
         reg.register("la.eig", getattr(la, "eig"))
     if hasattr(math_cas, "simplify"):
@@ -46,28 +43,3 @@ def default_registry() -> ToolRegistry:
 
 
 __all__ = ["ToolRegistry", "default_registry"]
-"""Tool registry helpers for the Toolformer runtime."""
-from __future__ import annotations
-
-from typing import Dict, Callable, Any
-
-from . import quantum_np, viz
-
-Registry = Dict[str, Callable[..., Any]]
-
-
-def default_registry() -> Registry:
-    """Return the default mapping from tag names to callables."""
-
-    return {
-        "quantum_np.bell_phi_plus": quantum_np.bell_phi_plus,
-        "quantum_np.measure_counts": quantum_np.measure_counts,
-        "quantum_np.chsh_value_phi_plus": quantum_np.chsh_value_phi_plus,
-        "quantum_np.qft_matrix": quantum_np.qft_matrix,
-        "viz.hist": viz.hist,
-        "viz.bloch": viz.bloch,
-        "viz.ascii_circuit": viz.ascii_circuit,
-    }
-
-
-__all__ = ["default_registry", "Registry"]

@@ -14,6 +14,8 @@ COVERAGE_FILE = MODULE_ROOT / "coverage.xml"
 ARTIFACTS_DIR = MODULE_ROOT / "artifacts"
 OUTPUT_PATH = ROOT / "prism" / "ci" / "qlm_lab.coverage.json"
 MODULE_OUTPUT_PATH = MODULE_ROOT / "prism" / "ci" / "qlm_lab.coverage.json"
+RAG_OUTPUT_PATH = ROOT / "prism" / "ci" / "qlm_lab.rag.json"
+MODULE_RAG_OUTPUT_PATH = MODULE_ROOT / "prism" / "ci" / "qlm_lab.rag.json"
 TARGET_FILE = "qlm_lab/tools/quantum_np.py"
 ALT_TARGET_FILE = "tools/quantum_np.py"
 
@@ -41,10 +43,24 @@ def _allow_network() -> bool:
     return raw.lower() in {"1", "true", "yes"}
 
 
+def _citation_count() -> int:
+    rag_path = ARTIFACTS_DIR / "rag_topk.json"
+    if not rag_path.exists():
+        return 0
+    try:
+        data = json.loads(rag_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return 0
+    if isinstance(data, list):
+        return len(data)
+    return 0
+
+
 def main() -> None:
     coverage_value = _coverage_for_target()
     chsh_value = float(quantum_np.chsh_value_phi_plus())
     artifacts = _artifact_count()
+    citations = _citation_count()
     payload = {
         "coverage": {TARGET_FILE: round(coverage_value, 4)},
         "metrics": {"chsh": round(chsh_value, 4)},
@@ -55,6 +71,11 @@ def main() -> None:
     OUTPUT_PATH.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     MODULE_OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     MODULE_OUTPUT_PATH.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    rag_payload = {"citations": {"count": citations}}
+    RAG_OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    RAG_OUTPUT_PATH.write_text(json.dumps(rag_payload, indent=2) + "\n", encoding="utf-8")
+    MODULE_RAG_OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    MODULE_RAG_OUTPUT_PATH.write_text(json.dumps(rag_payload, indent=2) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

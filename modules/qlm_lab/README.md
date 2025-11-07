@@ -7,6 +7,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -e .[qiskit]
 make test  # pytest with coverage
 make demo  # generates bell artifacts
+make demo_rag  # builds TF-IDF index and writes artifacts/rag_topk.json
 make gate  # emits prism/ci/qlm_lab.coverage.json
 ```
 
@@ -19,6 +20,7 @@ make gate  # emits prism/ci/qlm_lab.coverage.json
 - `qlm_lab/tools`: numerical, symbolic, visualization, and filesystem helpers.
 - `qlm_lab/agents`: rule-based prototype agents for orchestration and critique.
 - `qlm_lab/demos`: runnable experiments that produce artifacts and metrics.
+- `qlm_lab/retrieval`: TF-IDF chunking/index/search powering local RAG flows.
 - `qlm_lab/notebooks`: reproducible notebooks mirroring the demos.
 - `tests`: pytest suite covering tools, policies, and agent coordination.
 

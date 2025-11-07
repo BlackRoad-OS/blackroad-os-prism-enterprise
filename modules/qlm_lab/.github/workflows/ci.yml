@@ -12,6 +12,7 @@ jobs:
       - run: python -m qlm_lab.demos.demo_bell
       - run: make -C modules/qlm_lab demo_toolcaller
       - run: make -C modules/qlm_lab demo_toolformer
+      - run: make -C modules/qlm_lab demo_rag
       - name: Write coverage summary
         run: |
           python - <<'PY'
@@ -24,6 +25,10 @@ jobs:
           percent = data['files'][file_key]['summary']['percent_covered'] / 100.0
           artifacts_dir = Path('modules/qlm_lab/artifacts')
           artifacts_dir.mkdir(exist_ok=True)
+          rag_path = artifacts_dir / 'rag_topk.json'
+          citations = []
+          if rag_path.exists():
+              citations = json.loads(rag_path.read_text(encoding='utf-8'))
           payload = {
               'coverage': {'qlm_lab/tools/quantum_np.py': round(percent, 4)},
               'metrics': {'chsh': Q.chsh_value_phi_plus()},
@@ -33,6 +38,8 @@ jobs:
           out = Path('prism/ci/qlm_lab.coverage.json')
           out.parent.mkdir(parents=True, exist_ok=True)
           out.write_text(json.dumps(payload, indent=2))
+          rag_out = Path('prism/ci/qlm_lab.rag.json')
+          rag_out.write_text(json.dumps({'citations': {'count': len(citations)}}, indent=2))
           PY
       - run: make -C modules/qlm_lab lint
       - run: make -C modules/qlm_lab test
