@@ -11,6 +11,7 @@ jobs:
       - run: pytest --cov=qlm_lab.tools.quantum_np --cov-report=term --cov-report=json:coverage.json modules/qlm_lab/tests
       - run: python -m qlm_lab.demos.demo_bell
       - run: make -C modules/qlm_lab demo_toolcaller
+      - run: make -C modules/qlm_lab demo_toolformer
       - name: Write coverage summary
         run: |
           python - <<'PY'

@@ -2,6 +2,9 @@
 .PHONY: setup demo test lint gate
 setup:
 	python -m venv .venv && . .venv/bin/activate && pip install -e .[qiskit] pytest pytest-cov ruff mypy jupyter nbconvert
+.PHONY: setup demo demo_toolformer test lint notebooks
+setup:
+	python -m venv .venv && . .venv/bin/activate && pip install -e .[viz] -r requirements-dev.txt || true
 
 demo:
 	python -m qlm_lab.demos.demo_bell
@@ -11,6 +14,11 @@ demo_toolcaller:
 
 test:
 	pytest --cov=qlm_lab --cov-report=xml
+demo_toolformer:
+	python -m qlm_lab.demos.demo_toolformer_prompt
+
+test:
+	pytest -q
 
 lint:
 	ruff check . && mypy qlm_lab

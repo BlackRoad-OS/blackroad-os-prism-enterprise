@@ -41,6 +41,19 @@ class Policy:
     allow_network: bool = False
     max_artifacts_mb: int = 20
 
+@dataclass
+class Policy:
+    """Lightweight runtime policy for tool execution."""
+
+    allow_network: bool = False
+    max_artifacts_mb: float = 20.0
+    required_artifacts: List[str] = field(default_factory=list)
+
+    def allows(self, tool_name: str) -> bool:
+        if not self.allow_network and tool_name.startswith(('llm.', 'network.')):
+            return False
+        return True
+
 
 def artifact_paths(root: Path, patterns: Iterable[str]) -> List[Path]:
     """Resolve artifact paths relative to ``root``."""
@@ -103,6 +116,7 @@ def network_allowed(config: PolicyConfig | None = None) -> bool:
 __all__ = [
     "Policy",
     "PolicyConfig",
+    "Policy",
     "artifact_paths",
     "check_artifact_quota",
     "ensure_required_artifacts",
