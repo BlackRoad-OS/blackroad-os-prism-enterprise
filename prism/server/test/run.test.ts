@@ -40,6 +40,11 @@ describe('run and approvals', () => {
       if (e.kind === 'run.end') events.push('end');
     };
     bus.on('event', handler);
+    bus.on('event', (e: any) => {
+      if (e.kind === 'run.start') events.push('start');
+      if (e.kind === 'run.out' && e.data.chunk.trim() === 'hi') events.push('out');
+      if (e.kind === 'run.end') events.push('end');
+    });
     await supertest(app.server)
       .post('/run')
       .send({ projectId: 'p', sessionId: 's', cmd: 'node -e "console.log(\\"hi\\")"' })
@@ -72,6 +77,9 @@ describe('run and approvals', () => {
     expect(endEvent).toBeDefined();
     expect(endEvent!.data.status).toBe('error');
     expect(endEvent!.data.error).toBeDefined();
+  });
+
+    expect(events).toEqual(['start', 'out', 'end']);
   });
 
   it('requires approval for diffs when policy is review', async () => {
