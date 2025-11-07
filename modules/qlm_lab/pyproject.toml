@@ -1,0 +1,13 @@
+[project]
+name = "qlm-lab"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["numpy", "matplotlib", "sympy"]
+
+[project.optional-dependencies]
+qiskit = ["qiskit", "qiskit-aer"]
+viz = ["matplotlib"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = "-q"
