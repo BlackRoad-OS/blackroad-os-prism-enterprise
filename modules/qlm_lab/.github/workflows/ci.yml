@@ -33,7 +33,11 @@ jobs:
           out.parent.mkdir(parents=True, exist_ok=True)
           out.write_text(json.dumps(payload, indent=2))
           PY
+      - run: make -C modules/qlm_lab lint
+      - run: make -C modules/qlm_lab test
+      - run: make -C modules/qlm_lab demo
+      - run: make -C modules/qlm_lab gate
       - uses: actions/upload-artifact@v4
         with:
-          name: artifacts
+          name: qlm_lab-artifacts
           path: modules/qlm_lab/artifacts/

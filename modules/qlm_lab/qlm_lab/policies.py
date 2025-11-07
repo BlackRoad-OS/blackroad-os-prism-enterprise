@@ -4,8 +4,12 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
+"""Policy primitives for QLM Lab."""
+from __future__ import annotations
+
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Mapping
+from typing import Iterable
 
 
 def _default_artifact_dir() -> Path:
@@ -31,26 +35,35 @@ class Policy:
 
 
 @dataclass
-class PolicyConfig:
-    """Configuration for runtime policy enforcement."""
+class Policy:
+    """Runtime policy describing network and artifact constraints."""
 
     allow_network: bool = False
-    max_artifacts_mb: float = 20.0
-    required_artifacts: List[str] = field(default_factory=list)
+    max_artifacts_mb: int = 20
 
 
 def artifact_paths(root: Path, patterns: Iterable[str]) -> List[Path]:
     """Resolve artifact paths relative to ``root``."""
-
-    resolved: List[Path] = []
-    for pattern in patterns:
-        path = root / pattern
-        resolved.append(path)
-    return resolved
+def _iter_files(root: Path) -> Iterable[Path]:
+    for path in root.rglob("*"):
+        if path.is_file():
+            yield path
 
 
-def check_artifact_quota(paths: Iterable[Path], max_megabytes: float) -> bool:
-    """Return ``True`` if the combined size of ``paths`` is within quota."""
+def enforce_file_caps(artifacts_dir: str | Path, policy: Policy | None = None) -> None:
+    """Raise ``RuntimeError`` if the total artifact size exceeds the policy cap."""
+
+    policy = policy or Policy()
+    root = Path(artifacts_dir)
+    if not root.exists():
+        return
+    total_bytes = sum(path.stat().st_size for path in _iter_files(root))
+    limit_bytes = policy.max_artifacts_mb * 1_048_576
+    if total_bytes > limit_bytes:
+        raise RuntimeError(
+            f"artifact quota exceeded: {total_bytes} bytes > {limit_bytes} bytes"
+        )
+
 
     total_bytes = 0
     for path in paths:
@@ -97,3 +110,4 @@ __all__ = [
     "coverage_thresholds_met",
     "network_allowed",
 ]
+__all__ = ["Policy", "enforce_file_caps"]

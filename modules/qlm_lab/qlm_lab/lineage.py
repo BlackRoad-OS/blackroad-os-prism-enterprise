@@ -1,12 +1,12 @@
-"""Lineage logging utilities."""
+"""Artifact lineage logging utilities for QLM Lab."""
 from __future__ import annotations
 
-import json
-from dataclasses import asdict, dataclass
+from json import dumps
 from pathlib import Path
-from typing import List
+from typing import Any, Dict, List
 
-from .proto import Msg
+ARTIFACTS_DIR = Path(__file__).resolve().parents[1] / "artifacts"
+LINEAGE_PATH = ARTIFACTS_DIR / "lineage.jsonl"
 
 
 DEFAULT_LINEAGE_PATH = Path(__file__).resolve().parents[1] / "artifacts" / "lineage.jsonl"
@@ -26,44 +26,37 @@ def append(event: dict[str, object], path: Path | None = None) -> None:
 @dataclass
 class LineageRecord:
     """Serializable lineage record for agent activity."""
+def _coerce(value: Any) -> Any:
+    """Convert values into JSON-serialisable primitives."""
 
-    message: Msg
-    note: str | None = None
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, dict):
+        return {str(k): _coerce(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple, set)):
+        return [_coerce(item) for item in value]
+    return value
 
-    def to_json(self) -> str:
-        payload = asdict(self)
-        payload["message"]["ts"] = float(self.message.ts)
-        return json.dumps(payload, default=str)
+
+def append(event: Dict[str, Any]) -> Path:
+    """Append ``event`` to the lineage JSONL log."""
+
+    ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+    payload = _coerce(event)
+    with LINEAGE_PATH.open("a", encoding="utf-8") as handle:
+        handle.write(dumps(payload, sort_keys=True) + "\n")
+    return LINEAGE_PATH
 
 
-class LineageLogger:
-    """Persist lineage events to a JSONL file."""
+def artifact_index() -> Dict[str, Any]:
+    """Return a summary of known artifacts within the lab."""
 
-    def __init__(self, path: str | Path | None = None):
-        default_path = Path(__file__).resolve().parents[1] / "artifacts" / "lineage.jsonl"
-        self.path = Path(path) if path is not None else default_path
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        self._records: List[LineageRecord] = []
+    ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+    files: List[str] = sorted(
+        entry.name for entry in ARTIFACTS_DIR.iterdir() if entry.is_file()
+    )
+    return {"count": len(files), "files": files}
 
-    def log(self, message: Msg, note: str | None = None) -> None:
-        record = LineageRecord(message=message, note=note)
-        self._records.append(record)
-        with self.path.open("a", encoding="utf-8") as handle:
-            handle.write(record.to_json() + "\n")
-
-    def load(self) -> List[LineageRecord]:
-        """Load records from disk, replacing in-memory cache."""
-
-        records: List[LineageRecord] = []
-        if self.path.exists():
-            with self.path.open("r", encoding="utf-8") as handle:
-                for line in handle:
-                    if line.strip():
-                        raw = json.loads(line)
-                        msg = Msg(**raw["message"])
-                        records.append(LineageRecord(message=msg, note=raw.get("note")))
-        self._records = records
-        return list(self._records)
 
     @property
     def records(self) -> List[LineageRecord]:
@@ -71,3 +64,4 @@ class LineageLogger:
 
 
 __all__ = ["LineageLogger", "LineageRecord", "append"]
+__all__ = ["append", "artifact_index", "ARTIFACTS_DIR", "LINEAGE_PATH"]
