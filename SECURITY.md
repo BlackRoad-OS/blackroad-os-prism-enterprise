@@ -26,4 +26,16 @@ We run advisory scans (Semgrep, Trivy, Gitleaks, Checkov, CodeQL) behind feature
 - Scope tokens and API keys with least privilege, and rotate them every 90 days or immediately after any suspected exposure.
 - If a secret leaks, follow the incident playbook: (a) revoke/rotate at the provider, (b) scrub the git history, (c) redeploy or restart affected services, and (d) document the post-incident steps in the remediation PR.
 - Use OIDC-backed federation (GitHub Actions → cloud provider) instead of long-lived deployment keys wherever possible. Token lifetimes should be capped at 1 hour.
+- Track all rotations in `RUNBOOK.md` with ticket links and effective timestamps. Emergency rotations require owner sign-off within 24 hours.
+
+## SOPS Encryption Workflow
+
+- Store persistent secrets as encrypted SOPS documents (`*.sops.yaml`, `*.sops.json`, etc.) using `age` recipients from the platform keyring. Plaintext `.env` files are forbidden in the repository and the `ops/security/check_env_secrets.sh` gate enforces this automatically.
+- A small number of historical `.env` files remain for documentation inside `_trash/`, `etc/blackroad/`, `lucidia/`, `ops/backup/`, `opt/blackroad/`, and `tools/tools-adapter/`. Do not modify them—migrate to SOPS equivalents before making any changes.
+- To create a new secret file:
+  1. `sops --encrypt --age $(cat sops/age.pub) secret.env > secret.env.sops`
+  2. Commit only the `.sops` output and reference it in the deployment runbook.
+- To rotate a value: `sops secret.env.sops` → edit → save; the encryption metadata is updated automatically.
+- Never share age private keys in chat or tickets. Use the secure key escrow described in `SECURITY_BASELINE.md` for recovery.
+
 Report issues privately to security@blackroad.io. Do not disclose publicly until fixed. This project operates in offline environments; please avoid any network-based exploits in reports.
