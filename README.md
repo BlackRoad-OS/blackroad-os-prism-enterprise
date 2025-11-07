@@ -109,6 +109,66 @@ See `src/modmath/__init__.py` for docstrings, parameter validation details, and 
   prime factors due to naive factorisation.
 - The toolkit is educational and **not** suitable for production cryptography.
 
+## Quantum Math Lab
+
+[![Quantum Math Lab CI](https://img.shields.io/github/actions/workflow/status/blackboxprogramming/blackroad-prism-console/ci.yml?label=Quantum%20Math%20Lab%20CI)](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/ci.yml)
+[![Unsolved Problems](https://img.shields.io/badge/docs-unsolved%20problems-blue)](quantum_math_lab/docs/unsolved_problems.md)
+
+The `quantum_math_lab` package upgrades our NumPy-based simulator with Qiskit execution, Torch-driven variational solvers, Matplotlib visuals, and curated quantum-friendly research prompts. It targets Python 3.11+ and integrates with IBM Quantum backends via `qiskit`/`qiskit-aer`.
+
+### Feature highlights
+
+- Local `QuantumCircuit` simulator with Hadamard/Pauli/CNOT and parameterised rotations.
+- Seamless conversion to `qiskit.QuantumCircuit`, transpilation, and Aer execution helpers.
+- Torch-powered `TorchVQESolver` for hybrid VQE workflows (see `examples/vqe_example.py`).
+- Grover search walkthrough with Aer sampling (`examples/grover_demo.py`).
+- `visuals/plot_states.py` for Bloch spheres and state probability plots.
+- Bit-flip error-correction helpers in `quantum_math_lab/error_correction.py`.
+- Research prompts in [`quantum_math_lab/docs/unsolved_problems.md`](quantum_math_lab/docs/unsolved_problems.md).
+
+### Quickstart (Python 3.11+)
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+python -m pip install -e .
+pytest tests/test_simulator.py -k "quantum"
+```
+
+### Run the demos
+
+```bash
+python -m quantum_math_lab.examples.vqe_example
+python -m quantum_math_lab.examples.grover_demo
+```
+
+### Visualise states
+
+```python
+from quantum_math_lab import QuantumCircuit
+from quantum_math_lab.visuals import plot_states
+
+circuit = QuantumCircuit(1)
+circuit.hadamard(0)
+state = circuit.simulate()
+fig = plot_states.plot_bloch_sphere(state)
+fig.savefig("bloch.png")
+```
+
+### Execute on Qiskit backends
+
+```python
+from quantum_math_lab import QuantumCircuit, get_aer_simulator
+
+circuit = QuantumCircuit(2)
+circuit.hadamard(0)
+circuit.cnot(0, 1)
+result = circuit.execute_on_backend(get_aer_simulator(), shots=1024, measure=True)
+print(result.get_counts())
+```
+
 > Nothing here overwrites your existing code. The scripts are defensive: they detect paths,
 > **merge** deps, and only generate files if missing.
 
