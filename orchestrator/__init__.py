@@ -1,14 +1,27 @@
-"""Orchestrator public API."""
+"""Public orchestrator exports and legacy routing helper."""
 
 from __future__ import annotations
 
+import importlib
+from typing import Any
+
+from sdk import plugin_api
 from .base import BaseBot, BotMetadata
 from .lineage import LineageTracker
 from .memory import MemoryLog
 from .policy import PolicyEngine
-from .protocols import BotExecutionError, BotResponse, MemoryRecord, Task, TaskPriority
+from .protocols import (
+    BotExecutionError,
+    BotResponse,
+    MemoryRecord,
+    Task,
+    TaskPriority,
+)
 from .router import BotRegistry, RouteContext, Router, TaskRepository
+from .sandbox import run_in_sandbox
 from .tasks import load_tasks, save_tasks
+
+_logger = importlib.import_module("logging").getLogger(__name__)
 
 __all__ = [
     "BaseBot",
@@ -27,25 +40,23 @@ __all__ = [
     "TaskRepository",
     "load_tasks",
     "save_tasks",
+    "route",
 ]
-import logging
-from typing import Any
-
-from sdk import plugin_api
-from . import registry
-from .sandbox import run_in_sandbox, BotExecutionError
-
-logger = logging.getLogger(__name__)
 
 
 def route(bot_name: str, task: plugin_api.Task) -> Any:
-    bot_cls = registry.get_bot(bot_name)
+    """Entrypoint used by plugins to execute bot handlers."""
+
+    from . import registry as _registry
+
+    bot_cls = _registry.get_bot(bot_name)
     if not bot_cls:
         raise ValueError(f"bot {bot_name} not found")
+
     bot = bot_cls()
     settings = plugin_api.get_settings()
     exec_mode = getattr(settings, "EXECUTION_MODE", "inproc")
-    logger.info(
+    _logger.info(
         "route",
         extra={
             "execution_mode": exec_mode,
@@ -53,6 +64,7 @@ def route(bot_name: str, task: plugin_api.Task) -> Any:
             "theme": getattr(settings, "THEME", None),
         },
     )
+
     if exec_mode == "sandbox":
         return run_in_sandbox(lambda: bot.handle(task))
     return bot.handle(task)
