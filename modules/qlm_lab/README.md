@@ -32,3 +32,20 @@ make lint
 ```
 
 Use `make notebooks` to execute and store evaluated notebooks with outputs saved next to the originals.
+
+## Bridge API
+
+Spin up the FastAPI bridge to expose the orchestrator over HTTP:
+
+```bash
+uvicorn qlm_lab.api:create_app --factory --port 8061
+```
+
+Key endpoints:
+
+- `GET /health` – readiness probe.
+- `POST /runs` – execute a goal (e.g. `{ "goal": "bell-lab-demo" }`) and receive the message log plus artifact summary.
+- `GET /artifacts` – list generated artifacts for inspection or download.
+- `GET /lineage?limit=20` – stream recent lineage events captured during runs.
+
+Responses include critic summaries and serialized bus messages so clients can mirror state into other engines.
