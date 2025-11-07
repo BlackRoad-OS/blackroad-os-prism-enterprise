@@ -1,5 +1,4 @@
 import { parsePatch } from 'diff';
-import { globby } from 'globby';
 import fs from 'fs';
 import path from 'path';
 import { DiffIntel, PrismDiff, TestPrediction } from '../types';

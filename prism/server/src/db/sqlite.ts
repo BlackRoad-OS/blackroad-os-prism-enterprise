@@ -1,144 +1,87 @@
-import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
 import { PrismEvent } from '@prism/core';
 import { IntelligenceEvent } from '../types';
 
-let db: Database.Database | null = null;
+type StoredEvent = PrismEvent & { ctx?: Record<string, unknown> };
 
-export function initDb(dbPath: string) {
-  const dir = path.dirname(dbPath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+type StoredIntelligence = IntelligenceEvent;
+
+type DbState = {
+  events: StoredEvent[];
+  intelligence: StoredIntelligence[];
+};
+
+let dbFile: string | null = null;
+let state: DbState = { events: [], intelligence: [] };
+
+function loadState(file: string) {
+  if (!fs.existsSync(file)) {
+    state = { events: [], intelligence: [] };
+    return;
   }
-  db = new Database(dbPath);
-  db.exec(`CREATE TABLE IF NOT EXISTS events(
-    id TEXT PRIMARY KEY,
-    ts TEXT,
-    actor TEXT,
-    kind TEXT,
-    projectId TEXT,
-    sessionId TEXT,
-    facet TEXT,
-    summary TEXT,
-    ctx TEXT
-  );
-  CREATE INDEX IF NOT EXISTS idx_events_project ON events(projectId);
-  CREATE INDEX IF NOT EXISTS idx_events_ts ON events(ts);
-  CREATE TABLE IF NOT EXISTS intelligence_events(
-    id TEXT PRIMARY KEY,
-    topic TEXT NOT NULL,
-    timestamp TEXT NOT NULL,
-    source TEXT NOT NULL,
-    channel TEXT NOT NULL,
-    parent_id TEXT,
-    tags TEXT,
-    payload TEXT NOT NULL,
-    meta TEXT NOT NULL,
-    causal_chain TEXT
-  );
-  CREATE INDEX IF NOT EXISTS idx_intel_events_ts ON intelligence_events(timestamp);
-  CREATE INDEX IF NOT EXISTS idx_intel_events_topic ON intelligence_events(topic);
-  `);
-  return db;
+  try {
+    const raw = fs.readFileSync(file, 'utf8');
+    const parsed = JSON.parse(raw) as DbState;
+    state = {
+      events: parsed.events ?? [],
+      intelligence: parsed.intelligence ?? [],
+    };
+  } catch {
+    state = { events: [], intelligence: [] };
+  }
 }
 
-export function getDb() {
-  if (!db) throw new Error('DB not initialized');
-  return db;
+function persist() {
+  if (!dbFile || dbFile === ':memory:') {
+    return;
+  }
+  const tmpFile = `${dbFile}.tmp`;
+  fs.writeFileSync(tmpFile, JSON.stringify(state));
+  fs.renameSync(tmpFile, dbFile);
+}
+
+export function initDb(filePath: string) {
+  dbFile = filePath;
+  if (dbFile !== ':memory:') {
+    const dir = path.dirname(dbFile);
+    fs.mkdirSync(dir, { recursive: true });
+    loadState(dbFile);
+  } else {
+    state = { events: [], intelligence: [] };
+  }
 }
 
 export function insertEvent(event: PrismEvent) {
-  const database = getDb();
-  const stmt = database.prepare(`INSERT INTO events(id, ts, actor, kind, projectId, sessionId, facet, summary, ctx)
-    VALUES(@id, @ts, @actor, @kind, @projectId, @sessionId, @facet, @summary, @ctx)`);
-  stmt.run({ ...event, ctx: event.ctx ? JSON.stringify(event.ctx) : null });
+  state.events.push(event);
+  persist();
 }
 
 export function listEvents(projectId: string, limit: number) {
-  const database = getDb();
-  const stmt = database.prepare(`SELECT * FROM events WHERE projectId = ? ORDER BY ts DESC LIMIT ?`);
-  const rows = stmt.all(projectId, limit) as (Omit<PrismEvent, 'ctx'> & { ctx: string | null })[];
-  return rows.map(r => ({ ...r, ctx: r.ctx ? JSON.parse(r.ctx) : undefined }));
+  return state.events
+    .filter((event) => event.projectId === projectId)
+    .sort((a, b) => b.ts.localeCompare(a.ts))
+    .slice(0, limit);
 }
 
 export function insertIntelligenceEvent(event: IntelligenceEvent) {
-  const database = getDb();
-  const stmt = database.prepare(`INSERT OR REPLACE INTO intelligence_events(
-    id, topic, timestamp, source, channel, parent_id, tags, payload, meta, causal_chain
-  ) VALUES (@id, @topic, @timestamp, @source, @channel, @parent_id, @tags, @payload, @meta, @causal_chain)`);
-  stmt.run({
-    id: event.id,
-    topic: event.topic,
-    timestamp: event.timestamp,
-    source: event.source,
-    channel: event.channel,
-    parent_id: event.causal?.parent?.id ?? null,
-    tags: event.tags ? JSON.stringify(event.tags) : null,
-    payload: JSON.stringify(event.payload),
-    meta: JSON.stringify(event.meta),
-    causal_chain: event.causal?.chain ? JSON.stringify(event.causal.chain) : null,
-  });
+  const existingIndex = state.intelligence.findIndex((row) => row.id === event.id);
+  if (existingIndex >= 0) {
+    state.intelligence[existingIndex] = event;
+  } else {
+    state.intelligence.push(event);
+  }
+  persist();
 }
 
 export function listIntelligenceEvents(limit: number) {
-  const database = getDb();
-  const stmt = database.prepare(`SELECT * FROM intelligence_events ORDER BY timestamp DESC LIMIT ?`);
-  const rows = stmt.all(limit) as {
-    id: string;
-    topic: string;
-    timestamp: string;
-    source: string;
-    channel: IntelligenceEvent['channel'];
-    parent_id: string | null;
-    tags: string | null;
-    payload: string;
-    meta: string;
-    causal_chain: string | null;
-  }[];
-  return rows.map(row => ({
-    id: row.id,
-    topic: row.topic,
-    timestamp: row.timestamp,
-    source: row.source,
-    channel: row.channel,
-    payload: JSON.parse(row.payload),
-    tags: row.tags ? JSON.parse(row.tags) : undefined,
-    causal: {
-      parent: row.parent_id ? { id: row.parent_id } : undefined,
-      chain: row.causal_chain ? JSON.parse(row.causal_chain) : undefined,
-    },
-    meta: JSON.parse(row.meta),
-  }) as IntelligenceEvent[]);
+  return [...state.intelligence]
+    .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+    .slice(0, limit);
 }
 
 export function getHydrationEvents(limit: number) {
-  const database = getDb();
-  const stmt = database.prepare(`SELECT * FROM intelligence_events ORDER BY timestamp ASC LIMIT ?`);
-  const rows = stmt.all(limit) as {
-    id: string;
-    topic: string;
-    timestamp: string;
-    source: string;
-    channel: IntelligenceEvent['channel'];
-    parent_id: string | null;
-    tags: string | null;
-    payload: string;
-    meta: string;
-    causal_chain: string | null;
-  }[];
-  return rows.map(row => ({
-    id: row.id,
-    topic: row.topic,
-    timestamp: row.timestamp,
-    source: row.source,
-    channel: row.channel,
-    payload: JSON.parse(row.payload),
-    tags: row.tags ? JSON.parse(row.tags) : undefined,
-    causal: {
-      parent: row.parent_id ? { id: row.parent_id } : undefined,
-      chain: row.causal_chain ? JSON.parse(row.causal_chain) : undefined,
-    },
-    meta: JSON.parse(row.meta),
-  }) as IntelligenceEvent[]);
+  return [...state.intelligence]
+    .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+    .slice(0, limit);
 }

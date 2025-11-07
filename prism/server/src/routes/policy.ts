@@ -1,43 +1,36 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import fs from 'fs';
-import path from 'path';
-import yaml from 'yaml';
-import { Policy } from '@prism/core';
+import { getPolicy, setMode, updateApprovals, checkCapability, resetApprovals, type Decision, type Capability } from '../policy';
 
-const approval = z.enum(['auto','review','forbid']);
-const policySchema: z.ZodType<Policy> = z.object({
-  mode: z.enum(['playground','dev','trusted','prod']),
-  approvals: z.object({
-    read: approval.optional(),
-    write: approval.optional(),
-    exec: approval.optional(),
-    net: approval.optional(),
-    secrets: approval.optional(),
-    dns: approval.optional(),
-    deploy: approval.optional()
-  }).partial()
-});
-
-const policyPath = path.resolve(process.cwd(), '../configs/prism.config.yaml');
-
-function readPolicy(): Policy {
-  if (!fs.existsSync(policyPath)) {
-    return { mode: 'dev', approvals: {} };
-  }
-  const txt = fs.readFileSync(policyPath, 'utf-8');
-  return yaml.parse(txt) as Policy;
-}
+const decisionSchema = z.enum(['auto', 'review', 'forbid']);
 
 export default async function policyRoutes(fastify: FastifyInstance) {
   fastify.get('/policy', async (_req, reply) => {
-    reply.send(readPolicy());
+    reply.send(getPolicy());
   });
 
   fastify.put('/policy', async (req, reply) => {
-    const body = policySchema.parse(req.body);
-    fs.mkdirSync(path.dirname(policyPath), { recursive: true });
-    fs.writeFileSync(policyPath, yaml.stringify(body));
-    reply.send({ ok: true });
+    const body = z.object({ approvals: z.record(decisionSchema).optional() }).parse(req.body ?? {});
+    if (body.approvals) {
+      updateApprovals(body.approvals as Partial<Record<Capability, Decision>>);
+    } else {
+      resetApprovals();
+    }
+    reply.send(getPolicy());
+  });
+
+  fastify.get('/mode', async (_req, reply) => {
+    reply.send({ currentMode: getPolicy().mode });
+  });
+
+  fastify.put('/mode', async (req, reply) => {
+    const body = z.object({ mode: z.enum(['playground', 'dev', 'trusted', 'prod']) }).parse(req.body);
+    setMode(body.mode);
+    reply.send({ currentMode: body.mode });
+  });
+
+  fastify.get('/policy/check/:capability', async (req, reply) => {
+    const params = z.object({ capability: z.enum(['write', 'exec', 'net', 'secrets', 'dns', 'deploy', 'read']) }).parse(req.params);
+    reply.send({ decision: checkCapability(params.capability) });
   });
 }
