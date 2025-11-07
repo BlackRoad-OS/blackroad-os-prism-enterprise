@@ -4,6 +4,8 @@ import math
 import sys
 from pathlib import Path
 
+import numpy as np
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
@@ -89,7 +91,7 @@ def test_model_evolve_applies_derivative():
     assert math.isclose(derivative, dummy.last_update)
 
 
-def test_placeholders_raise_not_implemented():
+def test_energy_placeholder_raises_not_implemented():
     try:
         amundson_energy_balance(energy=1.0, dissipation=0.1)
     except NotImplementedError:
@@ -97,9 +99,44 @@ def test_placeholders_raise_not_implemented():
     else:
         raise AssertionError("energy balance placeholder should raise NotImplementedError")
 
-    try:
-        amundson_learning_update(gradient=0.5, weights=2.0)
-    except NotImplementedError:
-        pass
-    else:
-        raise AssertionError("learning placeholder should raise NotImplementedError")
+
+def test_learning_update_reduces_to_gradient_descent_with_identity_metric():
+    weights = np.array([1.0, -0.5])
+    gradient = np.array([0.2, -0.4])
+    metric = np.eye(2)
+    eta = 0.1
+    updated = amundson_learning_update(
+        weights=weights,
+        gradient=gradient,
+        metric=metric,
+        learning_rate=eta,
+        k_b_t=0.0,
+        noise=np.zeros_like(weights),
+    )
+    expected = weights - eta * gradient
+    assert np.allclose(updated, expected)
+
+
+def test_learning_update_respects_metric_and_noise_channel():
+    weights = np.array([0.3, -1.2])
+    gradient = np.array([1.0, -0.5])
+    metric = np.array([[2.0, 0.3], [0.3, 1.5]])
+    eta = 0.2
+    k_b_t = 0.7
+    noise = np.array([0.5, -1.0])
+
+    updated = amundson_learning_update(
+        weights=weights,
+        gradient=gradient,
+        metric=metric,
+        learning_rate=eta,
+        k_b_t=k_b_t,
+        noise=noise,
+    )
+
+    chol = np.linalg.cholesky(metric)
+    natural_grad = np.linalg.solve(metric, gradient)
+    deterministic = -eta * natural_grad
+    stochastic = math.sqrt(2.0 * eta * k_b_t) * np.linalg.solve(chol.T, noise)
+    expected = weights + deterministic + stochastic
+    assert np.allclose(updated, expected)
