@@ -3,6 +3,9 @@ node_modules
 .next
 out
 build
+.turbo
+*.tsbuildinfo
 .DS_Store
 .env.local
 .env.*
+!.env.example
