@@ -1,8 +1,8 @@
 [project]
 name = "qlm-lab"
-version = "0.1.0"
+version = "0.1.2"
 requires-python = ">=3.11"
-dependencies = ["numpy", "matplotlib", "sympy"]
+dependencies = ["numpy", "matplotlib", "sympy", "pyyaml"]
 
 [project.optional-dependencies]
 qiskit = ["qiskit", "qiskit-aer"]
