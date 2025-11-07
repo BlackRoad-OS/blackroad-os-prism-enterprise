@@ -1,0 +1,6 @@
+{
+  "coverage": {"qlm_lab/tools/quantum_np.py": 0.0},
+  "metrics": {"chsh": 0.0},
+  "artifacts": {"count": 0},
+  "policy": {"allow_network": false}
+}
