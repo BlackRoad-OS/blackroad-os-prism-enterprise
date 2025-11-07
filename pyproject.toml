@@ -15,6 +15,7 @@ dependencies = [
     "pyyaml>=6.0.2,<7",
     "hypothesis>=6.103.4,<7",
     "numpy>=1.26,<3",
+    "matplotlib>=3.8,<4",
     "regopy>=1.0.0,<2",
 ]
 

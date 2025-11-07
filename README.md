@@ -599,3 +599,18 @@ JSON schemas live in `/schemas` and are enforced via `io.validate.validate_json`
 
 ## i18n & Themes
 Translate messages with `i18n.translate.t` and run the TUI with `--theme light|dark`.
+
+### Bot family demo
+
+The repository now ships with a tiny in-memory bus and a handful of cooperating bots that
+demonstrate planning, execution, and artifact logging. Activate a virtual environment, install
+the project in editable mode, and run the orchestrator entrypoint:
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -e .
+python orchestrator/run_demo.py
+```
+
+You should see a Bell pair histogram saved to `artifacts/bell_hist.png` alongside a
+`lineage.jsonl` log describing the exchanged messages.
