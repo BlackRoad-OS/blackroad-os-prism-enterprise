@@ -19,6 +19,7 @@ app.use((_req, res, next) => {
 
 // primary health endpoint
 // GET /api/health (primary)
+// GET /api/health (primary endpoint)
 app.get('/api/health', (_req, res) => {
   let body = {
     status: 'ok',
@@ -41,6 +42,7 @@ app.get('/api/health', (_req, res) => {
 
 // liveness and readiness endpoints for k8s or uptime monitors
 // Liveness/Readiness endpoints (K8s or uptime monitors)
+// liveness/readiness endpoints (k8s or uptime monitors)
 app.get('/livez', (_req, res) => res.send('OK'));
 app.get('/readyz', (_req, res) => {
   try {
