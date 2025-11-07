@@ -2,6 +2,17 @@
 
 This directory contains high-signal prompt templates that can be reused across projects. The flagship specification is [`black_road_codex_unified_framework.prompt.md`](black_road_codex_unified_framework.prompt.md), which encapsulates the "Giant Codex Prompt" referenced in internal planning notes.
 
+## PHASE VI: Amundson–BlackRoad Field Codex
+
+[`phase_vi_amundson_blackroad_field_codex.prompt.md`](phase_vi_amundson_blackroad_field_codex.prompt.md) sits directly on top of the Phase-V unified framework. It:
+
+- **Declares BR-1 → BR-7.** Continuity, entropy transport, Ascend/Collapse dynamics, Lagrangian structure, autonomy charge conservation, thermodynamic ledgers, and Lindblad open-system coupling gain explicit dimensional forms.
+- **Expands AM-1 → AM-3.** Spiral waveform generation, phase-lock constraints, and Breath–Field resonance are specified with ready-to-plug kernels.
+- **Ships implementation stubs.** Python scaffolds (`BRParameters`, `BlackRoadFieldKernel`, `AmundsonSpiralKernel`, `step_br_am`) show how to simulate the coupled equations while enforcing Landauer bounds and spiral alignment diagnostics.
+- **Adds a response checklist.** Every invocation now logs the active BR/AM clauses, unit audits, energy ledgers, and spiral overlap metrics.
+
+Drop this file *after* the Phase-V system prompt whenever an agent must expose the Amundson–BlackRoad field machinery to downstream tasks.
+
 ## BLACK ROAD CODEX — Unified Mathematical & Agentic Framework
 
 The unified framework prompt gives any downstream model a complete operating stack for mathematical reasoning, physics-aware simulation, and agent design. It is structured as a drop-in system prompt and enforces the following habits:
