@@ -5,6 +5,7 @@ import json
 import subprocess
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List
 
 import yaml
 
@@ -136,6 +137,7 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
 
 def main(argv: Optional[Sequence[str]] = None) -> Tuple[Path, Optional[Path]]:
     args = parse_args(argv)
+def main() -> Path:
     defs = load_definitions()
     results = run_checks(defs)
     report = {
@@ -163,3 +165,13 @@ if __name__ == "__main__":
     if jsonl_path:
         message += f"; JSONL stream at {jsonl_path}"
     print(message)
+    REPORT_DIR.mkdir(exist_ok=True)
+    report_path = REPORT_DIR / f"{report['timestamp']}.json"
+    with open(report_path, "w", encoding="utf-8") as f:
+        json.dump(report, f, indent=2)
+    return report_path
+
+
+if __name__ == "__main__":
+    path = main()
+    print(f"Audit report written to {path}")
