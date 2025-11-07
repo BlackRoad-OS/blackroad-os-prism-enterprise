@@ -7,17 +7,20 @@ import os from 'os';
 
 describe('diff intel', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'prism-intel-'));
-  let app = buildServer();
+  let app: Awaited<ReturnType<typeof buildServer>>;
+  let cwdSpy: ReturnType<typeof vi.spyOn>;
   beforeAll(async () => {
-    vi.spyOn(process, 'cwd').mockReturnValue(tmp);
+    cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tmp);
     fs.mkdirSync(path.join(tmp, 'src'), { recursive: true });
     fs.writeFileSync(path.join(tmp, 'src/foo.test.ts'), 'test');
     fs.mkdirSync(path.join(tmp, 'tests'), { recursive: true });
     fs.writeFileSync(path.join(tmp, 'tests/test_module.py'), 'test');
+    app = await buildServer(':memory:');
     await app.ready();
   });
   afterAll(async () => {
     await app.close();
+    cwdSpy.mockRestore();
   });
   it('intel for js patch', async () => {
     const patch = '*** Begin Patch\n*** Update File: src/foo.ts\n@@\n-export function a(){};\n+export function a(){return 1};\n*** End Patch';
