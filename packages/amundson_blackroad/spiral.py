@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Callable, Tuple
 
 import numpy as np
@@ -136,3 +137,36 @@ def jacobian_am2(
         )
         jac[:, idx] = (shifted - base) / eps
     return jac
+
+
+@dataclass
+class StabilityReport:
+    """Phase-space stability report for the AM-2 fixed point."""
+
+    jacobian: np.ndarray
+    eigenvalues: np.ndarray
+
+    @property
+    def is_stable(self) -> bool:
+        """Return ``True`` when all eigenvalues have non-positive real part."""
+
+        return bool(np.all(self.eigenvalues.real <= 0.0))
+
+
+def fixed_point_stability(
+    a: float,
+    theta: float,
+    gamma: float,
+    kappa: float,
+    eta: float,
+    omega0: float,
+    *,
+    phi: PhiTransform | None = None,
+    lift_fn: FieldLift | None = None,
+    eps: float = 1e-6,
+) -> StabilityReport:
+    """Return the Jacobian and eigenvalues at a candidate fixed point."""
+
+    jac = jacobian_am2(a, theta, gamma, kappa, eta, omega0, phi=phi, lift_fn=lift_fn, eps=eps)
+    eigenvalues = np.linalg.eigvals(jac)
+    return StabilityReport(jacobian=jac, eigenvalues=eigenvalues)

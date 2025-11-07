@@ -80,17 +80,15 @@ interactive_app = create_app()
 # Flask API for the Infinity Math system.
 from pathlib import Path
 
-import numpy as np
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, send_from_directory
 
-from amundson_blackroad.autonomy import conserved_mass, simulate_transport
-from amundson_blackroad.spiral import simulate_am2
-from amundson_blackroad.thermo import annotate_run_with_thermo
+from .api_ambr import bp as ambr_bp
 
 BASE_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = BASE_DIR / "output"
 
 api_app = Flask(__name__)
+api_app.register_blueprint(ambr_bp)
 app = api_app
 
 
@@ -103,58 +101,6 @@ def health() -> tuple:
 def get_output(subpath: str):
     """Serve generated artifacts from the output tree."""
     return send_from_directory(OUTPUT_DIR, subpath)
-
-
-@api_app.get("/api/ambr/sim/am2")
-def simulate_am2_endpoint():
-    """Run the AM-2 spiral simulation."""
-
-    args = request.args
-    t, a, theta, amp = simulate_am2(
-        float(args.get("T", 10.0)),
-        float(args.get("dt", 1e-3)),
-        float(args.get("a0", 0.1)),
-        float(args.get("theta0", 0.0)),
-        float(args.get("gamma", 0.3)),
-        float(args.get("kappa", 0.7)),
-        float(args.get("eta", 0.5)),
-        float(args.get("omega0", 1.0)),
-    )
-    payload = {
-        "t": t.tolist(),
-        "a": a.tolist(),
-        "theta": theta.tolist(),
-        "amp": amp.tolist(),
-    }
-    annotated = annotate_run_with_thermo(payload, bits=float(args.get("bits", 0.0)), temperature=float(args.get("temperature", 300.0)))
-    return jsonify(annotated)
-
-
-@api_app.post("/api/ambr/sim/transport")
-def simulate_transport_endpoint():
-    """Run BR-1/2 transport and report conservation metrics."""
-
-    body = request.get_json(force=True)
-    x = np.asarray(body["x"], dtype=float)
-    A0 = np.asarray(body["A"], dtype=float)
-    rho = np.asarray(body["rho"], dtype=float)
-    dt = float(body.get("dt", 1e-3))
-    steps = int(body.get("steps", 100))
-    mu_A = float(body.get("mu", 1.0))
-    chi_A = float(body.get("chi", 0.0))
-    Uc = np.asarray(body["Uc"], dtype=float) if "Uc" in body else None
-    result = simulate_transport(x, A0, rho, steps, dt, mu_A=mu_A, chi_A=chi_A, Uc=Uc)
-    initial_mass = conserved_mass(x, A0)
-    payload = {
-        "x": result["x"].tolist(),
-        "A": result["A"].tolist(),
-        "flux": result["flux"].tolist(),
-        "mass": float(result["mass"]),
-        "mass_initial": initial_mass,
-        "mass_error": float(result["mass"] - initial_mass),
-    }
-    annotated = annotate_run_with_thermo(payload, bits=float(body.get("bits", 0.0)), temperature=float(body.get("temperature", 300.0)), seed=body.get("seed"))
-    return jsonify(annotated)
 
 
 if __name__ == "__main__":

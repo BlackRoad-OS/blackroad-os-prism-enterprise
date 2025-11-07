@@ -32,6 +32,7 @@ import SecuritySpotlights from './pages/SecuritySpotlights.jsx'
 import GitPage from './pages/GitPage.jsx'
 import ControlPanel from './pages/ControlPanel.jsx'
 import PeriodicTableOfEquations from './pages/PeriodicTableOfEquations.jsx'
+import EquationsLab from './pages/EquationsLab.jsx'
 import Resilience from './pages/Resilience.jsx'
 import AgentLineage from './pages/AgentLineage.jsx'
 import WebEngine from './pages/WebEngine.jsx'
@@ -61,6 +62,7 @@ const NAV_ITEMS = [
   { key: 'codex', to: '/codex', text: 'Codex', icon: <Cpu size={18} /> },
   { key: 'agents', to: '/agents', text: 'Agent Lineage', icon: <Brain size={18} /> },
   { key: 'equations', to: '/equations', text: 'Equations', icon: <FunctionSquare size={18} /> },
+  { key: 'equations-lab', to: '/equations-lab', text: 'Equations Lab', icon: <FunctionSquare size={18} /> },
   { key: 'roadcoin', to: '/roadcoin', text: 'RoadCoin', icon: <Wallet size={18} /> },
   { key: 'orchestrator', to: '/orchestrator', text: 'Orchestrator', icon: <Rocket size={18} /> },
   { key: 'roadbook', to: '/roadbook', text: 'Roadbook', icon: <BookOpen size={18} /> },
@@ -294,6 +296,7 @@ export default function App(){
               <Route path="/claude" element={<Section><Claude socket={socket} /></Section>} />
               <Route path="/codex" element={<Section><Codex socket={socket} /></Section>} />
               <Route path="/equations" element={<Section><PeriodicTableOfEquations /></Section>} />
+              <Route path="/equations-lab" element={<Section><EquationsLab /></Section>} />
               <Route path="/roadcoin" element={<Section><RoadCoin onUpdate={handleWalletUpdate} /></Section>} />
               <Route path="/orchestrator" element={<Section><Orchestrator socket={socket} /></Section>} />
               <Route path="/roadbook" element={<Section><Roadbook /></Section>} />
