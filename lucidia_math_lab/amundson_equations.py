@@ -38,6 +38,9 @@ import math
 from dataclasses import dataclass
 from typing import Protocol
 
+import numpy as np
+from numpy.typing import ArrayLike
+
 
 def coherence(phi_x: float, phi_y: float) -> float:
     """Return the cosine coherence term :math:`C(x, y)`.
@@ -165,14 +168,98 @@ def amundson_energy_balance(*, energy: float, dissipation: float) -> float:
     raise NotImplementedError("Amundson II energy balance has not been derived yet.")
 
 
-def amundson_learning_update(*, gradient: float, weights: float) -> float:
-    """Placeholder for Amundson III learning law.
+def _ensure_vector(name: str, value: ArrayLike) -> np.ndarray:
+    """Return *value* as a 1-D float vector."""
 
-    Amundson III will translate coherence gradients into weight
-    updates, providing a physicalized backpropagation rule.  The
-    returned value is expected to be a delta for the weights once
-    the learning equation is finalized.
+    array = np.asarray(value, dtype=float)
+    if array.ndim == 0:
+        return array.reshape(1)
+    if array.ndim != 1:
+        raise ValueError(f"{name} must be a 1-D vector, received shape {array.shape}.")
+    return array
+
+
+def _ensure_metric(name: str, value: ArrayLike, dimension: int) -> np.ndarray:
+    """Validate that *value* is a symmetric positive-definite matrix."""
+
+    matrix = np.asarray(value, dtype=float)
+    if matrix.ndim == 0:
+        matrix = matrix.reshape(1, 1)
+    if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
+        raise ValueError(f"{name} must be a square matrix, received shape {matrix.shape}.")
+    if matrix.shape[0] != dimension:
+        raise ValueError(
+            f"{name} dimension {matrix.shape[0]} does not match vector length {dimension}."
+        )
+    if not np.allclose(matrix, matrix.T, atol=1e-10):
+        raise ValueError(f"{name} must be symmetric to act as a metric tensor.")
+    try:
+        np.linalg.cholesky(matrix)
+    except np.linalg.LinAlgError as exc:  # pragma: no cover - defensive branch
+        raise ValueError(f"{name} must be positive definite.") from exc
+    return matrix
+
+
+def amundson_learning_update(
+    *,
+    weights: ArrayLike,
+    gradient: ArrayLike,
+    metric: ArrayLike,
+    learning_rate: float,
+    k_b_t: float,
+    noise: ArrayLike | None = None,
+    rng: np.random.Generator | None = None,
+) -> np.ndarray:
+    r"""Apply the Amundson III Resonant Natural Gradient update.
+
+    The update follows the stochastic natural-gradient rule described
+    for the Resonant Natural Gradient option:
+
+    .. math::
+
+       \theta_{t+1} = \theta_t - \eta G^{-1} \nabla_\theta \mathcal F
+       + \sqrt{2\eta k_B T}\, G^{-1/2} \xi,
+
+    where ``weights`` is :math:`\theta_t`, ``gradient`` is the free-energy
+    gradient, ``metric`` is the Fisher (or Gauss–Newton) metric
+    :math:`G`, and ``noise`` supplies the standard-normal samples
+    :math:`\xi`.  Setting ``k_b_t`` to zero removes the stochastic term
+    and recovers standard gradient descent when the metric is the
+    identity.
     """
 
-    # TODO: Implement once the learning dynamics are formally defined.
-    raise NotImplementedError("Amundson III learning dynamics are pending design.")
+    weight_vec = _ensure_vector("weights", weights)
+    grad_vec = _ensure_vector("gradient", gradient)
+    if weight_vec.shape != grad_vec.shape:
+        raise ValueError(
+            "weights and gradient must share the same shape, "
+            f"received {weight_vec.shape} and {grad_vec.shape}."
+        )
+
+    metric_tensor = _ensure_metric("metric", metric, weight_vec.size)
+    chol = np.linalg.cholesky(metric_tensor)
+
+    natural_grad = np.linalg.solve(metric_tensor, grad_vec)
+    deterministic_step = -learning_rate * natural_grad
+
+    scale = math.sqrt(max(0.0, 2.0 * learning_rate * k_b_t))
+    if noise is None:
+        if scale == 0.0:
+            stochastic_step = np.zeros_like(weight_vec)
+        else:
+            generator = rng if rng is not None else np.random.default_rng()
+            xi = generator.standard_normal(size=weight_vec.shape)
+            stochastic_step = scale * np.linalg.solve(chol.T, xi)
+    else:
+        xi = _ensure_vector("noise", noise)
+        if xi.shape != weight_vec.shape:
+            raise ValueError(
+                "noise must match the dimensionality of the weights, "
+                f"received {xi.shape} and {weight_vec.shape}."
+            )
+        if scale == 0.0:
+            stochastic_step = np.zeros_like(weight_vec)
+        else:
+            stochastic_step = scale * np.linalg.solve(chol.T, xi)
+
+    return weight_vec + deterministic_step + stochastic_step
