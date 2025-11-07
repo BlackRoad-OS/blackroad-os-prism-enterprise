@@ -1,17 +1,25 @@
 import Link from "next/link";
-import type { Route } from "next";
 
 type FooterLink = {
-  href: Route<string>;
+  href: string;
   label: string;
 };
 
 type FooterProps = {
-  links: FooterLink[];
+  links?: FooterLink[];
 };
 
-export function Footer({ links }: FooterProps) {
+const crossSiteLinks: FooterLink[] = [
+  { href: "https://blackroad.network/agents", label: "Registry" },
+  { href: "https://lucidia.earth/admissions", label: "Admissions" },
+  { href: "https://blackroadai.com/agents", label: "API Catalog" },
+];
+
+export function Footer({ links = [] }: FooterProps) {
   const year = new Date().getFullYear();
+  const mergedLinks = [...crossSiteLinks, ...links].filter(
+    (link, index, array) => array.findIndex((item) => item.href === link.href) === index
+  );
 
   return (
     <footer className="border-t border-slate-200 bg-white">
@@ -19,7 +27,7 @@ export function Footer({ links }: FooterProps) {
         <p className="text-xs text-slate-400">© {year} BlackRoad. All rights reserved.</p>
         <nav aria-label="Footer navigation">
           <ul className="flex flex-wrap gap-4">
-            {links.map((link) => (
+            {mergedLinks.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
