@@ -34,6 +34,12 @@
       ],
       "@blackroad/diffusion-gateway": [
         "packages/diffusion-gateway/src/index.ts"
+      ],
+      "@br/qlm": [
+        "frontend/src/lib/qlm/index.ts"
+      ],
+      "@br/qlm/*": [
+        "frontend/src/lib/qlm/*"
       ]
     },
     "plugins": [
