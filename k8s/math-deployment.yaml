@@ -18,6 +18,18 @@ spec:
           image: ghcr.io/blackroad-prism/lucidia-math:latest
           ports:
             - containerPort: 9000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 9000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/ambr/energy
+              port: 9000
+            initialDelaySeconds: 15
+            periodSeconds: 30
           envFrom:
             - configMapRef:
                 name: prism-config

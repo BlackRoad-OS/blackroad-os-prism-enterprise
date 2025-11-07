@@ -106,3 +106,24 @@ id_rsa
 *.pem
 *.key
 ssh-*
+
+# Text-only policy: block binary artefacts
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.pdf
+*.zip
+*.tar.gz
+*.npz
+*.npy
+*.pkl
+*.parquet
+*.feather
+*.mp4
+*.mov
+*.wav
+*.ogg
+output/**
+artifacts/**
