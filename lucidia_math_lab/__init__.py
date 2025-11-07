@@ -26,6 +26,12 @@ __all__ = [
     "NoetherAnalyzer",
     "EntropyFieldMapper",
     "HilbertPhaseAnalyzer",
+    "AmundsonCoherenceModel",
+    "coherence",
+    "decoherence_energy",
+    "phase_derivative",
+    "amundson_energy_balance",
+    "amundson_learning_update",
 ]
 
 _MODULE_MAP: Dict[str, Tuple[str, str]] = {
@@ -51,6 +57,12 @@ _MODULE_MAP: Dict[str, Tuple[str, str]] = {
     "NoetherAnalyzer": ("unified_geometry_engine", "NoetherAnalyzer"),
     "EntropyFieldMapper": ("unified_geometry_engine", "EntropyFieldMapper"),
     "HilbertPhaseAnalyzer": ("unified_geometry_engine", "HilbertPhaseAnalyzer"),
+    "AmundsonCoherenceModel": ("amundson_equations", "AmundsonCoherenceModel"),
+    "coherence": ("amundson_equations", "coherence"),
+    "decoherence_energy": ("amundson_equations", "decoherence_energy"),
+    "phase_derivative": ("amundson_equations", "phase_derivative"),
+    "amundson_energy_balance": ("amundson_equations", "amundson_energy_balance"),
+    "amundson_learning_update": ("amundson_equations", "amundson_learning_update"),
 }
 
 
