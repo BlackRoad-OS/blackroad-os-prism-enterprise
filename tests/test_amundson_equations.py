@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -91,13 +92,16 @@ def test_model_evolve_applies_derivative():
     assert math.isclose(derivative, dummy.last_update)
 
 
-def test_energy_placeholder_raises_not_implemented():
-    try:
-        amundson_energy_balance(energy=1.0, dissipation=0.1)
-    except NotImplementedError:
-        pass
-    else:
-        raise AssertionError("energy balance placeholder should raise NotImplementedError")
+def test_energy_balance_reduces_energy_but_clamps_at_zero():
+    assert math.isclose(amundson_energy_balance(energy=1.0, dissipation=0.1), 0.9)
+    assert math.isclose(amundson_energy_balance(energy=0.05, dissipation=1.0), 0.0)
+
+
+def test_energy_balance_validates_inputs():
+    with pytest.raises(ValueError):
+        amundson_energy_balance(energy=-0.1, dissipation=0.0)
+    with pytest.raises(ValueError):
+        amundson_energy_balance(energy=1.0, dissipation=-0.5)
 
 
 def test_learning_update_reduces_to_gradient_descent_with_identity_metric():
