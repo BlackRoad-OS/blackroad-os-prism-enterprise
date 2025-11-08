@@ -587,7 +587,13 @@ async def transport_endpoint(body: TransportRequest) -> Dict[str, Any]:
         "flux": result["flux"].tolist(),
         "mass": float(result["mass"]),
         "mass_error": mass_error,
-        "units": format_units([("mass", "1"), ("mass_error", "1")]),
+        "units": format_units(
+            [
+                ("mass", "1"),
+                ("mass_error", "1"),
+                ("flux", "1 / s"),
+            ]
+        ),
         "run_record": provenance["run_record"],
     }
     if provenance.get("landauer"):
