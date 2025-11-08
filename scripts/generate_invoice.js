@@ -1,6 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-const mustache = require('mustache');
+import fs from 'node:fs';
+import path from 'node:path';
+import mustache from 'mustache';
 
 function today() {
   return new Date().toISOString().slice(0, 10);
@@ -26,7 +26,8 @@ const invoice = {
   items: [{ sku: 'BLACKROAD-PRO', qty: 1, unit: 1200 }],
   currency: base.currency,
   terms: base.terms,
-  due_at: new Date(Date.now() + 30 * 86400000).toISOString()
+  due_at: new Date(Date.now() + 30 * 86400000).toISOString(),
+  payment_link: process.env.PAYMENT_LINK || ''
 };
 
 invoice.total = invoice.items.reduce((sum, item) => sum + item.qty * item.unit, 0);
