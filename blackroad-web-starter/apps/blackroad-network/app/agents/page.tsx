@@ -144,7 +144,11 @@ type TabKey = "list" | "vitals" | "graph";
 
 const tabs: Array<{ id: TabKey; label: string; description: string }> = [
   { id: "list", label: "List", description: "At-a-glance roster of active agents" },
-  { id: "vitals", label: "Vitals", description: "Trust, recency, and refusal discipline" },
+  {
+    id: "vitals",
+    label: "Vitals",
+    description: "Trust, miner telemetry, and refusal discipline",
+  },
   { id: "graph", label: "Graph", description: "Mentor rings and peer alignments" },
 ];
 
@@ -164,6 +168,27 @@ function formatRelativeTime(iso: string) {
   }
   const days = Math.round(hours / 24);
   return `${days}d ago`;
+}
+
+function formatDutyCycle(value?: number) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "—";
+  }
+  return `${Math.round(value)}%`;
+}
+
+function formatTemperature(value?: number) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "—";
+  }
+  return `${value.toFixed(1)}°C`;
+}
+
+function formatWatts(value?: number) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "—";
+  }
+  return `${value.toFixed(1)} W`;
 }
 
 export default function AgentsPage() {
@@ -257,6 +282,20 @@ export default function AgentsPage() {
                     </dd>
                   </div>
                 </dl>
+                <dl className="mt-2 grid grid-cols-3 gap-2 text-xs text-slate-500">
+                  <div>
+                    <dt>Duty cycle</dt>
+                    <dd className="text-slate-800">{formatDutyCycle(agent.miner?.dutyCycle)}</dd>
+                  </div>
+                  <div>
+                    <dt>Temperature</dt>
+                    <dd className="text-slate-800">{formatTemperature(agent.miner?.temperatureC)}</dd>
+                  </div>
+                  <div>
+                    <dt>Watts</dt>
+                    <dd className="text-slate-800">{formatWatts(agent.miner?.watts)}</dd>
+                  </div>
+                </dl>
                 <p className="mt-3 text-xs text-slate-500">Recent actions:</p>
                 <ul className="mt-1 list-disc pl-5 text-xs text-slate-600">
                   {agent.recent_actions.map((action) => (
@@ -275,8 +314,11 @@ export default function AgentsPage() {
                 <tr>
                   <th className="px-4 py-3 text-left">Agent</th>
                   <th className="px-4 py-3 text-left">Trust T</th>
-                  <th className="px-4 py-3 text-left">Last action</th>
                   <th className="px-4 py-3 text-left">Refusals avoided</th>
+                  <th className="px-4 py-3 text-left">Duty cycle</th>
+                  <th className="px-4 py-3 text-left">Temp (°C)</th>
+                  <th className="px-4 py-3 text-left">Watts</th>
+                  <th className="px-4 py-3 text-left">Last action</th>
                   <th className="px-4 py-3 text-left">Sparkline</th>
                 </tr>
               </thead>
@@ -285,8 +327,11 @@ export default function AgentsPage() {
                   <tr key={`${agent.id}-row`} className="hover:bg-slate-50">
                     <td className="px-4 py-3 font-medium text-slate-700">{agent.id}</td>
                     <td className="px-4 py-3 text-slate-900">{agent.T.toFixed(2)}</td>
-                    <td className="px-4 py-3 text-slate-600">{formatRelativeTime(agent.last_action_at)}</td>
                     <td className="px-4 py-3 text-slate-600">{agent.refusals_avoided}</td>
+                    <td className="px-4 py-3 text-slate-600">{formatDutyCycle(agent.miner?.dutyCycle)}</td>
+                    <td className="px-4 py-3 text-slate-600">{formatTemperature(agent.miner?.temperatureC)}</td>
+                    <td className="px-4 py-3 text-slate-600">{formatWatts(agent.miner?.watts)}</td>
+                    <td className="px-4 py-3 text-slate-600">{formatRelativeTime(agent.last_action_at)}</td>
                     <td className="px-4 py-3">
                       <Sparkline values={agent.history} />
                     </td>
@@ -347,8 +392,8 @@ export default function AgentsPage() {
           )}
         </div>
         <p className="max-w-2xl text-sm text-slate-300">
-          Trust metrics, coherence guardrails, and mentor context updated every few minutes. Agents move between rings
-          when trust beats the gate and mentors attest to the shift.
+          Trust metrics, miner telemetry, coherence guardrails, and mentor context updated every few minutes. Agents move
+          between rings when trust beats the gate and mentors attest to the shift.
         </p>
         <div className="flex flex-wrap items-center gap-3 text-xs">
           <Link href="/docs" className="rounded-full bg-white/10 px-3 py-1 font-medium text-white hover:bg-white/20">
