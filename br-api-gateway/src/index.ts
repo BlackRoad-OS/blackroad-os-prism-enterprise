@@ -31,6 +31,7 @@ app.addContentTypeParser(/^application\/json(;.*)?$/, { parseAs: 'buffer' }, (re
   const text = Buffer.isBuffer(body) ? body.toString() : body;
   jsonParser(req, text, done);
 });
+const app = Fastify({ logger: true });
 
 await app.register(swagger, {
   openapi: {
@@ -50,6 +51,7 @@ await app.register(import('./routes/v1/sources.js'), { prefix: '/v1' });
 await app.register(import('./routes/v1/metrics_github.js'), { prefix: '/v1' });
 await app.register(import('./routes/v1/linear.js'), { prefix: '/v1' });
 await app.register(import('./routes/webhooks_stripe.js'), { prefix: '/' });
+await app.register(import('./routes/v1/echo.js'), { prefix: '/v1' });
 
 const port = Number(process.env.PORT || 3001);
 app.listen({ port, host: '0.0.0.0' }).catch((e) => {
