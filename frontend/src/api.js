@@ -199,6 +199,10 @@ export async function fetchAutohealEvents() {
   return data.events;
 }
 
+export async function fetchApiHealthSummary() {
+  return get('/api/status/health');
+}
+
 export async function postAutohealEscalation(note) {
   const data = await post('/api/autoheal/escalations', { note });
   return data.event;

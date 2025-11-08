@@ -18,6 +18,7 @@ import {
 } from './api'
 import Guardian from './Guardian.jsx'
 import Dashboard from './pages/Dashboard.jsx'
+import ApiHealthDashboard from './pages/ApiHealthDashboard.jsx'
 import You from './components/You.jsx'
 import Claude from './components/Claude.jsx'
 import Codex from './components/Codex.jsx'
@@ -47,7 +48,7 @@ import Nexus from './pages/Nexus.jsx'
 import LucidiaDemo from './pages/LucidiaDemo.jsx'
 import Login from './components/Login.jsx'
 import RoadCoin from './components/RoadCoin.jsx'
-import { Activity, User, LayoutGrid, HeartPulse, Shield, ShieldCheck, Cpu, Brain, FunctionSquare, Wallet, Rocket, BookOpen, GraduationCap, Sparkles, Music3, GitCommit, Settings, Atom } from 'lucide-react'
+import { Activity, User, LayoutGrid, HeartPulse, Shield, ShieldCheck, Cpu, Brain, FunctionSquare, Wallet, Rocket, BookOpen, GraduationCap, Sparkles, Music3, GitCommit, Settings, Atom, Stethoscope } from 'lucide-react'
 
 const NAV_ITEMS = [
   { key: 'dashboard', to: '/dashboard', text: 'Dashboard', icon: <Activity size={18} />, match: path => path === '/' || path === '/dashboard' },
@@ -57,6 +58,7 @@ const NAV_ITEMS = [
   { key: 'simplified-os', to: '/simplified-os', text: 'Simplified OS', icon: <Cpu size={18} /> },
   { key: 'desktop-os', to: '/desktop-os', text: 'Desktop OS', icon: <Cpu size={18} /> },
   { key: 'autoheal', to: '/autoheal', text: 'Auto-Heal', icon: <HeartPulse size={18} /> },
+  { key: 'api-health', to: '/api-health', text: 'API Health', icon: <Stethoscope size={18} /> },
   { key: 'security', to: '/security', text: 'Security Spotlights', icon: <Shield size={18} /> },
   { key: 'guardian', to: '/guardian', text: 'Guardian', icon: <ShieldCheck size={18} /> },
   { key: 'claude', to: '/claude', text: 'Claude', icon: <Cpu size={18} /> },
@@ -292,6 +294,7 @@ export default function App(){
               <Route path="/simplified-os" element={<Section><SimplifiedOS /></Section>} />
               <Route path="/desktop-os" element={<Section><DesktopOS /></Section>} />
               <Route path="/autoheal" element={<Section><AutoHeal /></Section>} />
+              <Route path="/api-health" element={<Section><ApiHealthDashboard /></Section>} />
               <Route path="/security" element={<Section><SecuritySpotlights /></Section>} />
               <Route path="/guardian" element={<Section><Guardian /></Section>} />
               <Route path="/agents" element={<Section><AgentLineage /></Section>} />

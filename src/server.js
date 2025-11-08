@@ -13,6 +13,7 @@ import config from './config/appConfig.js';
 import aiderRouter from './routes/aider.js';
 import musicRouter from './routes/music.js';
 import roadcoinRouter from './routes/roadcoin.js';
+import statusRouter from './routes/status.js';
 
 const logger = pino({ level: config.logLevel });
 
@@ -59,6 +60,7 @@ export function createApp() {
   app.use('/api/aider', aiderRouter);
   app.use('/api/music', musicRouter);
   app.use('/api/roadcoin', roadcoinRouter);
+  app.use('/api/status', statusRouter);
 
   app.use(
     '/media',

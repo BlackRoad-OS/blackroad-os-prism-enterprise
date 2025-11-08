@@ -40,7 +40,7 @@ const defaultEnergy = {
 const sampleGrid = Array.from({ length: 256 }, (_, i) => -5 + (10 * i) / 255)
 const initialAutonomy = sampleGrid.map(x => Math.exp(-x * x))
 const trustField = sampleGrid.map(x => -(
-  Math.exp(-(x - 1.5) ** 2) + Math.exp(-(x + 1.5) ** 2)
+  Math.exp(-Math.pow(x - 1.5, 2)) + Math.exp(-Math.pow(x + 1.5, 2))
 ))
 
 function numberInput(value, onChange, step = 'any', min, max) {
