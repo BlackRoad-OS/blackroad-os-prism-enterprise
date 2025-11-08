@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import PolicyCheckCard from '../components/policy/PolicyCheckCard';
 
 export default function Audit(){
   const [rows,setRows] = useState<any[]>([]);
@@ -9,5 +10,8 @@ export default function Audit(){
       <thead><tr><th>Time</th><th>Action</th><th>Meta</th></tr></thead>
       <tbody>{rows.map((r,i)=><tr key={i}><td>{new Date(r.ts).toISOString()}</td><td>{r.action}</td><td><pre style={{margin:0}}>{JSON.stringify(r.meta,null,2)}</pre></td></tr>)}</tbody>
     </table>
+    <section style={{marginTop:32}}>
+      <PolicyCheckCard />
+    </section>
   </div>;
 }

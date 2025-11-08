@@ -13,6 +13,8 @@ import notifySend from './routes/notify/send.js';
 import webpush from './routes/notify/webpush.js';
 import hooks from './routes/hooks.js';
 import metrics from './routes/metrics.js';
+import attestRoutes from './routes/attest.js';
+import policyRoutes from './routes/policy.js';
 import okta from './routes/okta.js';
 import clmTemplates from './routes/clm/templates.js';
 import clmContracts from './routes/clm/contracts.js';
@@ -484,6 +486,8 @@ app.use('/api/notify/webpush', webpush);
 app.use('/api/crm', crmAcc, crmCon, crmLead, crmOpp, crmStages, crmF, crmTer, crmQ, crmICM, crmRen);
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
+app.use('/api/attest', attestRoutes);
+app.use('/api/policy', policyRoutes);
 app.use('/api/auth/okta', okta);
 app.use('/api/hr', hrOnOff, hrOrg, hrPto, hrReviews, hrTraining, hrPolicies);
 
