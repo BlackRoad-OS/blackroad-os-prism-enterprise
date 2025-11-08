@@ -7,6 +7,10 @@ The Equations Lab brings the Amundson–BlackRoad measurement stack into a brows
 - **AM-2 Simulator** – adjust the dissipative (`γ`), coupling (`κ`), and evidence (`η`) coefficients. A live chart plots amplitude and phase trajectories while the stability eigenvalues and spiral entropy ledger update on each fetch.
 - **BR-1/2 Transport** – drive the autonomy continuity equation with adjustable step count, mobility, and trust potentials. The plot compares the initial and evolved densities and reports mass conservation errors to the 1e-3 acceptance target.
 - **AM-4 Energy Ledger** – submit temperature, phase, and amplitude deltas to compute the discrete energy increment. The Landauer floor check flags whether irreversible work exceeds the thermodynamic minimum.
+- **AM-VI Projective Phase** – explore the projective coordinate `u = tan(θ/2)` to avoid singularities near `π/2`. The panel reports `(a_dot, u_dot, θ_dot)` with next-step estimates and highlights the lifted response.
+- **AM-VIII Resonance Scanner** – sweep harmonics up to `n_max` and visualise when `θ/π` locks to rational ratios. Resonance peaks return the numerator `p`, denominator `n`, and a dimensionless score.
+- **BR-8 Collatz Flow** – move a discrete mass distribution through Collatz iterations while tracking Landauer energy. The card reports mass preservation, irreversible energy (`J`), and the pushed-forward histogram.
+- **Fib–Pascal Instrument** – fetch Pascal rows, diagonal sums, and the matching Fibonacci target in one call. The UI confirms `Σ diagonal = F_{n+1}` and exposes the `F`-matrix pairs for quick inspection.
 
 ## Usage
 
