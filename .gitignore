@@ -118,6 +118,11 @@ ssh-*
 *.tar.gz
 *.npz
 *.npy
+# Time machine artifacts
+/data/kpis/latest.json
+/data/timemachine/index.json
+/data/aiops/actions.jsonl
+/pulses/
 *.pkl
 *.parquet
 *.feather
