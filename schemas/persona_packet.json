@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Lucidia Persona Packet",
+  "description": "Structured response envelope expected from Lucidia persona evaluations.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "persona",
+    "verdict",
+    "balanced_ternary",
+    "confidence",
+    "justification"
+  ],
+  "properties": {
+    "persona": {
+      "type": "string",
+      "description": "Identifier for the responding persona."
+    },
+    "verdict": {
+      "type": "string",
+      "description": "Plain-language recommendation rendered by the persona."
+    },
+    "balanced_ternary": {
+      "type": "string",
+      "enum": ["+", "0", "-"],
+      "description": "Balanced ternary vote where '+' affirms, '-' rejects, and '0' abstains or remains neutral."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Self-reported confidence for the verdict on a closed interval of [0, 1]."
+    },
+    "justification": {
+      "type": "string",
+      "description": "Short rationale that backs the verdict and vote."
+    },
+    "evidence": {
+      "type": ["string", "null"],
+      "description": "Optional citations or structured evidence supporting the justification."
+    },
+    "confidence_notes": {
+      "type": ["string", "null"],
+      "description": "Optional explanation for the selected confidence value."
+    }
+  }
+}
