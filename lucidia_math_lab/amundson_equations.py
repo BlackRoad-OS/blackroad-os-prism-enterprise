@@ -156,16 +156,35 @@ class AmundsonCoherenceModel:
 
 
 def amundson_energy_balance(*, energy: float, dissipation: float) -> float:
-    """Placeholder for Amundson II energy balance law.
+    """Return the net resonant energy after accounting for dissipation.
 
-    The energy balance law will govern :math:`\frac{dE_\phi}{dt}`
-    so that systems can explicitly track how coherence work
-    converts into thermal losses.  The exact formulation is left
-    open for future refinement.
+    The current Amundson II formulation focuses on conserving the
+    available coherence energy while subtracting the irreversible loss
+    channel ``dissipation``.  We assume ``dissipation`` is expressed in
+    the same units as ``energy`` over the integration horizon.  The
+    balance therefore follows the simple conservation law
+
+    .. math::
+
+       E_{t+1} = \max(0, E_t - D_t),
+
+    which clamps the output at zero to avoid non-physical negative
+    energies.
+
+    Parameters
+    ----------
+    energy:
+        The current coherence energy :math:`E_t`.
+    dissipation:
+        The total dissipative loss :math:`D_t` over the step.
     """
 
-    # TODO: Implement once the energy balance derivation is specified.
-    raise NotImplementedError("Amundson II energy balance has not been derived yet.")
+    if energy < 0:
+        raise ValueError("energy must be non-negative to preserve physical meaning")
+    if dissipation < 0:
+        raise ValueError("dissipation must be non-negative")
+
+    return max(0.0, energy - dissipation)
 
 
 def _ensure_vector(name: str, value: ArrayLike) -> np.ndarray:
