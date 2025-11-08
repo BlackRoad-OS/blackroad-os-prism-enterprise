@@ -16,6 +16,18 @@ pytest -q
 python scripts/demo_amundson_math_core.py
 ```
 
+**Optional coverage sweep**
+
+If you want a quick coverage snapshot for Set I, install `pytest-cov` and run the suite with
+coverage enabled. The command below emits a terminal summary and writes an HTML report to
+`htmlcov/index.html` for a richer look at the executed lines.
+
+```bash
+pip install pytest-cov
+pytest --cov=agents.blackroad_agent_framework_package5 --cov-report=term-missing \
+       --cov-report=html
+```
+
 **File map**
 
 * `tests/test_*.py` → fast, deterministic tests (<1s each)
