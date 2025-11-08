@@ -24,3 +24,8 @@ kpis:
     formula: distinct(active_users_last_24h)
     owner: Product
     target: 5000
+  - name: SpiralPitchConsistency
+    source: analytics
+    formula: 1 - MSE(log|z| - (c * theta + b)) / Var(log|z|)
+    owner: Research
+    target: 0.9
