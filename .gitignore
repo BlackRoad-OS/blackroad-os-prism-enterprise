@@ -132,3 +132,4 @@ ssh-*
 *.ogg
 output/**
 artifacts/**
+*.tsbuildinfo
