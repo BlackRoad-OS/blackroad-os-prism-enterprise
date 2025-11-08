@@ -50,3 +50,5 @@ const withPreviewBasePath = () => {
 };
 
 export default withPreviewBasePath();
+const nextConfig = { reactStrictMode: true };
+export default nextConfig;

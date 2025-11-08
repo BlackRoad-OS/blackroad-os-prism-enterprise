@@ -10,6 +10,7 @@ export default function Page() {
         <li>
           <Link href={withBase('/health')}>/health</Link>
         </li>
+        <li><a href="/health">/health</a></li>
       </ul>
     </main>
   );
