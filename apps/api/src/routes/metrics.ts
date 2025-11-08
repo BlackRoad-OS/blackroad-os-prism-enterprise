@@ -1,9 +1,73 @@
+import type { Request, Response } from 'express';
 import { Router } from 'express';
 import { listIssues } from '../lib/githubIssuesStore.js';
+import { renderPrometheusMetrics, isPrometheusEnabled } from '../metrics/metrics.js';
 
-const r = Router();
+const router = Router();
 
-r.get('/', (_req, res) => res.json({ uptime: process.uptime(), ts: Date.now() }));
+router.get('/', (_req, res) => res.json({ uptime: process.uptime(), ts: Date.now() }));
+
+router.get('/github/issues_opened', (req, res) => {
+  const repo = parseRepoParam(req.query.repo);
+  const since = parseLookback(req.query.from);
+  const issues = listIssues().filter((issue) => {
+    if (issue.is_pull) {
+      return false;
+    }
+    if (repo && issue.repo_full.toLowerCase() !== repo) {
+      return false;
+    }
+    const createdAt = new Date(issue.created_at);
+    return !Number.isNaN(createdAt.getTime()) && createdAt >= since;
+  });
+  const points = bucketByDay(issues.map((issue) => ({ timestamp: issue.created_at })));
+  res.json({ points });
+});
+
+router.get('/github/issues_closed', (req, res) => {
+  const repo = parseRepoParam(req.query.repo);
+  const since = parseLookback(req.query.from);
+  const issues = listIssues().filter((issue) => {
+    if (issue.is_pull || !issue.closed_at) {
+      return false;
+    }
+    if (repo && issue.repo_full.toLowerCase() !== repo) {
+      return false;
+    }
+    const closedAt = new Date(issue.closed_at);
+    return !Number.isNaN(closedAt.getTime()) && closedAt >= since;
+  });
+  const points = bucketByDay(issues.map((issue) => ({ timestamp: issue.closed_at as string })));
+  res.json({ points });
+});
+
+router.get('/github/open_bugs', (req, res) => {
+  const repo = parseRepoParam(req.query.repo);
+  const issues = listIssues().filter((issue) => {
+    if (issue.is_pull) {
+      return false;
+    }
+    if (repo && issue.repo_full.toLowerCase() !== repo) {
+      return false;
+    }
+    if (issue.state !== 'open') {
+      return false;
+    }
+    return issue.labels.some((label) => label.toLowerCase() === 'bug');
+  });
+  res.json({ points: [{ t: new Date().toISOString(), v: issues.length }] });
+});
+
+export function prometheusMetricsHandler(_req: Request, res: Response): void {
+  res.setHeader('Content-Type', 'text/plain; version=0.0.4');
+  res.status(200).send(renderPrometheusMetrics());
+}
+
+export function prometheusEnabled(): boolean {
+  return isPrometheusEnabled();
+}
+
+export default router;
 
 function parseRepoParam(value: unknown): string | null {
   if (typeof value !== 'string' || !value.trim()) {
@@ -43,62 +107,3 @@ function bucketByDay(records: { timestamp: string }[]): { t: string; v: number }
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([t, v]) => ({ t, v }));
 }
-
-r.get('/github/issues_opened', (req, res) => {
-  const repo = parseRepoParam(req.query.repo);
-  const since = parseLookback(req.query.from);
-  const issues = listIssues().filter((issue) => {
-    if (issue.is_pull) {
-      return false;
-    }
-    if (repo && issue.repo_full.toLowerCase() !== repo) {
-      return false;
-    }
-    const createdAt = new Date(issue.created_at);
-    return !Number.isNaN(createdAt.getTime()) && createdAt >= since;
-  });
-  const points = bucketByDay(
-    issues.map((issue) => ({ timestamp: issue.created_at }))
-  );
-  res.json({ points });
-});
-
-r.get('/github/issues_closed', (req, res) => {
-  const repo = parseRepoParam(req.query.repo);
-  const since = parseLookback(req.query.from);
-  const issues = listIssues().filter((issue) => {
-    if (issue.is_pull || !issue.closed_at) {
-      return false;
-    }
-    if (repo && issue.repo_full.toLowerCase() !== repo) {
-      return false;
-    }
-    const closedAt = new Date(issue.closed_at);
-    return !Number.isNaN(closedAt.getTime()) && closedAt >= since;
-  });
-  const points = bucketByDay(
-    issues.map((issue) => ({ timestamp: issue.closed_at as string }))
-  );
-  res.json({ points });
-});
-
-r.get('/github/open_bugs', (req, res) => {
-  const repo = parseRepoParam(req.query.repo);
-  const issues = listIssues().filter((issue) => {
-    if (issue.is_pull) {
-      return false;
-    }
-    if (repo && issue.repo_full.toLowerCase() !== repo) {
-      return false;
-    }
-    if (issue.state !== 'open') {
-      return false;
-    }
-    return issue.labels.some((label) => label.toLowerCase() === 'bug');
-  });
-  res.json({ points: [{ t: new Date().toISOString(), v: issues.length }] });
-});
-
-const r = Router();
-r.get('/', (_req, res) => res.json({ uptime: process.uptime(), ts: Date.now() }));
-export default r;

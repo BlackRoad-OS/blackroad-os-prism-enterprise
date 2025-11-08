@@ -7,12 +7,15 @@ import { canaryMiddleware } from './middleware/canary.js';
 import { regionMiddleware } from './middleware/region.js';
 import { cacheHeaders } from './middleware/cache_headers.js';
 import { localeMiddleware } from './middleware/locale.js';
+import { metricsMiddleware } from './middleware/metrics.js';
 import reindex from './routes/search/reindex.js';
 import query from './routes/search/query.js';
 import notifySend from './routes/notify/send.js';
 import webpush from './routes/notify/webpush.js';
 import hooks from './routes/hooks.js';
-import metrics from './routes/metrics.js';
+import metricsRouter, { prometheusMetricsHandler, prometheusEnabled } from './routes/metrics.js';
+import policyRoutes from './routes/policy.js';
+import attestRoutes from './routes/attest.js';
 import okta from './routes/okta.js';
 import clmTemplates from './routes/clm/templates.js';
 import clmContracts from './routes/clm/contracts.js';
@@ -483,7 +486,7 @@ app.use('/api/notify/webpush', webpush);
 
 app.use('/api/crm', crmAcc, crmCon, crmLead, crmOpp, crmStages, crmF, crmTer, crmQ, crmICM, crmRen);
 app.use('/api/hooks', hooks);
-app.use('/api/metrics', metrics);
+app.use('/api/metrics', metricsRouter);
 app.use('/api/auth/okta', okta);
 app.use('/api/hr', hrOnOff, hrOrg, hrPto, hrReviews, hrTraining, hrPolicies);
 
@@ -499,7 +502,6 @@ app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail)
 app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFeedback);
 app.use('/api/ai', aiPrompts, aiTools, aiRag, aiAssist, aiEvals, aiExps, aiSafety, aiRun);
 import hooks from './routes/hooks.js';
-import metrics from './routes/metrics.js';
 import okta from './routes/okta.js';
 import predict from './routes/predict.js';
 import reco from './routes/reco.js';
@@ -515,7 +517,7 @@ app.use('/api/notify', notifySend);
 app.use('/api/notify/webpush', webpush);
 
 app.use('/api/hooks', hooks);
-app.use('/api/metrics', metrics);
+app.use('/api/metrics', metricsRouter);
 app.use('/api/auth/okta', okta);
 app.use('/api/ml/predict', predict);
 app.use('/api/reco', reco);
@@ -541,7 +543,7 @@ import agentsCommand from './routes/agents/command.js';
 import agentsSlack from './routes/agents/slack.js';
 import agentsDiscord from './routes/agents/discord.js';
 app.use('/api/hooks', hooks);
-app.use('/api/metrics', metrics);
+app.use('/api/metrics', metricsRouter);
 app.use('/api/auth/okta', okta);
 app.use('/api/agents/command', agentsCommand);
 app.use('/api/agents/slack', agentsSlack);
@@ -641,12 +643,12 @@ app.use('/api/wfm', wfmTS, wfmRS, wfmTM, wfmLV, wfmOT);
 app.use('/api/treasury', trCash, trAlm, trMkt, trCred, trHedge, trPol);
 import csat from './routes/csat.js';
 app.use('/api/hooks', hooks);
-app.use('/api/metrics', metrics);
+app.use('/api/metrics', metricsRouter);
 app.use('/api/auth/okta', okta);
 app.use('/api/csat', csat);
 import invoices from './routes/invoices.js';
 app.use('/api/hooks', hooks);
-app.use('/api/metrics', metrics);
+app.use('/api/metrics', metricsRouter);
 app.use('/api/auth/okta', okta);
 app.use('/api/invoices', invoices);
 app.use('/api/cons', consEntities, consCOA, consTB, consFX, consIC, consRun, consTasks, consPack);
@@ -655,9 +657,8 @@ app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
 import hooks from './routes/hooks.js';
-import metrics from './routes/metrics.js';
 app.use('/api/hooks', hooks);
-app.use('/api/metrics', metrics);
+app.use('/api/metrics', metricsRouter);
 
 const port = process.env.PORT || 4000;
 
@@ -673,7 +674,6 @@ import dotenv from 'dotenv';
 import health from './routes/health.js';
 import subscribe from './routes/subscribe.js';
 import hooks from './routes/hooks.js';
-import metrics from './routes/metrics.js';
 import billing from './routes/billing.js';
 import stripeWebhook from './routes/stripe_webhook.js';
 import auth from './routes/auth.js';
@@ -695,11 +695,23 @@ app.use(express.urlencoded({
 app.use(express.json());
 app.use(morgan('combined'));
 app.use(sessionMiddleware(process.env.SESSION_SECRET || ''));
+app.use(metricsMiddleware);
+
+if (prometheusEnabled()) {
+  app.get('/metrics', prometheusMetricsHandler);
+} else {
+  app.get('/metrics', (_req, res) => {
+    res.setHeader('Content-Type', 'text/plain; version=0.0.4');
+    res.status(503).send('# metrics disabled\n');
+  });
+}
 
 app.use('/api/health', health);
 app.use('/api/subscribe', subscribe);
 app.use('/api/hooks', hooks);
-app.use('/api/metrics', metrics);
+app.use('/api/metrics', metricsRouter);
+app.use('/api/policy', policyRoutes);
+app.use('/api/attest', attestRoutes);
 app.use('/api/billing', billing);
 app.use('/api/stripe/webhook', stripeWebhook);
 app.use('/api/auth', auth);

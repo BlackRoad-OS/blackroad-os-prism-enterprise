@@ -1,0 +1,51 @@
+name: Metrics
+
+on:
+  push:
+    paths:
+      - 'apps/api/**'
+      - '.github/workflows/metrics.yml'
+  pull_request:
+    paths:
+      - 'apps/api/**'
+      - '.github/workflows/metrics.yml'
+
+jobs:
+  metrics_unit_tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run test:metrics
+
+  metrics_contract:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npx tsx test/metrics.contract.ts
+
+  slack_stub:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npx tsx test/slack.stub.ts
