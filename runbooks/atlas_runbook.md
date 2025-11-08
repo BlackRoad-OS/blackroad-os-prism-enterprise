@@ -2,6 +2,56 @@
 
 This runbook provides a set of well-defined prompts for Atlas, an ops orchestrator. Use these prompts to automate setup and deployment tasks across multiple services: GitHub, Vercel, DNS (Cloudflare or GoDaddy), Microsoft 365, DigitalOcean, Hugging Face, and deployment verification.
 
+## Connector prerequisites & fallbacks
+
+Atlas can only drive services that are connected through the agent layer. Before running any prompts, confirm which connectors are active and wire up the missing ones:
+
+| Service | Required credential / connector | Notes |
+| --- | --- | --- |
+| DigitalOcean | `DO_API_TOKEN` (Personal access token with read/write on droplets, VPC, databases, spaces) | Store in Atlas secrets vault and GitHub repository secrets used by Atlas. |
+| GoDaddy | GoDaddy Production API key/secret | Needed when DNS remains at GoDaddy. Cloudflare-only setups can skip this. |
+| Vercel | `VERCEL_TOKEN` (team scope) | Required for project provisioning and deployments. |
+| Hugging Face | `HUGGINGFACE_TOKEN` (write scope) | Used for repository and Spaces automation. |
+
+If a connector is missing, Atlas will acknowledge the gap but cannot execute related prompts. Use the manual fallbacks below until the connector is added.
+
+### Manual heartbeat checklist (fallback when connectors are offline)
+
+Run these commands from an operator workstation or the Atlas shell to capture the same insights the prompts provide:
+
+- **Deployments (Vercel projects `blackroad-prism-console`, `lucidia`):**
+  ```bash
+  vercel projects ls | grep -E 'blackroad-prism-console|lucidia'
+  vercel deployments ls blackroad-prism-console --limit 5
+  vercel deployments ls lucidia --limit 5
+  ```
+- **DigitalOcean droplets:**
+  ```bash
+  doctl compute droplet list
+  for droplet in $(doctl compute droplet list --format ID --no-header); do
+    echo "=== $droplet ==="
+    doctl compute droplet get "$droplet" --format Name,PublicIPv4,Status,Memory,Disk
+    ssh root@$(doctl compute droplet get "$droplet" --format PublicIPv4 --no-header) 'uptime'
+  done
+  ```
+- **GoDaddy DNS propagation:**
+  ```bash
+  for domain in blackroad.io lucidia.earth lucidia.studio; do
+    echo "== $domain =="
+    dig +nocmd $domain +multiline +noall +answer
+    dig +short TXT _dmarc.$domain
+  done
+  ```
+- **Compliance sync (GitHub → DigitalOcean → Vercel → Hugging Face):**
+  ```bash
+  gh repo view blackboxprogramming/blackroad-prism-console --web
+  doctl -o json compute droplet list
+  vercel env ls blackroad-prism-console
+  huggingface-cli whoami --token $HUGGINGFACE_TOKEN
+  ```
+
+Document the results in the ops log (Notion or Runbooks) so the automated heartbeat history remains unbroken.
+
 ## 0) Secrets & Guardrails
 
 **Prompt — `ATLAS_INIT_SECRETS`**
