@@ -15,6 +15,171 @@ from fastapi.testclient import TestClient
 
 from lucidia_math_lab.amundson_equations import phase_derivative
 
+
+def _install_ambr_stubs() -> None:
+    """Install lightweight stubs for the Amundson–BlackRoad package."""
+
+    if "amundson_blackroad.autonomy" in sys.modules:
+        return
+
+    import types
+    from dataclasses import dataclass
+
+    pkg = types.ModuleType("amundson_blackroad")
+    pkg.__path__ = []  # type: ignore[attr-defined]
+    sys.modules["amundson_blackroad"] = pkg
+
+    autonomy = types.ModuleType("amundson_blackroad.autonomy")
+
+    def _trapz(x: np.ndarray, y: np.ndarray) -> float:
+        return float(np.trapz(y, x))
+
+    def conserved_mass(x: np.ndarray, A: np.ndarray) -> float:
+        return _trapz(x, A)
+
+    def simulate_transport(
+        x: np.ndarray,
+        A: np.ndarray,
+        rho: np.ndarray,
+        steps: int,
+        dt: float,
+        *,
+        mu_A: float = 1.0,
+        chi_A: float = 0.0,
+        Uc: np.ndarray | None = None,
+    ) -> dict[str, np.ndarray]:
+        if steps <= 0 or dt <= 0:
+            raise ValueError("steps and dt must be positive")
+        flux = np.zeros_like(A)
+        return {"x": x, "A": A, "flux": flux, "mass": conserved_mass(x, A)}
+
+    autonomy.conserved_mass = conserved_mass
+    autonomy.simulate_transport = simulate_transport
+    sys.modules["amundson_blackroad.autonomy"] = autonomy
+    setattr(pkg, "autonomy", autonomy)
+
+    spiral = types.ModuleType("amundson_blackroad.spiral")
+
+    def simulate_am2(T: float, dt: float, *args: float) -> tuple[np.ndarray, ...]:
+        steps = max(int(T / dt), 1)
+        t = np.linspace(0.0, T, steps)
+        a = np.full_like(t, 0.1)
+        theta = np.full_like(t, 0.2)
+        amp = np.sqrt(a ** 2 + theta ** 2)
+        return t, a, theta, amp
+
+    spiral.simulate_am2 = simulate_am2
+    sys.modules["amundson_blackroad.spiral"] = spiral
+    setattr(pkg, "spiral", spiral)
+
+    thermo = types.ModuleType("amundson_blackroad.thermo")
+
+    def energy_increment(a: np.ndarray, theta: np.ndarray, dt: float, *, gamma: float, eta: float) -> float:
+        return float(np.abs(a).sum() * dt * max(gamma, 1e-9))
+
+    def landauer_min(bits: float, temperature: float) -> float:
+        return float(bits * temperature * 1e-23)
+
+    def spiral_entropy(a: np.ndarray, theta: np.ndarray) -> float:
+        return float(np.mean(np.abs(a) + np.abs(theta)))
+
+    thermo.energy_increment = energy_increment
+    thermo.landauer_min = landauer_min
+    thermo.spiral_entropy = spiral_entropy
+    sys.modules["amundson_blackroad.thermo"] = thermo
+    setattr(pkg, "thermo", thermo)
+
+    resolution = types.ModuleType("amundson_blackroad.resolution")
+
+    K_BOLTZMANN = 1.380649e-23
+
+    @dataclass
+    class AmbrContext:
+        last_phi_x: float = 0.0
+        last_phi_y: float = 0.0
+        default_temperature_K: float = 300.0
+        default_r: float = 1.0
+
+    def resolve_coherence_inputs(
+        ctx: AmbrContext = AmbrContext(),
+        **payload: float,
+    ) -> tuple[dict[str, float], list[str], dict[str, str]]:
+        resolved: dict[str, float] = {}
+        why: dict[str, str] = {}
+        missing: list[str] = []
+
+        omega_0 = float(payload.get("omega_0", 1.0))
+        if "omega_0" not in payload:
+            why["omega_0"] = "default 1.0 (baseline phase drift)"
+        lambda_ = float(payload.get("lambda_", 0.5))
+        if "lambda_" not in payload:
+            why["lambda_"] = "default 0.5 (moderate coupling)"
+        eta = float(payload.get("eta", 0.2))
+        if "eta" not in payload:
+            why["eta"] = "default 0.2 (gentle damping)"
+
+        if "phi_x" in payload:
+            phi_x = float(payload["phi_x"])
+        else:
+            phi_x = ctx.last_phi_x
+            why["phi_x"] = "from context.last_phi_x"
+        if "phi_y" in payload:
+            phi_y = float(payload["phi_y"])
+        else:
+            phi_y = ctx.last_phi_y
+            why["phi_y"] = "from context.last_phi_y"
+
+        r_x = float(payload.get("r_x", ctx.default_r))
+        if "r_x" not in payload:
+            why["r_x"] = "default unity participation"
+        r_y = float(payload.get("r_y", ctx.default_r))
+        if "r_y" not in payload:
+            why["r_y"] = "default unity participation"
+
+        if "k_b_t" in payload:
+            k_b_t = float(payload["k_b_t"])
+        else:
+            temperature_K = float(payload.get("temperature_K", ctx.default_temperature_K))
+            if "temperature_K" not in payload:
+                why["temperature_K"] = "default 300 K"
+            k_b_t = K_BOLTZMANN * temperature_K
+            why["k_b_t"] = "computed as k_B * T"
+
+        for name, value in {
+            "omega_0": omega_0,
+            "lambda_": lambda_,
+            "eta": eta,
+            "phi_x": phi_x,
+            "phi_y": phi_y,
+            "r_x": r_x,
+            "r_y": r_y,
+            "k_b_t": k_b_t,
+        }.items():
+            if not math.isfinite(value):
+                missing.append(name)
+
+        resolved.update(
+            omega_0=omega_0,
+            lambda_=lambda_,
+            eta=eta,
+            phi_x=phi_x,
+            phi_y=phi_y,
+            r_x=r_x,
+            r_y=r_y,
+            k_b_t=k_b_t,
+        )
+        return resolved, missing, why
+
+    resolution.K_BOLTZMANN = K_BOLTZMANN
+    resolution.AmbrContext = AmbrContext
+    resolution.resolve_coherence_inputs = resolve_coherence_inputs
+    resolution.__all__ = ["AmbrContext", "K_BOLTZMANN", "resolve_coherence_inputs"]
+    sys.modules["amundson_blackroad.resolution"] = resolution
+    setattr(pkg, "resolution", resolution)
+
+
+_install_ambr_stubs()
+
 MODULE_PATH = Path(__file__).resolve().parents[1] / "srv" / "lucidia-math" / "api_ambr.py"
 spec = importlib.util.spec_from_file_location(
     "lucidia_math",
@@ -114,11 +279,17 @@ def test_transport_endpoint_conserves_mass(client: TestClient) -> None:
             "steps": 20,
             "dt": 1e-3,
             "mu": 0.5,
+            "bits": 12,
+            "temperature": 300.0,
         },
     )
     assert response.status_code == 200
     payload = response.json()
     assert abs(payload["mass_error"]) < 1e-3
+    assert "landauer" in payload
+    assert payload["landauer"]["bits"] == 12
+    assert payload["units"]["mass"] == "1"
+    assert "flux" in payload["units"]
 
 
 def test_energy_endpoint_reports_landauer(client: TestClient) -> None:
@@ -139,6 +310,27 @@ def test_energy_endpoint_reports_landauer(client: TestClient) -> None:
     payload = response.json()
     assert payload["E_min"] > 0
     assert isinstance(payload["pass"], bool)
+    assert payload["units"]["dE"] == "J"
+
+
+def test_energy_endpoint_flags_landauer_violation(client: TestClient) -> None:
+    response = client.post(
+        "/api/ambr/energy",
+        json={
+            "T": 300.0,
+            "a": 0.1,
+            "theta": 0.1,
+            "da": 0.0,
+            "dtheta": 0.0,
+            "Omega": 0.0,
+            "n_bits": 4,
+            "temperature": 300.0,
+        },
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["E_min"] > 0
+    assert payload["pass"] is False
 
 
 def test_phase_derivative_endpoint_auto_resolves(client: TestClient) -> None:
@@ -264,3 +456,21 @@ def test_phase_derivative_endpoint_strict_temperature_why_empty(client: TestClie
     payload = response.json()
     assert payload["mode"] == "strict"
     assert payload["why"] == {}
+def test_negative_temperature_request_rejected(client: TestClient) -> None:
+    response = client.post(
+        "/api/ambr/energy",
+        json={
+            "T": 300.0,
+            "a": 0.2,
+            "theta": 0.3,
+            "da": 0.01,
+            "dtheta": 0.02,
+            "Omega": 1.0,
+            "n_bits": 1,
+            "temperature": -5.0,
+        },
+    )
+    assert response.status_code == 422
+    payload = response.json()
+    assert payload["error_code"] == "validation_error"
+    assert isinstance(payload["hint"], list)
