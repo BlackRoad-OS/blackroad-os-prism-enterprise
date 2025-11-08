@@ -8,3 +8,8 @@
   internal_policy: 'User access review'
   evidence:
     - ev2
+- framework: OFAC
+  control: 'Sanctions due diligence – Nov 2025 DPRK update'
+  internal_policy: 'Sanctions screening and escalation playbook'
+  evidence:
+    - ofac_ccb_cluster_playbook
