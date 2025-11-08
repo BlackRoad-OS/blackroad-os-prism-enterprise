@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"sync"
 	"time"
 )
 
@@ -19,6 +20,13 @@ var ErrInvalidNumber = errors.New("service: operands must be finite numbers")
 type Service struct {
 	db  *sql.DB
 	now func() time.Time
+
+	agent *DIDCommAgent
+
+	mu                  sync.RWMutex
+	issuedCredentials   []IssuedCredential
+	presentationRecords []PresentationRecord
+	presentationNonces  map[string]presentationNonce
 }
 
 // Option mutates the service configuration during construction.
@@ -33,17 +41,31 @@ func WithClock(now func() time.Time) Option {
 	}
 }
 
+// WithDIDCommAgent overrides the DIDComm agent used to coordinate private channels.
+func WithDIDCommAgent(agent *DIDCommAgent) Option {
+	return func(s *Service) {
+		if agent != nil {
+			s.agent = agent
+		}
+	}
+}
+
 // New constructs a Service bound to the provided database handle.
 func New(db *sql.DB, opts ...Option) (*Service, error) {
 	if db == nil {
 		return nil, ErrNilDB
 	}
 	svc := &Service{
-		db:  db,
-		now: func() time.Time { return time.Now().UTC() },
+		db:                 db,
+		now:                func() time.Time { return time.Now().UTC() },
+		agent:              NewDIDCommAgent(),
+		presentationNonces: make(map[string]presentationNonce),
 	}
 	for _, opt := range opts {
 		opt(svc)
+	}
+	if svc.agent == nil {
+		svc.agent = NewDIDCommAgent()
 	}
 	if err := svc.ensureSchema(context.Background()); err != nil {
 		return nil, fmt.Errorf("service: ensure schema: %w", err)

@@ -169,3 +169,137 @@ func TestMiniInferHandlerInsertError(t *testing.T) {
 		t.Fatalf("expected status 500, got %d", rec.Code)
 	}
 }
+
+func TestOID4VCICredentialHandler(t *testing.T) {
+	api, db := newAPI(t)
+	t.Cleanup(func() { _ = db.Close() })
+
+	payload := map[string]interface{}{
+		"credential_type": "EmployeeCredential",
+		"subject_did":     "did:example:alice",
+		"claims": map[string]interface{}{
+			"given_name": "Alice",
+		},
+		"didcomm": map[string]interface{}{
+			"endpoint": "https://wallet.example.com/didcomm",
+		},
+	}
+	buf, _ := json.Marshal(payload)
+	req := httptest.NewRequest(http.MethodPost, "/api/oid4vci/credential", bytes.NewReader(buf))
+	rec := httptest.NewRecorder()
+	api.Router().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", rec.Code)
+	}
+	var body map[string]interface{}
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if body["format"].(string) != "vc+sd-jwt" {
+		t.Fatalf("unexpected format: %v", body["format"])
+	}
+	didcomm := body["didcomm"].(map[string]interface{})
+	if didcomm["endpoint"].(string) != "https://wallet.example.com/didcomm" {
+		t.Fatalf("unexpected didcomm endpoint: %v", didcomm["endpoint"])
+	}
+}
+
+func TestOID4VCICredentialHandlerValidation(t *testing.T) {
+	api, db := newAPI(t)
+	t.Cleanup(func() { _ = db.Close() })
+
+	payload := map[string]interface{}{
+		"credential_type": "EmployeeCredential",
+	}
+	buf, _ := json.Marshal(payload)
+	req := httptest.NewRequest(http.MethodPost, "/api/oid4vci/credential", bytes.NewReader(buf))
+	rec := httptest.NewRecorder()
+	api.Router().ServeHTTP(rec, req)
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected status 400, got %d", rec.Code)
+	}
+}
+
+func TestOID4VCIBatchCredentialHandler(t *testing.T) {
+	api, db := newAPI(t)
+	t.Cleanup(func() { _ = db.Close() })
+
+	payload := map[string]interface{}{
+		"requests": []map[string]interface{}{
+			{"credential_type": "EmployeeCredential", "subject_did": "did:example:1"},
+			{"credential_type": "EmployeeCredential", "subject_did": "did:example:2"},
+		},
+	}
+	buf, _ := json.Marshal(payload)
+	req := httptest.NewRequest(http.MethodPost, "/api/oid4vci/batch_credential", bytes.NewReader(buf))
+	rec := httptest.NewRecorder()
+	api.Router().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", rec.Code)
+	}
+	var body map[string][]interface{}
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if len(body["credentials"]) != 2 {
+		t.Fatalf("expected 2 credentials, got %d", len(body["credentials"]))
+	}
+}
+
+func TestOIDC4VPAuthorizeAndCallbackHandlers(t *testing.T) {
+	api, db := newAPI(t)
+	t.Cleanup(func() { _ = db.Close() })
+
+	authorizePayload := map[string]interface{}{
+		"client_id":    "client-1",
+		"redirect_uri": "https://rp.example.com/callback",
+	}
+	buf, _ := json.Marshal(authorizePayload)
+	req := httptest.NewRequest(http.MethodPost, "/api/oidc4vp/authorize", bytes.NewReader(buf))
+	rec := httptest.NewRecorder()
+	api.Router().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("authorize expected status 200, got %d", rec.Code)
+	}
+	var authResp map[string]interface{}
+	if err := json.Unmarshal(rec.Body.Bytes(), &authResp); err != nil {
+		t.Fatalf("unmarshal authorize: %v", err)
+	}
+	nonce := authResp["nonce"].(string)
+	callbackPayload := map[string]interface{}{
+		"nonce":       nonce,
+		"subject_did": "did:example:alice",
+		"vp_token":    map[string]interface{}{"proof": "ok"},
+	}
+	buf, _ = json.Marshal(callbackPayload)
+	req = httptest.NewRequest(http.MethodPost, "/api/oidc4vp/callback", bytes.NewReader(buf))
+	rec = httptest.NewRecorder()
+	api.Router().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("callback expected status 200, got %d", rec.Code)
+	}
+}
+
+func TestDIDCommRegisterHandler(t *testing.T) {
+	api, db := newAPI(t)
+	t.Cleanup(func() { _ = db.Close() })
+
+	payload := map[string]interface{}{
+		"did":      "did:example:alice",
+		"endpoint": "https://wallet.example.com/didcomm",
+	}
+	buf, _ := json.Marshal(payload)
+	req := httptest.NewRequest(http.MethodPost, "/api/didcomm/register", bytes.NewReader(buf))
+	rec := httptest.NewRecorder()
+	api.Router().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", rec.Code)
+	}
+	var body map[string]interface{}
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if body["endpoint"].(string) != "https://wallet.example.com/didcomm" {
+		t.Fatalf("unexpected endpoint: %v", body["endpoint"])
+	}
+}

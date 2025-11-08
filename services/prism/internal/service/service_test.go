@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"math"
 	"testing"
 	"time"
@@ -123,5 +124,104 @@ func TestMiniInferInsertFailure(t *testing.T) {
 	_ = db.Close()
 	if _, err := svc.MiniInfer(context.Background(), 1, 2); err == nil {
 		t.Fatal("expected insert failure")
+	}
+}
+
+func TestIssueCredentialRegistersDIDComm(t *testing.T) {
+	svc, db := newTestService(t)
+	t.Cleanup(func() { _ = db.Close() })
+
+	req := CredentialRequest{
+		SubjectDID:     "did:example:alice",
+		CredentialType: "EmployeeCredential",
+		DIDComm: &DIDCommRegistration{
+			Endpoint: "https://wallet.example.com/didcomm",
+		},
+	}
+	resp, err := svc.IssueCredential(context.Background(), req)
+	if err != nil {
+		t.Fatalf("IssueCredential() error = %v", err)
+	}
+	if resp.Format != "vc+sd-jwt" {
+		t.Fatalf("unexpected format: %s", resp.Format)
+	}
+	if resp.DIDComm == nil || resp.DIDComm.Endpoint != "https://wallet.example.com/didcomm" {
+		t.Fatalf("expected didcomm endpoint in response: %+v", resp.DIDComm)
+	}
+	issued := svc.IssuedCredentials()
+	if len(issued) != 1 {
+		t.Fatalf("expected 1 issued credential, got %d", len(issued))
+	}
+	if issued[0].SubjectDID != "did:example:alice" {
+		t.Fatalf("unexpected subject: %s", issued[0].SubjectDID)
+	}
+	channels := svc.DIDCommChannels()
+	if len(channels) != 1 {
+		t.Fatalf("expected 1 didcomm channel, got %d", len(channels))
+	}
+}
+
+func TestBatchIssueCredential(t *testing.T) {
+	svc, db := newTestService(t)
+	t.Cleanup(func() { _ = db.Close() })
+
+	reqs := []CredentialRequest{
+		{SubjectDID: "did:example:1", CredentialType: "Test"},
+		{SubjectDID: "did:example:2", CredentialType: "Test"},
+	}
+	resps, err := svc.BatchIssueCredential(context.Background(), reqs)
+	if err != nil {
+		t.Fatalf("BatchIssueCredential() error = %v", err)
+	}
+	if len(resps) != 2 {
+		t.Fatalf("expected 2 responses, got %d", len(resps))
+	}
+	if len(svc.IssuedCredentials()) != 2 {
+		t.Fatalf("expected 2 issued credentials")
+	}
+}
+
+func TestAuthorizeAndCompletePresentation(t *testing.T) {
+	svc, db := newTestService(t)
+	t.Cleanup(func() { _ = db.Close() })
+
+	auth, err := svc.AuthorizePresentation(context.Background(), PresentationAuthorizationRequest{
+		ClientID:    "client-123",
+		RedirectURI: "https://rp.example.com/callback",
+		Scope:       []string{"openid", "vp_token"},
+	})
+	if err != nil {
+		t.Fatalf("AuthorizePresentation() error = %v", err)
+	}
+	if auth.Nonce == "" {
+		t.Fatal("expected nonce to be populated")
+	}
+
+	record, err := svc.CompletePresentation(context.Background(), PresentationSubmission{
+		Nonce:      auth.Nonce,
+		SubjectDID: "did:example:alice",
+		VPToken:    map[string]interface{}{"proof": "ok"},
+	})
+	if err != nil {
+		t.Fatalf("CompletePresentation() error = %v", err)
+	}
+	if record.Nonce != auth.Nonce {
+		t.Fatalf("nonce mismatch: %s vs %s", record.Nonce, auth.Nonce)
+	}
+	if len(svc.PresentationHistory()) != 1 {
+		t.Fatalf("expected presentation history to be recorded")
+	}
+}
+
+func TestCompletePresentationUnknownNonce(t *testing.T) {
+	svc, db := newTestService(t)
+	t.Cleanup(func() { _ = db.Close() })
+
+	_, err := svc.CompletePresentation(context.Background(), PresentationSubmission{
+		Nonce:      "no-such-nonce",
+		SubjectDID: "did:example:bob",
+	})
+	if !errors.Is(err, ErrPresentationNonceUnknown) {
+		t.Fatalf("expected ErrPresentationNonceUnknown, got %v", err)
 	}
 }

@@ -23,6 +23,11 @@ func (a *API) Router() http.Handler {
 	mux.HandleFunc("/api/health.json", a.handleHealth)
 	mux.HandleFunc("/api/echo", a.handleEcho)
 	mux.HandleFunc("/api/mini/infer", a.handleMiniInfer)
+	mux.HandleFunc("/api/oid4vci/credential", a.handleOID4VCICredential)
+	mux.HandleFunc("/api/oid4vci/batch_credential", a.handleOID4VCIBatchCredential)
+	mux.HandleFunc("/api/oidc4vp/authorize", a.handleOIDC4VPAuthorize)
+	mux.HandleFunc("/api/oidc4vp/callback", a.handleOIDC4VPCallback)
+	mux.HandleFunc("/api/didcomm/register", a.handleDIDCommRegister)
 	return mux
 }
 
