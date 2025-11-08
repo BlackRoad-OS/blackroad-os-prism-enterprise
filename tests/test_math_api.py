@@ -1,13 +1,19 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 import importlib.util
 import sys
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT))
+
 import numpy as np
 import pytest
 from fastapi.testclient import TestClient
+
+from lucidia_math_lab.amundson_equations import phase_derivative
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "srv" / "lucidia-math" / "api_ambr.py"
 spec = importlib.util.spec_from_file_location(
@@ -21,6 +27,7 @@ sys.modules[spec.name] = module
 assert spec.loader
 spec.loader.exec_module(module)  # type: ignore[arg-type]
 app = module.app
+SERVER_CONTEXT = module.SERVER_CONTEXT
 
 
 @pytest.fixture
@@ -132,3 +139,48 @@ def test_energy_endpoint_reports_landauer(client: TestClient) -> None:
     payload = response.json()
     assert payload["E_min"] > 0
     assert isinstance(payload["pass"], bool)
+
+
+def test_phase_derivative_endpoint_auto_resolves(client: TestClient) -> None:
+    SERVER_CONTEXT.last_phi_x = 0.0
+    SERVER_CONTEXT.last_phi_y = 1.2
+    response = client.post("/api/ambr/coherence/dphi", json={"phi_x": 0.4})
+    assert response.status_code == 200
+    payload = response.json()
+    resolved = payload["resolved"]
+    assert payload["mode"] == "auto"
+    assert math.isclose(payload["dphi_dt"], phase_derivative(**resolved))
+    assert math.isclose(resolved["phi_x"], 0.4)
+    assert math.isclose(resolved["phi_y"], 1.2)
+    assert "phi_y" in payload["why"]
+
+
+def test_phase_derivative_endpoint_strict_requires_fields(client: TestClient) -> None:
+    response = client.post(
+        "/api/ambr/coherence/dphi",
+        json={"auto_resolve": False, "omega_0": 1.0},
+    )
+    assert response.status_code == 422
+    payload = response.json()
+    assert payload["error_code"] == "missing_parameters"
+
+
+def test_phase_derivative_endpoint_strict_success(client: TestClient) -> None:
+    body = {
+        "auto_resolve": False,
+        "omega_0": 1.0,
+        "lambda_": 0.5,
+        "eta": 0.2,
+        "phi_x": 0.3,
+        "phi_y": -0.2,
+        "r_x": 1.1,
+        "r_y": 0.9,
+        "k_b_t": 1e-21,
+    }
+    response = client.post("/api/ambr/coherence/dphi", json=body)
+    assert response.status_code == 200
+    payload = response.json()
+    resolved = payload["resolved"]
+    assert payload["mode"] == "strict"
+    assert payload["why"] == {}
+    assert math.isclose(payload["dphi_dt"], phase_derivative(**resolved))

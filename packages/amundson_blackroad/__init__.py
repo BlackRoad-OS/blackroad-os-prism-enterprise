@@ -1,62 +1,56 @@
 """Core kernels for the Amundson-BlackRoad simulations."""
 
-from .spiral import (
-    simulate_am2,
-    am2_step,
-    field_lift,
-    jacobian_am2,
-    fixed_point_stability,
-    StabilityReport,
-)
+from .adaptive import gains_step, simulate_am5
 from .autonomy import (
-    step_transport,
-    simulate_transport,
-    conserved_mass,
     compute_flux,
+    conserved_mass,
+    simulate_transport,
+    step_transport,
     trust_field_step,
 )
-from .coupling import curvature_source, couple_curvature_response
+from .coupling import couple_curvature_response, curvature_source
 from .curvature import simulate_a_field
+from .resolution import AmbrContext, K_BOLTZMANN, resolve_coherence_inputs
+from .spiral import (
+    StabilityReport,
+    am2_step,
+    field_lift,
+    fixed_point_stability,
+    jacobian_am2,
+    simulate_am2,
+)
 from .thermo import (
-    K_BOLTZMANN,
-    spiral_entropy,
-    energy_increment,
-    landauer_min,
-    landauer_floor,
-    irreversible_energy,
     annotate_run_with_thermo,
-from .thermo import (
+    energy_increment,
+    irreversible_energy,
     landauer_floor,
     landauer_min,
-    irreversible_energy,
-    annotate_run_with_thermo,
     spiral_entropy,
-    energy_increment,
 )
 
 __all__ = [
-    "simulate_am2",
-    "am2_step",
-    "field_lift",
-    "jacobian_am2",
-    "fixed_point_stability",
-    "StabilityReport",
-    "step_transport",
-    "simulate_transport",
-    "conserved_mass",
-    "compute_flux",
-    "trust_field_step",
-    "curvature_source",
-    "couple_curvature_response",
-    "simulate_a_field",
+    "AmbrContext",
     "K_BOLTZMANN",
-    "spiral_entropy",
+    "annotate_run_with_thermo",
+    "am2_step",
+    "compute_flux",
+    "conserved_mass",
+    "couple_curvature_response",
     "energy_increment",
-    "landauer_min",
+    "field_lift",
+    "fixed_point_stability",
+    "gains_step",
+    "irreversible_energy",
+    "jacobian_am2",
     "landauer_floor",
     "landauer_min",
-    "irreversible_energy",
-    "annotate_run_with_thermo",
+    "resolve_coherence_inputs",
+    "simulate_a_field",
+    "simulate_am2",
+    "simulate_am5",
+    "simulate_transport",
     "spiral_entropy",
-    "energy_increment",
+    "StabilityReport",
+    "step_transport",
+    "trust_field_step",
 ]
