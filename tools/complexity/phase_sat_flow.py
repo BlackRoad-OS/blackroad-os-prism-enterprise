@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Iterable, List, Sequence, Tuple
 
+import argparse
+import json
 import math
 import random
 
@@ -34,6 +37,16 @@ class FlowResult:
     @property
     def final_state(self) -> np.ndarray:
         return self.history[-1]
+
+
+@dataclass
+class RunResult:
+    """Summary of the XY-style gradient flow cut heuristic."""
+
+    steps: int
+    energy: float
+    best_cut: float
+    best_step: int
 
 
 def _normalize_weights(weight_matrix: np.ndarray) -> np.ndarray:
@@ -148,13 +161,172 @@ def random_phases(num_nodes: int, *, seed: int | None = None) -> np.ndarray:
     return rng.uniform(-math.pi, math.pi, size=num_nodes)
 
 
+def gen_erdos(n: int, p: float, w: float = 1.0, seed: int | None = None) -> np.ndarray:
+    """Generate a weighted Erdős–Rényi graph with constant edge weight ``w``."""
+
+    rng = random.Random(seed)
+    matrix = np.zeros((n, n), dtype=float)
+    for i in range(n):
+        for j in range(i + 1, n):
+            if rng.random() < p:
+                matrix[i, j] = matrix[j, i] = w
+    return matrix
+
+
+def read_edgelist(path: str, n: int | None = None) -> np.ndarray:
+    """Load a symmetric weight matrix from an edge list file."""
+
+    weights: dict[tuple[int, int], float] = {}
+    inferred_n = 0
+    with open(path) as handle:
+        for line in handle:
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            parts = stripped.split()
+            i, j = int(parts[0]), int(parts[1])
+            value = float(parts[2]) if len(parts) > 2 else 1.0
+            weights[(i, j)] = weights[(j, i)] = value
+            inferred_n = max(inferred_n, i + 1, j + 1)
+    size = n if n is not None else inferred_n
+    matrix = np.zeros((size, size), dtype=float)
+    for (i, j), value in weights.items():
+        if i < size and j < size:
+            matrix[i, j] = matrix[j, i] = value
+    return matrix
+
+
+def energy(phi: np.ndarray, weights: np.ndarray) -> float:
+    """Compute the XY energy ``-Σ w_ij cos(φ_i - φ_j)``."""
+
+    n = len(phi)
+    total = 0.0
+    for i in range(n):
+        for j in range(i + 1, n):
+            wij = weights[i, j]
+            if wij != 0.0:
+                total -= wij * math.cos(phi[i] - phi[j])
+    return float(total)
+
+
+def grad(phi: np.ndarray, weights: np.ndarray) -> np.ndarray:
+    """Gradient of the XY energy with respect to ``φ``."""
+
+    n = len(phi)
+    g = np.zeros(n, dtype=float)
+    for i in range(n):
+        accum = 0.0
+        for j in range(n):
+            if i != j and weights[i, j] != 0.0:
+                accum += weights[i, j] * math.sin(phi[i] - phi[j])
+        g[i] = accum
+    return g
+
+
+def cut_value(phi: np.ndarray, weights: np.ndarray) -> tuple[float, list[int]]:
+    """Return the cut value induced by ``sign(cos φ_i)``."""
+
+    spins = np.where(np.cos(phi) >= 0.0, 1, -1)
+    cut = 0.0
+    n = len(phi)
+    for i in range(n):
+        for j in range(i + 1, n):
+            if spins[i] != spins[j]:
+                cut += weights[i, j]
+    return float(cut), spins.tolist()
+
+
+def run(
+    weights: np.ndarray,
+    *,
+    steps: int = 5000,
+    dt: float = 0.03,
+    lam: float = 1.0,
+    T: float = 0.02,
+    seed: int | None = 0,
+) -> RunResult:
+    """Integrate the gradient flow with optional Langevin noise."""
+
+    rng = np.random.default_rng(seed)
+    n = weights.shape[0]
+    phi = rng.random(n) * 2 * math.pi
+    best_cut, _ = cut_value(phi, weights)
+    best_step = 0
+    for step in range(steps):
+        g = grad(phi, weights)
+        if T > 0:
+            noise = rng.normal(scale=math.sqrt(2 * T * dt), size=n)
+        else:
+            noise = 0.0
+        phi = (phi - lam * dt * g + noise) % (2 * math.pi)
+        current_cut, _ = cut_value(phi, weights)
+        if current_cut > best_cut:
+            best_cut = current_cut
+            best_step = step + 1
+    return RunResult(steps=steps, energy=energy(phi, weights), best_cut=best_cut, best_step=best_step)
+
+
+def main(argv: Sequence[str] | None = None) -> None:
+    """CLI harness mirroring the exploratory gradient-flow script."""
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--n", type=int, default=80)
+    parser.add_argument("--p", type=float, default=0.1)
+    parser.add_argument("--edge", default="", help="Optional edge-list file")
+    parser.add_argument("--steps", type=int, default=4000)
+    parser.add_argument("--dt", type=float, default=0.03)
+    parser.add_argument("--lam", type=float, default=1.0)
+    parser.add_argument("--T", type=float, default=0.02)
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--out", default="data/phase_sat/run.json")
+    args = parser.parse_args(argv)
+
+    if args.edge:
+        weights = read_edgelist(args.edge, None)
+    else:
+        weights = gen_erdos(args.n, args.p, w=1.0, seed=args.seed)
+
+    result = run(
+        weights,
+        steps=args.steps,
+        dt=args.dt,
+        lam=args.lam,
+        T=args.T,
+        seed=args.seed,
+    )
+
+    out_path = Path(args.out)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    summary = {
+        "n": int(weights.shape[0]),
+        "m": int(np.count_nonzero(np.triu(weights, 1))),
+        "steps": result.steps,
+        "best_cut": result.best_cut,
+        "best_step": result.best_step,
+        "final_energy": result.energy,
+    }
+    out_path.write_text(json.dumps(summary, indent=2))
+    print(f"Saved {out_path}")
+
+
 __all__ = [
     "FlowParameters",
     "FlowResult",
+    "RunResult",
     "simulate_flow",
     "maxcut_weight_matrix",
     "random_maxcut_instance",
     "random_2sat_instance",
     "build_clause_weight_matrix",
     "random_phases",
+    "gen_erdos",
+    "read_edgelist",
+    "energy",
+    "grad",
+    "cut_value",
+    "run",
 ]
+
+
+if __name__ == "__main__":  # pragma: no cover - CLI entry point.
+    main()
