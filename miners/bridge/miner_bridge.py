@@ -33,16 +33,29 @@ class MinerSummary:
     last_share_diff: Optional[float]
     last_share_at: Optional[datetime]
 
+    @property
+    def shares_total(self) -> int:
+        return max(self.shares_accepted + self.shares_rejected, 0)
+
+    @property
+    def stale_rate(self) -> float:
+        total = self.shares_total
+        if total <= 0:
+            return 0.0
+        return max(min(self.shares_stale / total, 1.0), 0.0)
+
     def to_payload(self) -> Dict[str, Any]:
         return {
-            "miner_id": self.miner_id,
-            "timestamp": self.recorded_at.isoformat().replace("+00:00", "Z"),
+            "miner": self.miner_id,
+            "ts": self.recorded_at.isoformat().replace("+00:00", "Z"),
             "pool": self.pool,
             "hashrate_1m": self.hashrate_1m,
             "hashrate_15m": self.hashrate_15m,
             "shares_accepted": self.shares_accepted,
             "shares_rejected": self.shares_rejected,
             "shares_stale": self.shares_stale,
+            "shares_total": self.shares_total,
+            "stale_rate": self.stale_rate,
             "latency_ms": self.latency_ms,
             "temperature_c": self.temperature_c,
             "last_share_difficulty": self.last_share_diff,
@@ -78,9 +91,16 @@ class MinerBridge:
     def __init__(self) -> None:
         self.xmrig_api = os.environ.get("XMRIG_API_URL", "http://localhost:18080").rstrip("/") + "/"
         self.xmrig_token = os.environ.get("XMRIG_API_TOKEN")
-        self.prism_api = os.environ.get("PRISM_API_URL", "http://localhost:4000").rstrip("/") + "/"
         self.prism_token = os.environ.get("PRISM_API_TOKEN")
+        self.prism_org_id = os.environ.get("PRISM_ORG_ID")
         self.miner_id = os.environ.get("MINER_ID", "xmrig")
+        self.miner_agent_id = os.environ.get("MINER_AGENT_ID", f"miner:{self.miner_id}")
+        prism_events_url = os.environ.get("PRISM_EVENTS_URL")
+        if prism_events_url:
+            self.prism_events_url = prism_events_url.rstrip("/")
+        else:
+            base_api = os.environ.get("PRISM_API_URL", "http://localhost:4000").rstrip("/") + "/"
+            self.prism_events_url = urljoin(base_api, "events").rstrip("/")
         self.interval = max(float(os.environ.get("POLL_INTERVAL", "15")), 5.0)
         self.timeout = float(os.environ.get("HTTP_TIMEOUT", "5"))
         self.last_good_shares: Optional[int] = None
@@ -93,8 +113,7 @@ class MinerBridge:
             try:
                 summary = self._fetch_summary()
                 if summary:
-                    payload = summary.to_payload()
-                    self._send_sample(payload)
+                    self._send_sample(summary)
             except Exception as exc:  # noqa: BLE001 - log and continue loop
                 LOGGER.exception("bridge loop failed", exc_info=exc)
             time.sleep(self.interval)
@@ -174,10 +193,25 @@ class MinerBridge:
         )
         return summary
 
-    def _send_sample(self, payload: Dict[str, Any]) -> None:
+    def _send_sample(self, summary: MinerSummary) -> None:
+        sample_payload = summary.to_payload()
+        event_payload: Dict[str, Any] = {
+            "type": "miner.sample",
+            "sample": sample_payload,
+        }
+        if self.prism_org_id:
+            event_payload["orgId"] = self.prism_org_id
+        if self.miner_agent_id:
+            event_payload["agentId"] = self.miner_agent_id
+
+        envelope = {
+            "topic": "miner.sample",
+            "payload": event_payload,
+        }
+
         request = Request(
-            urljoin(self.prism_api, "api/miners/sample"),
-            data=json.dumps(payload).encode("utf-8"),
+            self.prism_events_url,
+            data=json.dumps(envelope).encode("utf-8"),
             method="POST",
             headers={"Content-Type": "application/json"},
         )
@@ -186,14 +220,21 @@ class MinerBridge:
         try:
             with urlopen(request, timeout=self.timeout) as response:
                 response.read()
-            LOGGER.info("sent miner.sample", extra={"accepted": payload.get("shares_accepted")})
+            LOGGER.info(
+                "sent miner.sample",
+                extra={
+                    "accepted": summary.shares_accepted,
+                    "stale_rate": round(summary.stale_rate * 100, 2),
+                    "hashrate_1m": summary.hashrate_1m,
+                },
+            )
         except HTTPError as exc:
             LOGGER.error(
                 "failed to push miner.sample",
                 extra={"status": exc.code, "reason": exc.reason},
             )
         except URLError as exc:
-            LOGGER.error("prism api unreachable", extra={"error": str(exc)})
+            LOGGER.error("prism events unreachable", extra={"error": str(exc)})
 
     def _http_get_json(self, url: str) -> Dict[str, Any]:
         request = Request(url, headers={"Content-Type": "application/json"})

@@ -63,13 +63,13 @@ package is installed locally.
 
 ```bash
 # bring up xmrig, p2pool, and the telemetry bridge
-PRISM_API=http://localhost:3333 \
+PRISM_API_URL=http://localhost:3333 \
 PRISM_ORG_ID=demo-org \
 MINER_AGENT_ID=demo-miner \
 docker compose -f miners/miners-compose.yml up -d p2pool xmrig miner-bridge
 
 # confirm events are flowing
-curl "$PRISM_API/events?limit=5" | jq 'map(select(.topic=="miner.sample")) | length'
+curl "$PRISM_API_URL/events?limit=5" | jq 'map(select(.topic=="miner.sample")) | length'
 ```
 
 ## Native systemd (xmrig, throttled, hardened)

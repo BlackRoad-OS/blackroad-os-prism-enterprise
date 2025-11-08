@@ -2,6 +2,7 @@
 
 import { DashboardSummary } from '@/components/DashboardSummary';
 import { MetricsGrid } from '@/components/MetricsGrid';
+import { MinersPanel } from '@/components/MinersPanel';
 import { ShortcutList } from '@/components/ShortcutList';
 import { useDashboard } from '@/features/use-dashboard';
 import { useTelemetry } from '@/lib/telemetry';
@@ -32,6 +33,7 @@ export function OverviewContent() {
     <div className="space-y-6">
       <DashboardSummary summary={data.summary} />
       <MetricsGrid metrics={data.metrics} />
+      <MinersPanel />
       <ShortcutList shortcuts={data.shortcuts} />
     </div>
   );
