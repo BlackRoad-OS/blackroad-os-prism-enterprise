@@ -1,216 +1,3 @@
-"""HTTP blueprint exposing Amundson–BlackRoad simulations and ledgers."""
-
-from __future__ import annotations
-
-from typing import Any, Dict, List
-
-import numpy as np
-from flask import Blueprint, jsonify, request
-
-from amundson_blackroad.autonomy import conserved_mass, step_transport
-from amundson_blackroad.spiral import fixed_point_stability, simulate_am2
-from amundson_blackroad.thermo import (
-    annotate_run_with_thermo,
-    energy_increment,
-    landauer_min,
-    spiral_entropy,
-)
-
-bp = Blueprint("ambr", __name__, url_prefix="/api/ambr")
-
-
-def _serialize_complex(values: np.ndarray) -> List[Dict[str, float]]:
-    return [
-        {"real": float(val.real), "imag": float(val.imag)}
-        for val in np.asarray(values).ravel()
-    ]
-
-
-@bp.get("/sim/am2")
-def am2_endpoint():
-    q = request.args
-    T = float(q.get("T", 10.0))
-    dt = float(q.get("dt", 1e-3))
-    a0 = float(q.get("a0", 0.1))
-    theta0 = float(q.get("theta0", 0.0))
-    gamma = float(q.get("gamma", 0.3))
-    kappa = float(q.get("kappa", 0.7))
-    eta = float(q.get("eta", 0.5))
-    omega0 = float(q.get("omega0", 1.0))
-    bits = float(q.get("bits", 0.0))
-    temperature = float(q.get("temperature", 300.0))
-    omega_surface = float(q.get("Omega", q.get("omega", 0.0)))
-
-    t, a, theta, amp = simulate_am2(
-        T,
-        dt,
-        a0,
-        theta0,
-        gamma,
-        kappa,
-        eta,
-        omega0,
-"""Text-only Amundson–BlackRoad API endpoints."""
-from __future__ import annotations
-
-from dataclasses import dataclass
-from typing import Any, Dict, Iterable
-
-import numpy as np
-from flask import Blueprint, Response, jsonify, request
-
-from amundson_blackroad import (
-    annotate_run_with_thermo,
-    conserved_mass,
-    landauer_floor,
-    simulate_am2,
-    simulate_transport,
-)
-from packages.textviz import line_svg, pgm_p2
-
-DEFAULT_BITS = 0.0
-DEFAULT_TEMPERATURE = 300.0  # Kelvin
-MASS_TOLERANCE = 1e-3
-
-
-@dataclass
-class SimulationContext:
-    bits: float = DEFAULT_BITS
-    temperature: float = DEFAULT_TEMPERATURE
-    seed: int | None = None
-
-
-ambr_api = Blueprint("ambr_api", __name__)
-
-
-def _safe_float(value: Any, default: float) -> float:
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return default
-
-
-def _maybe_int(value: Any) -> int | None:
-    try:
-        return None if value is None else int(value)
-    except (TypeError, ValueError):
-        return None
-
-
-def run_am2_simulation(args: Dict[str, Any]) -> Dict[str, Any]:
-    """Execute the AM-2 simulation and return JSON serialisable payload."""
-
-    t, a, theta, amp = simulate_am2(
-        T=_safe_float(args.get("T"), 10.0),
-        dt=_safe_float(args.get("dt"), 1e-3),
-        a0=_safe_float(args.get("a0"), 0.1),
-        theta0=_safe_float(args.get("theta0"), 0.0),
-        gamma=_safe_float(args.get("gamma"), 0.3),
-        kappa=_safe_float(args.get("kappa"), 0.7),
-        eta=_safe_float(args.get("eta"), 0.5),
-        omega0=_safe_float(args.get("omega0"), 1.0),
-    )
-    payload: Dict[str, Any] = {
-        "t": t.tolist(),
-        "a": a.tolist(),
-        "theta": theta.tolist(),
-        "amplitude": amp.tolist(),
-        "units": {"t": "s", "a": "1", "theta": "rad", "amplitude": "1"},
-    }
-    if len(a) >= 2:
-        da = float(a[-1] - a[-2])
-        dtheta = float(theta[-1] - theta[-2])
-        entropy = spiral_entropy(float(a[-2]), float(theta[-2]))
-        payload["ledger"] = {
-            "spiral_entropy_J_per_K": entropy,
-            "da": da,
-            "dtheta": dtheta,
-        }
-        payload = annotate_run_with_thermo(
-            payload,
-            bits=bits,
-            n_bits=bits,
-            temperature=temperature,
-            Omega=omega_surface,
-            a=float(a[-2]),
-            theta=float(theta[-2]),
-            da=da,
-            dtheta=dtheta,
-        )
-    stability = fixed_point_stability(float(a[-1]), float(theta[-1]), gamma, kappa, eta, omega0)
-    payload["stability"] = {
-        "jacobian": stability.jacobian.tolist(),
-        "eigenvalues": _serialize_complex(stability.eigenvalues),
-        "is_stable": stability.is_stable,
-    }
-    return jsonify(payload)
-
-
-@bp.post("/sim/transport")
-def transport_endpoint():
-    body = request.get_json(force=True)
-    x = np.asarray(body["x"], dtype=float)
-    A = np.asarray(body["A"], dtype=float)
-    rho = np.asarray(body["rho"], dtype=float)
-    dt = float(body.get("dt", 1e-3))
-    steps = int(body.get("steps", 100))
-    mu = float(body.get("mu", 1.0))
-    chi = float(body.get("chi", 0.0))
-    Uc = np.asarray(body["Uc"], dtype=float) if "Uc" in body else None
-    dx = float(body.get("dx", x[1] - x[0]))
-
-    current = A.copy()
-    flux = np.zeros_like(current)
-    for _ in range(steps):
-        current, flux = step_transport(current, rho, dx, dt, mu_A=mu, chi_A=chi, Uc=Uc)
-    mass_initial = conserved_mass(x, A)
-    mass_final = conserved_mass(x, current)
-    payload = {
-        "x": x.tolist(),
-        "A": current.tolist(),
-        "flux": flux.tolist(),
-        "mass": mass_final,
-        "mass_initial": mass_initial,
-        "mass_error": mass_final - mass_initial,
-        "units": {
-            "x": "m",
-            "A": "A-units",
-            "flux": "A-units*m/s",
-            "mass": "A-units*m",
-        },
-    }
-    bits = float(body.get("bits", 0.0))
-    temperature = float(body.get("temperature", 300.0))
-    payload = annotate_run_with_thermo(
-        payload,
-        bits=bits,
-        n_bits=bits,
-        temperature=temperature,
-    )
-    return jsonify(payload)
-
-
-@bp.post("/energy")
-def energy_endpoint():
-    body = request.get_json(force=True)
-    T = float(body["T"])
-    a = float(body["a"])
-    theta = float(body["theta"])
-    da = float(body["da"])
-    dtheta = float(body["dtheta"])
-    Omega = float(body.get("Omega", 0.0))
-    n_bits = float(body.get("n_bits", body.get("bits", 0.0)))
-
-    delta_e = energy_increment(T, da, dtheta, a, theta, Omega=Omega)
-    response: Dict[str, Any] = {
-        "dE_J": delta_e,
-        "units": {"dE_J": "J"},
-    }
-    if "n_bits" in body or "bits" in body:
-        Emin = landauer_min(T, n_bits)
-        response["E_min_J"] = Emin
-        response["passes_landauer"] = bool(delta_e + 1e-30 >= Emin)
-    return jsonify(response)
 """FastAPI application exposing math and Amundson–BlackRoad endpoints."""
 
 from __future__ import annotations
@@ -237,8 +24,11 @@ if str(PACKAGES_DIR) not in sys.path:
     sys.path.insert(0, str(PACKAGES_DIR))
 
 from amundson_blackroad.autonomy import conserved_mass, simulate_transport  # noqa: E402
+from amundson_blackroad.resolution import AmbrContext, resolve_coherence_inputs  # noqa: E402
 from amundson_blackroad.spiral import simulate_am2  # noqa: E402
 from amundson_blackroad.thermo import energy_increment, landauer_min, spiral_entropy  # noqa: E402
+
+from lucidia_math_lab.amundson_equations import phase_derivative  # noqa: E402
 
 from . import fractals, logic, primes, proofs, waves  # noqa: E402
 from .storage import (  # noqa: E402
@@ -258,6 +48,18 @@ ARTIFACT_BYTES = Counter(
 )
 AMBR_LAST_MASS_ERROR = Gauge("ambr_last_mass_error", "Most recent mass conservation error")
 AMBR_LAST_ENERGY = Gauge("ambr_last_energy_dE", "Most recent energy increment value")
+
+SERVER_CONTEXT = AmbrContext()
+STRICT_PHASE_FIELDS = (
+    "omega_0",
+    "lambda_",
+    "eta",
+    "phi_x",
+    "phi_y",
+    "r_x",
+    "r_y",
+    "k_b_t",
+)
 
 
 class MandelbrotQuery(BaseModel):
@@ -363,6 +165,21 @@ class EnergyRequest(BaseModel):
     Omega: float = Field(...)
     n_bits: Optional[float] = Field(None, ge=0)
     temperature: Optional[float] = Field(None, gt=0)
+
+
+class PhaseDerivativeRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    omega_0: Optional[float] = Field(None, alias="omega_0")
+    lambda_: Optional[float] = Field(None, alias="lambda")
+    eta: Optional[float] = Field(None, alias="eta")
+    phi_x: Optional[float] = Field(None, alias="phi_x")
+    phi_y: Optional[float] = Field(None, alias="phi_y")
+    r_x: Optional[float] = Field(None, alias="r_x")
+    r_y: Optional[float] = Field(None, alias="r_y")
+    k_b_t: Optional[float] = Field(None, alias="k_b_t")
+    temperature_K: Optional[float] = Field(None, alias="temperature_K")
+    auto_resolve: bool = Field(True, alias="auto_resolve")
 
 
 def _error(status_code: int, code: str, hint: str) -> None:
@@ -780,6 +597,51 @@ async def transport_endpoint(body: TransportRequest) -> Dict[str, Any]:
     return response
 
 
+@ambr_router.post("/coherence/dphi")
+async def phase_derivative_endpoint(body: PhaseDerivativeRequest) -> Dict[str, Any]:
+    payload = body.model_dump(by_alias=False, exclude_none=True)
+    auto = bool(payload.pop("auto_resolve", True))
+    context = SERVER_CONTEXT
+    if auto:
+        resolved, missing, why = resolve_coherence_inputs(ctx=context, **payload)
+        if missing:
+            AMBR_ERRORS.labels(kind="dphi").inc()
+            _error(
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                "missing_parameters",
+                f"Unresolvable fields: {', '.join(sorted(missing))}",
+            )
+        derivative = float(phase_derivative(**resolved))
+        context.last_phi_x = resolved["phi_x"]
+        context.last_phi_y = resolved["phi_y"]
+        AMBR_RUNS.labels(kind="dphi").inc()
+        return {
+            "dphi_dt": derivative,
+            "resolved": resolved,
+            "why": why,
+            "mode": "auto",
+        }
+    missing = [field for field in STRICT_PHASE_FIELDS if field not in payload]
+    if missing:
+        AMBR_ERRORS.labels(kind="dphi").inc()
+        _error(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "missing_parameters",
+            f"Missing fields: {', '.join(sorted(missing))}",
+        )
+    resolved = {name: float(payload[name]) for name in STRICT_PHASE_FIELDS}
+    derivative = float(phase_derivative(**resolved))
+    context.last_phi_x = resolved["phi_x"]
+    context.last_phi_y = resolved["phi_y"]
+    AMBR_RUNS.labels(kind="dphi").inc()
+    return {
+        "dphi_dt": derivative,
+        "resolved": resolved,
+        "why": {},
+        "mode": "strict",
+    }
+
+
 @ambr_router.post("/energy")
 async def energy_endpoint(body: EnergyRequest) -> Dict[str, Any]:
     n_bits = body.n_bits
@@ -812,157 +674,3 @@ async def energy_endpoint(body: EnergyRequest) -> Dict[str, Any]:
 
 app.include_router(math_router)
 app.include_router(ambr_router)
-
-        "amp": amp.tolist(),
-        "units": {
-            "t": "s",
-            "a": "arb",
-            "theta": "rad",
-            "amp": "arb",
-        },
-    }
-    context = SimulationContext(
-        bits=_safe_float(args.get("bits"), DEFAULT_BITS),
-        temperature=_safe_float(args.get("temperature"), DEFAULT_TEMPERATURE),
-        seed=_maybe_int(args.get("seed")),
-    )
-    return annotate_run_with_thermo(
-        payload,
-        bits=context.bits,
-        temperature=context.temperature,
-        seed=context.seed,
-    )
-
-
-def run_transport_simulation(body: Dict[str, Any]) -> Dict[str, Any]:
-    """Execute the BR-1/2 transport solver and return diagnostics."""
-
-    x = np.asarray(body["x"], dtype=float)
-    A0 = np.asarray(body["A"], dtype=float)
-    rho = np.asarray(body["rho"], dtype=float)
-    dt = _safe_float(body.get("dt"), 1e-3)
-    steps = int(body.get("steps", 100))
-    mu_A = _safe_float(body.get("mu"), 1.0)
-    chi_A = _safe_float(body.get("chi"), 0.0)
-    Uc = None
-    if "Uc" in body and body["Uc"] is not None:
-        Uc = np.asarray(body["Uc"], dtype=float)
-
-    result = simulate_transport(x, A0, rho, steps, dt, mu_A=mu_A, chi_A=chi_A, Uc=Uc)
-    initial_mass = conserved_mass(x, A0)
-    final_mass = float(result["mass"])
-    corrected_A = result["A"]
-    corrected_flux = result["flux"]
-    if abs(final_mass) > 1e-12:
-        scale = initial_mass / final_mass
-        corrected_A = corrected_A * scale
-        corrected_flux = corrected_flux * scale
-        final_mass = conserved_mass(x, corrected_A)
-    mass_error = final_mass - initial_mass
-    rel_error = abs(mass_error) / (abs(initial_mass) + 1e-12)
-
-    payload: Dict[str, Any] = {
-        "x": result["x"].tolist(),
-        "A": corrected_A.tolist(),
-        "flux": corrected_flux.tolist(),
-        "mass": final_mass,
-        "mass_initial": initial_mass,
-        "mass_error": mass_error,
-        "mass_relative_error": rel_error,
-        "units": {
-            "x": "m",
-            "A": "arb",
-            "flux": "arb/m",
-            "mass": "arb·m",
-        },
-        "invariants": {
-            "mass_conservation": {
-                "tolerance": MASS_TOLERANCE,
-                "relative_error": rel_error,
-                "pass": rel_error <= MASS_TOLERANCE,
-            }
-        },
-    }
-    context = SimulationContext(
-        bits=_safe_float(body.get("bits"), DEFAULT_BITS),
-        temperature=_safe_float(body.get("temperature"), DEFAULT_TEMPERATURE),
-        seed=_maybe_int(body.get("seed")),
-    )
-    return annotate_run_with_thermo(
-        payload,
-        bits=context.bits,
-        temperature=context.temperature,
-        seed=context.seed,
-    )
-
-
-def _am2_plot_payload(args: Dict[str, Any]) -> str:
-    """Return SVG string for AM-2 amplitude trajectory."""
-
-    data = run_am2_simulation(args)
-    svg = line_svg(data["t"], data["amp"], height=280, stroke="#257dfd")
-    return svg
-
-
-def _pgm_from_values(values: Iterable[Iterable[float]], maxval: int) -> str:
-    return pgm_p2(list(list(row) for row in values), maxval=maxval)
-
-
-@ambr_api.get("/health")
-def health() -> Response:
-    return jsonify({"status": "ok"})
-
-
-@ambr_api.get("/api/ambr/sim/am2")
-def am2_simulation() -> Response:
-    result = run_am2_simulation(request.args)
-    return jsonify(result)
-
-
-@ambr_api.post("/api/ambr/sim/transport")
-def transport_simulation() -> Response:
-    body = request.get_json(force=True)
-    result = run_transport_simulation(body)
-    return jsonify(result)
-
-
-@ambr_api.route("/api/ambr/energy", methods=["GET", "POST"])
-def irreversible_energy_endpoint() -> Response:
-    payload = request.get_json(silent=True) if request.method == "POST" else None
-    params = payload or request.args
-    bits = _safe_float(params.get("bits"), DEFAULT_BITS)
-    if "transitions" in params and params.get("bits") is None:
-        bits = _safe_float(params.get("transitions"), DEFAULT_BITS)
-    temperature = _safe_float(params.get("temperature"), DEFAULT_TEMPERATURE)
-    delta_e = float(landauer_floor(bits, temperature))
-    limit = float(_safe_float(params.get("limit"), delta_e))
-    response = {
-        "delta_e": delta_e,
-        "delta_e_min": delta_e,
-        "limit": limit,
-        "pass": bool(delta_e <= limit + 1e-12),
-        "units": {
-            "delta_e": "J",
-            "delta_e_min": "J",
-            "temperature": "K",
-            "bits": "bit",
-        },
-    }
-    return jsonify(response)
-
-
-@ambr_api.get("/api/ambr/plot/am2.svg")
-def am2_plot() -> Response:
-    svg = _am2_plot_payload(request.args)
-    return Response(svg, mimetype="image/svg+xml; charset=utf-8")
-
-
-@ambr_api.post("/api/ambr/field/a.pgm")
-def a_field_pgm() -> Response:
-    body = request.get_json(force=True)
-    values = body.get("values") or body.get("A")
-    if values is None:
-        return jsonify({"error": "values field is required"}), 400
-    maxval = int(body.get("maxval", 255))
-    pgm_text = _pgm_from_values(values, maxval)
-    return Response(pgm_text, mimetype="image/x-portable-graymap; charset=us-ascii")
