@@ -1,26 +1,22 @@
-.PHONY: setup demo test lint notebooks
+.DEFAULT_GOAL := test
 
-setup:
-	python -m pip install -e .[dev]
+VENV ?= .venv
+PYTHON ?= python3
 
-DEMO_CMDS=\
-	python -m qlm_lab.demos.demo_bell && \
-	python -m qlm_lab.demos.demo_grover && \
-	python -m qlm_lab.demos.demo_phase_reasoning && \
-	python -m qlm_lab.demos.demo_codegen_tests
+.PHONY: install test demo clean
 
-demo:
-	$(DEMO_CMDS)
+install:
+	$(PYTHON) -m venv $(VENV)
+	. $(VENV)/bin/activate && pip install -U pip wheel
+	. $(VENV)/bin/activate && pip install -U pytest numpy scipy hypothesis
 
-test:
-	pytest
+# Run all tests with repo root on PYTHONPATH
+test: install
+	. $(VENV)/bin/activate && PYTHONPATH=$(PWD) pytest -q
 
-lint:
-	ruff check qlm_lab tests/test_quantum_np.py tests/test_proto_and_policies.py tests/test_agents_loop.py
-	mypy qlm_lab
+# Optional: run the headline demo
+demo: install
+	. $(VENV)/bin/activate && PYTHONPATH=$(PWD) python scripts/demo_amundson_math_core.py
 
-notebooks:
-	nbconvert --to notebook --execute notebooks/01_bell_chsh.ipynb
-	nbconvert --to notebook --execute notebooks/02_grover_vs_bruteforce.ipynb
-	nbconvert --to notebook --execute notebooks/03_qft_phase.ipynb
-	nbconvert --to notebook --execute notebooks/04_codegen_with_selftests.ipynb
+clean:
+	rm -rf $(VENV) .pytest_cache __pycache__ */__pycache__

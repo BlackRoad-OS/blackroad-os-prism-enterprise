@@ -1,19 +1,61 @@
-name: Backend Tests
+name: tests
 
 on:
   push:
-    branches: [ main ]
+    branches: ["main", "master"]
   pull_request:
-    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
+  pytest:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          node-version: 18
-      - run: npm install
-      - run: npm test
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip wheel
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          pip install pytest numpy scipy
+
+      - name: Run tests (pytest)
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          pytest -q --junitxml=pytest.xml
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-report
+          path: pytest.xml
+
+      - name: Run demo harness (optional)
+        if: always()
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          if [ -f scripts/demo_amundson_math_core.py ]; then python scripts/demo_amundson_math_core.py | tee demo_output.txt; fi
+
+      - name: Upload demo output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-output
+          path: demo_output.txt
