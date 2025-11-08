@@ -8,6 +8,7 @@ from typing import Any
 
 from sdk import plugin_api
 from .base import BaseBot, BotMetadata
+from .consent import ConsentGrant, ConsentRegistry, ConsentRequest, ConsentType
 from .lineage import LineageTracker
 from .memory import MemoryLog
 from .policy import PolicyEngine
@@ -29,6 +30,10 @@ logger = getLogger(__name__)
 __all__ = [
     "BaseBot",
     "BotMetadata",
+    "ConsentGrant",
+    "ConsentRegistry",
+    "ConsentRequest",
+    "ConsentType",
     "LineageTracker",
     "MemoryLog",
     "PolicyEngine",
