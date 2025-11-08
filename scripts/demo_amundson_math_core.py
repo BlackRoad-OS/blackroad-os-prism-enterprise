@@ -2,6 +2,9 @@
 """Quick demo harness: prints one headline result per module.
 Run:  python scripts/demo_amundson_math_core.py
 """
+import sys
+from contextlib import suppress
+
 import numpy as np
 
 from agents.blackroad_agent_framework_package5 import (
@@ -11,6 +14,8 @@ from agents.blackroad_agent_framework_package5 import (
     RamanujanMagicSquare,
     UnifiedHarmonicOperator,
 )
+
+from utils.safety import panic_guard, soft_guard
 
 
 def hr(name: str):
@@ -64,6 +69,12 @@ def demo_number_theory():
 
 
 if __name__ == "__main__":
+    with suppress(SystemExit):
+        panic_guard()
+
+    if not soft_guard(name="demo_amundson_math_core", stream=sys.stderr):
+        print("[demo] Running in SAFE_MODE read-only mode.")
+
     demo_unified_harmonic()
     demo_fourier()
     demo_magic_square()
