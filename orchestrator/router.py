@@ -7,7 +7,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Mapping, Sequence
 
-from .exceptions import BotNotRegisteredError, TaskNotFoundError
+from .consent import ConsentRegistry, ConsentType
+from .exceptions import BotNotRegisteredError, ConsentViolationError, TaskNotFoundError
 from .lineage import LineageTracker
 from .memory import MemoryLog
 from .metrics import log_metric
@@ -124,6 +125,8 @@ class RouteContext:
     config: Mapping[str, Any] | None = None
     approved_by: Sequence[str] | None = None
     sec_gate: SecRule2042Gate | None = None
+    consent_registry: ConsentRegistry | None = None
+    acting_agent: str | None = None
 
 
 class Router:
@@ -146,6 +149,23 @@ class Router:
 
         bot = self.registry.get(bot_name)
         context.policy_engine.enforce(bot_name, context.approved_by)
+
+        if context.consent_registry is not None:
+            actor = (
+                context.acting_agent
+                or task.owner
+                or (task.metadata or {}).get("requested_by")
+            )
+            if actor is None:
+                raise ConsentViolationError("consent_actor_unknown")
+            scope_hint = (task.metadata or {}).get("consent_scope") or task.id
+            if not context.consent_registry.check_consent(
+                actor=actor,
+                consent_type=ConsentType.TASK_ASSIGNMENT,
+                target=bot.metadata.name,
+                scope=scope_hint,
+            ):
+                raise ConsentViolationError("consent_not_granted")
 
         response = bot.run(task)
         task.status = "done" if getattr(response, "ok", False) else "failed"
