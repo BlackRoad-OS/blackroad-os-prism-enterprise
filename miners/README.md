@@ -15,6 +15,19 @@ docker compose -f miners/miners-compose.yml up -d xmrig          # enable xmrig 
 docker compose -f miners/miners-compose.yml stop xmrig           # stop
 ```
 
+### Prism telemetry bridge
+
+```bash
+# bring up xmrig, p2pool, and the telemetry bridge
+PRISM_API=http://localhost:3333 \
+PRISM_ORG_ID=demo-org \
+MINER_AGENT_ID=demo-miner \
+docker compose -f miners/miners-compose.yml up -d p2pool xmrig miner-bridge
+
+# confirm events are flowing
+curl "$PRISM_API/events?limit=5" | jq 'map(select(.topic=="miner.sample")) | length'
+```
+
 ## Native systemd (xmrig, throttled, hardened)
 # Miners pack (opt-in, throttled)
 
