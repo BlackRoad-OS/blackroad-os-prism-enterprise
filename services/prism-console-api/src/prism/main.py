@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.responses import PlainTextResponse, StreamingResponse
@@ -18,10 +19,18 @@ from .middlewares.rate_limit import RateLimitMiddleware
 from .middlewares.request_id import RequestIDMiddleware
 from .middlewares.security_headers import SecurityHeadersMiddleware
 from .observability.logging import configure_logging, get_logger
+from .models import MinerSample
 from .observability.metrics import REQUEST_COUNT, REQUEST_LATENCY, REGISTRY, RUNBOOK_EXECUTIONS
-from .repo import AgentRepository, MetricRepository, RunbookRepository
+from .repo import AgentRepository, MetricRepository, MinerRepository, RunbookRepository
 from .schemas.agents import AgentDetailResponse, AgentListResponse
 from .schemas.dashboard import DashboardPayload, Metric as MetricSchema, Shortcut
+from .schemas.miners import (
+    MinerSampleIn,
+    MinerSampleView,
+    MinerSamplesResponse,
+    MinerTile,
+    MinerTilesResponse,
+)
 from .schemas.runbooks import (
     RunbookExecuteRequest,
     RunbookExecuteResponse,
@@ -34,8 +43,136 @@ from .services.proxy import RunbookProxy
 from .services.sse import SSEBroadcaster
 from .services.validation import ValidationError, validate_payload
 
+if TYPE_CHECKING:  # pragma: no cover - hints only
+    from .models import MinerSample
+
 
 logger = get_logger(__name__)
+
+
+def _stale_stats(sample: "MinerSample") -> tuple[int, float]:
+    stale = sample.shares_stale if sample.shares_stale is not None else sample.shares_rejected
+    total = sample.shares_accepted + stale
+    rate = (stale / total) if total else 0.0
+    return stale, rate
+
+
+def _format_hashrate(value: float | None) -> str:
+    if value is None:
+        return "—"
+    units = ["H/s", "kH/s", "MH/s", "GH/s", "TH/s"]
+    amount = value
+    index = 0
+    while amount >= 1000 and index < len(units) - 1:
+        amount /= 1000
+        index += 1
+    if amount >= 100:
+        formatted = f"{amount:.0f}"
+    elif amount >= 10:
+        formatted = f"{amount:.1f}"
+    else:
+        formatted = f"{amount:.2f}"
+    return f"{formatted} {units[index]}"
+
+
+def _temperature_intent(temp: float | None) -> str | None:
+    if temp is None:
+        return None
+    if temp >= 85:
+        return "critical"
+    if temp >= 80:
+        return "warning"
+    return "good"
+
+
+def _relative_time(value: datetime | None) -> str:
+    if value is None:
+        return "—"
+    if value.tzinfo is not None:
+        ref = datetime.now(timezone.utc)
+        moment = value.astimezone(timezone.utc)
+    else:
+        ref = datetime.utcnow()
+        moment = value
+    delta = ref - moment
+    seconds = int(delta.total_seconds())
+    if seconds < 0:
+        seconds = 0
+    if seconds < 60:
+        return f"{seconds}s ago"
+    if seconds < 3600:
+        return f"{seconds // 60}m ago"
+    if seconds < 86400:
+        return f"{seconds // 3600}h ago"
+    return f"{seconds // 86400}d ago"
+
+
+def _sample_to_view(sample: "MinerSample") -> MinerSampleView:
+    stale, rate = _stale_stats(sample)
+    baseline = sample.hashrate_1m or sample.hashrate_15m
+    effective = baseline * (1 - rate) if baseline is not None else None
+    return MinerSampleView(
+        miner_id=sample.miner_id,
+        recorded_at=sample.recorded_at,
+        pool=sample.pool,
+        profile=sample.profile,
+        hashrate_1m=sample.hashrate_1m,
+        hashrate_15m=sample.hashrate_15m,
+        effective_hashrate=effective,
+        stale_rate=rate,
+        shares_accepted=sample.shares_accepted,
+        shares_rejected=sample.shares_rejected,
+        shares_stale=stale,
+        latency_ms=sample.latency_ms,
+        temperature_c=sample.temperature_c,
+        last_share_difficulty=sample.last_share_difficulty,
+        last_share_at=sample.last_share_at,
+    )
+
+
+def _build_tiles(sample: "MinerSample") -> list[MinerTile]:
+    stale, rate = _stale_stats(sample)
+    baseline = sample.hashrate_1m or sample.hashrate_15m
+    effective = baseline * (1 - rate) if baseline is not None else None
+    last_share_helper = None
+    if sample.last_share_difficulty:
+        last_share_helper = f"diff {sample.last_share_difficulty:,.0f}"
+    tiles = [
+        MinerTile(
+            id="effective-hashrate",
+            label="Effective hashrate",
+            value=_format_hashrate(effective),
+            helper=(f"reported {_format_hashrate(baseline)}" if baseline is not None else None),
+        ),
+        MinerTile(
+            id="stale-rate",
+            label="Stale rate",
+            value=f"{rate * 100:.2f}%",
+            helper=f"{sample.shares_accepted} accepted · {stale} stale",
+            intent="critical" if rate > 0.05 else ("warning" if rate > 0.02 else "good"),
+        ),
+        MinerTile(
+            id="temperature",
+            label="Temperature",
+            value=(f"{sample.temperature_c:.1f}°C" if sample.temperature_c is not None else "—"),
+            intent=_temperature_intent(sample.temperature_c),
+        ),
+        MinerTile(
+            id="last-share",
+            label="Last accepted share",
+            value=_relative_time(sample.last_share_at),
+            helper=last_share_helper,
+        ),
+    ]
+    return tiles
+
+
+def _tiles_response(miner_id: str, sample: "MinerSample") -> MinerTilesResponse:
+    return MinerTilesResponse(
+        miner_id=miner_id,
+        updated_at=sample.recorded_at,
+        tiles=_build_tiles(sample),
+    )
 
 
 def create_engine_and_seed(settings: Settings):
@@ -246,6 +383,82 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "linkedWorkflow": runbook.linked_workflow,
         }
         return RunbookResponse(runbook=payload)  # type: ignore[arg-type]
+
+    @app.post("/api/miners/sample", status_code=status.HTTP_202_ACCEPTED)
+    async def ingest_miner_sample(
+        sample: MinerSampleIn,
+        _: dict[str, Any] = Depends(require_auth),
+        session: Session = Depends(get_session),
+    ) -> dict[str, str]:
+        repo = MinerRepository(session)
+        shares_stale = sample.shares_stale if sample.shares_stale is not None else sample.shares_rejected
+        model = MinerSample(
+            miner_id=sample.miner_id,
+            recorded_at=sample.timestamp or datetime.utcnow(),
+            pool=sample.pool,
+            profile=sample.profile,
+            hashrate_1m=sample.hashrate_1m,
+            hashrate_15m=sample.hashrate_15m,
+            shares_accepted=sample.shares_accepted,
+            shares_rejected=sample.shares_rejected,
+            shares_stale=shares_stale,
+            latency_ms=sample.latency_ms,
+            temperature_c=sample.temperature_c,
+            last_share_difficulty=sample.last_share_difficulty,
+            last_share_at=sample.last_share_at,
+        )
+        recorded = repo.record_sample(model)
+        sample_view = _sample_to_view(recorded)
+        tiles = _build_tiles(recorded)
+        await broadcaster.publish(
+            json.dumps(
+                {
+                    "type": "miner.sample",
+                    "miner_id": recorded.miner_id,
+                    "sample": sample_view.model_dump(mode="json"),
+                    "tiles": [tile.model_dump(mode="json") for tile in tiles],
+                }
+            )
+        )
+        return {"status": "accepted"}
+
+    @app.get("/api/miners/latest", response_model=MinerSamplesResponse)
+    async def get_latest_samples(
+        miner_id: str | None = None,
+        _: dict[str, Any] = Depends(require_auth),
+        session: Session = Depends(get_session),
+    ) -> MinerSamplesResponse:
+        repo = MinerRepository(session)
+        if miner_id:
+            sample = repo.latest_for_miner(miner_id)
+            items = [sample] if sample else []
+        else:
+            items = list(repo.latest_by_miner().values())
+        views = [_sample_to_view(item) for item in items]
+        return MinerSamplesResponse(samples=views, generated_at=datetime.utcnow())
+
+    @app.get("/api/miners/tiles", response_model=MinerTilesResponse)
+    async def get_miner_tiles(
+        miner_id: str = "xmrig",
+        _: dict[str, Any] = Depends(require_auth),
+        session: Session = Depends(get_session),
+    ) -> MinerTilesResponse:
+        repo = MinerRepository(session)
+        sample = repo.latest_for_miner(miner_id)
+        if not sample:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No samples recorded")
+        return _tiles_response(miner_id, sample)
+
+    @app.get("/miners/tiles", response_model=MinerTilesResponse)
+    async def get_public_miner_tiles(
+        miner_id: str = "xmrig",
+        session: Session = Depends(get_session),
+    ) -> MinerTilesResponse:
+        repo = MinerRepository(session)
+        sample = repo.latest_for_miner(miner_id)
+        if not sample:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No samples recorded")
+        return _tiles_response(miner_id, sample)
 
     @app.post("/api/runbooks/{runbook_id}/execute", response_model=RunbookExecuteResponse)
     async def execute_runbook(

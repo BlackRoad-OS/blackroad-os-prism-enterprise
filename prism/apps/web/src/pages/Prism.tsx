@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { PrismEvent, IntelligenceEvent } from '@prism/core';
 import Timeline from '../components/prism/Timeline';
+import MinerTiles from '../components/prism/MinerTiles';
 import IntelligenceTimeline from '../components/intelligence/Timeline';
 import { connect, connectIntelligence } from '../clients/sse';
 
@@ -26,7 +27,10 @@ export default function PrismPage() {
 
   return (
     <div style={{ display: 'grid', gap: '1.5rem', gridTemplateColumns: '1fr 1fr' }}>
-      <Timeline events={events} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <MinerTiles />
+        <Timeline events={events} />
+      </div>
       <IntelligenceTimeline events={intelEvents} />
     </div>
   );

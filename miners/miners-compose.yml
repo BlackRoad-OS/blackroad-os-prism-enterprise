@@ -17,6 +17,37 @@ x-default-constraints: &default-constraints
     - miner-net
 
 services:
+# Low-power miner bundle with optional telemetry bridge and local p2pool.
+# Every service is opt-in. Edit the placeholders before enabling anything.
+services:
+  # --- Monero p2pool (optional local stratum template cache) ---
+  p2pool:
+    image: ghcr.io/sethforprivacy/p2pool:latest
+    container_name: p2pool
+    restart: unless-stopped
+    command: >-
+      --wallet ${XMR_ADDRESS:-YOUR_XMR_ADDRESS}
+      --host 0.0.0.0
+      --port 3333
+      --rpc-port 37889
+      --daemon ${MONEROD_HOST:-host.docker.internal:18089}
+      --stratum 0.0.0.0:3333
+      --mini
+      --log-level 2
+    environment:
+      - P2POOL_DATA=/opt/p2pool
+    ports:
+      - "${P2POOL_PORT:-3333}:3333"
+      - "${P2POOL_API_PORT:-37889}:37889"
+    volumes:
+      - p2pool-data:/opt/p2pool
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:37889/stats"]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+
+  # --- Monero (xmrig) — CPU miner (learn-mode) ---
   xmrig:
     image: ghcr.io/xmrig/xmrig:latest
     container_name: xmrig
@@ -38,10 +69,36 @@ services:
       - XMRIG_ALGO=${XMRIG_ALGO:-rx/0}
     cpus: 0.25                # hard cap ≈25% of one core
     mem_limit: 256m
+      -o ${XMR_POOL_HOST:-p2pool:3333}
+      -u ${XMR_ADDRESS:-YOUR_XMR_ADDRESS}
+      -p ${XMR_POOL_PASSWORD:-x}
+      --algo=${XMRIG_ALGO:-rx/0}
+      --donate-level=${XMRIG_DONATE_LEVEL:-0}
+      --cpu-max-threads-hint=${XMRIG_THREAD_HINT:-1}
+      --hugepages
+      --http-enabled
+      --http-host=0.0.0.0
+      --http-port=18080
+      --http-access-token=${XMRIG_HTTP_TOKEN:-}
+      --http-no-restricted
+      --api-worker-id=${XMRIG_WORKER_ID:-jetson}
+    environment:
+      - TZ=UTC
+    cpus: ${XMRIG_CPUS:-0.5}
+    mem_limit: ${XMRIG_MEM_LIMIT:-512m}
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
+    depends_on:
+      - p2pool
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:18080/1/summary"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
     read_only: true
+    tmpfs:
+      - /tmp
     volumes:
       - /etc/localtime:/etc/localtime:ro
     ports:
@@ -78,6 +135,25 @@ services:
     networks:
       - miner-net
 
+  # --- Miner bridge → Prism telemetry ---
+  miner-bridge:
+    image: python:3.11-slim
+    container_name: miner-bridge
+    restart: unless-stopped
+    depends_on:
+      - xmrig
+    environment:
+      - XMRIG_API_URL=http://xmrig:18080
+      - XMRIG_API_TOKEN=${XMRIG_HTTP_TOKEN:-}
+      - PRISM_API_URL=${PRISM_API_URL:-http://prism-console-api:4000}
+      - PRISM_API_TOKEN=${PRISM_API_TOKEN:-}
+      - MINER_ID=${MINER_ID:-xmrig}
+      - POLL_INTERVAL=${MINER_BRIDGE_INTERVAL:-15}
+      - LOG_LEVEL=${MINER_BRIDGE_LOG_LEVEL:-INFO}
+    command: ["python", "-u", "/app/miner_bridge.py"]
+    volumes:
+      - ./bridge:/app:ro
+
   verusminer:
     image: krypt0nn/verus-miner:latest
     container_name: verusminer
@@ -89,6 +165,9 @@ services:
       - THREADS=${VERUS_THREADS:-1}
     command: >-
       --api-bind 0.0.0.0:4068
+      - WALLET=${VERUS_ADDRESS:-YOUR_VRSC_ADDRESS}
+      - PASSWORD=${VERUS_PASSWORD:-x}
+      - THREADS=${VERUS_THREADS:-1}
     cpus: 0.25
     mem_limit: 256m
     restart: unless-stopped
@@ -101,6 +180,10 @@ services:
       - PASSWORD=${VERUS_PASSWORD:-x}
       - THREADS=${VERUS_THREADS:-1}
 
+    profiles:
+      - manual
+
+  # --- Litecoin (scrypt CPU demo; educational only) ---
   ltc-cpuminer:
     image: registry.gitlab.com/foss/cpuminer-multi:latest
     container_name: ltc-cpuminer
@@ -111,6 +194,10 @@ services:
       -p ${LTC_PASSWORD:-x}
       -t ${LTC_THREADS:-1}
       --api-bind 0.0.0.0:4048
+      -o stratum+tcp://${LTC_POOL:-POOL_HOST:PORT}
+      -u ${LTC_ADDRESS:-YOUR_LTC_ADDRESS}
+      -p ${LTC_PASSWORD:-x}
+      -t ${LTC_THREADS:-1}
     cpus: 0.25
     mem_limit: 256m
     restart: unless-stopped
@@ -126,6 +213,8 @@ services:
       -u ${LTC_ADDRESS:-YOUR_LTC_ADDRESS}
       -p ${LTC_PASSWORD:-x}
       -t ${LTC_THREADS:-1}
+    profiles:
+      - manual
 
   cpuminer-multi:
     image: registry.gitlab.com/foss/cpuminer-multi:latest
@@ -144,6 +233,12 @@ services:
       -p ${PASS}
       -t ${THREADS}
       --api-bind 0.0.0.0:4050
+    command: >-
+      -a ${CPUMINER_ALGO:-verushash}
+      -o stratum+tcp://${CPUMINER_POOL:-POOL_HOST:PORT}
+      -u ${CPUMINER_USER:-YOUR_ADDRESS}
+      -p ${CPUMINER_PASS:-x}
+      -t ${CPUMINER_THREADS:-1}
     cpus: 0.25
     mem_limit: 256m
     restart: unless-stopped
@@ -153,6 +248,10 @@ services:
     ports:
       - "${CPUMINER_API_PORT:-4050}:4050"
 
+    profiles:
+      - manual
+
+  # --- Chia farmer (plots must already exist) ---
   chia:
     image: ghcr.io/chia-network/chia:latest
     container_name: chia
@@ -164,6 +263,13 @@ services:
     volumes:
       - ./chia:/root/.chia   # config + logs persisted locally
       - /mnt/plots:/plots:ro # mount pre-plotted drives read-only
+      - keys=none
+      - service=farm
+      - log_level=INFO
+      - TZ=UTC
+    volumes:
+      - ./chia:/root/.chia
+      - /mnt/plots:/plots:ro
     cpus: 0.2
     mem_limit: 512m
     restart: unless-stopped
@@ -221,3 +327,9 @@ services:
 networks:
   miner-net:
     driver: bridge
+    profiles:
+      - manual
+
+volumes:
+  p2pool-data:
+    driver: local
