@@ -155,6 +155,44 @@ def test_phase_derivative_endpoint_auto_resolves(client: TestClient) -> None:
     assert "phi_y" in payload["why"]
 
 
+@pytest.mark.parametrize(
+    "payload, inferred",
+    [
+        (
+            {},
+            {"omega_0", "lambda_", "eta", "phi_x", "phi_y", "r_x", "r_y", "k_b_t"},
+        ),
+        (
+            {"phi_x": 0.9, "phi_y": -0.3},
+            {"omega_0", "lambda_", "eta", "r_x", "r_y", "k_b_t"},
+        ),
+    ],
+)
+def test_phase_derivative_endpoint_auto_temperature_inference(
+    client: TestClient, payload: dict, inferred: set[str]
+) -> None:
+    SERVER_CONTEXT.last_phi_x = -0.25
+    SERVER_CONTEXT.last_phi_y = 0.75
+    request_json = {"temperature_K": 300.0, **payload}
+    response = client.post("/api/ambr/coherence/dphi", json=request_json)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["mode"] == "auto"
+    resolved = body["resolved"]
+    why = body["why"]
+    assert math.isclose(resolved["k_b_t"], 1.380649e-23 * 300.0)
+    for field in inferred:
+        assert field in why
+    missing_fields = inferred & {"phi_x", "phi_y"}
+    if "phi_x" in missing_fields:
+        assert math.isclose(resolved["phi_x"], SERVER_CONTEXT.last_phi_x)
+    if "phi_y" in missing_fields:
+        assert math.isclose(resolved["phi_y"], SERVER_CONTEXT.last_phi_y)
+    for provided in payload:
+        if provided in why:
+            pytest.fail(f"unexpected provenance entry recorded for provided field {provided}")
+
+
 def test_phase_derivative_endpoint_strict_requires_fields(client: TestClient) -> None:
     response = client.post(
         "/api/ambr/coherence/dphi",
@@ -184,3 +222,45 @@ def test_phase_derivative_endpoint_strict_success(client: TestClient) -> None:
     assert payload["mode"] == "strict"
     assert payload["why"] == {}
     assert math.isclose(payload["dphi_dt"], phase_derivative(**resolved))
+
+
+def test_phase_derivative_endpoint_strict_rejects_nan(client: TestClient) -> None:
+    body = {
+        "auto_resolve": False,
+        "omega_0": 1.0,
+        "lambda_": 0.5,
+        "eta": 0.2,
+        "phi_x": "nan",
+        "phi_y": 0.1,
+        "r_x": 1.0,
+        "r_y": 1.0,
+        "k_b_t": 1e-21,
+    }
+    response = client.post("/api/ambr/coherence/dphi", json=body)
+    assert response.status_code == 422
+    payload = response.json()
+    assert isinstance(payload.get("fields"), list)
+    assert payload["fields"]
+    first_error = payload["fields"][0]
+    assert first_error["field"] == "phi_x"
+    assert "reason" in first_error
+
+
+def test_phase_derivative_endpoint_strict_temperature_why_empty(client: TestClient) -> None:
+    body = {
+        "auto_resolve": False,
+        "omega_0": 1.0,
+        "lambda_": 0.5,
+        "eta": 0.2,
+        "phi_x": 0.3,
+        "phi_y": -0.2,
+        "r_x": 1.1,
+        "r_y": 0.9,
+        "k_b_t": 1e-21,
+        "temperature_K": 310.0,
+    }
+    response = client.post("/api/ambr/coherence/dphi", json=body)
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["mode"] == "strict"
+    assert payload["why"] == {}
