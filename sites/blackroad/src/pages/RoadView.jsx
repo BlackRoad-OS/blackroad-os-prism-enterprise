@@ -36,19 +36,93 @@ const DEFAULT_ITEMS = [
     type: 'code',
     category: 'session',
     lastOpened: '2025-09-03T08:15:00Z'
+  },
+  {
+    id: 5,
+    title: 'Soundscape Mix',
+    agent: 'Echo',
+    team: 'gamma',
+    type: 'audio',
+    category: 'asset',
+    lastOpened: '2025-09-04T11:20:00Z'
+  },
+  {
+    id: 6,
+    title: 'Launch Brief',
+    agent: 'Minerva',
+    team: 'delta',
+    type: 'document',
+    category: 'brief',
+    lastOpened: '2025-09-02T18:45:00Z'
+  },
+  {
+    id: 7,
+    title: 'Market Pulse Dashboard',
+    agent: 'Atlas',
+    team: 'growth',
+    type: 'dashboard',
+    category: 'analytics',
+    lastOpened: '2025-09-05T09:10:00Z'
+  },
+  {
+    id: 8,
+    title: 'Onboarding Flow',
+    agent: 'Helios',
+    team: 'success',
+    type: 'simulation',
+    category: 'experience',
+    lastOpened: '2025-09-04T21:05:00Z'
+  },
+  {
+    id: 9,
+    title: 'Launch Checklist',
+    agent: 'Hermes',
+    team: 'ops',
+    type: 'workflow',
+    category: 'project',
+    lastOpened: '2025-08-31T07:30:00Z'
+  },
+  {
+    id: 10,
+    title: 'Render Farm Calibration',
+    agent: 'Vulcan',
+    team: 'gamma',
+    type: 'code',
+    category: 'maintenance',
+    lastOpened: '2025-09-01T16:55:00Z'
+  },
+  {
+    id: 11,
+    title: 'Investor Deck',
+    agent: 'Aurora',
+    team: 'capital',
+    type: 'presentation',
+    category: 'asset',
+    lastOpened: '2025-09-03T12:40:00Z'
+  },
+  {
+    id: 12,
+    title: 'Data Drift Report',
+    agent: 'Orion',
+    team: 'analytics',
+    type: 'dataset',
+    category: 'report',
+    lastOpened: '2025-09-04T05:25:00Z'
   }
 ]
+
+const STORAGE_KEY = 'roadview-items-v2'
 
 export default function RoadView () {
   const [items] = useState(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('roadview-items')
+      const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
         try {
           return JSON.parse(stored)
         } catch {}
       }
-      localStorage.setItem('roadview-items', JSON.stringify(DEFAULT_ITEMS))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_ITEMS))
     }
     return DEFAULT_ITEMS
   })
@@ -60,6 +134,7 @@ export default function RoadView () {
 
   const agents = useMemo(() => ['all', ...new Set(items.map(i => i.agent))], [items])
   const teams = useMemo(() => ['all', ...new Set(items.map(i => i.team))], [items])
+  const types = useMemo(() => ['all', ...new Set(items.map(i => i.type))], [items])
 
   const filteredItems = useMemo(() => {
     let list = items
@@ -114,10 +189,11 @@ export default function RoadView () {
           value={typeFilter}
           onChange={e => setTypeFilter(e.target.value)}
         >
-          <option value='all'>All Types</option>
-          <option value='code'>Code</option>
-          <option value='image'>Image</option>
-          <option value='video'>Video</option>
+          {types.map(type => (
+            <option key={type} value={type}>
+              {type === 'all' ? 'All Types' : type.charAt(0).toUpperCase() + type.slice(1)}
+            </option>
+          ))}
         </select>
 
         <select
