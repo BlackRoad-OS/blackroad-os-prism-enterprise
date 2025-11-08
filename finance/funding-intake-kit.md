@@ -24,7 +24,7 @@
 
 1. **Entity & EIN** (any of: existing LLC/C-Corp/sole prop).
 2. **Bank account** (business if you have it; personal only as last resort).
-3. **Payment rails**: ACH/wire instructions ready; optional Stripe link.
+3. **Payment rails**: Secure ACH payment link ready; only upload bank details inside the client's AP portal if they insist.
 4. **Paperwork**: Short **MSA + SOW** or a one-page Service Order.
 5. **Tax form**: US clients usually ask for **W-9** (or W-8 if non-US).
 
@@ -40,7 +40,7 @@ Deliverables:
   • Weeks 2–3: Deploy Prism + OpenTelemetry; dashboards live
   • Week 4: Policies + training; runbooks handed over
 Fees: USD $50,000 fixed, 50% due at signing, 50% at Week 4
-Payment: ACH/Wire within 5 business days of invoice
+Payment: ACH via secure payment link within 5 business days of invoice
 IP: Pre-existing IP remains owner’s; client receives usage rights to outputs
 Confidentiality: Mutual; 2 years; carve-outs for public info/order of court
 Limitation of Liability: Capped at fees paid; no consequential damages
@@ -56,14 +56,11 @@ Email: {ap@client.com}
 
 Description: Prism Console POC (per Service Order)
 Amount Due: $25,000 (50% upfront)
-Due: Net 5 (ACH/Wire)
+Due: Net 5
 
-ACH/Wire Instructions:
-Bank: _______________________
-Routing (ABA): ______________
-Account: ____________________
-Account Name: BlackRoad ______
-Memo: BR-{YYYYMMDD-001}
+Payment: Pay via secure link — {PAYMENT_LINK}
+If AP requires a direct bank upload, reply: "Reply with AP portal link for secure bank info upload."
+Notes: W-9 (EIN only) available on request.
 ```
 
 ---
@@ -138,9 +135,9 @@ Reference: SAFE — {Investor Name}
 ## Banking & Payments Quickstart
 
 * Prefer **business banking**; keep funds separate from personal.
-* Provide both **ACH** and **wire** options.
-* Keep a **standard wiring block** handy; include invoice number in memo.
-* For cards/ACH online, set up a simple **payment link** (optional).
+* Offer a secure **ACH payment link**; only share wire instructions inside a verified AP portal.
+* Keep a **standard wiring block** handy for portal uploads; include invoice number in memo.
+* Maintain a hosted **payment link** (Stripe, QuickBooks, PayPal) so no bank numbers travel by email.
 
 ---
 
