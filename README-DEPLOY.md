@@ -36,6 +36,26 @@ Add the following Action secrets/variables under
 4. Revalidates `/healthz` and `/api/version` before marking the run successful.
 5. Posts a Slack summary when `SLACK_WEBHOOK_URL` is available.
 
+## Gated Promotions
+
+The `gate-and-promote.yml` workflow orchestrates gated promotions for preview,
+staging, and production. Each run evaluates the Policy Gate (`tools/policy_gate.ts`),
+executes the API and UI test suites, validates the metrics contract snapshot
+(`data/metrics/status.json`), and confirms manual approvals from
+`config/approvals.json`. Gate outcomes are surfaced through the Gatekeeper API
+(`GET /api/gate/status`) and mirrored to GitHub Checks (`Policy Gate`, `Tests
+Gate`, `Metrics Gate`, `Approvals Gate`). When all gates are green the workflow
+delegates to reusable deployment ladders:
+
+- **Staging** calls `reusable-canary.yml` to step traffic through `1,50,100`
+  canary slices with baked health probes.
+- **Production** calls `reusable-bluegreen.yml` to warm the green stack, shift
+  traffic, and fall back automatically if CloudWatch alarms or probes turn red.
+
+Both reusable workflows emit `Canary Health`/`BlueGreen Health` checks and
+invoke `scripts/rollback.sh` if the run fails, ensuring parity with the
+rollback guidance captured in `docs/ops/rollback-forward.md`.
+
 ## Legacy SSH fallback
 
 The historical SSH pipeline still exists as a manual job. Trigger it from the
