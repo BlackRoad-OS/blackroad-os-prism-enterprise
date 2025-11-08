@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import json
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 
@@ -22,6 +23,7 @@ from orchestrator import (
     TaskRepository,
 )
 from orchestrator.logging_config import setup_logging
+from cli.consent_cli import register_consent_commands
 
 app = typer.Typer(help="BlackRoad Prism Console")
 bot_app = typer.Typer(help="Bot commands")
@@ -33,6 +35,7 @@ app.add_typer(bot_app, name="bot")
 app.add_typer(task_app, name="task")
 app.add_typer(policy_app, name="policy")
 app.add_typer(config_app, name="config")
+register_consent_commands(app)
 
 TASK_STORE = Path("artifacts/tasks.json")
 LINEAGE_LOG = Path("artifacts/lineage.jsonl")
@@ -262,9 +265,6 @@ def close_recon_run(
             for row in reader:
                 tb[row["account"]] = float(row["amount"])
     close_recon.run_recons(period, tb, config, fixtures)
-    fixtures: Path = typer.Option(..., "--fixtures", exists=True),
-):
-    close_recon.run_recons(period, str(fixtures))
     typer.echo("recons")
 
 
@@ -446,8 +446,7 @@ def plm_bom_explode(
     item: str = typer.Option(..., "--item"),
     rev: str = typer.Option(..., "--rev"),
     level: int = typer.Option(1, "--level"),
-):
-def plm_bom_explode(item: str = typer.Option(..., "--item"), rev: str = typer.Option(..., "--rev"), level: int = typer.Option(1, "--level")):
+) -> None:
     rows = plm_bom.explode(item, rev, level)
     for row in rows:
         typer.echo(
@@ -457,6 +456,9 @@ def plm_bom_explode(item: str = typer.Option(..., "--item"), rev: str = typer.Op
                     row.get("component_id", ""),
                     f"{row.get('qty', 0):.6f}",
                 ]
+            )
+        )
+
 """Lightweight CLI for program and task management."""
 
 from __future__ import annotations
@@ -599,8 +601,6 @@ def plm_eco_new(
     to_rev: str = typer.Option(..., "--to"),
     reason: str = typer.Option(..., "--reason"),
 ):
-@app.command("plm:eco:new")
-def plm_eco_new(item: str = typer.Option(..., "--item"), from_rev: str = typer.Option(..., "--from"), to_rev: str = typer.Option(..., "--to"), reason: str = typer.Option(..., "--reason")):
     ch = plm_eco.new_change(item, from_rev, to_rev, reason)
     typer.echo(ch.id)
 
@@ -613,9 +613,9 @@ def plm_eco_impact(id: str = typer.Option(..., "--id")):
 
 @app.command("plm:eco:approve")
 def plm_eco_approve(
-    id: str = typer.Option(..., "--id"), as_user: str = typer.Option(..., "--as-user")
+    id: str = typer.Option(..., "--id"),
+    as_user: str = typer.Option(..., "--as-user"),
 ):
-def plm_eco_approve(id: str = typer.Option(..., "--id"), as_user: str = typer.Option(..., "--as-user")):
     plm_eco.approve(id, as_user)
     typer.echo("approved")
 
@@ -638,8 +638,6 @@ def mfg_routing_load(
     strict: bool = typer.Option(False, "--strict"),
 ):
     mfg_routing.load_routings(str(dir), strict)
-def mfg_routing_load(dir: Path = typer.Option(..., "--dir", exists=True, file_okay=False)):
-    mfg_routing.load_routings(str(dir))
     typer.echo("ok")
 
 
@@ -649,7 +647,6 @@ def mfg_routing_capcheck(
     rev: str = typer.Option(..., "--rev"),
     qty: int = typer.Option(..., "--qty"),
 ):
-def mfg_routing_capcheck(item: str = typer.Option(..., "--item"), rev: str = typer.Option(..., "--rev"), qty: int = typer.Option(..., "--qty")):
     res = mfg_routing.capacity_check(item, rev, qty)
     typer.echo(json.dumps(res))
 

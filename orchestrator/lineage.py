@@ -8,6 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Sequence
 
+from orchestrator.consent import ConsentRegistry
 from orchestrator.protocols import BotResponse, Task
 
 
@@ -54,6 +55,13 @@ class LineageTracker:
             )
 
     def record(self, task: Task, bot_name: str, response: BotResponse) -> LineageEvent:
+        owner = task.owner or "system"
+        ConsentRegistry.get_default().check_consent(
+            from_agent=owner,
+            to_agent=bot_name,
+            consent_type="collaboration",
+            scope=(f"task:{task.id}", "handoff"),
+        )
         event = LineageEvent(
             task_id=task.id,
             bot_name=bot_name,

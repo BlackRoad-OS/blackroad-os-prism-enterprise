@@ -8,7 +8,7 @@ from bots.sop_bot import SopBot
 from orchestrator import Task, TaskPriority
 
 
-def test_sop_bot_allocations():
+def test_sop_bot_allocations(grant_full_consent):
     bot = SopBot()
     task = Task(
         id="TSK-SOP",
@@ -17,6 +17,7 @@ def test_sop_bot_allocations():
         priority=TaskPriority.MEDIUM,
         created_at=datetime.utcnow(),
     )
+    grant_full_consent(task.owner, bot.metadata.name)
     response = bot.run(task)
     assert response.ok
     assert response.metrics["service_level"] == 0.96

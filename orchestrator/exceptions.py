@@ -33,3 +33,5 @@ class MemoryWriteError(OrchestratorError):
 
 class ConsentViolationError(OrchestratorError):
     """Raised when an action is attempted without the required consent."""
+class ConsentError(OrchestratorError):
+    """Raised when consent validation fails for a sensitive operation."""

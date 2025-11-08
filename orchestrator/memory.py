@@ -11,6 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Iterator, Optional
 
+from orchestrator.consent import ConsentRegistry
 from orchestrator.exceptions import MemoryWriteError
 from orchestrator.protocols import BotResponse, MemoryRecord, Task
 from orchestrator.redaction import ensure_redacted
@@ -60,6 +61,13 @@ class MemoryLog:
         """Append a new record to the log and return it."""
 
         try:
+            owner = task.owner or "system"
+            ConsentRegistry.get_default().check_consent(
+                from_agent=owner,
+                to_agent=bot_name,
+                consent_type="data_access",
+                scope=(f"task:{task.id}", "memory"),
+            )
             previous_entry = None
             for previous_entry in _iter_memory(self.path):
                 pass
