@@ -29,3 +29,7 @@ class RedactionError(OrchestratorError):
 
 class MemoryWriteError(OrchestratorError):
     """Raised when memory persistence encounters an error."""
+
+
+class ConsentError(OrchestratorError):
+    """Raised when consent validation fails for a sensitive operation."""

@@ -8,6 +8,7 @@ from typing import Any
 
 from sdk import plugin_api
 from .base import BaseBot, BotMetadata
+from .consent import ConsentGrant, ConsentRegistry, ConsentRequest
 from .lineage import LineageTracker
 from .memory import MemoryLog
 from .policy import PolicyEngine
@@ -36,6 +37,9 @@ __all__ = [
     "MemoryRecord",
     "Task",
     "TaskPriority",
+    "ConsentRegistry",
+    "ConsentRequest",
+    "ConsentGrant",
     "BotExecutionError",
     "BotRegistry",
     "RouteContext",

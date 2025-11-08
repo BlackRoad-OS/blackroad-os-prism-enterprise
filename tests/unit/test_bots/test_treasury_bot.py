@@ -8,7 +8,7 @@ from bots.treasury_bot import TreasuryBot
 from orchestrator import Task, TaskPriority
 
 
-def test_treasury_bot_generates_forecast():
+def test_treasury_bot_generates_forecast(grant_full_consent):
     bot = TreasuryBot()
     task = Task(
         id="TSK-BOT",
@@ -17,6 +17,7 @@ def test_treasury_bot_generates_forecast():
         priority=TaskPriority.HIGH,
         created_at=datetime.utcnow(),
     )
+    grant_full_consent(task.owner, bot.metadata.name)
     response = bot.run(task)
     assert response.ok
     assert len(response.data["weekly_cash"]) == 13

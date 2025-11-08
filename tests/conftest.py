@@ -4,13 +4,14 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Sequence
 
 import pytest
 
 if TYPE_CHECKING:  # pragma: no cover - import-time typing only
     from bots import build_registry as BuildRegistryFunc
     from orchestrator import (
+        ConsentRegistry,
         LineageTracker,
         MemoryLog,
         PolicyEngine,
@@ -27,6 +28,7 @@ def _load_orchestrator_modules():
     try:
         from bots import build_registry  # type: ignore
         from orchestrator import (  # type: ignore
+            ConsentRegistry,
             LineageTracker,
             MemoryLog,
             PolicyEngine,
@@ -41,6 +43,7 @@ def _load_orchestrator_modules():
         pytest.skip(f"orchestrator stack unavailable: {exc}")
     return (
         build_registry,
+        ConsentRegistry,
         LineageTracker,
         MemoryLog,
         PolicyEngine,
@@ -54,8 +57,37 @@ def _load_orchestrator_modules():
 
 
 @pytest.fixture()
+def consent_registry(tmp_path: Path, monkeypatch) -> "ConsentRegistry":
+    modules = _load_orchestrator_modules()
+    ConsentRegistry = modules[1]
+    log_path = tmp_path / "consent.jsonl"
+    monkeypatch.setenv("PRISM_CONSENT_LOG", str(log_path))
+    ConsentRegistry.reset_default()
+    registry = ConsentRegistry.get_default()
+    yield registry
+    ConsentRegistry.reset_default()
+
+
+@pytest.fixture()
+def grant_full_consent(consent_registry) -> Callable[[str, str, Sequence[str] | str | None], None]:
+    def _grant(owner: str, bot_name: str, scope: Sequence[str] | str | None = "*") -> None:
+        for consent_type in ("task_assignment", "data_access", "collaboration"):
+            request_id = consent_registry.request_consent(
+                from_agent=owner,
+                to_agent=bot_name,
+                consent_type=consent_type,
+                purpose=f"automated {consent_type}",
+                duration="8h",
+                scope=scope,
+            )
+            consent_registry.grant_consent(request_id)
+
+    return _grant
+
+
+@pytest.fixture()
 def task_repository(tmp_path: Path) -> TaskRepository:
-    _, _, _, _, _, _, _, _, _, TaskRepository = _load_orchestrator_modules()
+    _, _, _, _, _, _, _, _, _, _, TaskRepository = _load_orchestrator_modules()
     return TaskRepository(tmp_path / "tasks.json")
 
 
@@ -79,13 +111,13 @@ policies:
 
 @pytest.fixture()
 def policy_engine(policy_file: Path) -> PolicyEngine:
-    _, _, _, PolicyEngine, _, _, _, _, _, _ = _load_orchestrator_modules()
+    _, _, _, _, PolicyEngine, _, _, _, _, _, _ = _load_orchestrator_modules()
     return PolicyEngine.from_file(policy_file)
 
 
 @pytest.fixture()
 def route_context(tmp_path: Path, policy_engine: PolicyEngine) -> RouteContext:
-    _, LineageTracker, MemoryLog, _, RouteContext, _, SecRule2042Gate, _, _, _ = _load_orchestrator_modules()
+    _, _, LineageTracker, MemoryLog, _, RouteContext, _, SecRule2042Gate, _, _, _ = _load_orchestrator_modules()
     memory = MemoryLog(tmp_path / "memory.jsonl")
     lineage = LineageTracker(tmp_path / "lineage.jsonl")
     sec_gate = SecRule2042Gate()
@@ -100,14 +132,14 @@ def route_context(tmp_path: Path, policy_engine: PolicyEngine) -> RouteContext:
 
 @pytest.fixture()
 def router(task_repository: TaskRepository) -> Router:
-    build_registry, _, _, _, _, Router, _, _, _, _ = _load_orchestrator_modules()
+    build_registry, _, _, _, _, _, Router, _, _, _, _ = _load_orchestrator_modules()
     registry = build_registry()
     return Router(registry=registry, repository=task_repository)
 
 
 @pytest.fixture()
 def treasury_task() -> Task:
-    _, _, _, _, _, _, _, Task, TaskPriority, _ = _load_orchestrator_modules()
+    _, _, _, _, _, _, _, _, Task, TaskPriority, _ = _load_orchestrator_modules()
     return Task(
         id="TSK-TEST",
         goal="Build 13-week cash forecast",

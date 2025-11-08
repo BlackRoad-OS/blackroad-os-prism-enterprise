@@ -7,6 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Mapping, Sequence
 
+from .consent import ConsentRegistry
 from .exceptions import BotNotRegisteredError, TaskNotFoundError
 from .lineage import LineageTracker
 from .memory import MemoryLog
@@ -146,11 +147,25 @@ class Router:
 
         bot = self.registry.get(bot_name)
         context.policy_engine.enforce(bot_name, context.approved_by)
+        registry = ConsentRegistry.get_default()
+        owner = task.owner or "system"
 
         response = bot.run(task)
         task.status = "done" if getattr(response, "ok", False) else "failed"
         self.repository.update(task)
+        registry.check_consent(
+            from_agent=owner,
+            to_agent=bot.metadata.name,
+            consent_type="data_access",
+            scope=(f"task:{task.id}", "memory"),
+        )
         context.memory.append(task, bot.metadata.name, response)
+        registry.check_consent(
+            from_agent=owner,
+            to_agent=bot.metadata.name,
+            consent_type="collaboration",
+            scope=(f"task:{task.id}", "handoff"),
+        )
         context.lineage.record(task, bot.metadata.name, response)
         return response
 

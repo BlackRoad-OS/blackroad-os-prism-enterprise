@@ -30,7 +30,9 @@ policies:
     )
 
 
-def test_route_records_memory_and_lineage(tmp_path: Path) -> None:
+def test_route_records_memory_and_lineage(
+    tmp_path: Path, grant_full_consent
+) -> None:
     task = Task(
         id="TSK-INTEG",
         goal="Build 13-week cash forecast",
@@ -50,6 +52,7 @@ def test_route_records_memory_and_lineage(tmp_path: Path) -> None:
         approved_by=["cfo"],
         sec_gate=SecRule2042Gate(),
     )
+    grant_full_consent(task.owner, "Treasury-BOT")
     response = router.route(task.id, "Treasury-BOT", context)
     assert response.ok
     tail = context.memory.tail(1)

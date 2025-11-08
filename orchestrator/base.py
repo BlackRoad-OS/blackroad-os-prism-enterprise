@@ -6,6 +6,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Mapping, Sequence
 
+from orchestrator.consent import ConsentRegistry
+from orchestrator.exceptions import ConsentError
 from orchestrator.protocols import BotResponse, Task
 
 
@@ -39,7 +41,19 @@ class BaseBot(ABC):
     def run(self, task: Task) -> BotResponse:
         """Wrapper around :meth:`handle_task` for future instrumentation."""
 
-        return self.handle_task(task)
+        owner = task.owner or "system"
+        registry = ConsentRegistry.get_default()
+        registry.check_consent(
+            from_agent=owner,
+            to_agent=self.metadata.name,
+            consent_type="task_assignment",
+            scope=(f"task:{task.id}", "task_assignment"),
+        )
+
+        response = self.handle_task(task)
+        if not isinstance(response, BotResponse):
+            raise ConsentError("bot responses must be structured for consent auditing")
+        return response
 
     def describe(self) -> Mapping[str, Sequence[str]]:
         """Return human-readable metadata about the bot."""
