@@ -46,3 +46,38 @@ def test_landauer_min_matches_manual() -> None:
     temperature = 310.0
     expected = 1.380649e-23 * temperature * np.log(2.0) * bits
     assert pytest.approx(expected, rel=1e-12) == landauer_min(bits, temperature)
+
+
+@pytest.mark.parametrize("temperature", [1.0, 77.0, 273.15, 350.0, 600.0])
+def test_landauer_min_monotonic_in_bits(temperature: float) -> None:
+    bits_grid = np.array([0.0, 0.125, 1.0, 8.0, 64.0, 256.0])
+    energies = [landauer_min(bits, temperature) for bits in bits_grid]
+    assert all(previous <= current for previous, current in zip(energies, energies[1:]))
+
+
+@pytest.mark.parametrize("bits", [1.0, 2.5, 16.0, 64.0, 128.0])
+def test_landauer_min_monotonic_in_temperature(bits: float) -> None:
+    temperatures = np.array([1.0, 25.0, 77.0, 150.0, 273.15, 400.0])
+    energies = [landauer_min(bits, temperature) for temperature in temperatures]
+    assert all(previous <= current for previous, current in zip(energies, energies[1:]))
+
+
+@pytest.mark.parametrize("size", [8, 64, 256])
+def test_energy_increment_random_traces_match_trapz(size: int) -> None:
+    rng = np.random.default_rng(seed=size)
+    dt = 1e-3
+    gamma = 0.7
+    eta = 0.2
+    a = rng.normal(loc=0.0, scale=0.5, size=size)
+    theta = rng.normal(loc=0.0, scale=0.5, size=size)
+    expected = np.trapz(gamma * a ** 2 + eta * np.abs(a * theta), dx=dt)
+    observed = energy_increment(a, theta, dt, gamma=gamma, eta=eta)
+    assert observed == pytest.approx(expected, abs=1e-6)
+
+
+@pytest.mark.parametrize("shape", [(5,), (2, 3), (4, 4, 2)])
+def test_spiral_entropy_non_negative_for_zero_arrays(shape: tuple[int, ...]) -> None:
+    zeros = np.zeros(shape)
+    entropy = spiral_entropy(zeros, zeros)
+    assert entropy >= 0.0
+    assert entropy == pytest.approx(0.0, abs=1e-12)
