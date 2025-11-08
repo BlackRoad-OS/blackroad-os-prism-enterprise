@@ -4,17 +4,34 @@ version: "3.8"
 # requires manual activation. Copy to a device as ./miners-compose.yml and edit
 # the placeholders before running:
 #   docker compose -f miners-compose.yml up -d <service>
+version: '3.9'
+
+x-default-constraints: &default-constraints
+  cpus: 0.25
+  mem_limit: 256m
+  restart: unless-stopped
+  read_only: true
+  security_opt:
+    - no-new-privileges:true
+  networks:
+    - miner-net
+
 services:
-  # --- Monero (XMRig) — CPU miner for education ---
   xmrig:
     image: ghcr.io/xmrig/xmrig:latest
     container_name: xmrig
+    <<: *default-constraints
     command: >-
       -o ${XMRIG_POOL:-POOL_HOST:PORT}
       -u ${XMRIG_WALLET:-YOUR_XMR_ADDRESS}
       --tls
       --donate-level=0
       --cpu-max-threads-hint=${XMRIG_THREADS_HINT:-1}
+      -o ${XMR_POOL:-POOL_HOST:PORT}
+      -u ${XMR_ADDRESS:-YOUR_XMR_ADDRESS}
+      --tls
+      --donate-level=0
+      --cpu-max-threads-hint=${XMR_THREADS:-1}
       --http-host=0.0.0.0
       --http-port=18080
     environment:
@@ -29,11 +46,42 @@ services:
       - /etc/localtime:/etc/localtime:ro
     ports:
       - "${XMRIG_HTTP_PORT:-18080}:18080"   # optional: expose the HTTP summary
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
 
-  # --- Verus (VerusHash 2.2) — efficient CPU miner ---
+  p2pool:
+    image: ghcr.io/schernykh/p2pool:release
+    container_name: p2pool
+    <<: *default-constraints
+    command: >-
+      --wallet ${P2POOL_WALLET:-YOUR_XMR_ADDRESS}
+      --host ${P2POOL_MONEROD:-monerod:18081}
+      --stratum ${P2POOL_STRATUM:-0.0.0.0:3333}
+      --log-level 3
+    ports:
+      - "${P2POOL_STRATUM_PORT:-3333}:3333"
+
+  miner-bridge:
+    build:
+      context: ../tools/miners
+    container_name: miner-bridge
+    restart: unless-stopped
+    environment:
+      PRISM_API: ${PRISM_API}
+      PRISM_TOKEN: ${PRISM_TOKEN}
+      PRISM_ORG_ID: ${PRISM_ORG_ID}
+      MINER_AGENT_ID: ${MINER_AGENT_ID}
+      XMRIG_URL: ${XMRIG_URL:-http://xmrig:18080/2/summary}
+      POLL_INTERVAL_MS: ${POLL_INTERVAL_MS:-15000}
+    depends_on:
+      - xmrig
+    networks:
+      - miner-net
+
   verusminer:
     image: krypt0nn/verus-miner:latest
     container_name: verusminer
+    <<: *default-constraints
     environment:
       - POOL=${VERUS_POOL:-POOL_HOST:PORT}
       - WALLET=${VERUS_WALLET:-YOUR_VRSC_ADDRESS}
@@ -49,8 +97,10 @@ services:
     read_only: true
     ports:
       - "${VERUS_API_PORT:-4068}:4068"
+      - WALLET=${VERUS_ADDRESS:-YOUR_VRSC_ADDRESS}
+      - PASSWORD=${VERUS_PASSWORD:-x}
+      - THREADS=${VERUS_THREADS:-1}
 
-  # --- Litecoin (LTC) • scrypt CPU demo (educational only) ---
   ltc-cpuminer:
     image: registry.gitlab.com/foss/cpuminer-multi:latest
     container_name: ltc-cpuminer
@@ -69,11 +119,18 @@ services:
     read_only: true
     ports:
       - "${LTC_API_PORT:-4048}:4048"
+    <<: *default-constraints
+    command: >-
+      -a scrypt
+      -o stratum+tcp://${LTC_POOL:-POOL_HOST:PORT}
+      -u ${LTC_ADDRESS:-YOUR_LTC_ADDRESS}
+      -p ${LTC_PASSWORD:-x}
+      -t ${LTC_THREADS:-1}
 
-  # --- Generic cpuminer (multi-algo learn-mode) ---
   cpuminer-multi:
     image: registry.gitlab.com/foss/cpuminer-multi:latest
     container_name: cpuminer-multi
+    <<: *default-constraints
     environment:
       - ALGO=${CPUMINER_ALGO:-verushash}
       - POOL=${CPUMINER_POOL:-POOL_HOST:PORT}
@@ -96,7 +153,6 @@ services:
     ports:
       - "${CPUMINER_API_PORT:-4050}:4050"
 
-  # --- Chia farmer/harvester role (plots must already exist) ---
   chia:
     image: ghcr.io/chia-network/chia:latest
     container_name: chia
@@ -145,3 +201,23 @@ services:
       xmrig:
         condition: service_started
     restart: unless-stopped
+    cpus: 0.2
+    mem_limit: 512m
+    restart: unless-stopped
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - miner-net
+    environment:
+      - keys=none
+      - service=farm
+      - log_level=${CHIA_LOG_LEVEL:-INFO}
+      - TZ=${TZ:-UTC}
+    volumes:
+      - ./chia:/root/.chia
+      - /mnt/plots:/plots:ro
+
+networks:
+  miner-net:
+    driver: bridge
