@@ -4,6 +4,8 @@
 
 ## Services included
 - **Monero (xmrig)** – CPU PoW, best for demos
+- **Monero p2pool** – lightweight local stratum cache for lower stale rates
+- **Miner bridge** – streams `miner.sample` telemetry into Prism every ~15 seconds
 - **Verus (verusminer)** – efficient CPU algo (still tiny on a Pi)
 - **Litecoin (scrypt CPU demo)** – educational; real LTC needs Scrypt ASICs
 - **Chia farmer** – ultra-low energy **farming** of pre-plotted drives
@@ -14,6 +16,48 @@ docker compose -f miners/miners-compose.yml config   # validate only
 docker compose -f miners/miners-compose.yml up -d xmrig          # enable xmrig (example)
 docker compose -f miners/miners-compose.yml stop xmrig           # stop
 ```
+### Enable the telemetry stack
+```bash
+# bring up p2pool + xmrig + miner bridge after editing wallet/node hosts
+docker compose -f miners/miners-compose.yml up -d p2pool xmrig miner-bridge
+
+# watch miner.sample events hitting Prism
+docker compose -f miners/miners-compose.yml logs -f miner-bridge
+```
+
+### Optional controller (bandit + duty-cycle)
+```bash
+node miners/controller/controller.mjs
+```
+
+The controller polls Prism for the last `miner.sample` slices, rotates pools via
+the XMRig HTTP API, and pauses the container when temps exceed the soft limit
+(defaults: 80 °C threshold, 10 minute cooldown).
+
+To decouple pool profiles from the script itself, point `PROFILE_CONFIG_PATH`
+at a JSON or YAML file:
+
+```bash
+cat >miners/controller/profiles.json <<'EOF'
+[
+  {
+    "name": "p2pool-local",
+    "pool": {"url": "stratum+tcp://p2pool:3333", "user": "YOUR_XMR_ADDRESS", "pass": "x"},
+    "duty": 1.0
+  },
+  {
+    "name": "remote-backup",
+    "pool": {"url": "stratum+tcp://pool.example.com:5555", "user": "YOUR_XMR_ADDRESS", "pass": "worker"},
+    "duty": 0.75
+  }
+]
+EOF
+
+PROFILE_CONFIG_PATH=miners/controller/profiles.json node miners/controller/controller.mjs
+```
+
+YAML is also supported if the optional [`yaml`](https://www.npmjs.com/package/yaml)
+package is installed locally.
 
 ## Native systemd (xmrig, throttled, hardened)
 # Miners pack (opt-in, throttled)

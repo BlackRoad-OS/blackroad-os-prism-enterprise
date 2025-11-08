@@ -5,7 +5,7 @@ from datetime import datetime
 
 from sqlmodel import Session, delete, select
 
-from .models import Agent, AgentEvent, Metric, Runbook, Setting
+from .models import Agent, AgentEvent, Metric, MinerSample, Runbook, Setting
 
 
 class AgentRepository:
@@ -75,9 +75,43 @@ class MetricRepository:
         self.session.commit()
 
 
+class MinerRepository:
+    def __init__(self, session: Session) -> None:
+        self.session = session
+
+    def record_sample(self, sample: MinerSample) -> MinerSample:
+        self.session.add(sample)
+        self.session.commit()
+        self.session.refresh(sample)
+        return sample
+
+    def latest_for_miner(self, miner_id: str) -> MinerSample | None:
+        statement = (
+            select(MinerSample)
+            .where(MinerSample.miner_id == miner_id)
+            .order_by(MinerSample.recorded_at.desc())
+            .limit(1)
+        )
+        return self.session.exec(statement).first()
+
+    def recent_samples(self, limit: int = 50) -> Sequence[MinerSample]:
+        statement = select(MinerSample).order_by(MinerSample.recorded_at.desc()).limit(limit)
+        return self.session.exec(statement).all()
+
+    def latest_by_miner(self) -> dict[str, MinerSample]:
+        statement = select(MinerSample).order_by(MinerSample.miner_id, MinerSample.recorded_at.desc())
+        rows = self.session.exec(statement).all()
+        latest: dict[str, MinerSample] = {}
+        for sample in rows:
+            if sample.miner_id not in latest:
+                latest[sample.miner_id] = sample
+        return latest
+
+
 __all__ = [
     "AgentRepository",
     "RunbookRepository",
     "SettingsRepository",
     "MetricRepository",
+    "MinerRepository",
 ]
