@@ -49,6 +49,8 @@ export default function EikonalPathLab(){
     };
     frame=requestAnimationFrame(draw);
     return ()=>cancelAnimationFrame(frame);
+    draw();
+    return()=>{ if(frame) cancelAnimationFrame(frame); };
   },[sim,iters,start,goal]);
 
   return (
