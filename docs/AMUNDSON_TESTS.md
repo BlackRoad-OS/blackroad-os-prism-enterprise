@@ -4,7 +4,7 @@
 - Unified harmonic operator: finite, non-zero contour integral.
 - Fourier analyzer: finds 5 Hz and 10 Hz in a synthetic signal.
 - Ramanujan square: row/col/diag magic constraint holds.
-- Lindbladian (GKSL): dissipator returns Hermitian derivative.
+- Lindbladian (GKSL): dissipator returns Hermitian derivative; GKSL coefficient matrix must be positive semidefinite.
 - Number theory utils: φ(30)=8, μ(60)=0, μ(30)=-1, factors(60)=[2,2,3,5].
 
 **Install & run**
