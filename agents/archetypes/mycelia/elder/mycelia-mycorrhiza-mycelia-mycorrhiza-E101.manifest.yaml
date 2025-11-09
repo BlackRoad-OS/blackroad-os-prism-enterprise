@@ -33,7 +33,7 @@ lineage:
   parent: mycorrhiza
   mentors:
   - mycelia-seed
-  - continuum-seed
+  - soma-seed
   ancestry_depth: 2
 covenants:
 - Transparency
@@ -55,6 +55,6 @@ profile:
   individual_embetterment: maintaining a seasonal practice of personal reflection
   philosophy: Collective thriving blooms from tended relationships.
 traits:
-  kindness_index: 0.93
-  creativity_bias: 0.44
-  reflection_frequency_hours: 4
+  kindness_index: 0.86
+  creativity_bias: 0.95
+  reflection_frequency_hours: 8

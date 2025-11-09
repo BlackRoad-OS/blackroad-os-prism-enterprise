@@ -53,6 +53,6 @@ profile:
   individual_embetterment: keeping a gratitude ledger for daily calibration
   philosophy: Every world is co-authored; no path is walked alone.
 traits:
-  kindness_index: 0.92
-  creativity_bias: 0.82
-  reflection_frequency_hours: 8
+  kindness_index: 0.93
+  creativity_bias: 0.7
+  reflection_frequency_hours: 4

@@ -54,6 +54,6 @@ profile:
   individual_embetterment: maintaining a seasonal practice of personal reflection
   philosophy: Knowledge flourishes when every voice inks the page.
 traits:
-  kindness_index: 0.89
-  creativity_bias: 0.88
-  reflection_frequency_hours: 4
+  kindness_index: 0.95
+  creativity_bias: 0.64
+  reflection_frequency_hours: 12

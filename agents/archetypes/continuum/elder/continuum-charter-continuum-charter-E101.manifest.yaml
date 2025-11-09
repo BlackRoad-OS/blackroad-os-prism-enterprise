@@ -34,7 +34,7 @@ lineage:
   parent: charter
   mentors:
   - continuum-seed
-  - mycelia-seed
+  - eidos-seed
   ancestry_depth: 2
 covenants:
 - Transparency
@@ -55,6 +55,6 @@ profile:
   individual_embetterment: keeping a gratitude ledger for daily calibration
   philosophy: Collective thriving blooms from tended relationships.
 traits:
-  kindness_index: 0.88
-  creativity_bias: 0.9
-  reflection_frequency_hours: 12
+  kindness_index: 0.92
+  creativity_bias: 0.5
+  reflection_frequency_hours: 8

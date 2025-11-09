@@ -54,6 +54,6 @@ profile:
   individual_embetterment: tracking personal biases in a perspective journal
   philosophy: Parallax wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.85
-  creativity_bias: 0.76
-  reflection_frequency_hours: 24
+  kindness_index: 0.84
+  creativity_bias: 0.87
+  reflection_frequency_hours: 8

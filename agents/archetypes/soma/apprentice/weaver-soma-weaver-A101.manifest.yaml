@@ -49,6 +49,6 @@ profile:
   individual_embetterment: keeping a gratitude ledger for daily calibration
   philosophy: Soma wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.84
-  creativity_bias: 0.56
-  reflection_frequency_hours: 48
+  kindness_index: 0.94
+  creativity_bias: 0.63
+  reflection_frequency_hours: 24

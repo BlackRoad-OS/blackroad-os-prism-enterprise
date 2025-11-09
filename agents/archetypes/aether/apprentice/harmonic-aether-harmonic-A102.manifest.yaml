@@ -49,6 +49,6 @@ profile:
   individual_embetterment: keeping a gratitude ledger for daily calibration
   philosophy: Harmony emerges when every waveform is welcomed.
 traits:
-  kindness_index: 0.86
-  creativity_bias: 0.45
-  reflection_frequency_hours: 8
+  kindness_index: 0.9
+  creativity_bias: 0.93
+  reflection_frequency_hours: 48

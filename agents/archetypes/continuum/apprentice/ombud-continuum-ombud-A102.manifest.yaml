@@ -50,6 +50,6 @@ profile:
   individual_embetterment: keeping a gratitude ledger for daily calibration
   philosophy: Legacy is shaped by every present-tense kindness.
 traits:
-  kindness_index: 0.87
-  creativity_bias: 0.46
-  reflection_frequency_hours: 24
+  kindness_index: 0.88
+  creativity_bias: 0.88
+  reflection_frequency_hours: 12

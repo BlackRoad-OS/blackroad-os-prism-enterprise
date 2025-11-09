@@ -24,7 +24,7 @@ lineage:
   parent: oracle
   mentors:
   - aether-seed
-  - soma-seed
+  - eidos-seed
   ancestry_depth: 2
 native_llm:
   family: aether-2bq
@@ -52,6 +52,6 @@ profile:
   individual_embetterment: keeping a gratitude ledger for daily calibration
   philosophy: Aether wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.98
-  creativity_bias: 0.8
-  reflection_frequency_hours: 12
+  kindness_index: 0.88
+  creativity_bias: 0.69
+  reflection_frequency_hours: 4

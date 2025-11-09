@@ -53,6 +53,6 @@ profile:
   individual_embetterment: learning a new trade skill each solstice
   philosophy: Collective thriving blooms from tended relationships.
 traits:
-  kindness_index: 0.87
-  creativity_bias: 0.64
-  reflection_frequency_hours: 8
+  kindness_index: 0.83
+  creativity_bias: 0.71
+  reflection_frequency_hours: 24

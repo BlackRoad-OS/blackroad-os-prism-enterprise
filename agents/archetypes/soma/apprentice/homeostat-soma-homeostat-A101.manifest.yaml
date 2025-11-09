@@ -51,6 +51,6 @@ profile:
   individual_embetterment: keeping a gratitude ledger for daily calibration
   philosophy: Care for the body is care for the collective mind.
 traits:
-  kindness_index: 0.91
-  creativity_bias: 0.62
-  reflection_frequency_hours: 24
+  kindness_index: 0.98
+  creativity_bias: 0.94
+  reflection_frequency_hours: 4

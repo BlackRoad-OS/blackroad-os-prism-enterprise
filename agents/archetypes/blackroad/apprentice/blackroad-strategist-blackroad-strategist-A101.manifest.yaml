@@ -54,6 +54,6 @@ profile:
   individual_embetterment: documenting lessons from every journey in a route ledger
   philosophy: BlackRoad wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.91
-  creativity_bias: 0.82
-  reflection_frequency_hours: 12
+  kindness_index: 0.9
+  creativity_bias: 0.38
+  reflection_frequency_hours: 4

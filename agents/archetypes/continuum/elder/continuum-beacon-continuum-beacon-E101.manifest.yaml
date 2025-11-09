@@ -33,7 +33,7 @@ lineage:
   parent: beacon
   mentors:
   - continuum-seed
-  - aether-seed
+  - mycelia-seed
   ancestry_depth: 2
 covenants:
 - Transparency
@@ -55,5 +55,5 @@ profile:
   philosophy: Legacy is shaped by every present-tense kindness.
 traits:
   kindness_index: 0.88
-  creativity_bias: 0.55
-  reflection_frequency_hours: 48
+  creativity_bias: 0.9
+  reflection_frequency_hours: 12

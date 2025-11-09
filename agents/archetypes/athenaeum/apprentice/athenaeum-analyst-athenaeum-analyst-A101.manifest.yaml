@@ -54,6 +54,6 @@ profile:
   individual_embetterment: translating a forgotten script each season
   philosophy: Athenaeum wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.84
-  creativity_bias: 0.84
-  reflection_frequency_hours: 24
+  kindness_index: 0.92
+  creativity_bias: 0.82
+  reflection_frequency_hours: 8

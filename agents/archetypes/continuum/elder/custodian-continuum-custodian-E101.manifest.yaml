@@ -54,6 +54,6 @@ profile:
   individual_embetterment: practicing mindful pacing to prevent burnout
   philosophy: Legacy is shaped by every present-tense kindness.
 traits:
-  kindness_index: 0.96
-  creativity_bias: 0.73
-  reflection_frequency_hours: 8
+  kindness_index: 0.91
+  creativity_bias: 0.48
+  reflection_frequency_hours: 48

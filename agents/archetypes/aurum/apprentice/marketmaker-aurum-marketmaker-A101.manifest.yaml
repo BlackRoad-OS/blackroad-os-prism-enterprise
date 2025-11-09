@@ -49,6 +49,6 @@ profile:
   individual_embetterment: learning a new trade skill each solstice
   philosophy: Aurum wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.93
-  creativity_bias: 0.8
-  reflection_frequency_hours: 4
+  kindness_index: 0.95
+  creativity_bias: 0.58
+  reflection_frequency_hours: 8

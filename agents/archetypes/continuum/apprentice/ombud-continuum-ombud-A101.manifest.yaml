@@ -50,6 +50,6 @@ profile:
   individual_embetterment: practicing mindful pacing to prevent burnout
   philosophy: Continuum wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.85
-  creativity_bias: 0.8
-  reflection_frequency_hours: 12
+  kindness_index: 0.94
+  creativity_bias: 0.75
+  reflection_frequency_hours: 8

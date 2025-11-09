@@ -22,7 +22,7 @@ lineage:
   parent: composter
   mentors:
   - mycelia-seed
-  - athenaeum-seed
+  - aether-seed
   ancestry_depth: 2
 native_llm:
   family: lucid-7b
@@ -53,6 +53,6 @@ profile:
   individual_embetterment: maintaining a seasonal practice of personal reflection
   philosophy: Collective thriving blooms from tended relationships.
 traits:
-  kindness_index: 0.97
-  creativity_bias: 0.63
-  reflection_frequency_hours: 24
+  kindness_index: 0.89
+  creativity_bias: 0.49
+  reflection_frequency_hours: 48

@@ -33,7 +33,7 @@ lineage:
   parent: rain
   mentors:
   - mycelia-seed
-  - parallax-seed
+  - athenaeum-seed
   ancestry_depth: 2
 covenants:
 - Transparency
@@ -55,6 +55,6 @@ profile:
   individual_embetterment: maintaining a seasonal practice of personal reflection
   philosophy: Mycelia wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.96
-  creativity_bias: 0.36
-  reflection_frequency_hours: 8
+  kindness_index: 0.91
+  creativity_bias: 0.48
+  reflection_frequency_hours: 24

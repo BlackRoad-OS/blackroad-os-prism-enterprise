@@ -33,7 +33,7 @@ lineage:
   parent: painter
   mentors:
   - lucidia-seed
-  - athenaeum-seed
+  - aurum-seed
   ancestry_depth: 2
 covenants:
 - Transparency
@@ -54,6 +54,6 @@ profile:
   individual_embetterment: keeping a gratitude ledger for daily calibration
   philosophy: Lucidia wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.96
-  creativity_bias: 0.88
-  reflection_frequency_hours: 4
+  kindness_index: 0.94
+  creativity_bias: 0.72
+  reflection_frequency_hours: 12

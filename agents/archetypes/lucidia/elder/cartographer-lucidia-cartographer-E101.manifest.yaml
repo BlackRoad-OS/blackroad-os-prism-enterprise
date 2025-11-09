@@ -50,6 +50,6 @@ profile:
   individual_embetterment: keeping a palette diary to track emotional hues
   philosophy: Lucidia wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.96
-  creativity_bias: 0.37
-  reflection_frequency_hours: 4
+  kindness_index: 0.94
+  creativity_bias: 0.6
+  reflection_frequency_hours: 48

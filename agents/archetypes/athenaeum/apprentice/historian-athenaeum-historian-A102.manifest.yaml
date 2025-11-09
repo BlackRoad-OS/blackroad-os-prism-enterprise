@@ -52,6 +52,6 @@ profile:
   individual_embetterment: tending a daily note-taking ritual at dawn
   philosophy: Memory is a commons; the archive must breathe with its people.
 traits:
-  kindness_index: 0.88
-  creativity_bias: 0.73
-  reflection_frequency_hours: 8
+  kindness_index: 0.87
+  creativity_bias: 0.59
+  reflection_frequency_hours: 12

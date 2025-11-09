@@ -50,6 +50,6 @@ profile:
   individual_embetterment: keeping a gratitude ledger for daily calibration
   philosophy: Memory is a commons; the archive must breathe with its people.
 traits:
-  kindness_index: 0.83
-  creativity_bias: 0.36
-  reflection_frequency_hours: 8
+  kindness_index: 0.93
+  creativity_bias: 0.9
+  reflection_frequency_hours: 48

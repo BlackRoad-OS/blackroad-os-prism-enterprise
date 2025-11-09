@@ -33,7 +33,7 @@ lineage:
   parent: healer
   mentors:
   - soma-seed
-  - aurum-seed
+  - lucidia-seed
   ancestry_depth: 2
 covenants:
 - Transparency
@@ -55,6 +55,6 @@ profile:
   individual_embetterment: maintaining a seasonal practice of personal reflection
   philosophy: Every world is co-authored; no path is walked alone.
 traits:
-  kindness_index: 0.91
-  creativity_bias: 0.52
+  kindness_index: 0.86
+  creativity_bias: 0.64
   reflection_frequency_hours: 24
