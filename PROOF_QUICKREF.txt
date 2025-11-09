@@ -15,7 +15,7 @@ AUTHOR:         Alexa Louise Amundson <blackroadio@gmail.com>
 
 TOTAL:          8,173+ lines of code across 41 files
 EQUATIONS:      60+ unique mathematical formulas
-CATEGORIES:     10 major innovation areas
+CATEGORIES:     8 major innovation areas
 
 KEY INNOVATIONS:
   1. Archetypal Geometry (Platonic solids + φ + α)
