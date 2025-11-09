@@ -133,8 +133,7 @@ jobs:
 
           # Fix missing semicolons, trailing commas, etc.
           find . -type f \( -name "*.js" -o -name "*.ts" -o -name "*.jsx" -o -name "*.tsx" \) \
-            ! -path "*/node_modules/*" ! -path "*/dist/*" ! -path "*/build/*" \
-            -exec sed -i 's/\s\+$//' {} \; 2>/dev/null || true
+            ! -path "*/node_modules/*" ! -path "*/dist/*" ! -path "*/build/*"
 
           # Remove unused imports (if we have a tool)
           if command -v tsc &> /dev/null; then
