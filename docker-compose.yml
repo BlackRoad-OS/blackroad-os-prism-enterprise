@@ -149,5 +149,149 @@ services:
       timeout: 10s
       retries: 5
 
+  # Blackroad Services
+  backroad:
+    build: ./services/backroad
+    container_name: backroad
+    ports:
+      - "4100:4100"
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  co-coding-portal:
+    build: ./services/co-coding-portal
+    container_name: co-coding-portal
+    ports:
+      - "4200:4200"
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - LLM_GATEWAY_URL=http://llm-gateway:4002
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  roadview-enhanced:
+    build: ./services/roadview-enhanced
+    container_name: roadview-enhanced
+    ports:
+      - "4210:4210"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  roadcoin:
+    build: ./services/roadcoin
+    container_name: roadcoin
+    ports:
+      - "4220:4220"
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - AUTO_MINE=true
+    depends_on:
+      - redis
+      - roadchain
+    restart: unless-stopped
+
+  roadchain:
+    build: ./services/roadchain
+    container_name: roadchain
+    ports:
+      - "4221:4221"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  hr-talent-automation:
+    build: ./services/hr-talent-automation
+    container_name: hr-talent-automation
+    ports:
+      - "4300:4300"
+    environment:
+      - NODE_ENV=production
+      - LLM_GATEWAY_URL=http://llm-gateway:4002
+    restart: unless-stopped
+
+  finance-accounting-automation:
+    build: ./services/finance-accounting-automation
+    container_name: finance-accounting-automation
+    ports:
+      - "4301:4301"
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - LLM_GATEWAY_URL=http://llm-gateway:4002
+    depends_on:
+      - redis
+      - roadcoin
+    restart: unless-stopped
+
+  marketing-sales-automation:
+    build: ./services/marketing-sales-automation
+    container_name: marketing-sales-automation
+    ports:
+      - "4302:4302"
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - LLM_GATEWAY_URL=http://llm-gateway:4002
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  operations-supply-chain:
+    build: ./services/operations-supply-chain
+    container_name: operations-supply-chain
+    ports:
+      - "4303:4303"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  legal-compliance-automation:
+    build: ./services/legal-compliance-automation
+    container_name: legal-compliance-automation
+    ports:
+      - "4304:4304"
+    environment:
+      - NODE_ENV=production
+      - LLM_GATEWAY_URL=http://llm-gateway:4002
+    restart: unless-stopped
+
+  rd-innovation-lab:
+    build: ./services/rd-innovation-lab
+    container_name: rd-innovation-lab
+    ports:
+      - "4305:4305"
+    environment:
+      - NODE_ENV=production
+      - LLM_GATEWAY_URL=http://llm-gateway:4002
+    restart: unless-stopped
+
+  metaverse-campus:
+    build: ./services/metaverse-campus
+    container_name: metaverse-campus
+    ports:
+      - "4400:4400"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  city-portal:
+    build: ./services/city-portal
+    container_name: city-portal
+    ports:
+      - "4401:4401"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - metaverse-campus
+    restart: unless-stopped
+
 volumes:
   blackroad-db:
