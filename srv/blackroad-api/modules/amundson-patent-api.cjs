@@ -90,7 +90,7 @@ module.exports = function attachAmundsonPatentAPI({ app }) {
         }
       });
     } catch (e) {
-      FAIL(res, e.message || e, 500);
+      FAIL(res, e.message || String(e), 500);
     }
   });
 
