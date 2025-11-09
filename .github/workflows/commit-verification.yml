@@ -236,7 +236,7 @@ jobs:
           # Count commits
           TOTAL=$(echo "$RESULTS" | jq 'length')
           PASSED=$(echo "$RESULTS" | jq '[.[] | select(.integrity == "passed")] | length')
-          FAILED=$(expr $TOTAL - $PASSED)
+          FAILED=$((TOTAL - PASSED))
 
           echo "total=$TOTAL" >> $GITHUB_OUTPUT
           echo "passed=$PASSED" >> $GITHUB_OUTPUT
