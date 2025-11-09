@@ -20,15 +20,29 @@ module.exports = function attachAmundsonPatentAPI({ app }) {
   const OK = (res, data) => res.type('application/json').send(JSON.stringify({ ok: true, data, error: null }));
   const FAIL = (res, msg, code = 400) => res.status(code).type('application/json').send(JSON.stringify({ ok: false, data: null, error: String(msg) }));
 
-  // Middleware to load manifest
+  // Manifest cache and last modified time
+  let manifestCache = null;
+  let manifestLastModified = null;
+
+  // Middleware to load manifest with caching and invalidation
   function loadManifest() {
     if (!fs.existsSync(MANIFEST_PATH)) {
+      manifestCache = null;
+      manifestLastModified = null;
       return null;
     }
     try {
-      return JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'));
+      const stats = fs.statSync(MANIFEST_PATH);
+      if (manifestCache && manifestLastModified >= stats.mtimeMs) {
+        return manifestCache;
+      }
+      manifestCache = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'));
+      manifestLastModified = stats.mtimeMs;
+      return manifestCache;
     } catch (e) {
       console.error('[amundson-api] Error loading manifest:', e);
+      manifestCache = null;
+      manifestLastModified = null;
       return null;
     }
   }
