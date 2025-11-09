@@ -17,6 +17,9 @@ const {
 const MANIFEST_PATH = '/srv/patent-archive/amundson/amundson-framework-v1.0-manifest.json';
 
 module.exports = function attachAmundsonPatentAPI({ app }) {
+  if (!app || typeof app.get !== 'function' || typeof app.post !== 'function') {
+    throw new Error('Invalid Express app instance provided to attachAmundsonPatentAPI');
+  }
   const OK = (res, data) => res.type('application/json').send(JSON.stringify({ ok: true, data, error: null }));
   const FAIL = (res, msg, code = 400) => res.status(code).type('application/json').send(JSON.stringify({ ok: false, data: null, error: String(msg) }));
 
