@@ -21,10 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - name: Setup Node.js 20.x
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
         with:
           node-version: 20.x
 
@@ -51,7 +51,7 @@ jobs:
           fi
 
       - name: Cache dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
         with:
           path: ${{ steps.detect.outputs.cache-path }}
           key: ${{ runner.os }}-${{ steps.detect.outputs.manager }}-${{ hashFiles(steps.detect.outputs.lockfile) }}

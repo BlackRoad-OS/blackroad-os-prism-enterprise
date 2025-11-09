@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Parse comment commands
         id: parse
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const core = require('@actions/core');
@@ -51,7 +51,7 @@ jobs:
     if: ${{ needs.detect.outputs.run_security == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with:
           repository: ${{ github.event.issue.pull_request.head.repo.full_name }}
           ref: ${{ github.event.issue.pull_request.head.ref }}
@@ -65,12 +65,12 @@ jobs:
     if: ${{ needs.detect.outputs.run_tests == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with:
           repository: ${{ github.event.issue.pull_request.head.repo.full_name }}
           ref: ${{ github.event.issue.pull_request.head.ref }}
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
         with:
           node-version: '20'
           cache: npm
@@ -85,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Add codex:auto-merge label
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             await github.rest.issues.addLabels({

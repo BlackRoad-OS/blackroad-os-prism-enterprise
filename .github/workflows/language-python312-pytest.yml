@@ -24,10 +24,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
@@ -68,7 +68,7 @@ jobs:
 
       - name: Upload reports on failure (${{ matrix.os }}-${{ matrix.python-version }})
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4
         with:
           name: python-pytest-reports-${{ matrix.os }}-${{ matrix.python-version }}
           path: reports

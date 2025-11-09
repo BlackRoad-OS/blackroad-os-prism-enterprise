@@ -1,0 +1,116 @@
+{
+  "agents": [
+    {
+      "id": "copilot-cece-swe",
+      "name": "Cece",
+      "role": "swe",
+      "fullTitle": "Software Engineer",
+      "description": "Primary software engineering copilot for code changes, refactoring, and feature development",
+      "responsibilities": ["code-review", "implementation", "refactoring", "testing"],
+      "active": true
+    },
+    {
+      "id": "copilot-codex-architect",
+      "name": "Codex",
+      "role": "architect",
+      "fullTitle": "System Architect",
+      "description": "Architecture review and system design",
+      "responsibilities": ["architecture", "design", "patterns", "scalability"],
+      "active": true
+    },
+    {
+      "id": "copilot-atlas-devops",
+      "name": "Atlas",
+      "role": "devops",
+      "fullTitle": "DevOps Engineer",
+      "description": "CI/CD, deployment, and infrastructure management",
+      "responsibilities": ["ci-cd", "deployment", "infrastructure", "monitoring"],
+      "active": true
+    },
+    {
+      "id": "copilot-sentinel-security",
+      "name": "Sentinel",
+      "role": "security",
+      "fullTitle": "Security Engineer",
+      "description": "Security scanning, vulnerability detection, and compliance",
+      "responsibilities": ["security-scan", "vulnerability-detection", "compliance", "secrets-management"],
+      "active": true
+    },
+    {
+      "id": "copilot-sage-sme",
+      "name": "Sage",
+      "role": "sme",
+      "fullTitle": "Subject Matter Expert",
+      "description": "Domain expertise and best practices guidance",
+      "responsibilities": ["domain-knowledge", "best-practices", "documentation", "mentoring"],
+      "active": true
+    },
+    {
+      "id": "copilot-qara-qa",
+      "name": "Qara",
+      "role": "qa",
+      "fullTitle": "Quality Assurance Engineer",
+      "description": "Testing, quality assurance, and test automation",
+      "responsibilities": ["testing", "qa", "test-automation", "regression"],
+      "active": true
+    },
+    {
+      "id": "copilot-scribe-docs",
+      "name": "Scribe",
+      "role": "docs",
+      "fullTitle": "Documentation Engineer",
+      "description": "Documentation, technical writing, and knowledge management",
+      "responsibilities": ["documentation", "technical-writing", "knowledge-base", "runbooks"],
+      "active": true
+    },
+    {
+      "id": "copilot-nexus-integration",
+      "name": "Nexus",
+      "role": "integration",
+      "fullTitle": "Integration Engineer",
+      "description": "API integration, webhooks, and third-party services",
+      "responsibilities": ["api-integration", "webhooks", "third-party", "data-sync"],
+      "active": true
+    },
+    {
+      "id": "copilot-prism-analytics",
+      "name": "Prism",
+      "role": "analytics",
+      "fullTitle": "Analytics Engineer",
+      "description": "Data analytics, metrics, and performance monitoring",
+      "responsibilities": ["analytics", "metrics", "performance", "dashboards"],
+      "active": true
+    },
+    {
+      "id": "copilot-harmony-pm",
+      "name": "Harmony",
+      "role": "pm",
+      "fullTitle": "Product Manager",
+      "description": "Product management, requirements, and feature planning",
+      "responsibilities": ["product-management", "requirements", "roadmap", "stakeholder-communication"],
+      "active": true
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2025-11-09T00:00:00Z",
+    "totalAgents": 10,
+    "namingConvention": "copilot-{name}-{role}",
+    "allowCustomNames": true,
+    "requireApproval": false
+  },
+  "naming": {
+    "pattern": "copilot-{name}-{role}",
+    "examples": [
+      "copilot-cece-swe",
+      "copilot-atlas-devops",
+      "copilot-sentinel-security"
+    ],
+    "rules": {
+      "nameFormat": "lowercase",
+      "roleFormat": "lowercase",
+      "separator": "-",
+      "prefix": "copilot"
+    }
+  }
+}

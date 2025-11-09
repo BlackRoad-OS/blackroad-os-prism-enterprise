@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process';
+import { AgentManager } from './agent_registry';
 
 const autopilotUser = (process.env.AUTOPILOT_USER || 'blackboxprogramming').trim();
 const prNumber = (process.env.PR_NUMBER || '').trim();
@@ -28,30 +29,28 @@ if (triggeredByComment) {
   console.log(`Autopilot triggered for PR #${prNumber}.`);
 }
 
+const agentManager = new AgentManager();
+const agentMentions = agentManager.getAllMentions();
+
 const autopilotMessage = [
-  '@codex @copilot @blackboxprogramming @dependabot @asana @linear',
+  `${agentMentions}`,
   'review and test the feature branch, set up CI and preview deploy,',
   'run security and dependency scans, and apply comment fixes',
   '',
-  '@codex fix comments              # auto-fixes code review comments',
-  '@codex apply .github/prompts/codex-fix-comments.md',
-  '@codex patch                     # applies code diffs',
-  '@codex run tests                 # triggers test suite',
-  '@codex ship when green           # queues auto-merge',
+  '@copilot-cece-swe fix comments              # auto-fixes code review comments',
+  '@copilot-codex-architect review design      # architecture review',
+  '@copilot-sentinel-security scan             # security scan',
+  '@copilot-qara-qa run tests                  # triggers test suite',
+  '@copilot-atlas-devops deploy                # deployment',
+  '@copilot-cece-swe ship when green           # queues auto-merge',
   '',
-  'And if it receives more comments it does this again and again and again until the open pull requests turns to merged period',
+  'All agents work together in real-time, sharing state and context.',
+  'Each agent can see what others are doing and adapt accordingly.',
   '',
-  'No more user in working copy',
+  'Continuous loop: monitor → review → fix → test → deploy → merge',
   '',
-  '@codex @copilot @blackboxprogramming @dependabot @asana @linear',
-  'review and test the feature branch, set up CI and preview deploy,',
-  'run security and dependency scans, and apply comment fixes',
-  '',
-  '@codex fix comments              # auto-fixes code review comments',
-  '@codex apply .github/prompts/codex-fix-comments.md',
-  '@codex patch                     # applies code diffs',
-  '@codex run tests                 # triggers test suite',
-  '@codex ship when green           # queues auto-merge',
+  `${agentMentions}`,
+  'Keep iterating until all checks pass and PR is merged.',
 ].join('\n');
 
 const runGh = (command: string, allowFailure = false) => {

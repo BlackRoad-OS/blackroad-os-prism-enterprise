@@ -33,10 +33,10 @@ jobs:
       WORKING_DIR: modules/qlm_lab
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
@@ -48,7 +48,7 @@ jobs:
           pip install coverage cyclonedx-bom pip-audit sigstore
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -121,7 +121,7 @@ jobs:
         run: bash ops/gates/check_qlm_lab.sh
 
       - name: Upload QLM Lab artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4
         with:
           name: qlm-lab-artifacts
           path: |

@@ -36,7 +36,7 @@ jobs:
       commit_count: ${{ steps.verify.outputs.commit_count }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha || inputs.ref || github.sha }}
@@ -140,7 +140,7 @@ jobs:
           fi
 
       - name: Upload verification results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4
         with:
           name: commit-verification-results
           path: /tmp/verification-results.json
@@ -155,19 +155,19 @@ jobs:
       attestation_id: ${{ steps.attest.outputs.attestation-id }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with:
           fetch-depth: 0
 
       - name: Download verification results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
           name: commit-verification-results
           path: /tmp
 
       - name: Generate primary attestation
         id: attest
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6337bc7bbf8cc # v1
         with:
           subject-path: /tmp/verification-results.json
 
@@ -200,7 +200,7 @@ jobs:
           echo "✅ Primary attestation generated: $ATTESTATION_ID"
 
       - name: Upload primary attestation
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4
         with:
           name: primary-attestation
           path: /tmp/primary-attestation.json
@@ -215,12 +215,12 @@ jobs:
       attestation_id: ${{ steps.attest.outputs.attestation-id }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with:
           fetch-depth: 0
 
       - name: Download verification results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
           name: commit-verification-results
           path: /tmp
@@ -255,7 +255,7 @@ jobs:
 
       - name: Generate secondary attestation
         id: attest
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6337bc7bbf8cc # v1
         with:
           subject-path: /tmp/verification-results.json
 
@@ -281,7 +281,7 @@ jobs:
           echo "✅ Secondary attestation generated: $ATTESTATION_ID"
 
       - name: Upload secondary attestation
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4
         with:
           name: secondary-attestation
           path: /tmp/secondary-attestation.json
@@ -294,7 +294,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download attestations
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
           pattern: '*-attestation'
           path: /tmp/attestations
@@ -355,7 +355,7 @@ jobs:
           fi
 
       - name: Upload final attestation
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4
         with:
           name: final-dual-attestation
           path: /tmp/final-attestation.json
@@ -363,7 +363,7 @@ jobs:
 
       - name: Store attestation in repository
         if: steps.reconcile.outputs.consensus == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -400,7 +400,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set commit status
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
