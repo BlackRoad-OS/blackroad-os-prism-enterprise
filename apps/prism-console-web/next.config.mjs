@@ -1,17 +1,12 @@
 /** @type {import('next').NextConfig} */
-const config = {
-  experimental: {
-    appDir: true
-  },
-  output: 'standalone'
-};
-
-export default config;
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
+    appDir: true,
     typedRoutes: true
-  }
+  },
+  output: "standalone",
+  transpilePackages: ["@amundson/projections", "@amundson/provenance"]
 };
 
 export default nextConfig;
