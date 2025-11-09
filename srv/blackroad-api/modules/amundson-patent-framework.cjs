@@ -213,24 +213,6 @@ const AMUNDSON_EQUATIONS = {
 // PS-SHA∞ HASHING (Phase-Sensitive SHA with Infinity handling)
 // ============================================================================
 
-function psShaInfinity(content, metadata = {}) {
-  // Enhanced SHA-512 with contradiction-aware merkle structure
-  const normalized = Buffer.from(JSON.stringify({
-    content: content.trim(),
-    metadata: metadata
-  }, Object.keys({content: '', metadata: {}}).sort()), 'utf8');
-
-  const hash = crypto.createHash('sha512').update(normalized).digest('hex');
-
-  return {
-    algorithm: 'PS-SHA∞-v1.0',
-    hash: hash,
-    shortHash: hash.slice(0, 16),
-    timestamp: new Date().toISOString(),
-    metadata: metadata
-  };
-}
-
 function generateMerkleTree(leaves) {
   if (leaves.length === 0) return null;
   if (leaves.length === 1) return leaves[0];
