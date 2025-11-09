@@ -701,7 +701,7 @@ Special thanks to:
 
 **Last Updated:** November 9, 2025
 **Version:** 1.0
-**Next Review:** December 1, 2025
+**Next Review:** December 9, 2025
 
 **IMPORTANT:** This is a living document. Update it as you complete steps, add new IP, or learn new information.
 
