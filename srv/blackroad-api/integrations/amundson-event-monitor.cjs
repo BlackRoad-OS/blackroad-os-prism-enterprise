@@ -6,7 +6,6 @@ const {
 } = require('../modules/amundson-patent-framework.cjs');
 
 const fs = require('fs');
-const crypto = require('crypto');
 
 // Simple text similarity using Levenshtein-style distance
 function stringSimilarity(str1, str2) {
