@@ -127,6 +127,11 @@ jobs:
         run: |
           BASE="${{ matrix.pr.base_ref }}"
 
+          # Sanitize BASE: allow only branch names with safe characters
+          if [[ ! "$BASE" =~ ^[A-Za-z0-9._/-]+$ ]]; then
+            echo "❌ Unsafe base branch name detected: '$BASE'. Aborting merge."
+            exit 1
+          fi
           echo "🔄 Merging origin/$BASE into ${{ matrix.pr.head_ref }}..."
 
           if git merge "origin/$BASE" --no-edit -m "chore: sync with $BASE"; then
