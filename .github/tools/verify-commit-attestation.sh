@@ -7,6 +7,12 @@ set -euo pipefail
 COMMIT="${1:-HEAD}"
 MODE="${2:-verify}" # verify, attest, or both
 
+# Validate COMMIT parameter: must be a SHA-1, SHA-256, or a valid ref name (simple check)
+if [[ ! "$COMMIT" =~ ^([0-9a-fA-F]{40}|[0-9a-fA-F]{64}|[A-Za-z0-9._/-]+)$ ]]; then
+    echo -e "${RED}❌ Invalid commit parameter: '$COMMIT'${NC}"
+    echo "    Must be a SHA-1, SHA-256, or a valid ref name (alphanumeric, ., _, /, -)"
+    exit 1
+fi
 echo "🔐 Commit Attestation Tool"
 echo "=========================="
 echo ""
