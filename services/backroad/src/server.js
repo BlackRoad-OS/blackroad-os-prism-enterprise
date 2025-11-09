@@ -332,7 +332,7 @@ app.use('*', async (req, res) => {
 
 // Health check polling for backends
 setInterval(async () => {
-  for (const [serviceName, service] of serviceRegistry.entries()) {
+  for (const service of serviceRegistry.values()) {
     for (const backend of service.backends) {
       try {
         const axios = require('axios');
