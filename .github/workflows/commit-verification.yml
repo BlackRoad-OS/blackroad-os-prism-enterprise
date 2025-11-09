@@ -174,19 +174,29 @@ jobs:
       - name: Create attestation record
         run: |
           ATTESTATION_ID="${{ steps.attest.outputs.attestation-id }}"
-
-          cat > /tmp/primary-attestation.json << EOF
-          {
-            "type": "primary",
-            "attestation_id": "$ATTESTATION_ID",
-            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "verifier": "github-actions-primary",
-            "workflow_run": "${{ github.run_id }}",
-            "commit": "${{ github.sha }}",
-            "verification_results": $(cat /tmp/verification-results.json)
-          }
-          EOF
-
+          TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          WORKFLOW_RUN="${{ github.run_id }}"
+          COMMIT_SHA="${{ github.sha }}"
+          jq -n \
+            --arg type "primary" \
+            --arg attestation_id "$ATTESTATION_ID" \
+            --arg timestamp "$TIMESTAMP" \
+            --arg verifier "github-actions-primary" \
+            --arg workflow_run "$WORKFLOW_RUN" \
+            --arg commit "$COMMIT_SHA" \
+            --slurpfile verification_results /tmp/verification-results.json \
+            '{
+              type: $type,
+              attestation_id: $attestation_id,
+              timestamp: $timestamp,
+              verifier: $verifier,
+              workflow_run: $workflow_run,
+              commit: $commit,
+              verification_results: ( ($verification_results | length == 1) 
+                and ($verification_results[0] | type == "object" or type == "array") 
+                ? $verification_results[0] 
+                : $verification_results )
+            }' > /tmp/primary-attestation.json
           echo "✅ Primary attestation generated: $ATTESTATION_ID"
 
       - name: Upload primary attestation
