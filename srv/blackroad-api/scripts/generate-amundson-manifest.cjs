@@ -14,9 +14,14 @@ function main() {
   const args = process.argv.slice(2);
   const outputIndex = args.indexOf('--output');
   const outputDir = outputIndex >= 0 && args[outputIndex + 1]
-    ? args[outputIndex + 1]
+    ? path.resolve(args[outputIndex + 1])
     : '/srv/patent-archive/amundson';
 
+  // Validate the path doesn't escape expected boundaries
+  if (!outputDir.startsWith('/srv/patent-archive/')) {
+    console.error('Output directory must be within /srv/patent-archive/');
+    process.exit(1);
+  }
   // Ensure output directory exists
   fs.mkdirSync(outputDir, { recursive: true });
 
