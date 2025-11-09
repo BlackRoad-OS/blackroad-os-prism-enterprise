@@ -4,6 +4,7 @@ import { DashboardSummary } from '@/components/DashboardSummary';
 import { MetricsGrid } from '@/components/MetricsGrid';
 import { MinersPanel } from '@/components/MinersPanel';
 import { ShortcutList } from '@/components/ShortcutList';
+import { BridgeTile } from '@/components/amundson';
 import { useDashboard } from '@/features/use-dashboard';
 import { useTelemetry } from '@/lib/telemetry';
 import { useEffect } from 'react';
@@ -33,6 +34,7 @@ export function OverviewContent() {
     <div className="space-y-6">
       <DashboardSummary summary={data.summary} />
       <MetricsGrid metrics={data.metrics} />
+      <BridgeTile />
       <MinersPanel />
       <ShortcutList shortcuts={data.shortcuts} />
     </div>
