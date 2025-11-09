@@ -6,6 +6,7 @@ try { ({ ethers } = require("ethers")); } catch (e) { console.warn("[patentnet] 
 
 module.exports = function attachPatentNet({ app }) {
   const ARCH = "/srv/patent-archive"; fs.mkdirSync(ARCH, {recursive:true});
+  const STATUS_FILE = path.join(ARCH, ".anchor-status.json");
   const provider = ethers ? new ethers.JsonRpcProvider(process.env.ETH_RPC_URL) : null;
   const wallet = ethers ? new ethers.Wallet(process.env.MINT_PK, provider) : null;
   const claimAddr = process.env.CLAIMREG_ADDR || (fs.existsSync("/srv/blackroad-api/.claimregistry.addr") ?
@@ -23,6 +24,29 @@ module.exports = function attachPatentNet({ app }) {
 
   function sha256(b){ return "0x"+crypto.createHash("sha256").update(b).digest("hex"); }
   function todayInt(){ const d=new Date(); return d.getUTCFullYear()*10000+(d.getUTCMonth()+1)*100+d.getUTCDate(); }
+
+  // Record anchor status for monitoring
+  function recordAnchorStatus(day, status, count, root, txHash, error=null) {
+    try {
+      const record = {
+        day, status, count, root, txHash, error,
+        timestamp: new Date().toISOString(),
+        timestampUnix: Date.now()
+      };
+      let history = [];
+      if (fs.existsSync(STATUS_FILE)) {
+        try { history = JSON.parse(fs.readFileSync(STATUS_FILE, "utf8")); } catch(e) { history = []; }
+      }
+      if (!Array.isArray(history)) history = [];
+      history.push(record);
+      // Keep last 90 days of records
+      const cutoff = Date.now() - (90 * 24 * 60 * 60 * 1000);
+      history = history.filter(r => r.timestampUnix > cutoff);
+      fs.writeFileSync(STATUS_FILE, JSON.stringify(history, null, 2));
+    } catch(e) {
+      console.error("[patentnet] Failed to record anchor status:", e);
+    }
+  }
 
   // POST /api/patent/claim  {title, abstract, claimsText, tags?, attachments? [ {name, b64} ], claimType?}
   app.post("/api/patent/claim", async (req,res)=>{
@@ -83,7 +107,11 @@ module.exports = function attachPatentNet({ app }) {
       const day = todayInt(); const dir = path.join(ARCH, String(day));
       const files = fs.existsSync(dir)? fs.readdirSync(dir).filter(f=>f.endsWith(".json")):
  [];
-      if (!files.length) return OK(res, {day, root:null, count:0});
+      if (!files.length) {
+        // Record the attempt even if no files
+        recordAnchorStatus(day, "success", 0, null, null);
+        return OK(res, {day, root:null, count:0});
+      }
       const leaves = files.map(f=>crypto.createHash("sha256").update(fs.readFileSync(path.join(dir,f))).digest());
       // simple merkle (pairwise sha256)
       function merkle(arr){
@@ -96,12 +124,55 @@ module.exports = function attachPatentNet({ app }) {
       const root = "0x"+merkle(leaves).toString("hex");
       const tx = await contract.commitDailyRoot(day, root);
       await tx.wait();
+      recordAnchorStatus(day, "success", leaves.length, root, tx.hash);
       OK(res, {day, root, count: leaves.length, txHash: tx.hash});
-    }catch(e){ FAIL(res, e.message||e, 500); }
+    }catch(e){
+      recordAnchorStatus(todayInt(), "error", 0, null, null, e.message);
+      FAIL(res, e.message||e, 500);
+    }
   });
 
   // (stub) GET /api/patent/compare?query=...  -> returns empty until connectors are configured
   app.get("/api/patent/compare", async (req,res)=>{ OK(res, {query: req.query.query||"", results: []}); });
+
+  // GET /api/patent/status  - Health check and monitoring endpoint
+  app.get("/api/patent/status", (req,res)=>{
+    try {
+      let history = [];
+      if (fs.existsSync(STATUS_FILE)) {
+        try { history = JSON.parse(fs.readFileSync(STATUS_FILE, "utf8")); } catch(e) { history = []; }
+      }
+      if (!Array.isArray(history)) history = [];
+
+      const lastAnchor = history.length > 0 ? history[history.length - 1] : null;
+      const today = todayInt();
+      const yesterday = today - 1; // Simplified: doesn't handle month/year boundaries perfectly
+
+      // Check if we've anchored today or yesterday (since we run at 23:55)
+      const isHealthy = lastAnchor && (lastAnchor.day === today || lastAnchor.day === yesterday) && lastAnchor.status === "success";
+
+      // Count recent successes/failures
+      const last7Days = history.filter(r => r.day > today - 10);
+      const successCount = last7Days.filter(r => r.status === "success").length;
+      const errorCount = last7Days.filter(r => r.status === "error").length;
+
+      OK(res, {
+        healthy: isHealthy,
+        lastAnchor,
+        todayInt: today,
+        recent: { successCount, errorCount, total: last7Days.length },
+        history: history.slice(-30), // Last 30 records
+        config: {
+          contractAddress: claimAddr,
+          hasWallet: !!wallet,
+          hasProvider: !!provider,
+          archivePath: ARCH
+        }
+      });
+    } catch(e) {
+      FAIL(res, e.message||e, 500);
+    }
+  });
 
   console.log("[patentnet] endpoints ready: /api/patent/*  archive:", ARCH);
 };
