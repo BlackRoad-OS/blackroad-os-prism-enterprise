@@ -114,9 +114,8 @@ jobs:
 
           # Reinstall if needed
           if ! npm run build 2>/dev/null; then
-            echo "🔄 Reinstalling dependencies..."
-            rm -rf node_modules package-lock.json
-            npm install
+            echo "🔄 Reinstalling dependencies using repo canonical script..."
+            bash ops/install.sh
           fi
 
           if [[ -n $(git status --porcelain) ]]; then
