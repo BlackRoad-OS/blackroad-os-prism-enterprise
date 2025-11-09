@@ -131,21 +131,28 @@ jobs:
           if [[ ! "$BASE" =~ ^[A-Za-z0-9._/-]+$ ]]; then
             echo "❌ Unsafe base branch name detected: '$BASE'. Aborting merge."
             exit 1
-          fi
+          FORCE_SYNC="${{ github.event.inputs.force_sync || 'false' }}"
+
           echo "🔄 Merging origin/$BASE into ${{ matrix.pr.head_ref }}..."
 
           if git merge "origin/$BASE" --no-edit -m "chore: sync with $BASE"; then
             echo "merge_status=success" >> $GITHUB_OUTPUT
             echo "✅ Merge successful"
-          elif git merge "origin/$BASE" -X theirs --no-edit -m "chore: sync with $BASE (auto-resolved conflicts)"; then
-            echo "merge_status=auto_resolved" >> $GITHUB_OUTPUT
-            echo "⚠️ Merge successful with auto-resolution (using theirs strategy)"
+          elif [ "$FORCE_SYNC" = "true" ]; then
+            echo "⚠️ Attempting auto-resolution with -X theirs due to force_sync=true"
+            if git merge "origin/$BASE" -X theirs --no-edit -m "chore: sync with $BASE (auto-resolved conflicts)"; then
+              echo "merge_status=auto_resolved" >> $GITHUB_OUTPUT
+              echo "⚠️ Merge successful with auto-resolution (using theirs strategy)"
+            else
+              echo "merge_status=failed" >> $GITHUB_OUTPUT
+              echo "❌ Merge failed - conflicts require manual resolution"
+              git merge --abort || true
+            fi
           else
             echo "merge_status=failed" >> $GITHUB_OUTPUT
-            echo "❌ Merge failed - conflicts require manual resolution"
+            echo "❌ Merge failed - conflicts require manual resolution (auto-resolution not permitted)"
             git merge --abort || true
           fi
-
       - name: Push changes
         if: |
           steps.merge.outputs.merge_status == 'success' ||
