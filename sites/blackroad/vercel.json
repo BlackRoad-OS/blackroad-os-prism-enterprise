@@ -6,7 +6,7 @@
   "outputDirectory": "dist",
   "github": {
     "silent": true
-  }
+  },
   "rewrites": [
     { "source": "/((?!api|_next/|assets/|.*\\.).*)", "destination": "/index.html" }
   ],
