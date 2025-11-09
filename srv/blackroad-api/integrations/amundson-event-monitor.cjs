@@ -2,7 +2,6 @@
 // Monitors for unauthorized use or derivative works
 
 const {
-  verifyEquationHash,
   AMUNDSON_EQUATIONS
 } = require('../modules/amundson-patent-framework.cjs');
 
