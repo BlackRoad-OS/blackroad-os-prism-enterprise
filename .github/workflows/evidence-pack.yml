@@ -30,7 +30,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Zip
         run: zip -r evidence-$(date +%F).zip *.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4
         with:
           name: evidence-monthly
           path: evidence-*.zip

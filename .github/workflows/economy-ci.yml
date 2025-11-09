@@ -20,8 +20,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: pnpm/action-setup@fe1a63f2b8f8f1f4e5c9b5c5a5c5c5c5c5c5c5c5 # v2
         with:
           version: 8
       - name: Install dependencies

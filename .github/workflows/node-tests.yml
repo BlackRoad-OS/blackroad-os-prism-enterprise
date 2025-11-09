@@ -78,10 +78,10 @@ jobs:
       JEST_JUNIT_OUTPUT: ${{ inputs.junit-path }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
         with:
           node-version: ${{ inputs.node-version }}
           cache: ${{ inputs.package-manager }}
@@ -96,14 +96,14 @@ jobs:
 
       - name: Publish junit report
         if: always()
-        uses: mikepenz/action-junit-report@v4
+        uses: mikepenz/action-junit-report@db71d41eb79864e25ab0337e395c352e84523afe # v4
         with:
           report_paths: ${{ inputs.working-directory != '.' && format('{0}/{1}', inputs.working-directory, inputs.junit-path) || inputs.junit-path }}
           require_tests: false
 
       - name: Upload test artifacts
         if: ${{ always() && inputs.upload-artifact }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4
         with:
           name: ${{ inputs.artifact-name }}
           path: ${{ inputs.working-directory != '.' && format('{0}/{1}', inputs.working-directory, inputs.junit-path) || inputs.junit-path }}

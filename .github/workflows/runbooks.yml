@@ -19,8 +19,8 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: pnpm/action-setup@fe1a63f2b8f8f1f4e5c9b5c5a5c5c5c5c5c5c5c5 # v2
         with:
           version: 9
       - name: Install
@@ -32,7 +32,7 @@ jobs:
       - name: Build docs
         run: pnpm --filter @blackroad/docs-portal run build
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4
         with:
           name: docs-portal
           path: apps/docs-portal/.next/**
@@ -42,8 +42,8 @@ jobs:
     needs: validate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: pnpm/action-setup@fe1a63f2b8f8f1f4e5c9b5c5a5c5c5c5c5c5c5c5 # v2
         with:
           version: 9
       - name: Install

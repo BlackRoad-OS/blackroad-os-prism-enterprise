@@ -15,7 +15,7 @@ jobs:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
       BOT_USER:  ${{ secrets.BOT_USER || 'blackroad-bot' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with: { persist-credentials: false, fetch-depth: 0 }
       - run: |
           git config user.name  "$BOT_USER"
@@ -44,7 +44,7 @@ jobs:
           npm i || npm i --package-lock-only || true
           if ! git diff --quiet; then git add -A; git commit -m "chore(deps): bump via ChatOps"; [ -n "$BOT_TOKEN" ] && git push "https://${BOT_TOKEN}@github.com/${{ github.repository }}.git" "HEAD:$(git rev-parse --abbrev-ref HEAD)"; fi
       - if: startsWith(steps.parse.outputs.cmd, '/rerun ')
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const wf = `${{ steps.parse.outputs.cmd }}`.replace('/rerun ','').trim()+'.yml';

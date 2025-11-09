@@ -17,14 +17,14 @@ jobs:
       SAFE_MODE: "1"
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - name: Panic guard
         run: |
           if [ -f ".panic" ]; then echo "::error::.panic present"; exit 2; fi
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
         with:
           python-version: "3.11"
           cache: pip
@@ -47,7 +47,7 @@ jobs:
 
       - name: Upload test report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4
         with:
           name: pytest-report
           path: pytest.xml
@@ -61,7 +61,7 @@ jobs:
 
       - name: Upload demo output
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4
         with:
           name: demo-output
           path: demo_output.txt
