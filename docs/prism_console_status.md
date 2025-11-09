@@ -40,9 +40,9 @@ pip install -r requirements-dev.txt
 Once dependencies are in place you can exercise the orchestrator locally:
 
 ```bash
-python -m cli.console task:create --goal "Draft SEC filing checklist" --bot compliance-bot
-python -m cli.console task:route --task <task-id-from-create>
-python -m cli.console task:history --task <task-id-from-create>
+python -m cli.console task create --goal "Draft SEC filing checklist" --bot compliance-bot
+python -m cli.console task route --task <task-id-from-create>
+python -m cli.console task history --task <task-id-from-create>
 ```
 
 For web cockpit work, install the JavaScript toolchain (`corepack enable && pnpm install`) within `apps/prism-console-web/` and export `BLACKROAD_API_URL` / `BLACKROAD_API_TOKEN` so the Next.js runtime binds to a live gateway instead of mock JSON.
