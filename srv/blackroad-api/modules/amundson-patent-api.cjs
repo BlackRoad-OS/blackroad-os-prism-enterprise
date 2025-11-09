@@ -40,7 +40,7 @@ module.exports = function attachAmundsonPatentAPI({ app }) {
       manifestLastModified = stats.mtimeMs;
       return manifestCache;
     } catch (e) {
-      console.error('[amundson-api] Error loading manifest:', e);
+      console.error('[amundson-api] Error loading manifest:', e.message, 'at', MANIFEST_PATH);
       manifestCache = null;
       manifestLastModified = null;
       return null;
