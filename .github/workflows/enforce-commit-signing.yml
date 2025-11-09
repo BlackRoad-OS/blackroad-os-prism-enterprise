@@ -72,7 +72,7 @@ jobs:
             else
               echo "  ❌ UNSIGNED"
               UNSIGNED_COMMITS=$((UNSIGNED_COMMITS + 1))
-              UNSIGNED_LIST="${UNSIGNED_LIST}\n- \`$SHORT_SHA\` by $AUTHOR: $MESSAGE"
+              UNSIGNED_LIST="${UNSIGNED_LIST}$'\n'- \`$SHORT_SHA\` by $AUTHOR: $MESSAGE"
             fi
             echo ""
           done
