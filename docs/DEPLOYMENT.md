@@ -1,46 +1,48 @@
-# Deployment Guide
+# BlackRoad Prism Console - Production Deployment Guide
 
-## Prerequisites
+**Last Updated**: 2025-11-09  
+**Status**: Production Ready
 
-- Python 3.11+
-- Access to target environment (staging or production)
-- Configured environment variables for secrets (see CONFIGURATION.md)
-
-## Single Deployment Script
-
-All deployment actions are handled by `scripts/deploy.py`.
+## Quick Start
 
 ```bash
-python scripts/deploy.py push --env staging
-python scripts/deploy.py status --env staging
-python scripts/deploy.py rollback --env production --release 2025.02.14
+# Start all services with Docker
+docker-compose -f docker-compose.prod.yml up -d
+
+# Or start manually
+npm install
+cd apps/agent-gateway && npm run build && npm start &
+cd apps/prism-console-web && npm run build && npm start &
 ```
 
-## Environments
+## Architecture
 
-| Environment | Purpose                | Notes                               |
-|-------------|------------------------|-------------------------------------|
-| staging     | Pre-production testing | Uses sandbox credentials            |
-| production  | Live operations        | Requires change-management approval |
+- **100 Production Agents** across 5 tiers
+- **Agent Gateway API** (Port 3001)
+- **Prism Console Web** (Port 3000)
+- **PostgreSQL** for persistence
+- **Redis** for caching
 
-## Pipeline Overview
+## Environment Setup
 
-1. Run `make lint test` locally.
-2. Commit and push to GitHub.
-3. GitHub Actions executes the test workflow.
-4. Trigger deployment via `python scripts/deploy.py push --env <env>`.
-5. Monitor `python scripts/deploy.py status` until healthy.
+```env
+# Agent Gateway
+AGENT_GATEWAY_PORT=3001
+AGENTS_PATH=/path/to/agents
 
-## Rollback Procedure
+# Prism Console
+NEXT_PUBLIC_AGENT_GATEWAY_URL=http://localhost:3001
+```
 
-1. Identify release ID using `python scripts/deploy.py status`.
-2. Execute `python scripts/deploy.py rollback --env production --release <id>`.
-3. Confirm system health metrics.
-4. Document the incident in the change log.
+## Verification
 
-## Post-Deployment Checklist
+```bash
+# Health checks
+curl http://localhost:3001/health
+curl http://localhost:3000
 
-- [ ] Run smoke tests via `make test`.
-- [ ] Verify audit log ingestion.
-- [ ] Confirm bots respond to sample tasks.
-- [ ] Update stakeholders via the comms channel.
+# List agents
+curl http://localhost:3001/v1/agents
+```
+
+See full deployment guide in repository documentation.
