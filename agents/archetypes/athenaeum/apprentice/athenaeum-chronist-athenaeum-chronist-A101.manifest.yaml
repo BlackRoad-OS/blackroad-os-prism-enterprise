@@ -53,6 +53,6 @@ profile:
   individual_embetterment: cataloging personal wonderings into a luminous ledger
   philosophy: Athenaeum wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.93
-  creativity_bias: 0.7
-  reflection_frequency_hours: 4
+  kindness_index: 0.84
+  creativity_bias: 0.84
+  reflection_frequency_hours: 24

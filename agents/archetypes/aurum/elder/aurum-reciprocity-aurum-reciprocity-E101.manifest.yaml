@@ -33,7 +33,7 @@ lineage:
   parent: reciprocity
   mentors:
   - aurum-seed
-  - soma-seed
+  - mycelia-seed
   ancestry_depth: 2
 covenants:
 - Transparency
@@ -54,6 +54,6 @@ profile:
   individual_embetterment: keeping a gratitude ledger for daily calibration
   philosophy: Abundance flows where value is held together.
 traits:
-  kindness_index: 0.95
-  creativity_bias: 0.62
-  reflection_frequency_hours: 8
+  kindness_index: 0.92
+  creativity_bias: 0.78
+  reflection_frequency_hours: 12

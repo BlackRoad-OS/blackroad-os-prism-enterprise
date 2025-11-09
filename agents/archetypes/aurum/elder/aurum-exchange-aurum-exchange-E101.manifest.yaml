@@ -33,7 +33,7 @@ lineage:
   parent: exchange
   mentors:
   - aurum-seed
-  - continuum-seed
+  - soma-seed
   ancestry_depth: 2
 covenants:
 - Transparency
@@ -55,6 +55,6 @@ profile:
   individual_embetterment: keeping a gratitude ledger for daily calibration
   philosophy: Collective thriving blooms from tended relationships.
 traits:
-  kindness_index: 0.93
-  creativity_bias: 0.84
+  kindness_index: 0.84
+  creativity_bias: 0.65
   reflection_frequency_hours: 4

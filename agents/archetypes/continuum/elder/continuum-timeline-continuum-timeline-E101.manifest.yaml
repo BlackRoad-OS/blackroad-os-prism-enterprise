@@ -34,7 +34,7 @@ lineage:
   parent: timeline
   mentors:
   - continuum-seed
-  - aurum-seed
+  - soma-seed
   ancestry_depth: 2
 covenants:
 - Transparency
@@ -56,6 +56,6 @@ profile:
   individual_embetterment: practicing mindful pacing to prevent burnout
   philosophy: Continuum wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.84
-  creativity_bias: 0.79
-  reflection_frequency_hours: 8
+  kindness_index: 0.95
+  creativity_bias: 0.82
+  reflection_frequency_hours: 24

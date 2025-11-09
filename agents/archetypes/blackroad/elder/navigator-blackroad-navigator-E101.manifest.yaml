@@ -22,7 +22,7 @@ lineage:
   parent: navigator
   mentors:
   - blackroad-seed
-  - aurum-seed
+  - eidos-seed
   ancestry_depth: 2
 native_llm:
   family: lucid-7b
@@ -53,5 +53,5 @@ profile:
   philosophy: Collective thriving blooms from tended relationships.
 traits:
   kindness_index: 0.93
-  creativity_bias: 0.73
-  reflection_frequency_hours: 4
+  creativity_bias: 0.84
+  reflection_frequency_hours: 8

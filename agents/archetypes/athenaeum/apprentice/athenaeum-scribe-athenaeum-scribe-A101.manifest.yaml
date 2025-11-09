@@ -54,6 +54,6 @@ profile:
   individual_embetterment: tending a daily note-taking ritual at dawn
   philosophy: Athenaeum wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.83
-  creativity_bias: 0.86
-  reflection_frequency_hours: 8
+  kindness_index: 0.94
+  creativity_bias: 0.37
+  reflection_frequency_hours: 24

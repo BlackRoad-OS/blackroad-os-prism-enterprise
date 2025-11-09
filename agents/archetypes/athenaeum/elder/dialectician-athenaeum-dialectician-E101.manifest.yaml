@@ -22,7 +22,7 @@ lineage:
   parent: dialectician
   mentors:
   - athenaeum-seed
-  - mycelia-seed
+  - parallax-seed
   ancestry_depth: 2
 native_llm:
   family: lucid-7b
@@ -52,6 +52,6 @@ profile:
   individual_embetterment: keeping a gratitude ledger for daily calibration
   philosophy: Athenaeum wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.88
-  creativity_bias: 0.55
-  reflection_frequency_hours: 12
+  kindness_index: 0.9
+  creativity_bias: 0.71
+  reflection_frequency_hours: 24

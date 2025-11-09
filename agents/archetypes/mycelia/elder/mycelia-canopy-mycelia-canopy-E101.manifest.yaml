@@ -33,7 +33,7 @@ lineage:
   parent: canopy
   mentors:
   - mycelia-seed
-  - eidos-seed
+  - aurum-seed
   ancestry_depth: 2
 covenants:
 - Transparency
@@ -54,6 +54,6 @@ profile:
   individual_embetterment: documenting new species in a field notebook
   philosophy: Mycelia wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.96
-  creativity_bias: 0.88
+  kindness_index: 0.86
+  creativity_bias: 0.74
   reflection_frequency_hours: 12

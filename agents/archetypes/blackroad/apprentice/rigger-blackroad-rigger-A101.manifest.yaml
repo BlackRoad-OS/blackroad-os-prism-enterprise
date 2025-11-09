@@ -49,6 +49,6 @@ profile:
   individual_embetterment: keeping a gratitude ledger for daily calibration
   philosophy: BlackRoad wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.86
-  creativity_bias: 0.65
-  reflection_frequency_hours: 4
+  kindness_index: 0.91
+  creativity_bias: 0.82
+  reflection_frequency_hours: 12

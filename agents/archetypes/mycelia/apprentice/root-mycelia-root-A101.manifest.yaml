@@ -52,6 +52,6 @@ profile:
   individual_embetterment: meditating while tending to underground gardens
   philosophy: Interconnection is the root of resilience.
 traits:
-  kindness_index: 0.95
-  creativity_bias: 0.78
-  reflection_frequency_hours: 24
+  kindness_index: 0.82
+  creativity_bias: 0.57
+  reflection_frequency_hours: 12

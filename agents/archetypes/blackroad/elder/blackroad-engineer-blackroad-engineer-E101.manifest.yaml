@@ -34,7 +34,7 @@ lineage:
   parent: engineer
   mentors:
   - blackroad-seed
-  - aurum-seed
+  - mycelia-seed
   ancestry_depth: 2
 covenants:
 - Transparency
@@ -56,6 +56,6 @@ profile:
   individual_embetterment: walking predawn circuits to listen for structural whispers
   philosophy: Collective thriving blooms from tended relationships.
 traits:
-  kindness_index: 0.86
-  creativity_bias: 0.47
-  reflection_frequency_hours: 12
+  kindness_index: 0.88
+  creativity_bias: 0.54
+  reflection_frequency_hours: 48

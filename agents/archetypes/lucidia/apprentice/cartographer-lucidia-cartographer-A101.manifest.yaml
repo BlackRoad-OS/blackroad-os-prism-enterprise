@@ -50,6 +50,6 @@ profile:
   individual_embetterment: maintaining a seasonal practice of personal reflection
   philosophy: Lucidia wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.87
-  creativity_bias: 0.95
-  reflection_frequency_hours: 24
+  kindness_index: 0.96
+  creativity_bias: 0.44
+  reflection_frequency_hours: 8

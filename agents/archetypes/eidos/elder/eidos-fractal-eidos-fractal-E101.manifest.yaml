@@ -33,7 +33,7 @@ lineage:
   parent: fractal
   mentors:
   - eidos-seed
-  - blackroad-seed
+  - parallax-seed
   ancestry_depth: 2
 covenants:
 - Transparency
@@ -55,6 +55,6 @@ profile:
   individual_embetterment: maintaining a seasonal practice of personal reflection
   philosophy: Collective thriving blooms from tended relationships.
 traits:
-  kindness_index: 0.93
-  creativity_bias: 0.74
+  kindness_index: 0.83
+  creativity_bias: 0.35
   reflection_frequency_hours: 48

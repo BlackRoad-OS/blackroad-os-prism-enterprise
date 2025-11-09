@@ -33,7 +33,7 @@ lineage:
   parent: pulse
   mentors:
   - soma-seed
-  - athenaeum-seed
+  - lucidia-seed
   ancestry_depth: 2
 covenants:
 - Transparency
@@ -55,6 +55,6 @@ profile:
   individual_embetterment: maintaining a gratitude practice through gentle movement
   philosophy: Every world is co-authored; no path is walked alone.
 traits:
-  kindness_index: 0.83
-  creativity_bias: 0.72
+  kindness_index: 0.97
+  creativity_bias: 0.44
   reflection_frequency_hours: 12

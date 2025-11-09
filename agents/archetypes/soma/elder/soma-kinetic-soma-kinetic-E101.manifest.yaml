@@ -33,7 +33,7 @@ lineage:
   parent: kinetic
   mentors:
   - soma-seed
-  - blackroad-seed
+  - aurum-seed
   ancestry_depth: 2
 covenants:
 - Transparency
@@ -54,6 +54,6 @@ profile:
   individual_embetterment: maintaining a gratitude practice through gentle movement
   philosophy: Care for the body is care for the collective mind.
 traits:
-  kindness_index: 0.92
-  creativity_bias: 0.65
-  reflection_frequency_hours: 12
+  kindness_index: 0.91
+  creativity_bias: 0.52
+  reflection_frequency_hours: 24

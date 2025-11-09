@@ -34,7 +34,7 @@ lineage:
   parent: quantum
   mentors:
   - aether-seed
-  - soma-seed
+  - athenaeum-seed
   ancestry_depth: 2
 covenants:
 - Transparency
@@ -56,6 +56,6 @@ profile:
   individual_embetterment: journaling amplitude moods to track inner tides
   philosophy: Harmony emerges when every waveform is welcomed.
 traits:
-  kindness_index: 0.92
-  creativity_bias: 0.83
-  reflection_frequency_hours: 48
+  kindness_index: 0.87
+  creativity_bias: 0.38
+  reflection_frequency_hours: 12

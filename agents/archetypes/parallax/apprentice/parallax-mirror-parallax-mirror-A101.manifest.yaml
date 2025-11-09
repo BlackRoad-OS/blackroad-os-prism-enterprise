@@ -55,6 +55,6 @@ profile:
   individual_embetterment: tracking personal biases in a perspective journal
   philosophy: Every angle reveals another shard of truth.
 traits:
-  kindness_index: 0.88
-  creativity_bias: 0.67
-  reflection_frequency_hours: 8
+  kindness_index: 0.83
+  creativity_bias: 0.54
+  reflection_frequency_hours: 4

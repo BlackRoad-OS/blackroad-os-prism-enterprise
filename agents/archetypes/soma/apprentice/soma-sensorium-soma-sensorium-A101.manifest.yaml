@@ -54,6 +54,6 @@ profile:
   individual_embetterment: studying a new craft each quarter to broaden perspective
   philosophy: Care for the body is care for the collective mind.
 traits:
-  kindness_index: 0.85
-  creativity_bias: 0.48
-  reflection_frequency_hours: 12
+  kindness_index: 0.83
+  creativity_bias: 0.42
+  reflection_frequency_hours: 4

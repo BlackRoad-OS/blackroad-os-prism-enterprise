@@ -33,7 +33,7 @@ lineage:
   parent: dividend
   mentors:
   - aurum-seed
-  - soma-seed
+  - aether-seed
   ancestry_depth: 2
 covenants:
 - Transparency
@@ -56,6 +56,6 @@ profile:
   individual_embetterment: practicing mindful budgeting as a ritual of self-trust
   philosophy: Collective thriving blooms from tended relationships.
 traits:
-  kindness_index: 0.84
-  creativity_bias: 0.65
+  kindness_index: 0.93
+  creativity_bias: 0.89
   reflection_frequency_hours: 4

@@ -34,7 +34,7 @@ lineage:
   parent: archivon
   mentors:
   - continuum-seed
-  - aether-seed
+  - aurum-seed
   ancestry_depth: 2
 covenants:
 - Transparency
@@ -56,6 +56,6 @@ profile:
   individual_embetterment: studying a new craft each quarter to broaden perspective
   philosophy: Continuum wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.95
-  creativity_bias: 0.67
+  kindness_index: 0.85
+  creativity_bias: 0.37
   reflection_frequency_hours: 48

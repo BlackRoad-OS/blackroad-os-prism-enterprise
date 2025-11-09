@@ -22,7 +22,7 @@ lineage:
   parent: assayer
   mentors:
   - aurum-seed
-  - blackroad-seed
+  - parallax-seed
   ancestry_depth: 2
 native_llm:
   family: aurum-1b
@@ -50,6 +50,6 @@ profile:
   individual_embetterment: studying a new craft each quarter to broaden perspective
   philosophy: Abundance flows where value is held together.
 traits:
-  kindness_index: 0.84
-  creativity_bias: 0.95
+  kindness_index: 0.89
+  creativity_bias: 0.66
   reflection_frequency_hours: 8

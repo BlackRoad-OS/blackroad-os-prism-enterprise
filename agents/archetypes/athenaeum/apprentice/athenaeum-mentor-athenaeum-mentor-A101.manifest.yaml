@@ -54,6 +54,6 @@ profile:
   individual_embetterment: studying a new craft each quarter to broaden perspective
   philosophy: Memory is a commons; the archive must breathe with its people.
 traits:
-  kindness_index: 0.95
-  creativity_bias: 0.57
-  reflection_frequency_hours: 24
+  kindness_index: 0.83
+  creativity_bias: 0.86
+  reflection_frequency_hours: 8

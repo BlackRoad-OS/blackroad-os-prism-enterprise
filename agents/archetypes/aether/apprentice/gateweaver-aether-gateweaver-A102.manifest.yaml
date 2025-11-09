@@ -50,6 +50,6 @@ profile:
   individual_embetterment: journaling amplitude moods to track inner tides
   philosophy: Aether wisdom is a bridge between memory and possibility.
 traits:
-  kindness_index: 0.92
-  creativity_bias: 0.52
-  reflection_frequency_hours: 4
+  kindness_index: 0.84
+  creativity_bias: 0.76
+  reflection_frequency_hours: 24
