@@ -100,13 +100,17 @@ jobs:
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          has_conflicts: ${{ steps.check_conflicts.outputs.has_conflicts }}
           script: |
+            const conflictMsg = (has_conflicts === 'true')
+              ? '⚠️ Conflicts detected - auto-sync will attempt resolution'
+              : '✅ No conflicts detected';
             const body = `## 🎯 PR Orchestrator Activated
 
             ✅ Initial setup complete
             📋 PR #${{ steps.pr_info.outputs.pr_number }}
             🌲 Branch: \`${{ steps.pr_info.outputs.head_branch }}\` → \`${{ steps.pr_info.outputs.base_branch }}\`
-            ${'${{ steps.check_conflicts.outputs.has_conflicts }}' === 'true' ? '⚠️ Conflicts detected - auto-sync will attempt resolution' : '✅ No conflicts detected'}
+            ${conflictMsg}
 
             The following automated workflows will run:
             - 🔍 Code quality checks (linting, formatting)
