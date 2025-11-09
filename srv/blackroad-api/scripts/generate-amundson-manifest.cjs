@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Generate Amundson Patent Framework Manifest
-// Usage: node generate-amundson-manifest.js [--output <path>]
+// Usage: node generate-amundson-manifest.cjs [--output <path>]
 
 const fs = require('fs');
 const path = require('path');
