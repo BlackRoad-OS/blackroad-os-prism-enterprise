@@ -89,16 +89,17 @@ def finish(job_id: int, status: str) -> None:
 
 def list_jobs(limit: int = 20) -> List[Dict[str, Any]]:
     """Return the newest jobs limited by ``limit``."""
-    conn = _get_conn()
-    rows = conn.execute(
-        """
-        SELECT id, cmd, started, ended, status
-          FROM jobs
-         ORDER BY id DESC
-         LIMIT ?
-        """,
-        (int(limit),),
-    ).fetchall()
+    with _lock:
+        conn = _get_conn()
+        rows = conn.execute(
+            """
+            SELECT id, cmd, started, ended, status
+              FROM jobs
+             ORDER BY id DESC
+             LIMIT ?
+            """,
+            (int(limit),),
+        ).fetchall()
     return [
         {
             "id": row[0],
@@ -113,15 +114,16 @@ def list_jobs(limit: int = 20) -> List[Dict[str, Any]]:
 
 def get_job(job_id: int) -> Optional[Dict[str, Any]]:
     """Fetch a single job by identifier."""
-    conn = _get_conn()
-    row = conn.execute(
-        """
-        SELECT id, cmd, started, ended, status, output
-          FROM jobs
-         WHERE id = ?
-        """,
-        (job_id,),
-    ).fetchone()
+    with _lock:
+        conn = _get_conn()
+        row = conn.execute(
+            """
+            SELECT id, cmd, started, ended, status, output
+              FROM jobs
+             WHERE id = ?
+            """,
+            (job_id,),
+        ).fetchone()
     if not row:
         return None
     return {
