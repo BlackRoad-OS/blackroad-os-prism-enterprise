@@ -109,11 +109,27 @@ jobs:
               "- [ ] Integration ✅",
               "- [ ] Merge window:"
             ];
-            const missing = required.filter(r => body.includes(r));
-            // If any required lines are present but unchecked, fail:
-            const unchecked = required.filter(item => body.includes(item));
-            if (unchecked.length) {
-              core.setFailed(`Missing or unchecked items: ${unchecked.join(" | ")}`);
+            const normalize = (item, mark) =>
+              item.replace(/- \[[xX ]\]/, `- [${mark}]`);
+            const missing = required.filter(item => {
+              const uncheckedPattern = normalize(item, ' ');
+              const checkedPatternLower = normalize(item, 'x');
+              const checkedPatternUpper = normalize(item, 'X');
+              return !(
+                body.includes(uncheckedPattern) ||
+                body.includes(checkedPatternLower) ||
+                body.includes(checkedPatternUpper)
+              );
+            });
+            // For each required item, check if the unchecked version is present in the body:
+            const unchecked = required.filter(item => {
+              // Convert required item to unchecked pattern (replace '- [ ]' or '- [x]' with '- [ ]')
+              const uncheckedPattern = item.replace(/- \[[xX ]\]/, '- [ ]');
+              return body.includes(uncheckedPattern);
+            });
+            const issues = [...missing, ...unchecked];
+            if (issues.length) {
+              core.setFailed(`Missing or unchecked items: ${issues.join(" | ")}`);
             }
 ```
 
@@ -126,9 +142,9 @@ Add labeler so your pulse sets labels automatically (e.g., Risk:High, Security, 
 ```
 # .github/labeler.yml
 risk-high:
-  - changed-files:
+  - label: 'Risk:High'
+    changed-files:
       - any-glob-to-any-file: ['**/*']
-    label: 'Risk:High'
     body:
       - '/Risk level:\s*🔴/i'
 security:
