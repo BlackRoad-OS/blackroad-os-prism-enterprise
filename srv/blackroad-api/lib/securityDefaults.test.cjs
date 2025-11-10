@@ -38,6 +38,18 @@ test('enforceSecurityDefaults rejects wildcard origins', () => {
       }),
     { code: 'SECURITY_DEFAULTS' }
   );
+
+  assert.throws(
+    () =>
+      enforceSecurityDefaults({
+        env: {
+          SESSION_SECRET: 'super-secret',
+          INTERNAL_TOKEN: 'internal-123',
+          ALLOW_ORIGINS: 'https://*.example.com',
+        },
+      }),
+    { code: 'SECURITY_DEFAULTS' }
+  );
 });
 
 test('enforceSecurityDefaults requires override when enabling shell access', () => {
