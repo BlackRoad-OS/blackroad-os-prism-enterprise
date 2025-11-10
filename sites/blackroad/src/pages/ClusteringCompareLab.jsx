@@ -114,6 +114,10 @@ function Scatter({title, pts, labels, centers}){
     return palette[idx];
   };
   const uniqueLabels = labels ? Array.from(new Set(labels)) : [];
+  const sortedLabels = uniqueLabels.slice().sort((a, b) => {
+    if (typeof a === "number" && typeof b === "number") return a - b;
+    return String(a).localeCompare(String(b));
+  });
   return (
     <section className="p-3 rounded-lg bg-white/5 border border-white/10">
       <h3 className="font-semibold mb-2">{title}</h3>
@@ -147,17 +151,30 @@ function Scatter({title, pts, labels, centers}){
           </g>
         ))}
       </svg>
-      {uniqueLabels.length ? (
+      {sortedLabels.length ? (
         <div className="mt-2 flex flex-wrap gap-3 text-xs opacity-80">
-          {uniqueLabels.map((lab)=> (
+          {sortedLabels.map((lab)=> (
             <span key={lab} className="flex items-center gap-1">
               <span
                 className="inline-block w-3 h-3 rounded-sm"
                 style={{background: colorForLabel(lab)}}
               />
-              Cluster {lab}
+              Cluster {typeof lab === "number" ? lab + 1 : lab}
             </span>
           ))}
+          {centers?.length ? (
+            <span className="flex items-center gap-1">
+              <span
+                className="relative inline-flex items-center justify-center w-5 h-5"
+                aria-hidden="true"
+              >
+                <span className="absolute inset-0 rounded-full border border-white/40" />
+                <span className="absolute w-3 h-0.5 bg-white/70" />
+                <span className="absolute h-3 w-0.5 bg-white/70" />
+              </span>
+              K-Means center
+            </span>
+          ) : null}
         </div>
       ) : null}
     </section>
