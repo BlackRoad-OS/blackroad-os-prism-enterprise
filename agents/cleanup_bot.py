@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import sys
 import subprocess
@@ -51,10 +52,30 @@ class CleanupSummary:
 
         return len(self.results)
 
+    def has_failures(self) -> bool:
+        """Return True when any branch failed to delete."""
+
+        return self.failed_count > 0
+
     def exit_code(self) -> int:
         """Return exit code reflecting whether any deletions failed."""
 
-        return 0 if self.failed_count == 0 else 1
+        return 0 if not self.has_failures() else 1
+
+    def to_dict(self, include_results: bool = True) -> Dict[str, object]:
+        """Serialize the summary to a dictionary."""
+
+        payload: Dict[str, object] = {
+            "deleted": list(self.deleted),
+            "failed": list(self.failed),
+            "deleted_count": self.deleted_count,
+            "failed_count": self.failed_count,
+            "total": self.total,
+            "exit_code": self.exit_code(),
+        }
+        if include_results:
+            payload["results"] = dict(self.results)
+        return payload
 
 
 @dataclass
@@ -148,6 +169,11 @@ def main(argv: List[str] | None = None) -> int:
         action="store_true",
         help="Show commands without executing them",
     )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output a machine-readable JSON summary in addition to log messages",
+    )
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(message)s")
@@ -173,6 +199,9 @@ def main(argv: List[str] | None = None) -> int:
         summary.failed_count,
         summary.total,
     )
+
+    if args.json:
+        print(json.dumps(summary.to_dict(), indent=2))
 
     return summary.exit_code()
 
