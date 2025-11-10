@@ -51,6 +51,15 @@ def build_payload(claims: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def require_entity_string(claims: Dict[str, Any]) -> str:
+    """Return the entity string from claims, enforcing non-empty validation."""
+
+    entity = claims.get("entity")
+    if not isinstance(entity, str) or not entity.strip():
+        raise SystemExit("claims JSON must include a non-empty 'entity' string.")
+    return entity.strip()
+
+
 def resolve_resume_policy(claims: Dict[str, Any]) -> Dict[str, Any]:
     """Extract and validate resume verification policy metadata."""
 
@@ -182,9 +191,7 @@ def resolve_top_resume_bullets(claims: Dict[str, Any]) -> List[str]:
 def validate_claims(claims: Dict[str, Any]) -> None:
     """Validate the structure of the claims payload."""
 
-    entity = claims.get("entity")
-    if not isinstance(entity, str) or not entity.strip():
-        raise SystemExit("claims JSON must include a non-empty 'entity' string.")
+    require_entity_string(claims)
 
     bullets = claims.get("bullets")
     if not isinstance(bullets, list) or not bullets:
@@ -246,12 +253,9 @@ def format_resume_bullets(
         lines.append(summary_prefix)
 
     bullet_count = len(bullet_records)
-    if entity and entity.strip():
-        lines.append(
-            f"Claim summary: {entity} — {bullet_count} Codex-governed resume bullets."
-        )
-    else:
-        lines.append(f"Claim summary: {bullet_count} Codex-governed resume bullets.")
+    lines.append(
+        f"Claim summary: {entity} — {bullet_count} Codex-governed resume bullets."
+    )
 
     status_icons: Dict[str, str] = policy.get("status_icons", {})
 
@@ -438,12 +442,8 @@ def main() -> None:
         bullet_records = resolve_top_resume_bullet_records(claims, policy)
         validation_entries = resolve_interview_validation(claims)
         grouped_validation = group_interview_validation_by_bullet(validation_entries)
-        entity = claims.get("entity")
-        if not isinstance(entity, str) or not entity.strip():
-            raise SystemExit("claims JSON must include a non-empty 'entity' string.")
-        rendered = format_resume_bullets(
-            bullet_records, grouped_validation, policy, entity.strip()
-        )
+        entity = require_entity_string(claims)
+        rendered = format_resume_bullets(bullet_records, grouped_validation, policy, entity)
         if args.output is None:
             print(rendered)
         else:
