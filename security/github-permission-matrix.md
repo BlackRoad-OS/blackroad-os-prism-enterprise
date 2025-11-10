@@ -5,7 +5,7 @@ This matrix documents least-privilege access for the three automation agents cur
 | Agent | Purpose | Preferred Auth | Repository Scope | Permissions |
 | --- | --- | --- | --- | --- |
 | Cadillac | Synchronize product documentation and open pull requests with content updates. | `GITHUB_TOKEN` when running via GitHub Actions; otherwise a fine-grained PAT dedicated to the target repo. | Specific documentation repos only (e.g., `blackroad/blackroad-docs`). Issue one token per repo when external. | `Contents: Read & Write`, `Metadata: Read`. No administrative scopes. |
-| Lucidia | Execute analytics workflows that require reading data snapshots and opening analysis reports. | `GITHUB_TOKEN` within org workflows; per-repo fine-grained PAT for external scheduling service. | Analytics repos requiring report updates (e.g., `blackroad/analytics-*`). Separate tokens per repo to avoid cross-repo access. | `Contents: Read & Write`, `Issues: Read` (for posting findings), `Metadata: Read`. |
+| Lucidia | Execute analytics workflows that require reading data snapshots and opening analysis reports. | `GITHUB_TOKEN` within org workflows; per-repo fine-grained PAT for external scheduling service. | Analytics repos requiring report updates (e.g., `blackroad/analytics-*`). Separate tokens per repo to avoid cross-repo access. | `Contents: Read & Write`, `Issues: Read & Write` (to publish findings), `Metadata: Read`. |
 | Codex | Code-quality bot that reads source, leaves review comments, and occasionally opens fix branches. | Repository `GITHUB_TOKEN` for CI-based reviews; fine-grained PAT only if the bot runs off-platform. | Target application repo only. | `Contents: Read & Write`, `Pull requests: Read & Write`, `Metadata: Read`. |
 
 ## Operational Notes
