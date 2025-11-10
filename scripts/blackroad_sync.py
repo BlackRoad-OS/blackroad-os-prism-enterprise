@@ -55,13 +55,30 @@ class PipelineContext:
 
 def commit_and_push(ctx: PipelineContext) -> bool:
     """Commit local changes and push to GitHub."""
-    return (
-        run("git add -A", cwd=str(ctx.repo))
-        and run(
+    if not run("git add -A", cwd=str(ctx.repo)):
+        return False
+
+    status = subprocess.run(
+        ["git", "status", "--porcelain"],
+        cwd=str(ctx.repo),
+        text=True,
+        capture_output=True,
+    )
+    if status.returncode != 0:
+        LOG.error(status.stderr)
+        return False
+
+    if status.stdout.strip():
+        if not run(
             "git commit -m 'chore: sync BlackRoad pipeline'",
             cwd=str(ctx.repo),
-        )
-        and run(f"git pull --rebase origin {ctx.branch}", cwd=str(ctx.repo))
+        ):
+            return False
+    else:
+        LOG.info("Skipping commit: working tree clean")
+
+    return (
+        run(f"git pull --rebase origin {ctx.branch}", cwd=str(ctx.repo))
         and run(f"git push origin {ctx.branch}", cwd=str(ctx.repo))
     )
 
