@@ -21,6 +21,8 @@ from .utils import (
 
 DEFAULT_MODEL_TYPE = "deterministic-rules"
 DEFAULT_TRAINING_SCOPE = "Enablement heuristics + manual reviews"
+LEGACY_RATIONALE = "Legacy assignment rationale unavailable"
+LEGACY_MODEL_VERSION = "legacy-untracked"
 
 
 @dataclass
@@ -53,12 +55,28 @@ def _load_assignments() -> list[dict]:
     return json.loads(raw) if raw else []
 
 
-def _write_assignments(data: list[dict]) -> None:
+def _normalise_assignments(records: list[dict]) -> list[dict]:
+    normalised: list[dict] = []
+    for entry in records:
+        item = dict(entry)
+        rationale = item.get("rationale")
+        if not isinstance(rationale, str) or not rationale.strip():
+            item["rationale"] = LEGACY_RATIONALE
+        model_version = item.get("model_version")
+        if not isinstance(model_version, str) or not model_version.strip():
+            item["model_version"] = LEGACY_MODEL_VERSION
+        normalised.append(item)
+    return normalised
+
+
+def _write_assignments(data: list[dict]) -> list[dict]:
+    normalised = _normalise_assignments(data)
     artifacts.validate_and_write(
         _assignments_path(),
-        data,
+        normalised,
         str(ROOT / "contracts" / "schemas" / "assignments.json"),
     )
+    return normalised
 
 
 def _publish_model_manifest(
@@ -149,7 +167,7 @@ def assign(
     )
 
     updated = existing + [asdict(assignment)]
-    _write_assignments(updated)
+    normalised = _write_assignments(updated)
     lake_write("assignments", asdict(assignment))
     record("paths_assigned", 1)
 
@@ -169,7 +187,7 @@ def assign(
         model_type, training_scope, model_updated_at
     )
     _publish_model_manifest(clean_version, resolved_type, resolved_scope, resolved_updated)
-    generate_assignment_bias_report(updated)
+    generate_assignment_bias_report(normalised)
     return assignment
 
 
@@ -180,8 +198,8 @@ def undo_last_assignment(actor: str, rationale: str, model_version: str) -> list
     if not previous:
         return []
     current = _load_assignments()
-    _write_assignments(previous)
-    removed_count = max(len(current) - len(previous), 0)
+    normalised = _write_assignments(previous)
+    removed_count = max(len(current) - len(normalised), 0)
     log_action(
         "assignments.undo",
         actor,
@@ -192,5 +210,5 @@ def undo_last_assignment(actor: str, rationale: str, model_version: str) -> list
             "removed_count": removed_count,
         },
     )
-    generate_assignment_bias_report(previous)
-    return previous
+    generate_assignment_bias_report(normalised)
+    return normalised
