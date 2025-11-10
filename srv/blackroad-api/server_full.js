@@ -207,14 +207,28 @@ app.use(
     legacyHeaders: false,
   }),
 );
+const resolveClientIp = (req) => {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string' && forwarded.length > 0) {
+    const first = forwarded.split(',')[0].trim();
+    if (first) return first;
+  } else if (Array.isArray(forwarded) && forwarded.length > 0) {
+    const first = forwarded[0].split(',')[0].trim();
+    if (first) return first;
+  }
+  return req.socket?.remoteAddress || req.ip;
+};
+
 const loginLimiter = rateLimit({
   windowMs: 5 * 60_000,
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true,
+  keyGenerator: resolveClientIp,
   handler: (req, res) => {
-    logger.warn({ event: 'login_rate_limited', ip: req.ip });
+    const ip = resolveClientIp(req);
+    logger.warn({ event: 'login_rate_limited', ip });
     res.status(429).json({ error: 'too_many_attempts' });
   },
 });
