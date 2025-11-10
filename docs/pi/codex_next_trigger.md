@@ -161,3 +161,18 @@ sudo systemctl start codex-next.service
 
 After the reboot, confirm the Pi came back up, review `/var/log/codex-next.log`
 for the captured diagnostics, and repeat the trigger as needed.
+
+## 5. Verify systemd status and logs
+
+If the trigger does not behave as expected, confirm the path unit is active
+and that the service ran to completion without errors:
+
+```bash
+sudo systemctl status codex-next.path codex-next.service
+sudo journalctl -u codex-next.service --since "-15 minutes"
+```
+
+The combined status output should show the path unit in the `active (waiting)`
+state. The journal view surfaces the most recent run—including any curl errors
+or EEPROM update failures—so you can iterate before kicking off the next
+`next!!!` event.
