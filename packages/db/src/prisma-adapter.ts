@@ -148,8 +148,20 @@ export const createPrismaComplianceDb = (prisma: PrismaClient): ComplianceDb => 
           createdAt: new Date(record.createdAt),
         } satisfies CalendarItemRecord));
       },
-      async setStatus(id, status) {
-        const record = await prisma.calendarItem.update({ where: { id }, data: { status } });
+      async setStatus(id, status, reason) {
+        const existing = await prisma.calendarItem.findUnique({ where: { id } });
+        if (!existing) {
+          throw new Error(`Calendar item ${id} not found`);
+        }
+
+        const blockers = reason
+          ? [...(existing.blockers ?? []), reason]
+          : existing.blockers ?? [];
+
+        const record = await prisma.calendarItem.update({
+          where: { id },
+          data: { status, blockers },
+        });
         return {
           id: record.id,
           key: record.key,

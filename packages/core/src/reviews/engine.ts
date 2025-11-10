@@ -33,6 +33,25 @@ export const runPolicyReview = async <T>(options: ReviewRunOptions<T>) => {
     return evaluatePolicy(evaluator.key, evalInput);
   });
 
+  const gatePriority: Record<NonNullable<EvalResult["gateRecommendation"]>, number> = {
+    block: 3,
+    review: 2,
+    allow: 1,
+  };
+
+  const chooseGateRecommendation = (
+    current?: EvalResult["gateRecommendation"],
+    next?: EvalResult["gateRecommendation"]
+  ) => {
+    if (!next) {
+      return current;
+    }
+    if (!current) {
+      return next;
+    }
+    return gatePriority[next] > gatePriority[current] ? next : current;
+  };
+
   const aggregate: EvalResult = policyResults.reduce(
     (acc, result) => ({
       pass: acc.pass && result.pass,
@@ -40,7 +59,7 @@ export const runPolicyReview = async <T>(options: ReviewRunOptions<T>) => {
       breaches: [...acc.breaches, ...result.breaches],
       requiredDisclosures: Array.from(new Set([...(acc.requiredDisclosures ?? []), ...(result.requiredDisclosures ?? [])])),
       requiredEvidence: Array.from(new Set([...(acc.requiredEvidence ?? []), ...(result.requiredEvidence ?? [])])),
-      gateRecommendation: result.gateRecommendation ?? acc.gateRecommendation,
+      gateRecommendation: chooseGateRecommendation(acc.gateRecommendation, result.gateRecommendation),
     }),
     {
       pass: true,
