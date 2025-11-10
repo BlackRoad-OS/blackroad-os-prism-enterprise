@@ -2,8 +2,10 @@
 
 This module defines a tiny :class:`LucidiaBrain` class that can register
 processing steps and execute them sequentially. Steps may be given unique
-names so they can later be inspected, removed, or replaced. The class acts
-as a very small placeholder for more sophisticated reasoning engines.
+names so they can later be inspected, removed, or replaced. Attempting to
+reuse a step name raises :class:`ValueError`, clarifying how named steps are
+managed. The class acts as a very small placeholder for more sophisticated
+reasoning engines.
 """
 from __future__ import annotations
 

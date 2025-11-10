@@ -32,7 +32,8 @@ def test_reset_clears_steps():
 
 
 def test_register_duplicate_name_raises():
+    """Ensure duplicate step registration is rejected with ``ValueError``."""
     brain = LucidiaBrain()
     brain.register(lambda x: x, name="id")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Step 'id' already exists"):
         brain.register(lambda x: x, name="id")
