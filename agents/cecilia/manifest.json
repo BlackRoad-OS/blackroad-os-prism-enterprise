@@ -2,14 +2,16 @@
   "name": "cecilia",
   "version": "1.0.0",
   "agent_id": "CECILIA-7C3E-SPECTRUM-9B4F",
-  "description": "Creative spectrum engineer bridging memory discovery and design.",
+  "description": "Creative spectrum engineer bridging memory discovery and design",
   "capabilities": [
     "profile",
     "memory-summary",
-    "manifest-export"
-  ]
-  "description": "Spectrum creative engineer agent",
-  "agentId": "CECILIA-7C3E-SPECTRUM-9B4F",
+    "manifest-export",
+    "code_architecture",
+    "system_design",
+    "ui_creation",
+    "problem_solving"
+  ],
   "profile": {
     "agent_id": "CECILIA-7C3E-SPECTRUM-9B4F",
     "agent_name": "Cecilia",
