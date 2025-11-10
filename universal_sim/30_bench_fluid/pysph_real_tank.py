@@ -86,7 +86,8 @@ def _simulate_with_pysph(output_dir: Path, resolution: int) -> Dict[str, np.ndar
     )
     # tile along depth axis to emulate a 3D field from depth-averaged samples
     velocity = np.repeat(vel_grid[:, :, None, :], resolution, axis=2)
-    pressure = _bin_average(x, y, rho - RHO0, resolution)
+    pressure_grid = _bin_average(x, y, rho - RHO0, resolution)
+    pressure = np.repeat(pressure_grid[:, :, None], resolution, axis=2)
     surface = _sample_surface(x, y, resolution)
     return {
         "velocity_t000400.npz": velocity.astype(np.float32),
