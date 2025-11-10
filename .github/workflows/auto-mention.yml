@@ -35,6 +35,91 @@ jobs:
         with:
           routes_yaml_path: ${{ inputs.routes_yaml_path }}
 
+      - name: Request routed team reviewers
+        if: ${{ steps.route.outputs.has_mentions == 'true' }}
+        uses: actions/github-script@v7
+        env:
+          MENTIONS: ${{ steps.route.outputs.mentions }}
+        with:
+          script: |
+            const mentions = (process.env.MENTIONS || '').trim();
+            if (!mentions) {
+              core.info('No mentions to evaluate for reviewer requests.');
+              return;
+            }
+
+            const mentionTokens = Array.from(new Set(mentions.split(/\s+/).filter(Boolean)));
+            const teamRegex = /^@([^/\s]+)\/([^/\s]+)$/;
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              core.info('No pull request context; skipping reviewer requests.');
+              return;
+            }
+
+            const routedTeams = new Map();
+            for (const token of mentionTokens) {
+              const match = token.match(teamRegex);
+              if (!match) {
+                continue;
+              }
+              const [, org, teamSlug] = match;
+              if (org.toLowerCase() !== owner.toLowerCase()) {
+                core.info(`Skipping team mention outside repository org: ${token}`);
+                continue;
+              }
+              const lower = teamSlug.toLowerCase();
+              if (!routedTeams.has(lower)) {
+                routedTeams.set(lower, teamSlug);
+              }
+            }
+
+            if (!routedTeams.size) {
+              core.info('No in-organization team mentions found; skipping reviewer requests.');
+              return;
+            }
+
+            let prData;
+            try {
+              ({ data: prData } = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: pr.number
+              }));
+            } catch (error) {
+              core.warning(`Failed to load pull request details: ${error.message}`);
+              return;
+            }
+
+            const alreadyRequested = new Set(
+              (prData.requested_teams || []).map(team => team.slug.toLowerCase())
+            );
+            const teamReviewers = [];
+            for (const [lower, slug] of routedTeams.entries()) {
+              if (alreadyRequested.has(lower)) {
+                core.info(`Team ${slug} already requested; skipping.`);
+                continue;
+              }
+              teamReviewers.push(slug);
+            }
+
+            if (!teamReviewers.length) {
+              core.info('All routed teams already requested; nothing to do.');
+              return;
+            }
+
+            try {
+              await github.rest.pulls.requestReviewers({
+                owner,
+                repo,
+                pull_number: pr.number,
+                team_reviewers: teamReviewers
+              });
+              core.info(`Requested team reviewers: ${teamReviewers.join(', ')}`);
+            } catch (error) {
+              core.warning(`Failed to request team reviewers: ${error.message}`);
+            }
+
       - name: Routing status check
         uses: actions/github-script@v7
         env:
