@@ -82,6 +82,13 @@ float3 SampleBlockAtlas(Texture2D AtlasTex, SamplerState AtlasSampler, float3 uv
 - Use Git submodules for shared code (voxel meshing library) with pre-commit hooks verifying deterministic chunk outputs.
 - Automate nightly builds that capture Unity and Unreal frame captures via CLI tools to compare color grading and gamma.
 
+## Operational Checklist
+- **Security sanity**: Confirm design docs, configuration samples, and automation scripts avoid embedding secrets; rely on vault-backed credential injection for any future CI expansions.
+- **Tests**: Plan nightly regression suites in both engines plus schema validation jobs so auth, permissions, and gameplay edge cases stay covered as rendering features evolve.
+- **Merge plan**: Documentation-only update with no build artifacts; once sign-off is complete, merge to `main` without staging deployment but monitor subsequent CI runs for drift.
+- **Dependency freeze**: Record that no package manifests change in this PR and continue to block unreviewed engine version bumps.
+- **CI/CD check**: Ensure existing Unity/Unreal build agents share parity on GPU driver versions before lighting captures begin.
+
 ## Milestones
 1. **Foundation (Week 1-4)**: Stand up voxel data layer, shared mesh library, baseline scenes in both engines.
 2. **Rendering Polish (Week 5-8)**: Implement HDRP/UE5 lighting, finalize shaders, integrate atmospheric systems.
