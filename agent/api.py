@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 
@@ -37,10 +39,32 @@ async def ws_model(ws: WebSocket) -> None:
             await ws.send_text("[[BLACKROAD_MODEL_DONE]]")
             return
 
-        for token in models.run_llama_stream(model, prompt, n_predict=n_predict):
-            await ws.send_text(token)
+        loop = asyncio.get_running_loop()
+        done_event = asyncio.Event()
 
-        await ws.send_text("[[BLACKROAD_MODEL_DONE]]")
+        def stream_tokens() -> None:
+            try:
+                for token in models.run_llama_stream(
+                    model, prompt, n_predict=n_predict
+                ):
+                    send_future = asyncio.run_coroutine_threadsafe(
+                        ws.send_text(token), loop
+                    )
+                    try:
+                        send_future.result()
+                    except WebSocketDisconnect:
+                        break
+            except Exception as stream_exc:  # pragma: no cover - defensive in thread
+                asyncio.run_coroutine_threadsafe(
+                    ws.send_text(f"[error] {stream_exc}"), loop
+                ).result()
+            finally:
+                asyncio.run_coroutine_threadsafe(
+                    ws.send_text("[[BLACKROAD_MODEL_DONE]]"), loop
+                ).result()
+                loop.call_soon_threadsafe(done_event.set)
+
+        await asyncio.gather(asyncio.to_thread(stream_tokens), done_event.wait())
     except WebSocketDisconnect:
         return
     except Exception as exc:  # pragma: no cover - defensive; websocket lifecycle
