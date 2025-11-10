@@ -39,8 +39,17 @@ If any verdict is FALSE, generate a minimal PR plan (file, snippet to add, test)
 
 def load_claims(path: Path) -> Dict[str, Any]:
     """Load the verification claims JSON file."""
-    content = path.read_text(encoding="utf-8")
-    return json.loads(content)
+    try:
+        content = path.read_text(encoding="utf-8")
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(f"Claims file not found: {path}") from exc
+    except OSError as exc:
+        raise OSError(f"Failed to read claims file at {path}: {exc}") from exc
+
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Malformed JSON in claims file {path}: {exc}") from exc
 
 
 def build_payload(claims: Dict[str, Any]) -> Dict[str, Any]:
