@@ -17,5 +17,5 @@
       "mention": "@alexalouise"
     }
   ],
-  "always": []
+  "always": ["@copilot", "@dependabot", "@claude", "@codex", "@blackboxprogramming"]
 }
