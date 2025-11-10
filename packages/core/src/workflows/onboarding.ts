@@ -113,6 +113,8 @@ export class ClientOnboardingEngine {
     const band: Client["riskBand"] = score >= 80 ? "SPECULATIVE" : score >= 60 ? "HIGH" : score >= 40 ? "MODERATE" : "LOW";
 
     let cryptoRiskBand: SuitabilitySummary["cryptoRiskBand"];
+    let cryptoEligible: SuitabilitySummary["cryptoEligible"];
+    let cryptoBreaches: SuitabilitySummary["cryptoBreaches"];
     if (input.crypto) {
       const cryptoResult = this.policies.evaluateCryptoSuitability(input.clientId, {
         riskTolerance: input.riskTolerance,
@@ -123,6 +125,8 @@ export class ClientOnboardingEngine {
         walletIds: input.walletIds,
       });
       cryptoRiskBand = cryptoResult.cryptoRiskBand;
+      cryptoEligible = cryptoResult.pass;
+      cryptoBreaches = cryptoResult.breaches;
       if (!cryptoResult.pass) {
         await append(this.worm, { type: "CRYPTO_SUITABILITY_FAIL", clientId: input.clientId, cryptoResult });
       }
@@ -132,6 +136,8 @@ export class ClientOnboardingEngine {
       score,
       band: band ?? "LOW",
       cryptoRiskBand,
+      cryptoEligible,
+      cryptoBreaches,
       notes: input.objectives,
       questionnaire: input.questionnaire,
     };

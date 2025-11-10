@@ -46,6 +46,8 @@ export interface SuitabilitySummary {
   score: number;
   band: ClientRiskBand;
   cryptoRiskBand?: "LOW" | "MODERATE" | "HIGH" | "SPECULATIVE";
+  cryptoEligible?: boolean;
+  cryptoBreaches?: string[];
   notes: string[];
   questionnaire: Record<string, unknown>;
 }

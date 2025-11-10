@@ -1,17 +1,12 @@
 import { InMemoryStore } from "./store.js";
 import type { GateAction } from "@blackroad/db";
 import { PolicyEngine } from "./policy-engine.js";
-import type { GateEvaluationResult } from "../types.js";
+import type { GateEvaluationResult, SuitabilitySummary } from "../types.js";
 
 export class GateService {
   constructor(private readonly store: InMemoryStore, private readonly policies: PolicyEngine) {}
 
   evaluate(clientId: string, action: GateAction): GateEvaluationResult {
-    const existing = this.store.getGate(clientId, action);
-    if (existing) {
-      return { allowed: existing.allowed, reason: existing.reason };
-    }
-
     const gate = this.runEvaluation(clientId, action);
     this.store.createGate({ clientId, action, allowed: gate.allowed, reason: gate.reason });
     return gate;
@@ -84,6 +79,10 @@ export class GateService {
     }
 
     if (action === "enable_crypto") {
+      const suitability = client.suitability as SuitabilitySummary | undefined;
+      if (suitability?.cryptoEligible === false) {
+        return { allowed: false, reason: "crypto.suitability_failed" };
+      }
       const cryptoDisclosure = documents.some((doc) => doc.kind === "CRYPTO_RISK");
       if (!cryptoDisclosure) {
         return { allowed: false, reason: "crypto.disclosure_missing" };
