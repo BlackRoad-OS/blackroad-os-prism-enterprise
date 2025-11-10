@@ -79,6 +79,7 @@ async function load(){
     small.textContent=x.cid;
     li.appendChild(small);
     li.appendChild(document.createElement('br'));
+    // append text via DOM APIs so untrusted scores stay plain text
     li.append(`score=${x.score.toFixed(3)} love=${(x.love*100|0)}% trust=${(x.trust*100|0)}%`);
     feed.appendChild(li);
   });
