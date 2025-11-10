@@ -4,7 +4,7 @@ import { insertEvent, listEvents } from '../db/sqlite';
 import { broadcast, register } from '../bus/sse';
 import { PrismEvent } from '@prism/core';
 
-const eventSchema: z.ZodType<PrismEvent> = z.object({
+const eventSchema = z.object({
   id: z.string(),
   ts: z.string(),
   actor: z.union([z.literal('user'), z.literal('lucidia'), z.string().regex(/^agent:.+/)]),
@@ -18,7 +18,7 @@ const eventSchema: z.ZodType<PrismEvent> = z.object({
 
 export default async function eventsRoutes(fastify: FastifyInstance) {
   fastify.post('/events', async (req, reply) => {
-    const body = eventSchema.parse(req.body);
+    const body = eventSchema.parse(req.body) as PrismEvent;
     insertEvent(body);
     broadcast(body);
     reply.send({ ok: true });

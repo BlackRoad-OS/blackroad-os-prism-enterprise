@@ -8,7 +8,10 @@
     "noEmit": false,
     "module": "esnext",
     "moduleResolution": "node",
-    "target": "ES2020"
+    "target": "ES2020",
+    "types": ["node"],
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules"]

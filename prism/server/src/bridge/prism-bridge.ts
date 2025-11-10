@@ -33,7 +33,7 @@ const bridgePlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     const hydration = getHydrationEvents(200);
     socket.send(JSON.stringify({ type: 'hydrate', events: hydration }));
 
-    socket.on('message', (raw) => {
+    socket.on('message', (raw: any) => {
       let message: any;
       try {
         message = JSON.parse(raw.toString());

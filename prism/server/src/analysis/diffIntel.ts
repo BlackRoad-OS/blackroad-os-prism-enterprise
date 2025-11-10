@@ -56,9 +56,9 @@ export async function computeDiffIntel(diffs: PrismDiff[], root: string): Promis
     const parsed = parsePatch(d.patch);
     let added = 0;
     let removed = 0;
-    parsed.forEach(h => {
-      h.hunks.forEach(hunk => {
-        hunk.lines.forEach(l => {
+    parsed.forEach((h: any) => {
+      h.hunks.forEach((hunk: any) => {
+        hunk.lines.forEach((l: any) => {
           if (l.startsWith('+') && !l.startsWith('+++')) added++;
           if (l.startsWith('-') && !l.startsWith('---')) removed++;
         });
