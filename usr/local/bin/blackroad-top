@@ -24,15 +24,15 @@ render() {
     read s2 s4 s5 auth rate <<<$(echo "$lines" | jq -r '.status' 2>/dev/null | awk '{if($1>=200&&$1<300)s2++;else if($1==401)auth++;else if($1==403)auth++;else if($1==429)rate++;else if($1>=400&&$1<500)s4++;else if($1>=500)s5++;} END{print s2+0, s4+0, s5+0, auth+0, rate+0}')
     p50=$(echo "$lines" | jq -r '.req_time' 2>/dev/null | sort -n | awk 'NF{a[NR]=$1} END{if(NR){print a[int(0.5*NR+0.5)]*1000}else{print 0}}')
     p95=$(echo "$lines" | jq -r '.req_time' 2>/dev/null | sort -n | awk 'NF{a[NR]=$1} END{if(NR){print a[int(0.95*NR+0.5)]*1000}else{print 0}}')
-    up_p50=$(echo "$lines" | jq -r '.up_time | split(",") | map(tonumber) | add/length' 2>/dev/null | sort -n | awk 'NF{a[NR]=$1} END{if(NR){print a[int(0.5*NR+0.5)]*1000}else{print 0}}')
-    up_p95=$(echo "$lines" | jq -r '.up_time | split(",") | map(tonumber) | add/length' 2>/dev/null | sort -n | awk 'NF{a[NR]=$1} END{if(NR){print a[int(0.95*NR+0.5)]*1000}else{print 0}}')
+    up_p50=$(echo "$lines" | jq -r '(.up_time // "") | split(",") | map(select(. != "-" and . != "") | tonumber) | if length > 0 then add/length else empty end' 2>/dev/null | sort -n | awk 'NF{a[NR]=$1} END{if(NR){print a[int(0.5*NR+0.5)]*1000}else{print 0}}')
+    up_p95=$(echo "$lines" | jq -r '(.up_time // "") | split(",") | map(select(. != "-" and . != "") | tonumber) | if length > 0 then add/length else empty end' 2>/dev/null | sort -n | awk 'NF{a[NR]=$1} END{if(NR){print a[int(0.95*NR+0.5)]*1000}else{print 0}}')
     top_paths=$(echo "$lines" | jq -r '.path' 2>/dev/null | grep -vE '\.(css|js|png|jpg|gif|ico)$' | awk '{count[$1]++} END{for(k in count)print count[k],k}' | sort -nr | head -n5)
   else
     rps=0;s2=0;s4=0;s5=0;auth=0;rate=0;p50=0;p95=0;up_p50=0;up_p95=0;top_paths=""
   fi
 
-  ready=$(curl -fsS --max-time 1 http://127.0.0.1:4010/api/llm/ready 2>/dev/null | jq -r '.status? // .ok // "fail"' 2>/dev/null || echo fail)
-  metrics_json=$(curl -fsS --max-time 1 http://127.0.0.1:4010/api/llm/metrics 2>/dev/null || echo '')
+  ready=$(curl -fsS --max-time 1 http://127.0.0.1:4000/api/llm/ready 2>/dev/null | jq -r '.status? // .ok // "fail"' 2>/dev/null || echo fail)
+  metrics_json=$(curl -fsS --max-time 1 http://127.0.0.1:4000/api/llm/metrics 2>/dev/null || echo '')
   model=$(echo "$metrics_json" | jq -r '.model // empty' 2>/dev/null)
   sse=$(echo "$metrics_json" | jq -r '.sse_clients // empty' 2>/dev/null)
   if [[ -f "$BRIDGE_LOG" ]]; then
