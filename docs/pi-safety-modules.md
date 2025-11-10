@@ -11,7 +11,9 @@ opt-in and designed to stay private by default.
   public ports.
 * Requires the existing Core container to share the Docker network.
 * Provide `BITCOIN_RPCUSER` and `BITCOIN_RPCPASSWORD` via an `.env` file or
-  shell environment before launching.
+  shell environment before launching. The compose bundle now fails fast unless
+  a non-empty `BITCOIN_RPCPASSWORD` is supplied, so choose a strong value before
+  starting the services.
 
 ```bash
 # bootstrap from the repository root on the Pi
