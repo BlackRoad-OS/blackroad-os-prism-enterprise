@@ -27,8 +27,10 @@ def _parse_jobs(output: str) -> MutableSequence[Mapping[str, str]]:
         parts = line.split()
         if len(parts) < 4:
             continue
-        job_id, job_type, state = parts[:3]
-        unit = " ".join(parts[3:])
+        job_id, unit, job_type, state = parts[:4]
+        remainder = parts[4:]
+        if remainder:
+            unit = " ".join([unit, *remainder])
         jobs.append({
             "id": job_id,
             "type": job_type,
