@@ -32,4 +32,4 @@ Recent supply-chain campaigns (for example, the 2025 "GhostAction" incident that
 - **Workflow change monitoring** – Alert on new or modified workflow files, and require review before merging to mainline branches. Unexpected additions (for example, anonymous curl uploads) should trigger incident response.
 - **Network egress controls** – Block unapproved outbound destinations from CI runners where possible and log HTTP(S) requests to detect credential exfiltration attempts.
 
-The security team reviews GitHub Actions logs weekly and after every critical alert, rotating any cloud or package registry credentials if anomalous access is detected.
+The security team reviews GitHub Actions logs weekly and after every critical alert, rotating any cloud or package registry credentials if anomalous access is detected. Following the GhostAction retro, we also run quarterly tabletop exercises that simulate credential exfiltration to verify notification paths, and we re-validate OIDC trust relationships any time new environments are added.
