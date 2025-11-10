@@ -9,8 +9,9 @@ def parse_numeric_prefix(text: str) -> float:
     """Extract the numeric prefix from ``text``.
 
     The first comma-separated token is safely evaluated with
-    :func:`ast.literal_eval`. If that token is missing or not numeric the
-    function returns ``1.0``.
+    :func:`ast.literal_eval`. If that token is missing, not numeric, or causes
+    ``literal_eval`` to raise (e.g. ``RecursionError`` from extreme nesting),
+    the function returns ``1.0`` instead of propagating the exception.
     """
     try:
         value = ast.literal_eval(text.split(",", maxsplit=1)[0].strip())
