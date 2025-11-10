@@ -26,3 +26,16 @@ export {
 
 // React Components (for web clients)
 export { default as EarthMetaverse, EarthMetaverseContainer } from './components/EarthMetaverse';
+
+// Roster helpers
+export {
+  getAgentRoster,
+  getRosterMetadata,
+  findAgentById,
+  summarizeRoster,
+  toSpawnRequest,
+  type RosterAgent,
+  type RosterDataset,
+  type RosterMetadata,
+  type RosterAgentMetaverseInfo
+} from './agent-roster';

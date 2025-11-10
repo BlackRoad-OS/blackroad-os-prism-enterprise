@@ -83,6 +83,19 @@ The API will be available at:
 npm run build
 ```
 
+### Agent roster sync
+
+Generate or refresh the consolidated 1,000-agent roster that powers the
+metaverse auto-spawn pipeline:
+
+```bash
+python tools/build_metaverse_roster.py
+```
+
+This writes `metaverse/data/agent_roster.json` with normalized metadata for the
+first 1,000 archetype expansions. The API layer consumes this file at runtime
+to pre-warm the metaverse and expose cluster-aware spawn hints.
+
 ### Production
 
 ```bash
