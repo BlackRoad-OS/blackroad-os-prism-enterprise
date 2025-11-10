@@ -17,6 +17,9 @@ const ASSUMED_MAX_NETWORK_BYTES =
   Number.isFinite(CONFIGURED_MAX_NETWORK_BYTES) && CONFIGURED_MAX_NETWORK_BYTES > 0
     ? CONFIGURED_MAX_NETWORK_BYTES
     : 125_000_000; // Approx. 1 Gbps expressed in bytes/sec
+const INSECURE_SSH_ALLOWED = /^\s*(1|true|yes|on)\s*$/i.test(
+  process.env.JETSON_SSH_ALLOW_INSECURE || ''
+);
 
 function parseJetsonConfig() {
   const config = {
@@ -46,18 +49,13 @@ function runSshCommand(config, command) {
   return new Promise((resolve, reject) => {
     const timeoutMs = DEFAULT_TIMEOUT_MS > 0 ? DEFAULT_TIMEOUT_MS : 8000;
     const connectTimeout = Math.max(1, Math.floor(timeoutMs / 1000));
-    const args = [
-      '-o',
-      'BatchMode=yes',
-      '-o',
-      'StrictHostKeyChecking=no',
-      '-o',
-      'UserKnownHostsFile=/dev/null',
-      '-o',
-      `ConnectTimeout=${connectTimeout}`,
-      '-p',
-      String(config.port)
-    ];
+    const args = ['-o', 'BatchMode=yes'];
+
+    if (INSECURE_SSH_ALLOWED) {
+      args.push('-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null');
+    }
+
+    args.push('-o', `ConnectTimeout=${connectTimeout}`, '-p', String(config.port));
 
     if (process.env.JETSON_SSH_ARGS) {
       args.push(
