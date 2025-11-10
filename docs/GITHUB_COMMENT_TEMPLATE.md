@@ -55,7 +55,7 @@ npm run health
   - [ ] `tests/` API + integration specs
   - [ ] `sites/blackroad/` E2E coverage (if applicable)
 
-⸻
+---
 
 🚦 CI / Automation
   • Ensure GitHub Actions run on push + PR (lint, test, build)
@@ -69,7 +69,7 @@ Slash commands (if your bots support them):
   • /size-limit
   • /label type:bug priority:P1
 
-⸻
+---
 
 🤖 Agents (Cadillac · Lucidia · Codex)
   • Generate test scaffold: `/agent tests --paths srv/,sites/`
@@ -77,7 +77,7 @@ Slash commands (if your bots support them):
   • Risk matrix: `/agent risk --files changed`
   • Next steps plan: `/agent plan --acceptance`
 
-⸻
+---
 
 🔍 Review Checklist (for approvers)
   • Small, focused diffs (≤ ~300 LOC)
@@ -87,20 +87,20 @@ Slash commands (if your bots support them):
   • Perf & security notes addressed
   • Rollback plan or feature flag noted
 
-⸻
+---
 
 🚢 Merge Strategy
   • Type: squash / rebase / merge
   • Post-merge:
-  • Tag release: vX.Y.Z
-  • Deploy to: dev → staging → prod
-  • Smoke checks complete
-  • Announce in #eng-updates with changelog link
+    - Tag release: vX.Y.Z
+    - Deploy to: dev → staging → prod
+    - Smoke checks complete
+    - Announce in #eng-updates with changelog link
 
-⸻
+---
 
 ▶️ Next Steps (auto-fill after review)
- 1. — @owner — due
+ 1. [Action item] — @owner — [due date]
  2. <follow-up ticket> — create #
  3. <docs/tutorial update> — link PR
 ```
