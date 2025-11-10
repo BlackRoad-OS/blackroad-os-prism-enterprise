@@ -16,9 +16,18 @@ def parse_numeric_prefix(text: str) -> float:
     cases.
     """
     try:
+        # Evaluate only the portion before the first comma to ignore any
+        # trailing text (for example, "2, rest"). ``ast.literal_eval`` is
+        # intentionally used instead of ``eval`` because it restricts the
+        # permitted syntax to Python literals, preventing arbitrary code
+        # execution while still accepting ints, floats, and their negative
+        # forms.
         value = ast.literal_eval(text.split(",", maxsplit=1)[0].strip())
         if isinstance(value, (int, float)):
             return float(value)
     except (ValueError, SyntaxError):
+        # Non-numeric literals—such as strings, malformed expressions, or
+        # whitespace—raise ``ValueError``/``SyntaxError`` and fall through to the
+        # default of ``1.0``.
         pass
     return 1.0
