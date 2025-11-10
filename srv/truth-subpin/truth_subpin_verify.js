@@ -5,6 +5,7 @@ const bs58 = require('bs58');
 const crypto = require('crypto');
 const os = require('os');
 const { ensureIdentity, signJcs } = require('./device_identity');
+const { getIpfsClient } = require('../ipfs-client');
 
 const TOPIC = process.env.TRUTH_TOPIC || 'truth.garden/v1/announce';
 const API = process.env.IPFS_API || 'http://127.0.0.1:5001';
@@ -61,8 +62,7 @@ async function publishAttestation(cid) {
 }
 
 (async () => {
-  const { create } = await import('ipfs-http-client');
-  ipfs = create({ url: API });
+  ipfs = await getIpfsClient(API);
 
   console.log(
     '[subpin-verify] api=%s topic=%s DID=%s allow=%s',

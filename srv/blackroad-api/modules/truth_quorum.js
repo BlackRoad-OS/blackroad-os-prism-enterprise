@@ -5,6 +5,7 @@ const canonicalize = require('json-canonicalize');
 const bs58 = require('bs58');
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
+const { getIpfsClient } = require('../../ipfs-client');
 
 const IPFS_API = process.env.IPFS_API || 'http://127.0.0.1:5001';
 const TOPIC = process.env.TRUTH_TOPIC || 'truth.garden/v1/announce';
@@ -84,8 +85,7 @@ async function celebrateIf(db, cid) {
 }
 
 module.exports = async function attachTruthQuorum({ app }) {
-  const { create } = await import('ipfs-http-client');
-  const ipfs = create({ url: IPFS_API });
+  const ipfs = await getIpfsClient(IPFS_API);
   const d = db();
 
   // Subscriber
