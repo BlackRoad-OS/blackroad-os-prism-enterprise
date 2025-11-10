@@ -16,8 +16,9 @@ from prism_utils import parse_numeric_prefix
 st.set_page_config(layout="wide")
 st.title("BlackRoad Prism Generator with GPT + Voice Console")
 
-# Only instantiate the OpenAI client when an API key is available so we can
-# provide a Streamlit warning if configuration is missing.
+# Instantiate the OpenAI client only when an API key is available.
+# This lets the app warn about missing configuration instead of failing on
+# import.
 openai_api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=openai_api_key) if openai_api_key else None
 if client is None:
