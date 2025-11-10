@@ -59,7 +59,7 @@ The following catalog grounds the BlackRoad claims in repository artifacts acros
 
 ### Machine and deep learning
 
-21. `build_estimator_qnn` constructs gradient-enabled `EstimatorQNN` models with configurable feature maps and ansätze for local quantum classifiers. `lucidia/quantum/qnn.py`
+21. `build_estimator_qnn` constructs gradient-enabled `EstimatorQNN` models with configurable feature maps and ansatzes for local quantum classifiers. `lucidia/quantum/qnn.py`
 22. `build_sampler_qnn` prepares probabilistic `SamplerQNN` networks sized to multi-class outputs for measurement-based inference. `lucidia/quantum/qnn.py`
 23. `QModule` wraps Qiskit neural networks with `TorchConnector`, letting PyTorch autograd train quantum circuits alongside deep nets. `lucidia/quantum/torch_bridge.py`
 24. `FunctionalVAE.encode` splits latent means and log-variances, while `reparam` samples noise for unsupervised field modeling. `lucidia/modules/random_fields/functional_vae.py`
@@ -120,7 +120,7 @@ The following catalog grounds the BlackRoad claims in repository artifacts acros
 67. `QModule.to` enforces GPU opt-in before moving quantum connectors to CUDA devices. `lucidia/quantum/torch_bridge.py`
 68. The Grover Sudoku example constructs oracle clauses and uncomputes ancillas to keep the quantum oracle reversible. `envs/quantum/src/torchquantum/examples/grover/grover_example_sudoku.py`
 69. `fit_qsvc` trains Pegasos quantum SVMs on local kernels for hybrid ML workflows. `lucidia/quantum/kernels.py`
-70. `build_sampler_qnn` (reused here) generates multi-class sampler networks for measurement-based predictions. `lucidia/quantum/qnn.py`
+70. `build_sampler_qnn` generates multi-class sampler networks for measurement-based predictions. `lucidia/quantum/qnn.py`
 
 ### Consciousness, neuroscience, and AI education
 
@@ -153,13 +153,13 @@ The following catalog grounds the BlackRoad claims in repository artifacts acros
 91. `t_and` defines trinary AND as a minimum operator, supporting fuzzy logic over `(-1, 0, 1)` states. `lucidia_infinity/logic.py`
 92. `psi_merge` treats agreement as 0 and contradictions as 1, encoding Ψ′ paradox handling in logic space. `lucidia_infinity/logic.py`
 93. `generate_truth_tables` emits JSON, NumPy, and GEXF artifacts for every trinary operator into `output/logic`. `lucidia_infinity/logic.py`
-94. The Backbone equations list covers Turing’s halting problem, Kolmogorov complexity, RSA, and other computational theory staples. `docs/blackroad-equation-backbone.md`
+94. The Backbone equations list covers Turing’s halting problem, Kolmogorov complexity, RSA, and the Riemann zeta hypothesis, anchoring each to explicit formulas. `docs/blackroad-equation-backbone.md`
 95. Logistic regression and cross-entropy equations document supervised learning updates within the AI consciousness codex. `docs/ai-consciousness-intelligence-equation-codex.md`
-96. Juxtaposing those supervised formulas with the unsupervised `FunctionalVAE.forward` loss highlights both learning regimes living in the codebase. `docs/ai-consciousness-intelligence-equation-codex.md`, `lucidia/modules/random_fields/functional_vae.py`
-97. `riemann_zeros` fetches the first `n` nontrivial Riemann zeta zeros and compares their spacings to Wigner distributions. `experiments/hilbert_polya_gue.py`
-98. `tail_risk` sums scenario scores and evaluates `mpmath.zeta(1 + s)` to quantify systemic risk. `risk/engine.py`
-99. The Grover Sudoku oracle uncomputes clause qubits to keep the electron-inspired search oracle reversible. `envs/quantum/src/torchquantum/examples/grover/grover_example_sudoku.py`
-100. The Backbone list also includes the Riemann zeta function and hypothesis entries—“Zeta lol” grounded in math instead of memes. `docs/blackroad-equation-backbone.md`
+96. The supervised learning formulas (logistic regression, cross-entropy) are documented in detail. `docs/ai-consciousness-intelligence-equation-codex.md`
+97. The unsupervised learning regime is exemplified by the `FunctionalVAE.forward` loss implementation. `lucidia/modules/random_fields/functional_vae.py`
+98. The juxtaposition of these supervised and unsupervised approaches is discussed in the research summary, highlighting both learning regimes present in the codebase. See comparative analysis in Section 2 (Background & Motivation). `docs/blackroad-research.md`
+99. `riemann_zeros` fetches the first `n` nontrivial Riemann zeta zeros and compares their spacings to Wigner distributions. `experiments/hilbert_polya_gue.py`
+100. `tail_risk` sums scenario scores and evaluates `mpmath.zeta(1 + s)` to quantify systemic risk. `risk/engine.py`
 
 ⸻
 
