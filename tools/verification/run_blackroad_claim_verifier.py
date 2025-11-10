@@ -82,7 +82,19 @@ def main() -> None:
     if args.resume_bullets:
         bullets = claims.get("top_resume_bullets")
         if not bullets:
-            raise SystemExit("No top_resume_bullets section found in claims JSON.")
+            raise SystemExit(
+                "No 'top_resume_bullets' section found in claims JSON.\n"
+                "Please ensure your claims file includes a 'top_resume_bullets' key with a list of resume bullets.\n"
+                "Example structure:\n"
+                '{\n'
+                '  "top_resume_bullets": [\n'
+                '    "Built distributed memory palace for multi-agent chat",\n'
+                '    "Reduced latency by 30% via async SSE routes",\n'
+                '    "Benchmarked QNN estimator on CI artifacts"\n'
+                '  ],\n'
+                '  ...\n'
+                '}\n'
+            )
         rendered = format_resume_bullets(bullets)
         if args.output is None:
             print(rendered)
