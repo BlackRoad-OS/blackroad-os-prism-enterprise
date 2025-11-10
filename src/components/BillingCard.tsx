@@ -7,7 +7,7 @@ export interface BillingInfo {
 }
 
 export function formatAmount(amount: number): string {
-  return amount.toFixed(1);
+  return amount.toFixed(2);
 }
 
 export function BillingCard({ plan, amountDue, nextBillingDate }: BillingInfo) {
