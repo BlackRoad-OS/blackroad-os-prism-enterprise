@@ -69,47 +69,41 @@ const { loadFlags } = require('../../packages/flags/store');
 const { isOn } = require('../../packages/flags/eval');
 
 // --- Config
+const { enforceSecurityDefaults } = require('./lib/securityDefaults.cjs');
+
 const PORT = parseInt(process.env.PORT || '4000', 10);
-const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-me';
-const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
 const LLM_URL = process.env.LLM_URL || 'http://127.0.0.1:8000/chat';
-const ALLOW_SHELL =
-  String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
-<<const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
+const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
 const BILLING_DISABLE =
   String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
-const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || 'change-me';
-const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
-const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
-const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
-const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS
-  ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim())
-  : [];
-const MATH_ENGINE_URL = process.env.MATH_ENGINE_URL || '';
-const ALLOW_SHELL = String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
-const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
-const BILLING_DISABLE = String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
-const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
-const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
->>>>>>>+main
-=====
-coconst WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
->>>>>>>+origin/codex/cr
-nst BILLING_DISABLE =
-  String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
-const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || 'change-me';
 const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || '';
 const BRANCH_MAIN = process.env.BRANCH_MAIN || 'main';
 const BRANCH_STAGING = process.env.BRANCH_STAGING || 'staging';
 const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
 const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
-<<const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim()) : [];
+const MATH_ENGINE_URL = process.env.MATH_ENGINE_URL || '';
 const DEBUG_MODE =
   String(process.env.DEBUG_MODE || process.env.DEBUG_PROBES || 'false').toLowerCase() ===
   'true';
 const FLAGS_PARAM = process.env.FLAGS_PARAM || '/blackroad/dev/flags';
 const FLAGS_MAX_AGE_MS = Number(process.env.FLAGS_MAX_AGE_MS || '30000');
+
+let securityDefaults;
+try {
+  securityDefaults = enforceSecurityDefaults({ env: process.env, logger });
+} catch (error) {
+  if (error && error.code === 'SECURITY_DEFAULTS') process.exit(1);
+  throw error;
+}
+
+const {
+  sessionSecret: SESSION_SECRET,
+  internalToken: INTERNAL_TOKEN,
+  allowOrigins: ALLOW_ORIGINS,
+  allowShellEnabled: ALLOW_SHELL,
+} = securityDefaults;
+
 const PRISM_PLACEHOLDER = {
   github: [
     { label: 'Mon', value: 32 },
@@ -132,24 +126,6 @@ const PRISM_PLACEHOLDER = {
     churnRate: 1.8,
   },
 };
->>>>>>>+main
-=====
->>>>>>> origin/codex/create-cleanup-plan-and-decisions-dw5aix
-const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS
-  ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim())
-  : [];
-
-['SESSION_SECRET', 'INTERNAL_TOKEN', 'ALLOW_ORIGINS'].forEach((name) => {
-  if (!process.env[name]) {
-    logger.fatal({ event: 'missing_env', name });
-    process.exit(1);
-  }
-});
-
-const SESSION_SECRET = process.env.SESSION_SECRET;
-const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN;
-const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim());
-const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
 
 const PLANS = [
   {
