@@ -44,25 +44,25 @@ async function main() {
     }
 
     let subsCount = 0;
-    let latestSubUpdated = lastSubTs;
-    const updatedGte = Math.floor(lastSubTs.getTime() / 1000);
-    for await (const page of listSubscriptions(token, { updated: { gte: updatedGte } })) {
+    let latestSubCursor = lastSubTs;
+    const createdGteSubs = Math.floor(lastSubTs.getTime() / 1000);
+    for await (const page of listSubscriptions(token, { created: { gte: createdGteSubs } })) {
       if (!Array.isArray(page) || page.length === 0) continue;
       subsCount += await upsertSubscriptions(client, page, token, sourceId, getSubscriptionItems);
       const pageMax = page.reduce((max: number, sub: any) => {
-        const ts = Number(sub?.updated ?? sub?.current_period_end ?? sub?.created ?? 0);
+        const ts = Number(sub?.current_period_end ?? sub?.created ?? 0);
         return Math.max(max, ts);
       }, 0);
       if (pageMax) {
         const subDate = new Date(pageMax * 1000);
-        if (subDate > latestSubUpdated) {
-          latestSubUpdated = subDate;
+        if (subDate > latestSubCursor) {
+          latestSubCursor = subDate;
         }
       }
     }
 
     const nextChargeTs = chargesCount > 0 ? latestChargeTs : lastChargeTs;
-    const nextSubTs = subsCount > 0 ? latestSubUpdated : lastSubTs;
+    const nextSubTs = subsCount > 0 ? latestSubCursor : lastSubTs;
 
     await client.query(
       `INSERT INTO stripe_sync_state(source_id, last_charge_ts, last_sub_updated_ts)
