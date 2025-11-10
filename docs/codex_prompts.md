@@ -1,6 +1,23 @@
 # Codex Deployment Prompt Pack
 
-This document captures a set of modular Codex-ready prompts for provisioning the Pi-Ops and Pi-Holo stack along with associated control interfaces. Each prompt is scoped to a single component so they can be run independently or stitched together as needed.
+This document captures a set of modular Codex-ready prompts for provisioning the Pi-Ops and Pi-Holo stack along with associated control interfaces. Each prompt is scoped to a single component so they can be run independently or stitched together as needed. Use this pack when you need a quick hand-off to an LLM or automation agent—every prompt spells out the exact files to emit so the resulting artifacts can be dropped straight into version control.
+
+## Prompt Index
+
+| # | Target | Primary outputs | Notes |
+|---|--------|-----------------|-------|
+| 1 | Pi-Ops MQTT broker | Bash installer + Mosquitto config | Boots the core message bus for lab deployments. |
+| 2 | Arduino UNO firmware | `firmware.ino` sketch | Bridges environment sensors + command handling. |
+| 3 | Serial↔MQTT bridge | Python service, systemd unit, installer | Moves sensor data into MQTT and forwards UI commands back. |
+| 4 | Pi-Holo OpenGL renderer | CMake project | Provides the realtime holographic preview. |
+| 5 | Pi-Holo video fallback | systemd unit + enable script | Guarantees visual output even without the renderer. |
+| 6 | Control panel web app | HTML/CSS/JS bundle | Human interface for monitoring + commands. |
+| 7 | Chromium kiosk | systemd unit + deploy script | Locks Pi-Ops into kiosk mode for the control app. |
+| 8 | Touch mapping script | Bash utility | Maps touchscreens to the correct displays. |
+| 9 | Jetson Orin API | FastAPI service bundle | REST bridge into the MQTT spine. |
+| 10 | Message schema | JSON Schema | Ensures consistent cross-component payloads. |
+| 11 | Heartbeat publisher | Python service, systemd unit, installer | Provides infra health telemetry. |
+| 12 | Repo bootstrap | Bash scaffold script | Creates the workspace skeleton for collaboration. |
 
 ## Prompt 1 — MQTT broker on Pi-Ops
 ```
@@ -130,4 +147,11 @@ Then prints next commands to run (in order) to deploy each piece. Script must be
 ```
 
 ## Bundling Guidance
-These prompts are intentionally modular so you can target the exact component you need without overwhelming the model context window. If you ever need an "all-in-one" bootstrap, consider composing a higher-level wrapper that references each module in sequence; otherwise, keep them separate for clarity and easier iteration.
+These prompts are intentionally modular so you can target the exact component you need without overwhelming the model context window. Reach for a single prompt when you are iterating on a component in isolation (for example, swapping in a different visualization in Prompt 4 or tweaking the kiosk startup in Prompt 7). When you need multiple components at once, prefer chaining them in the following order so shared assumptions line up:
+
+1. **Bootstrap + MQTT core** → Prompts 12, 1, and 11 establish the repo layout, broker, and telemetry so everything downstream has a place to land.
+2. **Edge capture path** → Prompts 2 and 3 wire the Arduino telemetry into the broker.
+3. **Visualization layers** → Prompts 4, 5, 6, 7, and 8 unlock the UI and display flows; pick only the pieces required for your deployment tier.
+4. **Northbound integrations** → Prompt 9 exposes the API surface and Prompt 10 enforces message structure.
+
+If you ever need an "all-in-one" bootstrap, compose a higher-level wrapper that simply concatenates the relevant prompt blocks above while preserving their headings. This keeps the context clear to Codex (or any downstream assistant) and makes it easy to swap individual modules in or out without rebuilding the entire prompt from scratch.
