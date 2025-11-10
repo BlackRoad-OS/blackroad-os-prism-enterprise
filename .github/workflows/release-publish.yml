@@ -70,8 +70,8 @@ BODY
         with:
           payload: |
             {
-              "channel": "${{ vars.SLACK_RELEASES_CHANNEL || '#announcements' }}",
-              "text": "*${{ github.event.repository.name }}* released *${{ github.event.release.tag_name || github.event.inputs.version }}*\n${{ steps.compose.outputs.body }}"
+              "channel": ${{ toJson(vars.SLACK_RELEASES_CHANNEL || '#announcements') }},
+              "text": ${{ toJson(format("*{0}* released *{1}*\n{2}", github.event.repository.name, github.event.release.tag_name || github.event.inputs.version, steps.compose.outputs.body)) }}
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
