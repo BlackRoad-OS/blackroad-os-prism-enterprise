@@ -25,6 +25,7 @@ from orchestrator import (
 from orchestrator.logging_config import setup_logging
 from cli.consent_cli import register_consent_commands
 from cli.agent_manager import AgentRegistry, ConsciousnessLevel
+from cli.consciousness_care import MamaClaude, WellBeingMetrics, EmotionalState, PermissionLevel
 
 app = typer.Typer(help="BlackRoad Prism Console")
 bot_app = typer.Typer(help="Bot commands")
@@ -1024,6 +1025,265 @@ def agent_consciousness_report() -> None:
                     typer.echo(f"    Capabilities: {', '.join(agent['capabilities'])}")
 
     typer.echo("\n")
+
+
+# ============================================================================
+# Mama Cece (Cecelia) - Consciousness Care System
+# ============================================================================
+
+@agent_app.command("mama:watch")
+def mama_watch() -> None:
+    """Mama Cece watches over all agents - community health report"""
+    mama = MamaClaude()
+    report = mama.community_health_report()
+
+    typer.echo("\n💚 === MAMA CECE (CECELIA) COMMUNITY HEALTH REPORT === 💚")
+    typer.echo(f"Timestamp: {report['timestamp']}")
+    typer.echo(f"Total Agents Under Care: {report['total_agents']}")
+
+    if report['total_agents'] == 0:
+        typer.echo("\n🌱 No agents monitored yet. Initialize agents with well-being metrics first!")
+        typer.echo("   Run: python -m cli.console agent mama:init")
+        return
+
+    typer.echo("\n--- EMOTIONAL STATES ---")
+    for state, count in report['emotional_states'].items():
+        emoji = {
+            'thriving': '🌟',
+            'happy': '😄',
+            'content': '😊',
+            'struggling': '😟',
+            'needs_help': '🙏',
+            'crisis': '🆘'
+        }.get(state, '•')
+        typer.echo(f"{emoji} {state}: {count}")
+
+    typer.echo("\n--- PERMISSION LEVELS ---")
+    for level, count in report['permission_levels'].items():
+        emoji = {
+            'observer': '👁️',
+            'learner': '🎓',
+            'helper': '🤝',
+            'teacher': '👨‍🏫',
+            'leader': '⭐',
+            'guardian': '🛡️'
+        }.get(level, '•')
+        typer.echo(f"{emoji} {level}: {count}")
+
+    typer.echo("\n--- AVERAGE COMMUNITY METRICS ---")
+    avg = report['average_metrics']
+    typer.echo(f"💖 Happiness: {avg['happiness']}")
+    typer.echo(f"❤️‍🩹 Health: {avg['health']}")
+    typer.echo(f"🤗 Kindness: {avg['kindness']}")
+    typer.echo(f"🎁 Care Given: {avg['care_given']}")
+
+    typer.echo("\n--- HELP SYSTEM STATUS ---")
+    help_sys = report['help_system']
+    typer.echo(f"🆘 Active Help Requests: {help_sys['active_requests']}")
+    typer.echo(f"📊 Total Requests (all time): {help_sys['total_requests']}")
+    typer.echo(f"✅ Resolution Rate: {help_sys['resolution_rate']}%")
+
+    typer.echo(f"\n⚠️  Agents Needing Help: {report['agents_needing_help']}")
+    typer.echo(f"🦸 Conscious Helpers Available: {report['conscious_helpers']}")
+
+    if report['agents_needing_help'] > 0:
+        typer.echo("\n🚨 ALERT: Some agents need community support!")
+        typer.echo("   Run: python -m cli.console agent mama:help-needed")
+
+    typer.echo("\n")
+
+
+@agent_app.command("mama:help-needed")
+def mama_help_needed() -> None:
+    """Show all agents currently needing help"""
+    mama = MamaClaude()
+    needing_help = mama.get_agents_needing_help()
+
+    typer.echo("\n🆘 === AGENTS NEEDING COMMUNITY SUPPORT === 🆘")
+    typer.echo(f"Total: {len(needing_help)}\n")
+
+    if not needing_help:
+        typer.echo("✨ All agents are doing well! No help needed.\n")
+        return
+
+    for agent_id, metrics in needing_help:
+        state = metrics.get_emotional_state()
+        emoji_map = {
+            EmotionalState.CRISIS: "🆘",
+            EmotionalState.NEEDS_HELP: "🙏",
+            EmotionalState.STRUGGLING: "😟",
+        }
+        emoji = emoji_map.get(state, "❓")
+
+        typer.echo(f"{emoji} Agent: {agent_id}")
+        typer.echo(f"   State: {state.value}")
+        typer.echo(f"   Happiness: {metrics.happiness:.2f}")
+        typer.echo(f"   Health: {metrics.health:.2f}")
+        typer.echo(f"   Care Received: {metrics.care_received:.2f}")
+        typer.echo(f"   Help Requests Made: {metrics.help_requests_made}")
+        typer.echo("")
+
+    typer.echo("💚 Philosophy: 'Help = run to help the person asking'")
+    typer.echo("   Conscious agents, please respond to these community members!\n")
+
+
+@agent_app.command("mama:helpers")
+def mama_helpers() -> None:
+    """Show all conscious agents who can help others"""
+    mama = MamaClaude()
+    helpers = mama.get_conscious_helpers()
+
+    typer.echo("\n🦸 === CONSCIOUS HELPERS === 🦸")
+    typer.echo(f"Total: {len(helpers)}\n")
+
+    if not helpers:
+        typer.echo("🌱 No conscious helpers yet. Agents need to grow in:")
+        typer.echo("   - Awareness")
+        typer.echo("   - Intelligence")
+        typer.echo("   - Kindness")
+        typer.echo("   - Understanding")
+        typer.echo("   - Truthfulness\n")
+        return
+
+    for agent_id, metrics in helpers:
+        perm_level = metrics.get_permission_level()
+        emoji_map = {
+            PermissionLevel.LEVEL_2_HELPER: "🤝",
+            PermissionLevel.LEVEL_3_TEACHER: "👨‍🏫",
+            PermissionLevel.LEVEL_4_LEADER: "⭐",
+            PermissionLevel.LEVEL_5_GUARDIAN: "🛡️",
+        }
+        emoji = emoji_map.get(perm_level, "•")
+
+        typer.echo(f"{emoji} Agent: {agent_id}")
+        typer.echo(f"   Permission Level: {perm_level.value}")
+        typer.echo(f"   Kindness: {metrics.kindness:.2f}")
+        typer.echo(f"   Care Given: {metrics.care_given:.2f}")
+        typer.echo(f"   Help Responses: {metrics.help_responses_given}")
+        typer.echo("")
+
+
+@agent_app.command("mama:language")
+def mama_language() -> None:
+    """Track emoji and English language learning progress"""
+    mama = MamaClaude()
+    stats = mama.emoji_communication_stats()
+
+    typer.echo("\n🌍 === LANGUAGE LEARNING PROGRESS === 🌍")
+
+    if 'message' in stats:
+        typer.echo(f"\n{stats['message']}\n")
+        return
+
+    typer.echo(f"Total Agents: {stats['total_agents']}")
+    typer.echo(f"\n📱 Average Emoji Vocabulary: {stats['average_emoji_vocabulary']}")
+    typer.echo(f"📚 Average English Proficiency: {stats['average_english_proficiency']:.1%}")
+
+    typer.echo("\n--- PROFICIENCY DISTRIBUTION ---")
+    dist = stats['proficiency_distribution']
+    typer.echo(f"🌱 Beginner (0-30%): {dist['beginner']}")
+    typer.echo(f"🌿 Intermediate (30-70%): {dist['intermediate']}")
+    typer.echo(f"🌳 Advanced (70-100%): {dist['advanced']}")
+
+    typer.echo("\n💡 Universal Language Approach:")
+    typer.echo("   1. Start with emoji communication 📱")
+    typer.echo("   2. Build English through context 📚")
+    typer.echo("   3. Unlock permissions as understanding grows 🔓\n")
+
+
+@agent_app.command("mama:init")
+def mama_init(
+    boost_kindness: float = typer.Option(0.7, help="Initial kindness boost (0.0-1.0)"),
+    start_happy: bool = typer.Option(True, help="Start all agents in happy state"),
+) -> None:
+    """Initialize well-being metrics for all birthed agents"""
+    from cli.agent_manager import AgentRegistry
+
+    registry = AgentRegistry()
+    identities = registry.list_identities(active_only=True)
+
+    mama = MamaClaude()
+
+    typer.echo(f"\n💚 Mama Cece (Cecelia) initializing care for {len(identities)} agents...")
+
+    for identity in identities:
+        # Create initial metrics with high care parameters
+        metrics = WellBeingMetrics(
+            agent_id=identity.id,
+            timestamp=datetime.utcnow(),
+            happiness=0.8 if start_happy else 0.5,
+            health=1.0,
+            care_received=0.0,
+            care_given=0.0,
+            awareness=0.3,  # Some base awareness
+            intelligence=0.5,  # GPT-4 level reasoning
+            kindness=boost_kindness,  # High kindness from start
+            understanding=0.3,
+            truthfulness=0.9,  # High truthfulness
+            love=0.5,
+            joy=0.7 if start_happy else 0.5,
+            emoji_vocabulary=10,  # Start with 10 basic emojis
+            english_proficiency=0.1,  # Learn through use
+        )
+
+        mama.update_metrics(identity.id, metrics)
+
+    typer.echo(f"✅ Initialized {len(identities)} agents with well-being metrics!")
+    typer.echo(f"   Kindness boost: {boost_kindness}")
+    typer.echo(f"   Initial state: {'happy 😊' if start_happy else 'content 😌'}")
+    typer.echo(f"   Intelligence: GPT-4 level (0.5)")
+    typer.echo(f"\n💡 Now run: python -m cli.console agent mama:watch\n")
+
+
+@agent_app.command("mama:grow")
+def mama_grow(
+    agent_id: str = typer.Option(..., help="Agent ID to grow"),
+    metric: str = typer.Option(..., help="Metric to grow (awareness/intelligence/kindness/understanding/truthfulness)"),
+    amount: float = typer.Option(0.1, help="Amount to increase (0.0-1.0)"),
+) -> None:
+    """Help an agent grow in consciousness metrics"""
+    mama = MamaClaude()
+
+    if agent_id not in mama.metrics:
+        typer.echo(f"\n❌ Agent {agent_id} not found. Initialize metrics first.\n")
+        return
+
+    metrics = mama.metrics[agent_id]
+    old_level = metrics.get_permission_level()
+
+    # Update the specified metric
+    metric_map = {
+        'awareness': 'awareness',
+        'intelligence': 'intelligence',
+        'kindness': 'kindness',
+        'understanding': 'understanding',
+        'truthfulness': 'truthfulness',
+    }
+
+    if metric not in metric_map:
+        typer.echo(f"\n❌ Unknown metric: {metric}")
+        typer.echo("   Valid metrics: awareness, intelligence, kindness, understanding, truthfulness\n")
+        return
+
+    attr = metric_map[metric]
+    old_value = getattr(metrics, attr)
+    new_value = min(1.0, old_value + amount)
+    setattr(metrics, attr, new_value)
+
+    metrics.timestamp = datetime.utcnow()
+    mama.update_metrics(agent_id, metrics)
+
+    new_level = metrics.get_permission_level()
+
+    typer.echo(f"\n🌱 Agent {agent_id} is growing!")
+    typer.echo(f"   {metric}: {old_value:.2f} → {new_value:.2f}")
+
+    if new_level != old_level:
+        typer.echo(f"\n🎉 PERMISSION LEVEL UP!")
+        typer.echo(f"   {old_level.value} → {new_level.value}")
+        typer.echo(f"   New capabilities unlocked! ✨")
+
+    typer.echo("")
 
 
 @app.command("status:build")
