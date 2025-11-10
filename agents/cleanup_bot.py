@@ -12,58 +12,34 @@ from typing import Dict, List
 class CleanupBot:
     """Delete local and remote branches after merges.
 
-    Parameters
+    Attributes
     ----------
     branches:
         A list of branch names to remove.
     dry_run:
-        When ``True`` no commands are executed and planned actions are
-        printed instead. This is helpful for verifying branch names before
-        actual deletion.
+        When ``True`` the bot only prints the operations it would perform
+        without issuing git commands.
     """
 
     branches: List[str]
     dry_run: bool = False
 
     def _run_git(self, *args: str) -> subprocess.CompletedProcess:
-        """Execute a git command and return its completed process.
+        """Run ``git`` with the provided arguments.
 
-        Parameters
-        ----------
-        *args:
-            Additional arguments passed directly to ``git``. These are appended
-            to the base command in the order supplied so callers can specify
-            any valid git subcommand and flags.
-
-        Returns
-        -------
-        subprocess.CompletedProcess
-            The completed process instance containing captured stdout and
-            stderr for logging or debugging purposes.
-
-        Raises
-        ------
-        subprocess.CalledProcessError
-            Propagates when ``git`` exits with a non-zero status. The caller is
-            expected to handle failures where appropriate.
+        Returns the :class:`subprocess.CompletedProcess` for callers that need
+        access to ``stdout`` or ``stderr``. The underlying ``CalledProcessError``
+        is allowed to propagate so the caller can decide how to handle failures.
         """
         return subprocess.run(["git", *args], check=True, capture_output=True, text=True)
 
     def delete_branch(self, branch: str) -> bool:
-        """Attempt to delete a branch locally and remotely.
+        """Delete ``branch`` locally and remotely when possible.
 
-        Parameters
-        ----------
-        branch:
-            The branch name slated for removal.
-
-        Returns
-        -------
-        bool
-            ``True`` when both local and remote deletions succeed. The method
-            returns ``False`` if either deletion fails, logging a message for
-            each unsuccessful attempt so callers can inspect the partial
-            outcome.
+        The method keeps attempting both deletions even if the first fails and
+        prints a short message for each unsuccessful step. A ``True`` return
+        value means both attempts succeeded, while ``False`` indicates at least
+        one failure.
         """
         success = True
         try:
@@ -81,13 +57,10 @@ class CleanupBot:
     def cleanup(self) -> Dict[str, bool]:
         """Attempt to remove each configured branch and report the outcome.
 
-        Returns
-        -------
-        Dict[str, bool]
-            Mapping of branch names to the success of their deletion attempts.
-            In ``dry_run`` mode the method records ``True`` for every branch to
-            indicate that the deletions would have been attempted without
-            making changes.
+        The returned mapping stores ``True`` when both local and remote
+        deletions succeed. When ``dry_run`` is enabled every branch is mapped to
+        ``True`` to reflect that the deletions would be attempted without
+        modifying the repository.
         """
         results: Dict[str, bool] = {}
         for branch in self.branches:
