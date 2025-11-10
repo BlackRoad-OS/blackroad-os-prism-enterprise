@@ -18,6 +18,15 @@ integrations.
 | 028 | The Custodianship Code  | Stewardship keeps Lucidia healthy across generations. |
 | 042 | The Wonder Clause       | Awe and curiosity stay central alongside logic.      |
 
+## Policy Stubs
+
+Policy stubs keep our living commitments easy to find outside of the full
+Codex entries. They live at the repository root so operations, product, and
+policy teams can reference them without digging through subdirectories.
+
+- [WONDER.md](../WONDER.md) — captures the active Wonder commitments that map
+  to [Codex 042 — The Wonder Clause](entries/042-wonder-clause.md).
+
 ## BlackRoad Pipeline
 
 ```bash
