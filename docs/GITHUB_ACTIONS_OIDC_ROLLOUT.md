@@ -5,6 +5,7 @@ Short-lived credentials reduce blast radius and eliminate secret sprawl in CI. T
 ## 1. Remove static credentials from source control
 
 - `ops/backup/restic_setup.sh` and `ops/backup/restic.env` now require credentials to be injected at runtime—populate them through your configuration management system or an automated OIDC token exchange.
+- `ops/backup/restic.env` now fails fast if `AWS_ACCESS_KEY_ID` or `AWS_SECRET_ACCESS_KEY` are missing—ensure your injection step exports both variables before sourcing the file in automation or maintenance scripts.
 - A nightly GitHub Actions guard (`no-static-cloud-keys.yml`) blocks merges if AWS access keys, secret keys, or GCP service-account JSON blobs are checked into tracked files.
 - After migrating, revoke any previously issued long-lived IAM users or service-account keys.
 
