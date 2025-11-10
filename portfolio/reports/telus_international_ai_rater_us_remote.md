@@ -54,3 +54,9 @@ Happy to walk through a 2-minute demo.
 ## 6. Next Steps Prompt
 
 Want me to spin the same pack for Outlier AI next, or pull a fresh batch of U.S.-remote, no-code listings and run them through your chain? Say “next with Outlier” or “pull fresh.”
+
+## 7. Operational Checklist
+
+- ✅ **Security sanity:** No credentials, tokens, or proprietary data embedded in this pack.
+- ✅ **Dependencies:** Documentation-only asset; no packages or runtime changes introduced.
+- ✅ **Pipelines:** No CI/CD impacts expected—safe to merge once reviewed.
