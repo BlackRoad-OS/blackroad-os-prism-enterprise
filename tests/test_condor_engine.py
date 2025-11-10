@@ -22,12 +22,15 @@ def test_solve_algebraic_with_dummy():
 
     result = condor_engine.solve_algebraic(Dummy, a=1)
     assert result == {"x": 1}
+
+
 def test_validate_model_source_allows_basic_imports():
     src = """
 import math
 class M:
     pass
 """
+
     condor_engine.validate_model_source(src)
 
 
@@ -35,8 +38,20 @@ def test_validate_model_source_blocks_bad_imports():
     src = """
 import os
 """
+
     with pytest.raises(ValueError):
         condor_engine.validate_model_source(src)
+
+
+def test_simulate_ode_requires_condor(monkeypatch):
+    class DummyModel:
+        def __init__(self, **_):
+            pass
+
+    monkeypatch.setattr(condor_engine, "condor", None)
+
+    with pytest.raises(RuntimeError):
+        condor_engine.simulate_ode(DummyModel, 1.0, {}, {})
 
 
 def test_load_model_from_source():
@@ -48,6 +63,7 @@ class Example:
     def solve(self):
         return {'x': 1}
 """
+
     cls = condor_engine.load_model_from_source(src, "Example")
     previous = condor_engine.condor
     condor_engine.condor = None  # type: ignore[assignment]
