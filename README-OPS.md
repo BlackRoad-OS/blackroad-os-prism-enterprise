@@ -20,7 +20,8 @@ scripts/nginx-enable-tls.sh   # optional TLS helper
 
 - Run `runbooks/examples/release_rollback_forward.yaml` when a deployment needs
   validation or recovery. It documents the health checks, rollback commands, and
-  roll-forward steps. The artifacts land under `artifacts/runbooks/releases/`.
+  roll-forward steps. The artifacts land under
+  `artifacts/runbooks/releases/<environment>/`.
 - Quick health probes:
 
   ```sh

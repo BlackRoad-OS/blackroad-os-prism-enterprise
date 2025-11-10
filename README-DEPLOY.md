@@ -71,6 +71,10 @@ Quick reference from the runbook:
    target SHA (roll forward) or confirm rollback completion in `#eng` with links
    to the collected metrics and health checks.
 
+All evidence collected through the runbook lands in
+`artifacts/runbooks/releases/<environment>/`, making it easy to hand off context
+to the next on-call or audit the decision later.
+
 Monorepo notes
 •If your SPA is at web/, it will be built and packaged automatically.
 •If your API is at api/, its source is packaged (prod deps installed on the server).

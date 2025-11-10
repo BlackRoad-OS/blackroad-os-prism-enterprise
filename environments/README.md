@@ -23,7 +23,8 @@ in sync:
 
 For deployment reversals or expedited fixes, the environments reference the
 `runbooks/examples/release_rollback_forward.yaml` playbook that pairs with the
-deployment and ops guides.
+deployment and ops guides. Runbook evidence is stored under
+`artifacts/runbooks/releases/<environment>/` for later review.
 
 Update the manifest whenever the environment changes (new workflow, Terraform
 module, domain, or approval requirement). These files should stay aligned with
