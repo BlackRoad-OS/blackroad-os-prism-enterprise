@@ -34,6 +34,6 @@ The following sections will be expanded in subsequent drafts to cover the techni
 1. **Data Spine:** ingestion, normalization, and lineage guarantees for multi-tenant intelligence streams.
 2. **Agent Mesh:** lifecycle management for reasoning agents, including sandboxing, evaluation harnesses, and incident rollback mechanics.
 3. **Adaptive Governance:** policy-as-code abstractions, escalation routing, and evidence packaging for audits.
-4. **Experience Design:** cross-functional journey maps, accessibility benchmarks, and feedback analytics.
+4. **Experience Design:** Cross-functional journey maps, accessibility benchmarks, and feedback analytics.
 
 Upcoming work will detail reference implementations, integration guidelines, and performance benchmarks that demonstrate how these pillars interlock within the PRISM ecosystem.
