@@ -23,7 +23,7 @@ Portfolio + short Looms: blackroad.io
 
 ## Application Q&A JSON
 ```json
-{
+{ 
   "eligibility": "Yes",
   "sponsorship": "No",
   "notice_period": "Immediate",
@@ -38,6 +38,8 @@ Portfolio + short Looms: blackroad.io
   "disability_optional": {"status": "Decline to answer"}
 }
 ```
+
+You can also download the structured responses directly as [`pack-05-welocalize-search-quality-rater-us.json`](./pack-05-welocalize-search-quality-rater-us.json) for quick uploads into applicant tracking systems.
 
 ## Apply Link
 Remote U.S., 10–29 hrs/week (W-2) via Lever.
