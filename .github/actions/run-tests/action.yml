@@ -16,6 +16,10 @@ inputs:
     description: "Directory to run commands in"
     required: false
     default: ""
+  otp_version:
+    description: "OTP version to install for Elixir (overrides auto-detected version)"
+    required: false
+    default: ""
 runs:
   using: "composite"
   steps:
@@ -192,12 +196,50 @@ runs:
           dotnet restore
         fi
 
+    - name: Resolve Elixir OTP version
+      if: ${{ inputs.language == 'elixir' }}
+      id: resolve-elixir-otp
+      shell: bash
+      env:
+        REQUESTED_OTP: ${{ inputs.otp_version }}
+        ELIXIR_VERSION: ${{ inputs.version }}
+      run: |
+        set -euo pipefail
+        if [ -n "$REQUESTED_OTP" ]; then
+          echo "value=$REQUESTED_OTP" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        version="$ELIXIR_VERSION"
+        version="${version%%-*}"
+        version="${version%%+*}"
+
+        IFS='.' read -r major minor _ <<< "$version"
+
+        otp_version="26.2"
+
+        if [ "$major" = "1" ]; then
+          case "$minor" in
+            13)
+              otp_version="24.3"
+              ;;
+            14)
+              otp_version="25.3"
+              ;;
+            15)
+              otp_version="26.2"
+              ;;
+          esac
+        fi
+
+        echo "value=$otp_version" >> "$GITHUB_OUTPUT"
+
     - name: Set up Elixir
       if: ${{ inputs.language == 'elixir' }}
       uses: erlef/setup-beam@v1
       with:
         elixir-version: ${{ inputs.version }}
-        otp-version: 26.2
+        otp-version: ${{ steps.resolve-elixir-otp.outputs.value }}
 
     - name: Install Elixir dependencies
       if: ${{ inputs.language == 'elixir' }}
