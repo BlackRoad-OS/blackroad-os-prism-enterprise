@@ -1,7 +1,7 @@
 # Invisible Technologies — AI QA Trainer / Entry-Level AI Trainer (US Remote)
 
 ## 55-word summary
-AI workflow orchestrator focused on LLM evaluation: crisp rubrics, failure taxonomies, and tight prompt iterations. Documented guardrails and human-in-the-loop review. Delivered $23M revenue impact and 33.3% MoM lift in prior roles; strong at turning fuzzy specs into testable criteria and SOPs. Ready for Remote U.S./MN evaluation work with reliable follow-through.
+AI workflow orchestrator focused on LLM evaluation: crisp rubrics, failure taxonomies, and tight prompt iterations. Documented guardrails and human-in-the-loop review. Delivered $23M revenue impact and 33.3% MoM lift in prior roles; strong at turning fuzzy specs into testable criteria and SOPs. Ready for Remote U.S./MN evaluation work with reliable follow-through. Seasoned trainer bridging humans, models.
 
 ## Tailored bullets
 - Evaluate model outputs against calibrated rubrics; tag error types; propose prompt variants and follow-up tests.
