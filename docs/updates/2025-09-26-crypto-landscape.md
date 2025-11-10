@@ -1,4 +1,16 @@
+---
+title: "Crypto Market Landscape"
+date: "2025-09-26"
+description: "Weekly briefing covering Solana's SIMD-0370 debate, spot ETH ETF flows, and accelerated SEC approvals."
+tags: [crypto, markets, solana, ethereum, regulation]
+---
+
 # Crypto Market Landscape — September 26, 2025
+
+## Summary
+- Solana's Firedancer client proposes SIMD-0370, reopening the debate on throughput versus decentralization.
+- Spot Ethereum ETFs logged $795.6M in weekly outflows, hinting at a sentiment shift among institutional holders.
+- The SEC's generic listing standards could bring spot crypto ETFs to market in roughly 75 days.
 
 ## Solana Throughput Debate: Firedancer's SIMD-0370
 - **Proposal overview:** Jump Crypto's Firedancer client introduced SIMD-0370 to remove the fixed compute unit cap per Solana block, allowing throughput to scale with validator hardware.
