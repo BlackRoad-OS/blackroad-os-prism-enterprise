@@ -51,6 +51,12 @@ async function list(){
     const b=document.createElement('b');
     b.textContent=x.lens_id;
     li.appendChild(b);
+    if(x.label){
+      li.append(' ');
+      const span=document.createElement('span');
+      span.textContent=`(${x.label})`;
+      li.appendChild(span);
+    }
     li.append(` λ=${x.lambda} seeds=${Object.keys(x.seeds).length}`);
     listEl.appendChild(li);
   });
@@ -58,7 +64,8 @@ async function list(){
   selEl.innerHTML='';
   arr.forEach(x=>{
     const opt=document.createElement('option');
-    opt.textContent=x.lens_id;
+    opt.value=x.lens_id;
+    opt.textContent=x.label||x.lens_id;
     selEl.appendChild(opt);
   });
 }
