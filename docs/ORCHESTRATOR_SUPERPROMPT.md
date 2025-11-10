@@ -3,33 +3,58 @@
 ## Overview
 The "chef's kiss" orchestrator block introduces a speed-focused, single-call workflow. By sending a single message that includes your candidate seed, SnapIns JSON, and the raw job description (JD), the orchestrator returns an entire application enablement pack as JSON.
 
-## Downloadable Assets
-- **One-shot Orchestrator Superprompt** – paste this into the LLM of your choice to run the flow as a single message.
-- **Dummy JD (Remote U.S.)** – synthetic JD for validating the chain without exposing real requisitions.
-- **Sample Output Pack** – reference output demonstrating every field returned by the orchestrator:
-  - 55-word summary
-  - Six tailored bullets (JSON array)
-  - Cover letter micro-note
-  - Application Q&A (JSON)
-  - Resume template variables (JSON)
+## Repository Assets
+Use the following source files when validating the flow or onboarding another
+teammate:
 
-Keep the sample output handy so you can validate field names and shapes when wiring downstream automations.
+- [`OneShot_Orchestrator_Superprompt.txt`](./assets/orchestrator/one-shot/OneShot_Orchestrator_Superprompt.txt)
+  – Copy/paste this entire prompt into the LLM that will run the chain.
+- [`Dummy_JD_Remote_US.txt`](./assets/orchestrator/one-shot/Dummy_JD_Remote_US.txt)
+  – Synthetic requisition for dry runs (safe to share internally).
+- [`Sample_Output_Pack.json`](./assets/orchestrator/one-shot/Sample_Output_Pack.json)
+  – Reference payload showing every field the orchestrator returns:
+    - 55-word summary
+    - Six tailored bullets (JSON array)
+    - Cover letter micro-note
+    - Application Q&A (JSON)
+    - Identified gaps
+    - Resume template variables (JSON)
 
-## Usage
-1. **Paste the Superprompt:** Load the OneShot_Orchestrator_Superprompt into your LLM.
-2. **Provide the Inputs:** Supply the candidate seed, SnapIns configuration JSON, and the raw JD text.
-3. **Receive the Pack:** The orchestrator returns a single JSON payload containing:
-   - Meta information
-   - 55-word summary
-   - Six tailored bullets
-   - Cover letter micro-note
-   - Application Q&A
-   - Identified gaps
-   - Resume template variables
-4. **Automate:** Feed the JSON directly into Google Docs and Airtable modules. The shape is designed to flow into existing document and database automations without post-processing.
+Keep the sample output handy so you can validate field names and shapes when
+wiring downstream automations.
+
+## Running the Flow
+1. **Prime the model:** Paste the entire contents of the
+   `OneShot_Orchestrator_Superprompt.txt` file into your LLM chat window or API
+   call. Do not add extra narration.
+2. **Send the three input blocks:** Immediately follow the prompt with the
+   candidate seed, SnapIns JSON, and job description. Separate each block with a
+   unique delimiter, for example:
+
+   ```text
+   <<<CANDIDATE_SEED
+   ...persona yaml...
+   <<<SNAPINS_JSON
+   {...}
+   <<<JOB_DESCRIPTION
+   ...full JD text...
+   ```
+
+   Use the provided dummy JD when you need a safe test input.
+3. **Review the response:** The orchestrator returns a single JSON object. Confirm
+   the payload matches the structure in `Sample_Output_Pack.json` and that all
+   SnapIn identifiers are preserved.
+4. **Push to automations:** Feed the JSON into Google Docs, Airtable, or other
+   downstream modules. No field renaming should be required.
 
 ## Live JD Runs
-Ready to test on a live JD? Drop the requisition into the orchestrator to receive the full pack instantly. For automation walkthroughs, request the Make or Zapier module configurations to get step-by-step wiring instructions.
+Ready to test on a live JD? Drop the requisition into the orchestrator to receive
+the full pack instantly. For automation walkthroughs, request the Make or Zapier
+module configurations to get step-by-step wiring instructions.
 
-## Next Steps
-When you have a new JD to process, reply with `next` to initiate the orchestrator run. This keeps the flow ready for rapid iteration with real requisitions.
+## Operational Tips
+- When you have a new JD to process, reply with `next` to keep the model in the
+  same conversational session.
+- Save each output JSON in version control or a shared workspace so you can
+  diff changes and track automation quality.
+- Sanitize any candidate data before sharing outside the core team.

@@ -1,0 +1,31 @@
+Role: Senior Customer Success Manager (Remote - United States)
+Company: Aurora Analytics
+
+About the role:
+Aurora Analytics enables mid-market retailers to forecast demand using
+privacy-conscious data modeling. We are hiring a Senior Customer Success Manager
+to own a portfolio of enterprise accounts and drive adoption of our predictive
+insights platform.
+
+Responsibilities:
+- Lead quarterly business reviews and align product roadmaps to customer goals.
+- Design adoption plans that expand use of AI forecasting modules.
+- Coordinate with solutions engineering to resolve production issues.
+- Analyze churn signals and proactively mitigate risk across your accounts.
+- Own renewal and upsell motions alongside the sales organization.
+
+Required experience:
+- 5+ years in customer success or account management for B2B SaaS products.
+- Proven track record managing $3M+ ARR portfolios with multi-threaded
+  relationships.
+- Expertise in retail, supply chain, or adjacent verticals.
+- Ability to tell compelling stories using dashboards and executive-ready decks.
+- Strong project management skills; PMP or similar certification is a plus.
+
+Nice to have:
+- Experience launching AI or machine-learning products with non-technical users.
+- Familiarity with enterprise integration patterns (iPaaS, webhook pipelines).
+- Background in change management or enablement programs.
+
+To apply, share your resume and a short note describing how you grew adoption for
+a complex platform.
