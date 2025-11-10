@@ -1,7 +1,7 @@
 # TaskVerse (TaskUs) — Data Contributor / AI Data Tasks Pack
 
 ## 1. 55-word Summary (ATS-clean)
-Guideline-driven evaluator who keeps decisions consistent and auditable: crisp rubrics, versioned notes, and light regression checks. Built failure taxonomies and human-in-the-loop gates; trained 200+ colleagues. Prior roles drove $23M impact and a 33.3% MoM lift by standardizing workflows. Ready for Remote U.S./MN contributor work with steady throughput and clean documentation.
+Guideline-driven evaluator who keeps decisions consistent and auditable: crisp rubrics, versioned notes, and light regression checks. Built failure taxonomies and human-in-the-loop gates; trained 200+ colleagues. Prior roles drove $23M impact and a 33.3% MoM lift by standardizing workflows. Ready for Remote U.S./MN contributor work with steady throughput, calibrated reviews, deliberate feedback loops, and clean documentation.
 
 ## 2. Tailored Bullets
 - Label and evaluate data against detailed task guidelines; record concise rationales for audit and re-triage.
