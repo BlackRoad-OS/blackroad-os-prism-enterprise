@@ -83,15 +83,24 @@ function snapshotTree(root){
   return out;
 }
 function diffChanged(before, after){
-  const changed = [];
-  for (const [k,v] of after.entries()){
-    const b = before.get(k);
-    if (!b || b!==v) changed.push(k);
+  const changed = new Set();
+
+  // include removals + modifications
+  for (const [k, beforeVal] of before.entries()){
+    const afterVal = after.get(k);
+    if (afterVal === undefined){
+      changed.add(k);
+    } else if (afterVal !== beforeVal){
+      changed.add(k);
+    }
   }
-  for (const k of before.keys()){
-    if (!after.has(k)) changed.push(k);
+
+  // include new additions
+  for (const k of after.keys()){
+    if (!before.has(k)) changed.add(k);
   }
-  return changed;
+
+  return Array.from(changed);
 }
 function passesAllowedWrites(changed, patterns){
   if (!patterns || !patterns.length) return true;
