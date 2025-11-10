@@ -4,9 +4,13 @@ import json
 from collections import defaultdict, deque
 from datetime import datetime, timedelta
 
-LOG = "logs/blocks.csv"
-OUT_MD = "leaderboards/leaderboard.md"
-OUT_JSON = "leaderboards/leaderboard.json"
+from pathlib import Path
+
+
+BASE_DIR = Path(__file__).resolve().parents[1]
+LOG = BASE_DIR / "logs/blocks.csv"
+OUT_MD = BASE_DIR / "leaderboards/leaderboard.md"
+OUT_JSON = BASE_DIR / "leaderboards/leaderboard.json"
 
 
 def iso(s: str) -> datetime:
@@ -14,7 +18,7 @@ def iso(s: str) -> datetime:
 
 
 rows = []
-with open(LOG, newline="") as f:
+with LOG.open(newline="") as f:
     reader = csv.DictReader(f)
     for row in reader:
         row["ts"] = iso(row["timestamp"])
@@ -82,7 +86,8 @@ snapshot = {
     if cool
     else None,
 }
-with open(OUT_JSON, "w") as f:
+OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
+with OUT_JSON.open("w") as f:
     json.dump(snapshot, f, indent=2)
 
 
@@ -96,7 +101,8 @@ def miner_row(miner: str, values: dict) -> str:
     )
 
 
-with open(OUT_MD, "w") as f:
+OUT_MD.parent.mkdir(parents=True, exist_ok=True)
+with OUT_MD.open("w") as f:
     f.write("# Mining Leaderboard\n\n")
     f.write(f"**Total blocks:** {total}\n\n")
     f.write("## By Miner\n")
