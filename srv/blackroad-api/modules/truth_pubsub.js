@@ -3,21 +3,25 @@
 const { create } = require('ipfs-http-client');
 const canonicalize = require('json-canonicalize');
 const fs = require('fs');
+const path = require('path');
 const crypto = require('crypto');
+const { TextDecoder, TextEncoder } = require('util');
 
 const TOPIC = process.env.TRUTH_TOPIC || 'truth.garden/v1/announce';
 const IPFS_API = process.env.IPFS_API || 'http://127.0.0.1:5001';
+const STATE_DIR = process.env.TRUTH_STATE_DIR || '/srv/truth';
+const IDENTITY_PATH = process.env.TRUTH_IDENTITY_PATH || path.join(STATE_DIR, 'identity.json');
 const FEED_APPEND = (line) => {
   try {
-    fs.mkdirSync('/srv/truth', { recursive: true });
-    fs.appendFileSync('/srv/truth/feed.ndjson', line + '\n');
+    fs.mkdirSync(STATE_DIR, { recursive: true });
+    fs.appendFileSync(path.join(STATE_DIR, 'feed.ndjson'), line + '\n');
   } catch {}
 };
 
 function ensureIdentity() {
-  const path = '/srv/truth/identity.json';
+  const file = IDENTITY_PATH;
   try {
-    const raw = fs.readFileSync(path, 'utf8');
+    const raw = fs.readFileSync(file, 'utf8');
     const data = JSON.parse(raw);
     const key = crypto.createPrivateKey({
       key: Buffer.from(data.privateKey, 'base64'),
@@ -33,14 +37,15 @@ function ensureIdentity() {
   } catch {
     const { privateKey, publicKey } = crypto.generateKeyPairSync('ed25519');
     const did = 'did:key:' + publicKey.export({ format: 'der', type: 'spki' }).toString('base64');
-    fs.mkdirSync('/srv/truth', { recursive: true });
+    fs.mkdirSync(STATE_DIR, { recursive: true });
     fs.writeFileSync(
-      path,
+      file,
       JSON.stringify({
         did,
         privateKey: privateKey.export({ format: 'der', type: 'pkcs8' }).toString('base64'),
       })
     );
+    console.info('[truth] generated new identity at %s', file);
     return {
       did,
       signJcs(buf) {
