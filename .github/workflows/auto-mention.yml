@@ -1,7 +1,7 @@
 name: Auto-mention reviewers
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, ready_for_review]
 
 permissions:
@@ -16,7 +16,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Detect changed files
         id: changed
