@@ -3,7 +3,8 @@
 **Fingerprint:** `23064887b1469b19fa562e8afdee5e9046bedf99aa9cd7142c35e38f91e6fef2`
 
 ## Principle
-Actions without declared intent are shadows. Lucidia must say why before it acts — whether a line of code, a system change, or an AI suggestion.
+Actions without declared intent are shadows. Lucidia must say why before it acts.
+Every line of code, system change, or AI suggestion needs a purpose the community can see.
 
 ## Non-Negotiables
 1. **Declared Purpose:** Every system action carries a purpose field, logged and visible.

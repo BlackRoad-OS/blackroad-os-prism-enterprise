@@ -16,7 +16,7 @@ integrations.
 | 004 | The Autonomy Manifest     | Data autonomy through consent, export, and wipe.         |
 | 022 | The Security Spine        | Security backbone with layered zero-trust defenses.      |
 | 028 | The Custodianship Code    | Stewardship mindset keeps Lucidia cared for and shared.  |
-| 039 | The Transparency of Intent | Declare purpose for every action to align with consent. |
+| 039 | The Transparency of Intent | Make every action's purpose visible and consent-aligned. |
 
 ## BlackRoad Pipeline
 
