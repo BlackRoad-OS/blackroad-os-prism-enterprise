@@ -4,9 +4,9 @@
 The PRISM Console orchestrates BlackRoad's intelligence ecosystem by unifying telemetry, agentic workflows, and governance controls into a single adaptive surface. This white paper documents the strategic rationale, system design, and adoption pathways that position the console as the coordination nucleus for high-stakes, compliance-conscious AI operations. By coupling modular observability with human-in-the-loop guardrails, PRISM Console transforms fragmented datasets and manual review loops into a continuously learning command fabric capable of scaling insight across product, risk, and customer domains.
 
 Key commitments of the program include:
-- **Operational Cohesion:** consolidate monitoring, incident response, and experimentation pipelines under one shared schema to eliminate context switching and reduce time-to-mitigation.
-- **Explainable Autonomy:** embed interpretable agent behaviors, audit trails, and policy reasoning so that automated decisions can be validated by regulators and internal assurance teams.
-- **Human Amplification:** design feedback loops where analysts guide agents through scenario rehearsal, counterfactual testing, and corrective playbooks without requiring deep code intervention.
+- **Operational Cohesion:** Consolidate monitoring, incident response, and experimentation pipelines under one shared schema to eliminate context switching and reduce time-to-mitigation.
+- **Explainable Autonomy:** Embed interpretable agent behaviors, audit trails, and policy reasoning so that automated decisions can be validated by regulators and internal assurance teams.
+- **Human Amplification:** Design feedback loops where analysts guide agents through scenario rehearsal, counterfactual testing, and corrective playbooks without requiring deep code intervention.
 
 ## 2. Problem Landscape
 Organizations pursuing intelligence-driven products often encounter a brittle patchwork of dashboards, notebooks, and bespoke scripts. This fragmentation introduces several systemic risks:
