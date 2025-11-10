@@ -48,12 +48,4 @@ if [ -f pnpm-lock.yaml ] && command -v pnpm >/dev/null 2>&1; then
     pnpm install --frozen-lockfile
 fi
 
-if command -v git >/dev/null 2>&1; then
-  current_dir="$(pwd)"
-  if ! git config --global --get-all safe.directory 2>/dev/null | grep -Fxq "$current_dir"; then
-    log "Marking $current_dir as a safe Git directory"
-    git config --global --add safe.directory "$current_dir"
-  fi
-fi
-
 log "Post-create steps complete"

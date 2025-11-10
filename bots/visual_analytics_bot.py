@@ -658,7 +658,7 @@ Rounded:  ╭─────────╮    Thick:    ┏━━━━━━�
 
 ### 1. Run the Demo Script
 ```bash
-python artifacts/T{task.id if hasattr(task, 'id') else 'XXXX'}/terminal_visual_demo.py
+python artifacts/T{getattr(task, 'id', 'XXXX')}/terminal_visual_demo.py
 ```
 
 ### 2. Integrate with Manufacturing Bots
