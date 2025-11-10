@@ -5,7 +5,13 @@
 - **Port reference**: `22/tcp` (SSH)
 - **Result**: `Network is unreachable`
 
-The remote development environment does not have layer-2/3 access to the local network where the Raspberry Pi resides. Direct ICMP or TCP connectivity attempts from this sandbox will therefore fail.
+```bash
+$ ping -c 4 192.168.4.23
+PING 192.168.4.23 (192.168.4.23) 56(84) bytes of data.
+ping: connect: Network is unreachable
+```
+
+The remote development environment is network-isolated from the local segment where the Raspberry Pi hotspot resides. As a result, direct ICMP or TCP connectivity attempts from this sandbox will always fail regardless of target availability.
 
 ## Recommended Local Verification Steps
 1. Connect a laptop or workstation to the same Wi-Fi or Ethernet segment as the Raspberry Pi hotspot.
