@@ -3,7 +3,7 @@ import os
 import struct
 
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from runtime.ollama_client import chat as ollama_chat
 
@@ -81,6 +81,8 @@ async def video(body: VideoBody):
     data = _gif_from_text(body.prompt, body.frame_delay or 20)
     return StreamingResponse(io.BytesIO(data), media_type="image/gif")
 
-@app.get("/")
-async def root():
-    return PlainTextResponse("Lucidia API OK")
+@app.get("/", response_model=HealthResponse)
+async def root() -> HealthResponse:
+    """Mirror the health response at the root endpoint for consistency."""
+
+    return HealthResponse(ok=True, model=LUCIDIA_MODEL)
