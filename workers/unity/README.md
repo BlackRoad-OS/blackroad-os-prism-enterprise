@@ -105,6 +105,12 @@ curl -X POST http://localhost:3000/export \
   -d '{"projectName":"Test","scenes":["Main"]}'
 ```
 
+Run the automated test suite with:
+
+```bash
+npm test
+```
+
 The service requires the `zip` CLI (present in the base container and Dockerfile).
 
 ## Coordination

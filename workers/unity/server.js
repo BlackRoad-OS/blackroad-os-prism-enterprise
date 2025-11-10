@@ -2,6 +2,7 @@ import express from "express";
 import { execFile } from "child_process";
 import { mkdir, rm, stat, writeFile } from "fs/promises";
 import path from "path";
+import { fileURLToPath } from "url";
 import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
@@ -52,7 +53,7 @@ app.post("/export", async (req, res) => {
     const normalisedScenes = buildScenes(scenes);
     const { dependencies, requestedPackages } = buildDependencies(packages);
 
-    const downloadsDir = path.join(process.cwd(), "downloads");
+    const downloadsDir = resolveDownloadsDir();
     await mkdir(downloadsDir, { recursive: true });
 
     const workspaceName = `${safeProjectName}-${Date.now().toString(36)}`;
@@ -140,7 +141,27 @@ app.post("/export", async (req, res) => {
 });
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log("unity exporter listening on", port));
+
+if (isMainModule(import.meta.url)) {
+  app.listen(port, () => console.log("unity exporter listening on", port));
+}
+
+function resolveDownloadsDir() {
+  const root = process.env.UNITY_EXPORT_ROOT;
+  if (typeof root === "string" && root.trim()) {
+    return path.join(path.resolve(root), "downloads");
+  }
+  return path.join(process.cwd(), "downloads");
+}
+
+function isMainModule(moduleUrl) {
+  try {
+    const modulePath = fileURLToPath(moduleUrl);
+    return process.argv[1] === modulePath;
+  } catch (error) {
+    return false;
+  }
+}
 
 function sanitiseIdentifier(value) {
   if (typeof value !== "string") {
@@ -161,16 +182,13 @@ function normaliseText(value, fallback) {
 }
 
 function buildScenes(input) {
-  if (!Array.isArray(input) || input.length === 0) {
-    return DEFAULT_SCENES.map((scene) => ({ ...scene }));
-  }
-
-  const scenes = input.map((scene, index) => {
-    if (typeof scene === "string") {
-      return {
-        name: scene,
-        description: "Generated from request payload",
-      };
+  const scenes = Array.isArray(input) && input.length > 0
+    ? input.map((scene, index) => {
+      if (typeof scene === "string") {
+        return {
+          name: scene,
+          description: "Generated from request payload",
+        };
     }
 
     if (scene && typeof scene === "object") {
@@ -189,7 +207,8 @@ function buildScenes(input) {
       name: `Scene${index + 1}`,
       description: "Generated from request payload",
     };
-  });
+    })
+    : DEFAULT_SCENES.map((scene) => ({ ...scene }));
 
   const hasEnabled = scenes.some((scene) => scene.enabled !== false);
   if (!hasEnabled && scenes.length > 0) {
@@ -322,3 +341,19 @@ function createReadme({
 
   return `# ${projectName}\n\n- Company: ${companyName}\n- Product: ${productName}\n- Unity Version: ${unityVersion}\n\n## Scenes\n\n${sceneList || "(none)"}\n\n## Packages\n\n${packageList || "(none)"}\n\n## Getting Started\n\n1. Open Unity Hub and click **Add project from disk**.\n2. Select the extracted folder from this archive.\n3. When prompted, ensure Unity ${unityVersion} (or newer) is installed.\n\nThis starter layout was generated automatically by the BlackRoad Unity exporter.\n`;
 }
+
+export {
+  app,
+  buildDependencies,
+  buildScenes,
+  createEditorBuildSettings,
+  createManifest,
+  createProjectSettings,
+  createProjectVersion,
+  createReadme,
+  createSceneTemplate,
+  normaliseText,
+  sanitiseIdentifier,
+};
+
+export default app;
