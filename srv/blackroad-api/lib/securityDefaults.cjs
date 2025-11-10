@@ -46,7 +46,7 @@ function enforceSecurityDefaults({ env = process.env, logger } = {}) {
   const allowOrigins = parseAllowOrigins(env.ALLOW_ORIGINS);
   if (allowOrigins.length === 0) {
     violations.push({ message: 'ALLOW_ORIGINS must include at least one origin' });
-  } else if (allowOrigins.some((origin) => origin === '*' || origin.endsWith('*'))) {
+  } else if (allowOrigins.some((origin) => origin.includes('*'))) {
     violations.push({ message: 'ALLOW_ORIGINS must not include wildcards' });
   }
 
