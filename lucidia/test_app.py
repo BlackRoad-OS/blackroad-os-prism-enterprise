@@ -29,3 +29,16 @@ def test_state_and_builtins():
     resp = client.post("/run", json={"code": "print(len(nums))"})
     assert resp.status_code == 200
     assert resp.get_json()["output"].strip() == "3"
+
+
+def test_safe_builtins_are_isolated_per_request():
+    client = app.test_client()
+    tamper_resp = client.post(
+        "/run",
+        json={"code": "__builtins__['len'] = lambda items: 999"},
+    )
+    assert tamper_resp.status_code == 200
+
+    resp = client.post("/run", json={"code": "print(len([1, 2, 3]))"})
+    assert resp.status_code == 200
+    assert resp.get_json()["output"].strip() == "3"

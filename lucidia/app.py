@@ -39,7 +39,7 @@ def run_code():
     stdout = io.StringIO()
     try:
         with redirect_stdout(stdout):
-            exec(code, {"__builtins__": SAFE_BUILTINS}, GLOBAL_VARS)
+            exec(code, {"__builtins__": SAFE_BUILTINS.copy()}, GLOBAL_VARS)
         output = stdout.getvalue()
     except Exception as exc:  # noqa: BLE001 - broad for user feedback
         output = f"Error: {exc}"
