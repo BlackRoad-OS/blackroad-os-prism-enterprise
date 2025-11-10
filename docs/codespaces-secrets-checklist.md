@@ -24,12 +24,14 @@ This checklist helps BlackRoad maintainers wire GitHub Codespaces secrets into l
 
 - Confirm every required secret is listed in `.devcontainer/devcontainer.json` under `customizations.codespaces.secrets.required` so Codespaces prompts contributors to add them on create.
 - Avoid storing secrets in `.env` files or committing them to source control.
+- For secrets injected during `postCreateCommand`, guard the script with `if [[ -n "$SECRET_NAME" ]]; then … fi` checks so the build keeps running if a developer has not yet added their keys.
 
 ## 4. Validate the developer experience
 
 - Rebuild a Codespace and verify that required secrets are prompted during creation.
 - Inside the running Codespace, run `echo "$SECRET_NAME" | head -c 8` to confirm the variable is populated.
 - Ensure tooling that depends on secrets (tests, agents, CLI helpers) reads from environment variables.
+- Add smoke tests (for example `npm test -- --grep="requires OPENAI_API_KEY"`) to fail fast when required secrets are missing in CI-style runs.
 
 ## 5. Maintain operational hygiene
 
@@ -42,5 +44,19 @@ This checklist helps BlackRoad maintainers wire GitHub Codespaces secrets into l
 
 - Update contributor docs to reference this checklist so new team members follow the same process.
 - During PR reviews, verify that any new automation includes guidance for the necessary secrets.
+- Use the following `gh` CLI helpers for one-off audits or rotations:
+  - `gh codespace secrets list --repo <org/repo>` to confirm the required repository-level secrets exist.
+  - `gh secret list --env codespaces --org <org>` to review organization-level entries.
+
+## 7. Track ownership with an inventory
+
+Maintain a simple inventory (for example in Notion or a `secrets-inventory.md`) that answers:
+
+| Secret name      | Scope (user / repo / org) | Owner          | Rotation frequency | Last rotated |
+| ---------------- | ------------------------- | -------------- | ------------------ | ------------ |
+| `OPENAI_API_KEY` | User                       | Developer name | Quarterly          | 2024-04-03   |
+| `GH_TOKEN`       | Repository                 | Platform team  | Monthly            | 2024-05-11   |
+
+Make it part of quarterly reviews to confirm each entry is current and that expiring credentials have a rotation plan.
 
 By following this checklist, developers can safely provision tokens while keeping Codespaces builds, local tests, and automation agents running smoothly.
