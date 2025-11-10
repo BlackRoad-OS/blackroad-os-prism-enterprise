@@ -38,6 +38,8 @@ else
   cp "$CONF" "$NEWCONF"
 fi
 
+STAGED_UPDATE=0
+
 echo "Attempting in-place apply…"
 if sudo rpi-eeprom-config --apply "$NEWCONF"; then
   echo "Applied via --apply."
@@ -47,19 +49,29 @@ else
   ls -lh "$NEWIMG"
   echo "Flashing new EEPROM image…"
   sudo rpi-eeprom-update -d -f "$NEWIMG"
+  STAGED_UPDATE=1
 fi
 
 echo
 echo "Verifying…"
-sudo rpi-eeprom-config | tee "$TMPDIR/after.txt"
-NEW=$(grep -E '^BOOT_ORDER=' "$TMPDIR/after.txt" | head -n1 | cut -d= -f2 | tr -d '[:space:]')
-echo "After BOOT_ORDER: $NEW"
+if [ "$STAGED_UPDATE" -eq 1 ]; then
+  STAGED_VALUE=$(grep -E '^BOOT_ORDER=' "$NEWCONF" | head -n1 | cut -d= -f2 | tr -d '[:space:]')
+  echo "Update staged for next reboot. Staged BOOT_ORDER: ${STAGED_VALUE:-unknown}" | tee "$TMPDIR/after.txt"
+else
+  sudo rpi-eeprom-config | tee "$TMPDIR/after.txt"
+  NEW=$(grep -E '^BOOT_ORDER=' "$TMPDIR/after.txt" | head -n1 | cut -d= -f2 | tr -d '[:space:]')
+  echo "After BOOT_ORDER: $NEW"
 
-if [ "$NEW" != "$DESIRED" ]; then
-  echo "EEPROM did not reflect desired BOOT_ORDER. Check $LOG and try again."
-  exit 1
+  if [ "$NEW" != "$DESIRED" ]; then
+    echo "EEPROM did not reflect desired BOOT_ORDER. Check $LOG and try again."
+    exit 1
+  fi
 fi
 
 echo
-echo "✅ Boot order updated to $NEW. Rebooting to apply…"
+if [ "$STAGED_UPDATE" -eq 1 ]; then
+  echo "✅ Boot order change staged. Rebooting to apply…"
+else
+  echo "✅ Boot order updated to $NEW. Rebooting to apply…"
+fi
 sudo reboot
