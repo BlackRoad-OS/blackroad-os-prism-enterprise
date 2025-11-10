@@ -9,4 +9,5 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
-      - run: node scripts/esg/calc_monthly.ts
+      - run: npm install --global tsx
+      - run: npx tsx scripts/esg/calc_monthly.ts

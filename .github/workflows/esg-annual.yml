@@ -9,5 +9,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
-      - run: node scripts/esg/supplier_digest.ts
-      - run: node scripts/esg/annual_report.ts
+      - run: npm install --global tsx
+      - run: npx tsx scripts/esg/supplier_digest.ts
+      - run: npx tsx scripts/esg/annual_report.ts
