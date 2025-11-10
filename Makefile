@@ -52,3 +52,22 @@ encompass-demo: install
 
 clean:
         rm -rf $(VENV) .pytest_cache __pycache__ */__pycache__
+
+
+# Branch Cleanup Targets
+BR_TOKEN ?= $(BRANCH_CLEANUP_TOKEN)
+
+.PHONY: branch-cleanup-dry branch-cleanup-run branch-cleanup-report
+
+branch-cleanup-dry:
+	@echo "🔍 Dry run - preview branch cleanup..."
+	@BRANCH_CLEANUP_TOKEN=$(BR_TOKEN) npx tsx tools/branch-cleanup/cleanup.ts --dry-run
+
+branch-cleanup-run:
+	@echo "🚀 Executing live cleanup..."
+	@BRANCH_CLEANUP_TOKEN=$(BR_TOKEN) npx tsx tools/branch-cleanup/cleanup.ts
+
+branch-cleanup-report:
+	@echo "📊 Latest cleanup reports:"
+	@ls -lah ops/reports/branch-cleanup 2>/dev/null || echo "No reports yet"
+
