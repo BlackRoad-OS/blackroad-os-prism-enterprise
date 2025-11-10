@@ -159,6 +159,10 @@ def git_clean():
     repo_path = Path(raw_path) if raw_path else WORKSPACE_ROOT
     if not repo_path.is_absolute():
         repo_path = WORKSPACE_ROOT / repo_path
+
+    if _path_contains_symlink(repo_path, WORKSPACE_ROOT):
+        return jsonify({"error": "path not allowed"}), 400
+
     try:
         resolved_repo = repo_path.resolve(strict=True)
     except (OSError, RuntimeError):  # noqa: PERF203 - need broad resolution errors

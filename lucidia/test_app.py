@@ -113,6 +113,24 @@ def test_git_clean_rejects_outside_workspace(tmp_path, monkeypatch):
     assert resp.status_code == 400
 
 
+def test_git_clean_rejects_symlink_traversal():
+    with tempfile.TemporaryDirectory(dir=WORKSPACE_ROOT) as repo_dir:
+        repo = Path(repo_dir)
+        _git(repo, "init")
+        (repo / "tracked.txt").write_text("tracked")
+        _git(repo, "add", "tracked.txt")
+        _git(repo, "commit", "-m", "init")
+
+        symlink_path = repo.parent / f"{repo.name}-link"
+        symlink_path.symlink_to(repo, target_is_directory=True)
+        try:
+            client = app.test_client()
+            resp = client.post("/git/clean", json={"path": str(symlink_path)})
+            assert resp.status_code == 400
+        finally:
+            symlink_path.unlink(missing_ok=True)
+
+
 def test_math_endpoint():
     client = app.test_client()
     resp = client.post("/math", json={"expression": "x**2", "curious": True})
