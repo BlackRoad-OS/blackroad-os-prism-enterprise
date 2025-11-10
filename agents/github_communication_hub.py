@@ -46,6 +46,15 @@ class AgentGitHubIdentity:
     role: str
     category: str
     permissions: List[str] = field(default_factory=list)
+    # Optional fields from registry
+    specialization: Optional[str] = None
+    fullTitle: Optional[str] = None
+    description: Optional[str] = None
+    responsibilities: Optional[List[str]] = None
+    active: bool = True
+    file_path: Optional[str] = None
+    manifest_path: Optional[str] = None
+    cluster: Optional[str] = None
 
     def has_permission(self, permission: str) -> bool:
         """Check if agent has a specific permission"""
@@ -93,8 +102,10 @@ class GitHubCommunicationHub:
                 for agent in data.get('agents', []):
                     identities[agent['id']] = AgentGitHubIdentity(**agent)
 
-                # Load service bots
+                # Load service bots (add default role if missing)
                 for bot in data.get('service_bots', {}).get('agents', []):
+                    if 'role' not in bot:
+                        bot['role'] = 'service'
                     identities[bot['id']] = AgentGitHubIdentity(**bot)
 
         # Load archetypes
