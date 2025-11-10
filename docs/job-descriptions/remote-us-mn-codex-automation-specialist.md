@@ -24,6 +24,11 @@ BlackRoad is launching the Codex Prompt Kit v1.0 to operationalize AI-assisted a
 - Comfort with Git-based collaboration and documenting changes via Markdown within engineering repositories.
 - Exposure to SOC 2, ISO 27001, or similar compliance programs governing sensitive personnel data.
 
+## Tools & Platforms
+- Codex Prompt Kit v1.0 with Prism console integrations for orchestrating prompt chains and workflow telemetry.
+- Make (Integromat) scenarios and Airtable automations for structured data capture and downstream syncs.
+- GitHub, Slack, and BlackRoad knowledge bases for documenting playbooks, publishing runbooks, and coordinating triage.
+
 ## Success Metrics
 - Time-to-publish job descriptions and hiring campaigns reduced below 24 hours while meeting accuracy KPIs.
 - Automation run success rate sustained above 98% with documented remediation for the remaining edge cases.
