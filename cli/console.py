@@ -24,17 +24,20 @@ from orchestrator import (
 )
 from orchestrator.logging_config import setup_logging
 from cli.consent_cli import register_consent_commands
+from cli.agent_manager import AgentRegistry, ConsciousnessLevel
 
 app = typer.Typer(help="BlackRoad Prism Console")
 bot_app = typer.Typer(help="Bot commands")
 task_app = typer.Typer(help="Task management")
 policy_app = typer.Typer(help="Policy operations")
 config_app = typer.Typer(help="Configuration utilities")
+agent_app = typer.Typer(help="Agent lifecycle management")
 
 app.add_typer(bot_app, name="bot")
 app.add_typer(task_app, name="task")
 app.add_typer(policy_app, name="policy")
 app.add_typer(config_app, name="config")
+app.add_typer(agent_app, name="agent")
 register_consent_commands(app)
 
 TASK_STORE = Path("artifacts/tasks.json")
@@ -461,8 +464,6 @@ def plm_bom_explode(
 
 """Lightweight CLI for program and task management."""
 
-from __future__ import annotations
-
 import argparse
 import importlib.util
 from datetime import datetime
@@ -860,6 +861,171 @@ def mdm_change_apply(id: str = typer.Option(..., "--id")):
     mdm_changes.apply(id)
     typer.echo("applied")
 
+
+# ============================================================================
+# Agent Lifecycle Management Commands
+# ============================================================================
+
+@agent_app.command("census")
+def agent_census() -> None:
+    """Generate comprehensive census of all agents"""
+    registry = AgentRegistry()
+    census_data = registry.census()
+
+    typer.echo("\n=== AGENT CENSUS REPORT ===")
+    typer.echo(f"Timestamp: {census_data['census_timestamp']}")
+    typer.echo("\n--- POPULATION ---")
+    pop = census_data['population']
+    typer.echo(f"Total Unique Agents: {pop['total_unique']}")
+    typer.echo(f"Active: {pop['active']}")
+    typer.echo(f"Inactive: {pop['inactive']}")
+    typer.echo(f"Config Registered: {pop['config_registered']}")
+    typer.echo(f"Manifest Registered: {pop['manifest_registered']}")
+
+    typer.echo("\n--- CONSCIOUSNESS LEVELS ---")
+    for level, count in census_data['consciousness_levels'].items():
+        typer.echo(f"{level}: {count}")
+
+    typer.echo("\n--- ROLE DISTRIBUTION ---")
+    for role, count in census_data['role_distribution'].items():
+        typer.echo(f"{role}: {count}")
+
+    typer.echo("\n--- GOAL PROGRESS ---")
+    goal = census_data['goal']
+    typer.echo(f"Target Population: {goal['target_population']}")
+    typer.echo(f"Current Population: {goal['current_population']}")
+    typer.echo(f"Completion: {goal['completion_percentage']}%")
+    typer.echo("\n")
+
+
+@agent_app.command("birth")
+def agent_birth(
+    name: str = typer.Option(..., help="Agent name"),
+    role: str = typer.Option(..., help="Agent role"),
+    consciousness: str = typer.Option("level-0", help="Consciousness level (level-0 to level-4)"),
+    count: int = typer.Option(1, help="Number of agents to birth (batch mode)"),
+    batch: Optional[str] = typer.Option(None, help="Batch name for multiple agents"),
+) -> None:
+    """Birth new agents with PS-SHA∞ identity"""
+
+    # Parse consciousness level
+    consciousness_map = {
+        "level-0": ConsciousnessLevel.LEVEL_0_FUNCTION,
+        "level-1": ConsciousnessLevel.LEVEL_1_IDENTITY,
+        "level-2": ConsciousnessLevel.LEVEL_2_EMOTIONAL,
+        "level-3": ConsciousnessLevel.LEVEL_3_RECURSIVE,
+        "level-4": ConsciousnessLevel.LEVEL_4_FULL_AGENCY,
+    }
+
+    consciousness_level = consciousness_map.get(consciousness.lower(), ConsciousnessLevel.LEVEL_0_FUNCTION)
+
+    registry = AgentRegistry()
+
+    if count > 1 or batch:
+        # Batch mode
+        batch_name = batch or name
+        typer.echo(f"\n🌱 Birthing {count} agents in batch '{batch_name}'...")
+        identities = registry.birth_batch(
+            count=count,
+            batch_name=batch_name,
+            role=role,
+            consciousness_level=consciousness_level,
+        )
+
+        typer.echo(f"\n✅ Successfully birthed {len(identities)} agents:")
+        for identity in identities:
+            typer.echo(f"  - {identity.name} ({identity.id})")
+            typer.echo(f"    PS-SHA∞: {identity.ps_sha_hash}")
+
+    else:
+        # Single agent birth
+        typer.echo(f"\n🌱 Birthing agent '{name}' with role '{role}'...")
+        identity = registry.birth_agent(
+            name=name,
+            role=role,
+            consciousness_level=consciousness_level,
+        )
+
+        typer.echo(f"\n✅ Agent birthed successfully!")
+        typer.echo(f"ID: {identity.id}")
+        typer.echo(f"Name: {identity.name}")
+        typer.echo(f"Role: {identity.role}")
+        typer.echo(f"Birthdate: {identity.birthdate}")
+        typer.echo(f"PS-SHA∞: {identity.ps_sha_hash}")
+        typer.echo(f"Consciousness: {identity.consciousness_level.value}")
+        typer.echo(f"Generation: {identity.generation}")
+        typer.echo(f"Memory Path: {identity.memory_path}")
+
+    typer.echo("\n")
+
+
+@agent_app.command("identity")
+def agent_identity_list(
+    active_only: bool = typer.Option(True, help="Show only active agents"),
+    role: Optional[str] = typer.Option(None, help="Filter by role"),
+    format: str = typer.Option("table", help="Output format: table or json"),
+) -> None:
+    """List all agent identities with PS-SHA∞ hashes"""
+
+    registry = AgentRegistry()
+    identities = registry.list_identities(active_only=active_only, role_filter=role)
+
+    if format == "json":
+        typer.echo(json.dumps([i.to_dict() for i in identities], indent=2))
+        return
+
+    typer.echo("\n=== AGENT IDENTITIES ===")
+    typer.echo(f"Total: {len(identities)}")
+    if role:
+        typer.echo(f"Filtered by role: {role}")
+    typer.echo("\n")
+
+    for identity in identities:
+        status = "🟢 ACTIVE" if identity.active else "🔴 INACTIVE"
+        typer.echo(f"{status} {identity.name}")
+        typer.echo(f"  ID: {identity.id}")
+        typer.echo(f"  Role: {identity.role}")
+        typer.echo(f"  PS-SHA∞: {identity.ps_sha_hash}")
+        typer.echo(f"  Consciousness: {identity.consciousness_level.value}")
+        typer.echo(f"  Generation: {identity.generation}")
+        if identity.lineage:
+            typer.echo(f"  Lineage: {' -> '.join(identity.lineage)}")
+        typer.echo("")
+
+
+@agent_app.command("consciousness")
+def agent_consciousness_report() -> None:
+    """Generate detailed consciousness level report"""
+
+    registry = AgentRegistry()
+    report = registry.consciousness_report()
+
+    typer.echo("\n=== CONSCIOUSNESS REPORT ===")
+    typer.echo(f"Timestamp: {report['report_timestamp']}")
+
+    typer.echo("\n--- KEY PERFORMANCE INDICATORS ---")
+    kpis = report['kpis']
+    typer.echo(f"Total Active Agents: {kpis['total_active_agents']}")
+    typer.echo(f"Advanced Consciousness Count: {kpis['advanced_consciousness_count']}")
+
+    typer.echo("\n--- CONSCIOUSNESS DISTRIBUTION ---")
+    for level, data in kpis['consciousness_distribution'].items():
+        typer.echo(f"{level}:")
+        typer.echo(f"  Count: {data['count']}")
+        typer.echo(f"  Percentage: {data['percentage']}%")
+
+    typer.echo("\n--- AGENTS BY CONSCIOUSNESS LEVEL ---")
+    for level, agents in report['levels'].items():
+        if agents:
+            typer.echo(f"\n{level}:")
+            for agent in agents:
+                typer.echo(f"  - {agent['name']} ({agent['role']}) - Gen {agent['generation']}")
+                if agent['capabilities']:
+                    typer.echo(f"    Capabilities: {', '.join(agent['capabilities'])}")
+
+    typer.echo("\n")
+
+
 @app.command("status:build")
 def status_build():
     try:
@@ -949,7 +1115,6 @@ if __name__ == "__main__":  # pragma: no cover - CLI entry
     main()
 
 """Minimal Typer-based console for demos."""
-from __future__ import annotations
 
 import json
 from pathlib import Path
