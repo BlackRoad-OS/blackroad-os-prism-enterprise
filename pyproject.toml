@@ -1,73 +1,34 @@
-<<<<<<< Updated upstream
-[project]
-name = "qlm-lab"
-version = "0.1.0"
-description = "Quantum Language Model laboratory"
-requires-python = ">=3.11"
-dependencies = [
-    "numpy",
-    "sympy",
-    "matplotlib",
-    "nbformat",
-    "nbconvert",
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest",
-    "pytest-cov",
-    "mypy",
-    "ruff",
-]
-
-[tool.pytest.ini_options]
-addopts = "-q --cov=qlm_lab.tools.quantum_np --cov-report=term-missing --cov-fail-under=90"
-testpaths = [
-    "tests/test_quantum_np.py",
-    "tests/test_proto_and_policies.py",
-    "tests/test_agents_loop.py",
-]
-
-[tool.mypy]
-python_version = "3.11"
-ignore_missing_imports = true
-
-[tool.ruff]
-target-version = "py311"
-line-length = 100
-
-[build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
-=======
 [build-system]
 requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "quantum-lab"
+name = "blackroad-quantum-labs"
 version = "0.1.0"
-description = "Quantum computing teaching lab"
+description = "Quantum pedagogy and orchestration toolkits for the BlackRoad platform"
 readme = "README.md"
 requires-python = ">=3.11"
-authors = [{ name = "Quantum Lab", email = "labs@example.com" }]
+authors = [{ name = "BlackRoad Labs", email = "labs@example.com" }]
 dependencies = [
-<<<<<<< main
-    "typer>=0.15.1,<0.22",
-    "pydantic>=2.6.4,<3",
-    "pyyaml>=6.0.2,<7",
     "hypothesis>=6.103.4,<7",
-    "numpy>=1.26,<3",
     "matplotlib>=3.8,<4",
-    "regopy>=1.0.0,<2",
-=======
-    "numpy>=1.26",
-    "matplotlib>=3.8",
+    "nbconvert>=7.0",
+    "nbformat>=5.10",
+    "numpy>=1.26,<3",
+    "pydantic>=2.6.4,<3",
     "pyyaml>=6.0",
->>>>>>> origin/codex/refactor-and-upgrade-quantum-math-teaching-lab
+    "regopy>=1.0.0,<2",
+    "sympy>=1.12",
+    "typer>=0.15.1,<0.22",
 ]
 
 [project.optional-dependencies]
+dev = [
+    "mypy",
+    "pytest",
+    "pytest-cov",
+    "ruff",
+]
 qiskit = ["qiskit", "qiskit-aer", "qiskit-ibm-runtime"]
 viz = ["matplotlib"]
 
@@ -75,16 +36,17 @@ viz = ["matplotlib"]
 Homepage = "https://example.com/quantum-lab"
 
 [tool.pytest.ini_options]
+addopts = "-q"
 testpaths = ["tests"]
-
-[tool.ruff]
-line-length = 100
 
 [tool.mypy]
 python_version = "3.11"
-plugins = []
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["quantum_lab*"]
->>>>>>> Stashed changes
+include = ["quantum_lab*", "qlm_lab*"]
