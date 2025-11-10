@@ -38,14 +38,17 @@ def test_solve_algebraic_requires_condor_for_real_models(monkeypatch):
 
 def test_solve_algebraic_allows_condor_models_when_dependency_present(monkeypatch):
     class FakeCondorModel:
+        def __init__(self, scale: int = 1):
+            self.scale = scale
+
         def solve(self):
-            return {"x": 2}
+            return {"x": self.scale}
 
     FakeCondorModel.__module__ = "condor.fake"
 
     monkeypatch.setattr(condor_engine, "condor", object())
-    result = condor_engine.solve_algebraic(FakeCondorModel)
-    assert result == {"x": 2}
+    result = condor_engine.solve_algebraic(FakeCondorModel, scale=3)
+    assert result == {"x": 3}
 
 
 def test_validate_model_source_allows_basic_imports():
