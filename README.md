@@ -1,43 +1,62 @@
 # BlackRoad Prism Console
 
-A production-grade multi-agent AI platform featuring quantum computing capabilities, sacred geometry-based agent coordination, and distributed intelligence orchestration.
+A production-grade multi-agent AI platform featuring quantum computing capabilities, sacred geometry-based agent coordination, distributed intelligence orchestration, and comprehensive visualization tools.
 
 ## Overview
 
-The BlackRoad Prism Console is a comprehensive ecosystem for:
-
+The BlackRoad Prism Console is a comprehensive ecosystem combining:
+- **100 Production-Ready AI Agents** with specialized capabilities
+- **Quantum Computing Lab** with simulators and hardware integration
+- **Agent Gateway API** for orchestrating distributed agent swarms
+- **Cecilia Memory System** for persistent context across interactions
 - **Multi-Agent Orchestration**: 1000+ agent swarm with sacred formation patterns (DELTA, HALO, LATTICE, HUM, CAMPFIRE)
-- **Quantum Computing**: Production quantum lab with NumPy simulator, Qiskit hardware wrappers, and pedagogical notebooks
 - **Distributed Intelligence**: Polyglot microservices architecture with 36+ services
 - **Sacred Geometry**: Mathematical foundations for agent coordination and coherence
 - **Real-time Collaboration**: Multi-protocol message bus (QLM, MQTT, Redis, REST)
+- **57+ Infrastructure Packages** for gateways, engines, and SDKs
+- **Multiple Web Applications** including Prism Console, agent catalog, and BlackRoad sites
 
-## Quickstart
+## Quick Start
 
 ```bash
-# Install dependencies
+# Setup environment
+npm install
 make setup
 
-# Run development server
+# Start Prism Console web interface
 npm run dev
 
-# Run quantum demo
+# Run quantum computing demos
 make demo
+
+# Launch agent via Prism Shell
+./prism/prismsh.js spawn cecilia
 ```
 
 ## Architecture
 
-### Agent Swarm System
+### Core Components
+
+#### Prism Console (`apps/prism-console-web`)
+Next.js 14 web application for managing agents, viewing metrics, and orchestrating tasks.
+
+#### Agent Swarm System (`agents/`)
 
 The platform features a sophisticated agent swarm with:
 
+- **100+ Production-Ready Agents**: Specialized capabilities for different domains
 - **Language Abilities Registry**: Maps agents to linguistic capabilities
 - **Swarm Orchestrator**: Intelligent task routing and coordination
-- **Formation Patterns**: Sacred geometric coordination patterns
+- **Formation Patterns**: Sacred geometric coordination patterns (DELTA, HALO, LATTICE, HUM, CAMPFIRE)
 - **Unified Message Bus**: Multi-protocol communication layer
 
-### Agent Archetypes (20 Clusters)
+**Key Agents:**
+- **Cecilia** (`CECILIA-7C3E-SPECTRUM-9B4F`): Creative systems architect and infrastructure engineer
+- **Quantum Coder**: Quantum algorithm development and optimization
+- **Security Guardian**: Security auditing and vulnerability scanning
+- **Deployment Orchestrator**: CI/CD and infrastructure deployment
 
+**Agent Archetypes (20 Clusters):**
 - **athenaeum** (knowledge management)
 - **aurum** (economic systems)
 - **blackroad** (platform core)
@@ -49,24 +68,117 @@ The platform features a sophisticated agent swarm with:
 - **lucidia** (core intelligence)
 - And 11 more specialized clusters
 
-### Quantum Lab
+#### Gateway Packages (`packages/`)
+- `@blackroad/hjb-gateway`: Hamilton-Jacobi-Bellman optimization gateway
+- `@blackroad/media-gateway`: Media processing and streaming
+- `@blackroad/diffusion-gateway`: Stable Diffusion and image generation
+- `@blackroad/obs-gateway`: GraphQL subscriptions and observability
+- `@blackroad/correlation-engine`: Event correlation and pattern detection
+- `@blackroad/graph-engines`: Graph processing and analysis
 
-A production-grade quantum computing teaching lab featuring:
+## Quantum Computing Features
 
-- Local NumPy-based quantum simulator
-- Qiskit hardware integration (IBM Quantum)
-- Circuit visualization and analysis tools
-- Pedagogical notebooks for learning quantum computing
-- CHSH inequality demonstrations and Bell state analysis
+### Capabilities
+- **Simulators**: NumPy statevector simulation + Qiskit hardware wrappers
+- **Algorithms**: Bell states, Grover search, QFT, phase estimation
+- **Visualization**: Circuit diagrams, Bloch spheres, measurement histograms
+- **Hardware Integration**: IBM Quantum via `QISKIT_API_TOKEN`
+- **Pedagogical Notebooks**: Learning path for quantum computing
+- **CHSH Inequality Demonstrations**: Bell state analysis
 
-**Quantum Feature Matrix:**
+### Learning Path (Quantum Pedagogy)
+1. `notebooks/01_qubit_basics.ipynb` — Single qubits and Bloch sphere
+2. `notebooks/02_entanglement_bell.ipynb` — Bell states and CHSH violations
+3. `notebooks/03_qft_and_phase.ipynb` — Quantum Fourier transforms
+4. `notebooks/04_grover_vs_random.ipynb` — Grover's search algorithm
+5. `notebooks/05_noise_and_mitigation.ipynb` — Error handling and mitigation
+6. `notebooks/06_qiskit_hardware_roundtrip.ipynb` — IBM Quantum integration
 
-| Capability | Local Simulator | Qiskit Backends |
-| --- | --- | --- |
-| Statevector simulation | ✅ | ✅ |
-| Noise channels | ✅ | ✅ (through backend models) |
-| Circuit visualization | ✅ | ✅ |
-| Hardware execution | ❌ | ✅ (token required) |
+## Agent Development
+
+### Spawning Agents
+```bash
+# Via Prism Shell
+./prism/prismsh.js spawn <agent-name>
+
+# Via Agent Gateway API
+curl -X POST http://localhost:3001/v1/agents/cecilia/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"task": "Analyze system architecture"}'
+```
+
+### Agent Manifests
+Each agent has a manifest at `agents/<agent-name>/manifest.json`:
+
+```json
+{
+  "name": "cecilia",
+  "version": "1.0.0",
+  "agent_id": "CECILIA-7C3E-SPECTRUM-9B4F",
+  "description": "Creative spectrum engineer",
+  "capabilities": [
+    "code_architecture",
+    "system_design",
+    "ui_creation",
+    "problem_solving"
+  ]
+}
+```
+
+## Development
+
+### Project Structure
+```
+blackroad-prism-console/
+├── agents/                 # 100 agent manifests and implementations
+├── apps/                   # Web applications
+│   ├── prism-console-web/  # Main console (Next.js 14)
+│   ├── prismweb/           # Alternative console interface
+│   └── ...                 # Additional web apps
+├── packages/               # 57+ infrastructure packages
+│   ├── hjb-gateway/
+│   ├── media-gateway/
+│   ├── correlation-engine/
+│   └── ...
+├── prism/                  # Prism Shell CLI
+├── notebooks/              # Quantum computing tutorials
+└── artifacts/              # Generated outputs
+```
+
+### Building
+```bash
+# Build all packages
+npm run build
+
+# Run tests
+npm test
+
+# Type checking
+tsc --noEmit
+```
+
+## Deployment
+
+### Docker
+```bash
+# Build production image
+docker-compose -f docker-compose.prod.yml build
+
+# Start services
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+### Environment Variables
+```bash
+# Quantum hardware access
+QISKIT_API_TOKEN=your_token_here
+
+# Agent Gateway
+AGENT_GATEWAY_PORT=3001
+
+# Cecilia Memory API
+CECILIA_MEMORY_PORT=3000
+```
 
 **Running Quantum Demos:**
 
@@ -75,9 +187,10 @@ make demo
 ```
 
 This produces artifacts in `artifacts/`:
-- `bell_hist.png` - Bell state histogram
-- `bloch_example.png` - Bloch sphere visualization
-- `grover_success.png` - Grover algorithm success curve
+- `bell_hist.png` — Bell state measurement distributions
+- `bloch_example.png` / `bloch_q0.png` — Bloch sphere visualizations
+- `grover_success.png` / `grover_curve.png` — Grover algorithm success rates
+- `lineage.jsonl` — Agent interaction logs
 
 **Hardware Access:**
 
@@ -116,27 +229,41 @@ For detailed quantum lab documentation, see [README-quantum-lab.md](./README-qua
 ```bash
 # Install dependencies
 make install
+npm install
 
 # Run tests
 make test
+npm test
 
 # Format code
 make format
 
 # Lint
 make lint
+
+# Type checking
+tsc --noEmit
 ```
 
 ### Project Structure
 
 ```
 blackroad-prism-console/
-├── agents/           # 1000+ agent system
+├── agents/           # 100+ production-ready agents
 ├── frontend/         # React + Vite SPA
 ├── services/         # 36+ microservices
-├── apps/             # Multiple applications
+├── apps/             # Multiple web applications
+│   ├── prism-console-web/
+│   ├── prismweb/
+│   └── ...
+├── packages/         # 57+ infrastructure packages
+│   ├── hjb-gateway/
+│   ├── media-gateway/
+│   └── ...
+├── prism/            # Prism Shell CLI
+├── notebooks/        # Quantum computing tutorials
 ├── infra/            # Terraform, Kubernetes configs
-├── packages/         # 57 shared packages
+├── artifacts/        # Generated outputs
 ├── tools/            # Utilities and tooling
 └── docs/             # Comprehensive documentation
 ```
@@ -145,10 +272,10 @@ blackroad-prism-console/
 
 Multiple deployment options supported:
 
+- **Docker Compose**: `docker-compose -f docker-compose.prod.yml up`
 - **Fly.io**: `make deploy-fly`
 - **AWS ECS**: `make deploy-ecs`
 - **Kubernetes**: `kubectl apply -f infra/k8s/`
-- **Docker Compose**: `docker-compose -f docker-compose.prod.yml up`
 
 See [README-DEPLOY.md](./README-DEPLOY.md) for detailed deployment instructions.
 
@@ -162,15 +289,6 @@ The platform includes sophisticated mathematical tools:
 - Cross-ratio calculations
 - Spectral gap analysis
 - Angle defect computations
-
-## Pedagogy Path (Quantum Learning)
-
-1. `notebooks/01_qubit_basics.ipynb` — Single qubits and Bloch sphere
-2. `notebooks/02_entanglement_bell.ipynb` — Bell states and CHSH violations
-3. `notebooks/03_qft_and_phase.ipynb` — Fourier transforms and phase estimation
-4. `notebooks/04_grover_vs_random.ipynb` — Search speed-ups
-5. `notebooks/05_noise_and_mitigation.ipynb` — Ideal vs noisy evolutions
-6. `notebooks/06_qiskit_hardware_roundtrip.ipynb` — Simulator to hardware handoff
 
 ## Bot Family Demo
 
@@ -224,8 +342,14 @@ See [LICENSE](./LICENSE) for details.
 
 See `quantum_lab/pedagogy/unsolved/` for mini-essays connecting demos to enduring mathematical challenges.
 
+## Support
+
+- **Documentation**: `docs/`
+- **Issues**: GitHub Issues
+- **Security**: See `SECURITY.md`
+
 ---
 
 **Version**: 1.0.0
-**Last Updated**: 2025-11-09
+**Last Updated**: 2025-11-10
 **Status**: Pre-production (hardening in progress)
