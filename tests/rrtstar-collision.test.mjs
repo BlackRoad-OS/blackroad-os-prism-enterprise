@@ -35,6 +35,31 @@ assert.equal(
 );
 
 assert.equal(
+  segmentIntersectsRect({ x: 140, y: 80 }, { x: 320, y: 220 }, rect),
+  true
+);
+
+assert.equal(
+  segmentIntersectsRect({ x: 280, y: 180 }, { x: 360, y: 260 }, rect),
+  true
+);
+
+assert.equal(
+  segmentIntersectsRect({ x: 120, y: 120 }, { x: 200, y: 120 }, rect),
+  true
+);
+
+assert.equal(
+  segmentIntersectsRect({ x: 120, y: 119 }, { x: 200, y: 119 }, rect),
+  false
+);
+
+assert.equal(
+  segmentIntersectsRect({ x: 281, y: 181 }, { x: 361, y: 261 }, rect),
+  false
+);
+
+assert.equal(
   segmentHitsAnyRect({ x: 0, y: 0 }, { x: 400, y: 300 }, [
     rect,
     { x: 400, y: 0, w: 40, h: 40 },
@@ -49,3 +74,5 @@ assert.equal(
   ]),
   false
 );
+
+assert.equal(segmentHitsAnyRect({ x: 0, y: 0 }, { x: 10, y: 10 }, []), false);
