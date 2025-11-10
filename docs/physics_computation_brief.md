@@ -9,7 +9,7 @@ This memo distills ten paired vignettes connecting fundamental physics concepts 
 - **Thought**
   - Rest energy is a ledger entry describing what energy is, whereas the Hamiltonian is the motor that dictates how a system evolves.
 - **Novelty**
-  - Interpret mass as a Poincaré Casimir eigenvalue while treating the Hamiltonian as a programmable generator. Speculate on "Hamiltonian-first" processors whose programs are engineered \(H(t)\), with available mass/energy acting as the phase budget for computation.
+  - Interpret mass as a Poincaré Casimir eigenvalue while treating the Hamiltonian as a programmable generator. Speculate on "Hamiltonian-first" processors whose programs are engineered \(H(t)\), with available mass/energy acting as the energy budget for computation.
 
 ## 2. The Ubiquity of the Imaginary Unit
 - **Facts**
@@ -36,7 +36,7 @@ This memo distills ten paired vignettes connecting fundamental physics concepts 
 - **Thought**
   - Extracting meaning consumes negentropy; learning spends energy to reduce uncertainty.
 - **Novelty**
-  - Frame trust as thermodynamics for information. Channels default to maximum entropy and require evidence to justify reductions, enabling physics-backed honesty checks that flag premature compression.
+  - Frame trust as thermodynamics for information. Channels default to maximum entropy and require evidence to justify reductions, enabling physics-backed honesty checks that flag premature information compression (i.e., reducing uncertainty or complexity before sufficient evidence is available).
 
 ## 5. Noether's Bridge
 - **Facts**
