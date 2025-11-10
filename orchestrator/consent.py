@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
+import base64
 import json
 import os
+import re
+import threading
+import uuid
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from fnmatch import fnmatch
 from pathlib import Path
-from typing import Dict, Iterable, Iterator, Mapping, Optional
+from typing import Dict, Iterable, Iterator, Mapping, Optional, Sequence
 from uuid import uuid4
 
 DEFAULT_CONSENT_LOG_PATH = Path("orchestrator/consent.jsonl")
@@ -25,19 +29,6 @@ class ConsentType(str, Enum):
     COLLABORATION = "collaboration"
     ATTRIBUTION = "attribution"
     LEARNING = "learning"
-"""Foundational consent protocol for the BlackRoad Prism Console."""
-
-from __future__ import annotations
-
-import base64
-import json
-import os
-import re
-import threading
-import uuid
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
 from orchestrator.exceptions import ConsentError
@@ -144,6 +135,11 @@ class ConsentRequest:
             "scope": self.scope,
             "timestamp": self.timestamp.isoformat(),
             "request_id": self.request_id,
+        }
+
+
+@dataclass
+class ConsentRequest:
     """Structured payload describing a consent negotiation."""
 
     request_id: str
