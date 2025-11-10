@@ -20,7 +20,12 @@ class CleanupBot:
     dry_run: bool = False
 
     def _run(self, *cmd: str) -> None:
-        """Run a command unless in dry-run mode."""
+        """Run a command unless in dry-run mode.
+
+        Raises:
+            CalledProcessError: If the command exits with a non-zero status while
+                ``dry_run`` is ``False``.
+        """
         if self.dry_run:
             print("DRY-RUN:", " ".join(cmd))
             return
