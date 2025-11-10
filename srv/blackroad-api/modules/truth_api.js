@@ -36,9 +36,15 @@ module.exports = function attachTruthApi({ app }) {
   let ipfsClientPromise;
   const getIpfsClient = () => {
     if (!ipfsClientPromise) {
-      ipfsClientPromise = import('ipfs-http-client').then(({ create }) =>
-        create({ url: process.env.IPFS_API || 'http://127.0.0.1:5001' })
-      );
+      ipfsClientPromise = (async () => {
+        try {
+          const { create } = await import('ipfs-http-client');
+          return create({ url: process.env.IPFS_API || 'http://127.0.0.1:5001' });
+        } catch (err) {
+          ipfsClientPromise = undefined;
+          throw err;
+        }
+      })();
     }
     return ipfsClientPromise;
   };
