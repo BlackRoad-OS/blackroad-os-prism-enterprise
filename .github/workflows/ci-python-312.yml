@@ -21,6 +21,7 @@ on:
       - "Pipfile*"
       - "tests/**"
       - ".github/workflows/ci-python-312.yml"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -45,6 +46,15 @@ jobs:
         with:
           python-version: "3.12"
           cache: "pip"
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+            requirements-*.txt
+            pyproject.toml
+            setup.cfg
+            Pipfile
+            Pipfile.lock
+            poetry.lock
 
       - name: Install dependencies
         run: |
