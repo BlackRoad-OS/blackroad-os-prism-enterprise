@@ -21,12 +21,12 @@ LinkedIn • GitHub • Lucidia Console
 - Reduced API dependency 40% by wiring autonomous deploy, sync, and health pipelines (`scripts/blackroad_sync.py`, `systemd/blackroad-api.service`).
 - Shortened solve times 55% with autonomous agent delegation, presence-aware UI, and RoadCoin incentives (`lucidia/roadie.py`, `agents/auto_novel_agent.py`, `sites/blackroad/index.html`).
 
-### Securian Financial — Internal Annuity Wholesaler & Sales Sr. Analyst (Jul 2025 – May 2025)
+### Securian Financial — Internal Annuity Wholesaler & Sales Sr. Analyst (May 2025 – Jul 2025)
 - Drove $23M in annuity sales while achieving 92% of goal vs. 74% median, backed by automated outreach cadences and compliance tooling.
 - Closed $15M from non-repeating clients via call-back sequences and onboarded ~40 advisors with targeted enablement.
 - Automated 2,300 compliance-approved emails and 619 communications, improving channel efficiency 20%.
 
-### Ameriprise Financial — Client Support Associate & Financial Advisor (Jul 2025 – May 2025)
+### Ameriprise Financial — Client Support Associate & Financial Advisor (May 2025 – Jul 2025)
 - Converted $45M in assets to close a $14M AUM pipeline gap and deliver 400% GDC growth ($560K).
 - Cut at-risk assets in half and added $2M AUM through reallocation strategies and planning.
 - Maintained 65% appointment hold rate while elevating client satisfaction to 97%.
