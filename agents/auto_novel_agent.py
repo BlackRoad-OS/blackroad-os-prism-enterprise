@@ -75,12 +75,19 @@ class AutoNovelAgent:
 
         Raises:
             ValueError: If ``theme`` is empty or only whitespace.
+            TypeError: If ``theme`` or ``protagonist`` are not strings.
         """
+        if not isinstance(theme, str):
+            raise TypeError("Theme must be provided as a string.")
+        if not isinstance(protagonist, str):
+            raise TypeError("Protagonist must be provided as a string.")
+
         normalized_theme = theme.strip()
         if not normalized_theme:
             raise ValueError("Theme must be a non-empty string.")
+        normalized_protagonist = protagonist.strip() or "An unnamed protagonist"
         return (
-            f"{protagonist} set out on a {normalized_theme} journey, discovering "
+            f"{normalized_protagonist} set out on a {normalized_theme} journey, discovering "
             f"wonders along the way."
         )
 
