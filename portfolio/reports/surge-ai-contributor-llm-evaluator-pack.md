@@ -38,3 +38,9 @@ Portfolio + short Looms: blackroad.io
   "disability_optional": {"status":"Decline to answer"}
 }
 ```
+
+## 5. Submission Checklist
+- Swap `<handle>` with your personal LinkedIn slug and confirm the portfolio link you plan to share.
+- Adjust location, availability, or compensation preferences if they differ from the defaults above.
+- Keep the JSON block handy for portals that request structured answers—paste directly or adapt fields as needed.
+- Re-run the 55-word summary through an ATS checker if you tailor metrics so it stays under the word limit.
