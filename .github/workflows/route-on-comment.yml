@@ -31,7 +31,7 @@ jobs:
       - name: Dispatch auto-mention
         uses: benc-uk/workflow-dispatch@4c044c1613fabbe5250deadc65452d54c4ad4fc7 # v1.2.4
         with:
-          workflow: Auto mention teams
+          workflow: Auto mention on PRs
           ref: ${{ github.ref }}
           inputs: |
             pull_number=${{ steps.pr.outputs.number }}
