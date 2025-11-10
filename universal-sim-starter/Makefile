@@ -17,7 +17,7 @@ $(PYTHON) $(ROOT)/40_compare/batch_compare.py --outputs-dir $(OUTPUTS) --variant
 report: compare
 $(PYTHON) $(ROOT)/90_reports/make_report.py --outputs-dir $(OUTPUTS) --variants-file $(VARIANTS)
 
-check:
+check: report
 $(PYTHON) $(ROOT)/tools/check_pipeline.py --variants-file $(VARIANTS) --outputs-dir $(OUTPUTS)
 
 clean:
