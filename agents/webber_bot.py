@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -85,21 +86,39 @@ class WebberBot:
             self.notification_bot.send(message)
         print(message)
 
+    def _suffix_handlers(self) -> dict[str, Callable[[str], bool | None]]:
+        """Return mapping of file suffixes to handler methods."""
+        return {
+            ".html": self.format_html,
+            ".css": self.format_css,
+            ".js": self.format_js,
+            ".json": self.validate_json,
+        }
+
     def run_on_pr(self, files: list[str]) -> None:
         """Process ``files`` based on their extension."""
+        handlers = self._suffix_handlers()
         for file_path in files:
+            handler: Callable[[str], bool | None] | None = None
+            for suffix, suffix_handler in handlers.items():
+                if file_path.endswith(suffix):
+                    handler = suffix_handler
+                    break
+
+            if handler is None:
+                continue
+
             try:
-                if file_path.endswith(".html"):
-                    self.format_html(file_path)
-                elif file_path.endswith(".css"):
-                    self.format_css(file_path)
-                elif file_path.endswith(".js"):
-                    self.format_js(file_path)
-                elif file_path.endswith(".json"):
-                    self.validate_json(file_path)
-                self.notify(f"Processed {file_path} successfully")
+                result = handler(file_path)
             except Exception as exc:  # pylint: disable=broad-except
                 self.notify(f"Error processing {file_path}: {exc}")
+                continue
+
+            if result is False:
+                self.notify(f"Processing failed for {file_path}")
+                continue
+
+            self.notify(f"Processed {file_path} successfully")
 
 
 if __name__ == "__main__":
