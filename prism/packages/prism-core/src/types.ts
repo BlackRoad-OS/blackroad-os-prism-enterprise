@@ -6,10 +6,7 @@ export interface PrismDiffHunk {
   lines: string[];
 }
 
-export interface PrismDiff {
-  path: string;
-  hunks: PrismDiffHunk[];
-}
+// Removed duplicate - see type definition below
 
 export interface RunRecord {
   id: string;
@@ -34,11 +31,7 @@ export interface ApprovalRecord {
   note?: string;
 }
 
-export interface PrismEvent<T = any> {
-  id: string;
-  kind: string;
-  data: T;
-}
+// Removed duplicate - using type definition below
 export type PrismEvent = {
   id: string;
   ts: string;

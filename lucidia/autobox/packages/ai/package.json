@@ -13,6 +13,7 @@
     "natural": "^6.6.4"
   },
   "devDependencies": {
+    "@types/node": "^20.14.9",
     "typescript": "^5.4.5"
   }
 }
