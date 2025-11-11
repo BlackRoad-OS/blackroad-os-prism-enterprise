@@ -11,7 +11,8 @@
 - Public note: share a Loom walkthrough + changelog snippet on Day 15.
 
 ## Action 2 — Close the Feedback Loop (Weeks 1–4)
-- Stand up a lightweight in-product prompt that appears after a publish action asking "What slowed you down today?" with optional tagging (workflow, content, integrations).
+- Stand up a lightweight in-product prompt that appears after a publish action asking "What slowed you down today?"
+  with optional tagging (workflow, content, integrations).
 - Route responses into the #creator-ops Slack channel and tag owners within 12 hours.
 - Publish a weekly digest (Fridays) summarizing themes, commitments, and quick wins.
 
@@ -28,7 +29,8 @@
 ## Measurement Toolkit
 - Instrument dashboard with view + click analytics via existing product telemetry.
 - Extend retention query to segment active creators by feature usage.
-- Maintain a shared "Momentum" spreadsheet tracking: weekly active creators, dashboard minutes, feedback response SLA, drag removal status.
+- Maintain a shared "Momentum" spreadsheet tracking: weekly active creators, dashboard minutes, feedback response SLA,
+  drag removal status.
 
 ## Communication Commitments
 - Public weekly LinkedIn/Twitter thread: highlight what's shipping, one metric snapshot, and the drag being retired next.
