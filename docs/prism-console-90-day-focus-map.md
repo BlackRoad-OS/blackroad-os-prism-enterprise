@@ -1,51 +1,69 @@
 # Prism Console 90-Day Focus Map
 
 ## Purpose
-This plan distills the existing 20-phase roadmap into an execution-ready 90-day focus that proves value fast, keeps teams aligned on measurable outcomes, and creates the operating rhythm for continuous iteration.
+The Prism Console program enters its first 90-day execution window with a mandate to translate the 20-phase roadmap into tangible business traction. This focus map articulates three leverage areas that deliver compound impact when advanced in parallel, and defines the rituals, metrics, and accountability loops that keep execution grounded in customer value and operational excellence.
 
-## Focus Levers (Immediate Proof)
-| Lever | Intent | 30-Day Actions | 60-Day Actions | 90-Day Actions | Leading Indicators |
-| --- | --- | --- | --- | --- | --- |
-| **Revenue Activation** | Convert high-intent pipeline into monetized console usage. | Launch paywall-ready trial experience for top 50 prospects and instrument conversion funnel. | Land 25 paying teams on Growth plan with signed order forms and automated invoicing. | Reach $150K ARR run-rate from console subscriptions with 40% close rate on post-trial calls. | Trial-to-paid conversion %, ARR run-rate, sales cycle length. |
-| **User Happiness** | Drive daily active console usage that demonstrably accelerates customer workflows. | Ship workflow templates for top 3 jobs-to-be-done and add in-product NPS. | Hit 65% WAU/MAU with median daily session length >12 minutes. | Maintain NPS ≥40 and cut activation-to-first-value time under 15 minutes. | WAU/MAU, activation time, NPS, support ticket volume. |
-| **Operational Intelligence** | Make the platform smarter while reducing cost-to-serve. | Ship auto-tagging of telemetry events and enable query caching on heavy dashboards. | Reduce infra spend per active workspace by 20% via autoscaling and storage tiering. | Deliver predictive incident scoring that cuts median MTTR by 30%. | Infra cost per active workspace, cache hit rate, MTTR, anomaly detection precision. |
+## Leverage Areas & Objectives
 
-## Translating Phases Into Metrics
-Reframe each relevant roadmap phase into an outcome metric. Track them weekly in the focus review.
+### 1. Customer Activation & Insight Loop
+- **Objective**: Convert roadmap capabilities into activated usage across priority customer segments while deepening understanding of workflow gaps and desired outcomes.
+- **Key Initiatives**:
+  - Ship guided onboarding journeys and in-product messaging for the top three Prism Console personas.
+  - Launch a rolling customer council (design partners + lighthouse accounts) to test roadmap increments bi-weekly.
+  - Instrument funnel analytics and qualitative feedback capture across onboarding, key workflows, and retention signals.
+- **Owner(s)**: Product Management (Console), Design Research, Customer Success Leads.
 
-| Original Phase Theme | 90-Day Metric | Owner | Notes |
+### 2. Operational Reliability & Observability
+- **Objective**: Increase console resilience, reduce incident risk, and provide actionable telemetry for proactive remediation.
+- **Key Initiatives**:
+  - Harden core services with SLO-backed error budgets, automated runbooks, and on-call coverage.
+  - Expand observability stack (metrics, logs, traces) with golden signals and alerting for the top five user journeys.
+  - Integrate security posture checks into deployment pipeline and quarterly tabletop exercises.
+- **Owner(s)**: Platform Engineering, Site Reliability Engineering, Security Operations.
+
+### 3. Growth Experimentation & Enablement
+- **Objective**: Build a repeatable pipeline for growth hypotheses, experiment velocity, and revenue enablement alignment.
+- **Key Initiatives**:
+  - Stand up an experimentation backlog with clear hypothesis templates, guardrails, and instrumentation plans.
+  - Partner with Revenue Enablement to produce console value narratives, playbooks, and competitive positioning updates.
+  - Establish data integrations that surface usage signals into GTM systems for timely customer outreach.
+- **Owner(s)**: Growth Product, Revenue Enablement, Data Strategy.
+
+## Metrics & Leading Indicators
+| Lever | Metric | Target (Day 90) | Signal Type |
 | --- | --- | --- | --- |
-| Creator economy expansion | **100** paying creators earning **$100** each via marketplace bundles. | GTM Lead | Leverages Revenue Activation lever; only shipped bundles count. |
-| Token utility launch | **500** on-platform RoadCoin transactions with 70% repeat wallets. | Product Lead | Requires compliance sign-off before counting volume. |
-| Console AI assistant rollout | **75%** of active workspaces using the assistant weekly; satisfaction score ≥4.2/5. | AI Lead | Feedback loop feeds Operational Intelligence lever. |
-| Reliability hardening | **30%** reduction in Sev-2 incidents quarter-over-quarter. | Platform Lead | Validates predictive incident scoring roadmap. |
-| Partner integrations | **10** certified integrations producing ≥200 weekly cross-system syncs. | Integrations PM | Focus on partners tied to revenue motion. |
+| Customer Activation & Insight Loop | Activated accounts within 14 days of invite | ≥ 65% | Leading |
+| Customer Activation & Insight Loop | Net qualitative insight submissions per sprint | ≥ 12 | Leading |
+| Operational Reliability & Observability | Mean time to detect (MTTD) critical incidents | ≤ 5 minutes | Lagging |
+| Operational Reliability & Observability | Deployment change failure rate | ≤ 10% | Lagging |
+| Operational Reliability & Observability | Coverage of golden signals for key workflows | 100% | Leading |
+| Growth Experimentation & Enablement | Experiments launched with full instrumentation | ≥ 8 | Leading |
+| Growth Experimentation & Enablement | Revenue-facing playbook adoption (active reps) | ≥ 80% | Leading |
+| Growth Experimentation & Enablement | Qualified expansion opportunities sourced | ≥ 6 | Lagging |
 
-## 90-Day Cadence
-- **Weeks 1–2:** Finalize instrumentation, segment customer cohorts, and harden trial experience. Run daily war-room to unblock GTM + product handoffs.
-- **Weeks 3–4:** Launch workflow templates, roll out telemetry auto-tagging, and open NPS beta. Begin weekly focus review ritual.
-- **Month 2:** Scale monetization experiments, push RoadCoin transactions with targeted incentives, and deploy autoscaling/storage tiering changes.
-- **Month 3:** Ship predictive incident scoring, expand integration catalog, and optimize activation paths to lock in WAU/MAU goals. Prepare public-facing proof (case studies, creator earnings spotlight).
+## Cadence & Rituals
+- **Weekly Leadership Sync (45 min)**: Review metric deltas, unblock cross-functional dependencies, and surface new risks. Owners provide red/yellow/green status by lever.
+- **Bi-Weekly Customer Council**: Demo increments, capture structured insights, and decide pivot/persevere on roadmap items informed by customer pull.
+- **Monthly Reliability Review**: Inspect SLO adherence, incident postmortems, and automation backlog prioritization.
+- **Monthly Growth Experiment Demo Day**: Share outcomes, decide on scale/iterate/retire actions, and publish learnings to GTM teams.
 
-## Feedback Ritual
-1. **Weekly Focus Review (Monday 30 minutes)**
-   - Review focus lever dashboards and metric deltas (what moved, stalled, surprised).
-   - Identify top customer anecdotes validating or contradicting the data.
-   - Decide which experiment to accelerate, pause, or redesign.
-2. **Feature Subtraction Rule**
-   - End each review by retiring at least one backlog idea or experiment that does not advance the three levers.
-   - Archive rationale in the decision log to prevent resurrection without new evidence.
-3. **Rhythm Guardrails**
-   - Mid-week async checkpoint in product ops channel with blockers and data snapshots.
-   - Friday "proof drop": share one concrete win (ARR closed, creator earnings milestone, MTTR reduction) to reinforce momentum.
+## Feedback & Governance Loops
+- **Metrics Dashboards**: Centralized in Prism Analytics with automated distribution to stakeholders each Monday.
+- **Retrospectives**: End of every sprint, include representation from product, engineering, design, GTM, and support. Feed learnings into roadmap adjustments.
+- **Risk Register**: Maintained within the program management workspace with ownership, mitigation plans, and review cadence.
+- **Executive Checkpoint (Day 45 & Day 90)**: Present progress against leverage areas, metric trajectories, and investment asks; align on next-horizon priorities.
 
-## Operating Artifacts
-- **Focus dashboard:** single Notion/BI board showing lever metrics with green/yellow/red status.
-- **Decision log:** lightweight markdown log tracking weekly kill decisions and experiment outcomes.
-- **Customer proof library:** repository of quotes, earnings statements, and case studies used in GTM motions.
+## Dependencies & Enablers
+- Staffing finalized for critical roles: Growth PM, SRE rotation, Revenue Enablement partner.
+- Tooling upgrades: Experimentation platform license, observability dashboards, customer feedback repository.
+- Data governance alignment for sharing usage insights with GTM tooling compliant with privacy and security requirements.
 
-## Next Iteration Trigger
-At the end of 90 days, run a half-day retrospective to:
-- Re-score the three levers using actual ROI and decide whether to renew, rotate, or replace them.
-- Promote the top-performing experiment into the core roadmap.
-- Draft the next 90-day focus map using fresh metrics and learnings.
+## Exit Criteria
+- Documented customer journeys demonstrating measurable value realization in target segments.
+- Reliability posture maintains SLO compliance with clear escalation and remediation loops.
+- Growth experimentation pipeline consistently producing insights that translate into revenue enablement actions and expansion opportunities.
+
+## Next Steps Post-Day 90
+- Re-baseline roadmap based on customer council inputs and performance trends.
+- Evaluate automation opportunities identified during reliability and growth cadences.
+- Prepare next 90-day focus map emphasizing scale initiatives informed by outcomes from this cycle.
