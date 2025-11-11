@@ -411,6 +411,7 @@ export function buildServer() {
     };
     const schedule = buildSchedule(filled, scheduleState);
     const startAt = Date.now() + Math.max(0, startOffsetMs);
+    const startAtIso = new Date(startAt).toISOString();
     const timeline = schedule.map((entry) => ({
       word: entry.word,
       offset: entry.offset,
@@ -432,6 +433,7 @@ export function buildServer() {
     }
     emit('perform.timeline', {
       startAt,
+      startAtIso,
       bpm: scheduleState.bpm,
       quantDiv: scheduleState.quantDiv,
       humanize: scheduleState.humanize,
@@ -442,7 +444,7 @@ export function buildServer() {
       })),
     });
     const ssml = toSSML(filled, scheduleState.paceBias);
-    reply.send({ ok: true, startAt, metrics: metricsResult, timeline, ssml });
+    reply.send({ ok: true, startAt, startAtIso, metrics: metricsResult, timeline, ssml });
   });
 
   const runSchema = z.object({
