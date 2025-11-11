@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
+import importlib
+import importlib.util
 import os
 import tempfile
-from typing import Optional
+from typing import Any, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
 import streamlit as st
-import whisper
 from openai import OpenAI
 from streamlit.runtime.uploaded_file_manager import UploadedFile
 
@@ -24,10 +25,14 @@ st.set_page_config(layout="wide", page_title="BlackRoad Prism Console")
 
 
 @st.cache_resource
-def get_whisper_model() -> whisper.Whisper:
+def get_whisper_model() -> Optional[Any]:
     """Load and cache the Whisper model once for the session."""
 
-    return whisper.load_model("base")
+    if importlib.util.find_spec("whisper") is None:
+        return None
+
+    whisper_module = importlib.import_module("whisper")
+    return whisper_module.load_model("base")
 
 
 @st.cache_resource
@@ -49,12 +54,22 @@ def ensure_session_state() -> None:
     st.session_state.setdefault("last_amplitude", 1.0)
     st.session_state.setdefault("pending_voice_input", "")
     st.session_state.setdefault("last_voice_preview", "")
+    st.session_state.setdefault("whisper_error_notified", False)
 
 
 def transcribe_audio(uploaded_file: UploadedFile) -> str:
     """Transcribe an uploaded audio file with Whisper and return the text."""
 
     model = get_whisper_model()
+    if model is None:
+        if not st.session_state.get("whisper_error_notified", False):
+            st.error(
+                "Voice transcription requires the optional 'whisper' dependency. "
+                "Install it with `pip install openai-whisper` to enable this feature."
+            )
+            st.session_state["whisper_error_notified"] = True
+        return ""
+
     suffix = os.path.splitext(uploaded_file.name)[1] or ".wav"
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
         tmp_file.write(uploaded_file.read())
@@ -65,6 +80,9 @@ def transcribe_audio(uploaded_file: UploadedFile) -> str:
         pass
     try:
         result = model.transcribe(temp_path)
+    except Exception as exc:  # pragma: no cover - runtime/ffmpeg failure
+        st.error(f"Voice transcription failed: {exc}")
+        result = {"text": ""}
     finally:
         try:
             os.remove(temp_path)
