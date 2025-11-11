@@ -75,13 +75,19 @@ export class RfcService {
     approvers.add(approverId);
     const requiredApprovals = this.requiredApprovals(rfc.riskScore);
     const controlOwnerRequired = rfc.riskScore >= 70;
-    const existingControl = rfc.links && typeof rfc.links === "object" && (rfc as any).controlOwnerId;
+    const currentLinks: Record<string, unknown> =
+      rfc.links && typeof rfc.links === "object" && !Array.isArray(rfc.links)
+        ? { ...(rfc.links as Record<string, unknown>) }
+        : {};
+    const existingControl = typeof currentLinks["controlOwnerId"] === "string";
 
     const nextData: Partial<Rfc> & { approverIds: string[] } = {
       approverIds: [...approvers],
     };
     if (options.isControlOwner) {
-      (nextData as any).controlOwnerId = approverId;
+      nextData.links = { ...currentLinks, controlOwnerId: approverId };
+    } else if (Object.keys(currentLinks).length > 0) {
+      nextData.links = currentLinks;
     }
 
     if (approvers.size >= requiredApprovals && (!controlOwnerRequired || options.isControlOwner || existingControl)) {

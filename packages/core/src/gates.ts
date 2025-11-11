@@ -111,8 +111,9 @@ export class Gatekeeper {
 
   private async checkRecert(userId: string): Promise<string | null> {
     const entitlements = await this.repo.findEntitlementsByUser(userId);
+    const activeEntitlements = entitlements.filter((ent) => ent.status === "Active");
     const now = DateTime.now();
-    const overdue = entitlements.find((ent) => {
+    const overdue = activeEntitlements.find((ent) => {
       if (!ent.recertDue) return false;
       const due = DateTime.fromJSDate(ent.recertDue);
       return due.plus({ days: this.policy.recertGraceDays }).toMillis() < now.toMillis();
