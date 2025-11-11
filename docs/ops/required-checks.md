@@ -6,10 +6,10 @@ must match the `name` configured in the emitting workflow or the
 
 | Check | Source workflow | Notes |
 | --- | --- | --- |
-| `build` | `.github/workflows/build.yml` | Aggregates build + package verification. |
-| `test` | `.github/workflows/test.yml` | Runs the full unit/integration suite. |
-| `lint` | `.github/workflows/lint.yml` | ESLint, prettier, and Go linters. |
-| `security` | `.github/workflows/security.yml` | Dependency scanning and secret detection. |
+| `build` | `.github/workflows/ci.yml` (job: `build`) | Aggregates build + package verification. |
+| `test` | `.github/workflows/ci.yml` (job: `test`) | Runs the full unit/integration suite. |
+| `lint` | `.github/workflows/ci.yml` (job: `lint`) | ESLint, prettier, and Go linters. |
+| `security` | `.github/workflows/security-sweep.yml` | Dependency scanning and secret detection. |
 | `sbom` | `.github/workflows/sbom.yml` | Builds and validates the SBOM artifact. |
 | `policy` | `.github/workflows/policy.yml` | Policy-as-code enforcement (OPA/conftest). |
 | `eval` | `.github/workflows/eval.yml` | Scenario/regression evaluation harness. |
@@ -25,16 +25,16 @@ environment variable if you need to add or remove contexts.
 
 | Alias | Commit status context(s) to require | Source workflow | Purpose |
 | --- | --- | --- | --- |
-| `build` | `CI / Web quality checks`<br>`prism-ci / build` | `.github/workflows/ci.yml`<br>`.github/workflows/prism-ci.yml` | Builds the web bundles, runs end-to-end packaging, and ensures the Prism service still compiles and ships images. |
-| `test` | `Tests / test`<br>`Tests / site-playwright` | `.github/workflows/test.yml` | Node unit tests plus Playwright UI coverage. |
-| `lint` | `lint-suite / eslint`<br>`lint-suite / go-vet`<br>`lint-suite / python-static-analysis` | `.github/workflows/lint.yml` | Static analysis across the JavaScript, Go, and Python surfaces that ship from this repo. |
-| `security` | `Security • gitleaks / scan`<br>`Secret Scan / scan`<br>`PR Preview Containers / Vulnerability Scan` | `.github/workflows/gitleaks.yml`<br>`.github/workflows/secret-scan.yml`<br>`.github/workflows/preview-containers.yml` | Detects leaked credentials, enforces quick secret scans, and executes Grype against preview container images. |
+| `build` | `CI / build` | `.github/workflows/ci.yml` | Builds the web bundles, runs end-to-end packaging, and ensures the Prism service still compiles and ships images. |
+| `test` | `CI / test` | `.github/workflows/ci.yml` | Node unit tests plus Playwright UI coverage. |
+| `lint` | `CI / lint` | `.github/workflows/ci.yml` | Static analysis across the JavaScript, Go, and Python surfaces that ship from this repo. |
+| `security` | `Security Sweep / scan`<br>`Security • gitleaks / scan` | `.github/workflows/security-sweep.yml`<br>`.github/workflows/gitleaks.yml` | Runs Trivy and gitleaks across the repo so leaked credentials or high/critical CVEs fail the gate. |
 | `sbom` | `PR Preview Containers / Generate SBOM` | `.github/workflows/preview-containers.yml` | Publishes an SPDX bill of materials for the preview container created from the PR. |
-| `policy` | `policy-guard / org-guard` | `.github/workflows/policy-guard.yml` | Runs OPA checks to confirm branch protections and other guardrails have not drifted. |
+| `policy` | `CI / policy`<br>`policy-guard / org-guard` | `.github/workflows/ci.yml`<br>`.github/workflows/policy-guard.yml` | Confirms the policy job in CI plus the org guardrails stay enforced. |
 | `eval` | `quality-gates / pulse-check` | `.github/workflows/quality-gates.yml` | Verifies the quick-release checklist inside the pull request description stays checked. |
 
 ## Updating the branch-protection script
 
-Run `REQ_CHECKS='["CI / Web quality checks", ...]' repo-ops/enforce-branch-protection.sh`
+Run `REQ_CHECKS='["CI / build", ...]' repo-ops/enforce-branch-protection.sh`
 if you need to pin the exact contexts above. The JSON array should contain the
-**commit status names** (for example `CI / Web quality checks`), not just the alias.
+**commit status names** (for example `CI / build`), not just the alias.
