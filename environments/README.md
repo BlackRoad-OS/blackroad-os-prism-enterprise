@@ -32,3 +32,9 @@ Each manifest is a YAML document with the following top-level keys:
   they can wire the new target into their pipelines.
 
 These manifests intentionally stay concise so they remain easy to keep in sync with actual infrastructure.
+
+### Validation
+
+Run `make environments-validate` to perform a structural lint of the manifests.
+It checks required keys, data types, and that common enumerations such as
+`status` values stay within the agreed vocabulary.

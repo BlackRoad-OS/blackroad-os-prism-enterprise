@@ -1,8 +1,8 @@
 .RECIPEPREFIX = >
-.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy notify
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy notify environments-validate
 
 setup:
->python -m venv .venv && . .venv/bin/activate && pip install -U pip pytest jsonschema ruff
+>python -m venv .venv && . .venv/bin/activate && pip install -U pip pytest jsonschema ruff PyYAML
 
 test:
 >. .venv/bin/activate && pytest
@@ -12,6 +12,9 @@ lint:
 
 validate:
 >. .venv/bin/activate && python scripts/validate_contracts.py
+
+environments-validate:
+>python scripts/check_environment_manifests.py
 
 notify:
 >cd compliance && SLACK_WEBHOOK_URL="$(SLACK_WEBHOOK_URL)" go run ./cmd/harness test:mirror

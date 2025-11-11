@@ -3,4 +3,5 @@ isort==6.0.1
 libcst
 pre-commit
 pytest
+PyYAML>=6.0
 ruff==0.12.11
