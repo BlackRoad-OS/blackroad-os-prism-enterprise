@@ -10,6 +10,9 @@ const DEFAULT_PROJECT_NAME = "BlackRoadUnityProject";
 const DEFAULT_VERSION = "2022.3.10f1";
 const DEFAULT_PIPELINE = "builtin";
 const DEFAULT_TEMPLATE = "core";
+const UNITY_VERSION_PATTERN = /^[A-Za-z0-9.]+$/;
+
+class BadRequestError extends Error {}
 
 const PIPELINE_PACKAGES = {
   builtin: {
@@ -45,14 +48,35 @@ function sanitizeProjectName(projectName) {
   return projectName.trim().replace(/[^a-zA-Z0-9_-]+/g, "-");
 }
 
-function coerceVersions(unityVersions) {
-  if (Array.isArray(unityVersions) && unityVersions.length > 0) {
-    return unityVersions
-      .map((version) => (typeof version === "string" ? version.trim() : ""))
-      .filter((version) => version.length > 0);
+function sanitizeUnityVersion(version) {
+  const trimmed = typeof version === "string" ? version.trim() : "";
+  if (trimmed === "") {
+    return null;
   }
-  if (typeof unityVersions === "string" && unityVersions.trim() !== "") {
-    return [unityVersions.trim()];
+  if (!UNITY_VERSION_PATTERN.test(trimmed)) {
+    throw new BadRequestError("Unity versions may only include letters, numbers, and dots.");
+  }
+  return trimmed;
+}
+
+function coerceVersions(unityVersions) {
+  const normalized = [];
+  if (Array.isArray(unityVersions) && unityVersions.length > 0) {
+    for (const version of unityVersions) {
+      const sanitized = sanitizeUnityVersion(version);
+      if (sanitized) {
+        normalized.push(sanitized);
+      }
+    }
+  } else if (typeof unityVersions === "string" || unityVersions instanceof String) {
+    const sanitized = sanitizeUnityVersion(unityVersions);
+    if (sanitized) {
+      normalized.push(sanitized);
+    }
+  }
+
+  if (normalized.length > 0) {
+    return normalized;
   }
   return [DEFAULT_VERSION];
 }
@@ -201,6 +225,10 @@ app.post("/export", async (req, res) => {
       exports,
     });
   } catch (error) {
+    if (error instanceof BadRequestError) {
+      res.status(400).json({ ok: false, error: error.message });
+      return;
+    }
     console.error("unity exporter failed", error);
     res.status(500).json({ ok: false, error: error instanceof Error ? error.message : String(error) });
   }
