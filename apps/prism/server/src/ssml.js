@@ -1,16 +1,17 @@
-import { breakForEmphasis, escapeSSML, paceToRate, pitchToString } from './utils/beatMath.js';
+import { escapeSSML, escapeSSMLAttribute } from './utils/beatMath.js';
 
 export function buildSSML(plan) {
   const chunks = plan.sequence.map((segment) => {
-    const rate = paceToRate(segment.pace);
-    const pitch = pitchToString(segment.pitch);
     const text = escapeSSML(segment.text);
-    let chunk = `<prosody rate="${rate}%" pitch="${pitch}">${text}</prosody>`;
-    const breakMs = breakForEmphasis(segment.emphasis);
+    const rateAttr = escapeSSMLAttribute(`${segment.ratePercent}%`);
+    const pitchAttr = escapeSSMLAttribute(segment.pitchLabel);
+    let chunk = `<prosody rate="${rateAttr}" pitch="${pitchAttr}">${text}</prosody>`;
+    const breakMs = segment.breakMs;
     if (breakMs) {
       chunk += `<break time="${breakMs}ms"/>`;
     }
     return chunk;
   });
-  return `<speak><voice name="${escapeSSML(plan.voice)}">${chunks.join('')}</voice></speak>`;
+  const voiceAttr = escapeSSMLAttribute(plan.voice);
+  return `<speak><voice name="${voiceAttr}">${chunks.join('')}</voice></speak>`;
 }

@@ -5,7 +5,7 @@ import { synthesize } from './services/tts.js';
 
 export async function planPerformance(rawRequest) {
   const normalized = normalizePerformanceRequest(rawRequest);
-  const beatDurationMs = 60000 / normalized.bpm;
+  const beatDurationMs = (60000 / normalized.bpm) * (4 / normalized.time.beatUnit);
   const sequence = normalized.sequence.map((entry) => {
     const startMs = computeStartMs({
       beat: entry.beat,
@@ -57,14 +57,14 @@ export async function planPerformance(rawRequest) {
 
   const ssml = buildSSML({
     voice: normalized.voice,
-    sequence: normalized.sequence
+    sequence
   });
   const tts = await synthesize({ ssml, voice: normalized.voice });
 
   const captionEvents = sequence.map((segment) => ({
     word: segment.text,
     startMs: segment.startMs,
-    durMs: segment.highlightMs,
+    durationMs: segment.highlightMs,
     overlay: segment.overlay ?? undefined
   }));
 
@@ -81,7 +81,7 @@ export async function planPerformance(rawRequest) {
       captionEvents.push({
         word: event.overlay,
         startMs: event.startMs ?? null,
-        durMs: event.durationMs ?? Math.round(beatDurationMs),
+        durationMs: event.durationMs ?? Math.round(beatDurationMs),
         overlay: event.overlay,
         action: 'overlay'
       });

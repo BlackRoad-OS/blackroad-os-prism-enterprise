@@ -10,6 +10,9 @@ export function parseFraction(value, label) {
   const [, numStr, denStr] = value.match(FRACTION_RE);
   const numerator = Number.parseInt(numStr, 10);
   const denominator = Number.parseInt(denStr, 10);
+  if (numerator <= 0) {
+    throw new ValidationError(`${label} numerator must be greater than 0`);
+  }
   if (denominator === 0) {
     throw new ValidationError(`${label} denominator must be greater than 0`);
   }
@@ -37,7 +40,8 @@ export function computeStartMs({
   beatUnit,
   quantStepsPerBeat
 }) {
-  const beatDurationMs = 60000 / bpm;
+  const beatUnitFactor = 4 / beatUnit;
+  const beatDurationMs = (60000 / bpm) * beatUnitFactor;
   const { bar, beat: beatIndex, step } = beat;
   const zeroBar = bar - 1;
   const zeroBeat = beatIndex - 1;
@@ -93,4 +97,13 @@ export function escapeSSML(text) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+}
+
+export function escapeSSMLAttribute(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
 }

@@ -28,6 +28,7 @@ test('planPerformance returns SSML and scheduling metadata', async () => {
   assert.ok(plan.ssml.includes('<voice name="warm">'));
   assert.equal(plan.sequence.length, SAMPLE.seq.length);
   assert.equal(plan.obs.captions.length >= SAMPLE.seq.length, true);
+  assert.ok(Object.prototype.hasOwnProperty.call(plan.obs.captions[0], 'durationMs'));
   const emphasised = plan.sequence[1];
   assert.equal(emphasised.breakMs >= 100, true);
   assert.equal(emphasised.duckDb < 0, true);
@@ -40,4 +41,8 @@ test('planPerformance returns SSML and scheduling metadata', async () => {
 
 test('planPerformance rejects invalid payloads', async () => {
   await assert.rejects(() => planPerformance({}), /bpm must be a number/);
+  await assert.rejects(
+    () => planPerformance({ bpm: 120, time: '0/4', quant: '1/4', voice: 'test', seq: [] }),
+    /time numerator must be greater than 0/
+  );
 });
