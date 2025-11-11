@@ -63,6 +63,7 @@ jobs:
       - deploy-roadview-search
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Check console health
         run: |
           curl --fail --retry 10 --retry-connrefused --retry-delay 15 https://prism.blackroad.io/healthz

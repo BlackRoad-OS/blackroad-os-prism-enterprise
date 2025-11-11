@@ -27,6 +27,7 @@ jobs:
         run: |
           fails=0; total=50
           for i in $(seq 1 $total); do curl -fsS "$API_BASE/health" -o /dev/null || fails=$((fails+1)); done
+          export fails total
           rate=$(python - <<'PY'
             import os
             f = int(os.getenv('fails', 0))
