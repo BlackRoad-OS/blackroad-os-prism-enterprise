@@ -83,7 +83,7 @@ export class PreTradeCheckService {
     }
 
     const custody = await this.deps.custodySync.getSnapshot(order.accountId, order.instrumentId);
-    if (order.side.startsWith("SELL") || order.side === "SELL_TO_CLOSE") {
+    if (order.side === "SELL" || order.side === "SELL_TO_CLOSE") {
       const position = custody.positions[order.instrumentId] ?? new Decimal(0);
       if (position.lessThan(order.qty)) {
         reasons.push("Insufficient position");

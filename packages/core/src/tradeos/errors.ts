@@ -95,7 +95,7 @@ export class TradeErrorService {
       return undefined;
     }
     const direction = input.order?.side?.startsWith("SELL") ? -1 : 1;
-    const priceDiff = input.execution.price.minus(input.correctedPrice);
+    const priceDiff = input.correctedPrice.minus(input.execution.price);
     return priceDiff.times(input.execution.qty).times(direction);
   }
 }
