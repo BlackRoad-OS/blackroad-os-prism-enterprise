@@ -1,4 +1,7 @@
 """Generate the PatentNet research PDF for the BlackRoad Prism Console docs."""
+from __future__ import annotations
+
+import argparse
 from pathlib import Path
 
 from reportlab.lib import colors
@@ -7,6 +10,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.platypus import (
+    Flowable,
     PageBreak,
     Paragraph,
     SimpleDocTemplate,
@@ -18,9 +22,10 @@ from reportlab.platypus import (
 
 OUTPUT_FILENAME = "BlackRoad_PatentNet_Paper_v1.pdf"
 FONT_NAME = "HeiseiMin-W3"
+DEFAULT_OUTPUT_PATH = Path(__file__).resolve().parent / OUTPUT_FILENAME
 
 
-def build_document() -> list:
+def build_document() -> list[Flowable]:
     """Return the Platypus story containing the PatentNet whitepaper."""
     styles = getSampleStyleSheet()
 
@@ -206,7 +211,37 @@ def build_pdf(output_path: Path) -> None:
     doc.build(story)
 
 
-if __name__ == "__main__":
-    output_path = Path(__file__).resolve().parent / OUTPUT_FILENAME
+def parse_args() -> argparse.Namespace:
+    """Parse CLI arguments for the whitepaper generator."""
+
+    parser = argparse.ArgumentParser(
+        description="Generate the PatentNet research PDF for the Prism Console docs."
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        default=DEFAULT_OUTPUT_PATH,
+        help=(
+            "Destination path for the generated PDF. Relative paths are resolved against "
+            "the current working directory."
+        ),
+    )
+    return parser.parse_args()
+
+
+def main() -> None:
+    """Entrypoint for invoking the whitepaper generator from the CLI."""
+
+    args = parse_args()
+    output_path = args.output
+    if not output_path.is_absolute():
+        output_path = Path.cwd() / output_path
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
     build_pdf(output_path)
     print(f"Generated PatentNet paper at {output_path}")
+
+
+if __name__ == "__main__":
+    main()
