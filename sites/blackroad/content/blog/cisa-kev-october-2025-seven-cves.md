@@ -2,7 +2,7 @@
 title: "CISA Adds Eight Actively Exploited CVEs to the KEV Catalog"
 date: "2025-10-07"
 tags: [security, vulnerability-management, cisa]
-description: "Seven more actively exploited CVEs just landed in CISA's KEV catalog—here's what they hit and what to do before the October 27 deadline."
+description: "Eight more actively exploited CVEs just landed in CISA's KEV catalog—here's what they hit and what to do before the October 27 deadline."
 ---
 
 CISA expanded the Known Exploited Vulnerabilities (KEV) catalog on October 6 with **seven** additional CVEs that adversaries are already abusing in the wild, then added an **eighth** entry on October 7. Under Binding Operational Directive (BOD) 22-01, U.S. federal civilian agencies must remediate the affected products by **27 October 2025**, and the same urgency applies to anyone running the impacted stacks.
