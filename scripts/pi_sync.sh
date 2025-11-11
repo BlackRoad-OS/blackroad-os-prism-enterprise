@@ -14,6 +14,7 @@ Options:
   -r REMOTE         Override the remote spec (user@host:/path). You can
                     also set the PI_REMOTE environment variable.
   -s PATH           Local path to sync. Defaults to the repository root.
+                    When set, remote cleanup via --delete is disabled.
   -x FILE           Override the exclude file (defaults to
                     scripts/pi_sync_exclude.txt). You can also set the
                     PI_SYNC_EXCLUDE environment variable.
@@ -147,6 +148,7 @@ fi
 local_path=$(cd "$local_path" && pwd)
 remote_effective_path="$remote_path"
 disable_delete=false
+disable_delete_reason=""
 
 if [[ "$subdir_specified" == true ]]; then
   if [[ "$local_path" == "$repo_root" ]]; then
@@ -159,7 +161,15 @@ if [[ "$subdir_specified" == true ]]; then
     else
       echo "[WARN] Local path '$local_path' is outside the repository; disabling --delete for safety" >&2
       disable_delete=true
+      disable_delete_reason="outside-repo"
     fi
+  fi
+fi
+
+if [[ "$subdir_specified" == true ]]; then
+  disable_delete=true
+  if [[ -z "$disable_delete_reason" ]]; then
+    disable_delete_reason="subdirectory-sync"
   fi
 fi
 
@@ -186,6 +196,10 @@ fi
 rsync_opts=(-az --info=stats2,progress2 --filter=':- .gitignore')
 if [[ "$direction" == "push" && "$disable_delete" == false ]]; then
   rsync_opts+=(--delete)
+fi
+
+if [[ "$direction" == "push" && "$disable_delete" == true && -n "$disable_delete_reason" ]]; then
+  echo "[INFO] Remote cleanup (--delete) disabled ($disable_delete_reason)" >&2
 fi
 
 if [[ "$dry_run" == true ]]; then
