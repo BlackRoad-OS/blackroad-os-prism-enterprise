@@ -78,14 +78,14 @@ infrastructure:
       provider: cloudflare
       records:
         - type: A
-          name: @
+          name: "@"
           target: 159.65.43.12
           proxied: true
         - type: A
           name: api
           target: 159.65.43.12
           proxied: true
-    - domain: *.blackroad.io
+    - domain: "*.blackroad.io"
       provider: cloudflare
       waf_mode: strict
       cache_rules:
