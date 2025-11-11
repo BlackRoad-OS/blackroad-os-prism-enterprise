@@ -3,6 +3,8 @@
 from .generator import Proposal, ProposeInput, LocalGenerator
 from .validator import RuleSet, MemoryStore, ValidationResult, validate
 from .arbiter import ArbiterDecision, decide
+# Re-export logger utilities for package-level imports used by tests and
+# downstream consumers.
 from .logger import DuetLogger, TaskDescriptor
 
 __all__ = [
