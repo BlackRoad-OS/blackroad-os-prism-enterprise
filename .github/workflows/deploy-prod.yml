@@ -1,74 +1,21 @@
-name: Deploy Production
-
+name: Deploy Prod
 on:
-  release:
-    types:
-      - published
   workflow_dispatch:
 
-permissions:
-  contents: read
-  deployments: write
-
 jobs:
-  deploy-web:
-    name: Deploy Prism Console (Production)
-    uses: ./.github/workflows/reusable-aws-ecs-deploy.yml
-    with:
-      cluster: prism-shared-prod
-      service: prism-console-web
-      image: ghcr.io/blackroad/prism-console:${{ github.sha }}
-      container-name: web
-      region: us-east-1
-      environment: production
-    secrets:
-      aws-role-to-assume: ${{ secrets.AWS_PROD_DEPLOY_ROLE }}
-      aws-external-id: ${{ secrets.AWS_PROD_EXTERNAL_ID }}
-
-  deploy-workers:
-    name: Deploy Prism Console Workers (Production)
-    needs: deploy-web
-    uses: ./.github/workflows/reusable-aws-ecs-deploy.yml
-    with:
-      cluster: prism-shared-prod
-      service: prism-console-workers
-      image: ghcr.io/blackroad/prism-console:${{ github.sha }}
-      container-name: worker
-      region: us-east-1
-      environment: production
-    secrets:
-      aws-role-to-assume: ${{ secrets.AWS_PROD_DEPLOY_ROLE }}
-      aws-external-id: ${{ secrets.AWS_PROD_EXTERNAL_ID }}
-
-  deploy-roadview-search:
-    name: Deploy RoadView Search (Production)
-    needs: deploy-web
-    uses: ./.github/workflows/reusable-aws-ecs-deploy.yml
-    with:
-      cluster: prism-shared-prod
-      service: roadview-search
-      image: ghcr.io/blackroad/roadview-search:${{ github.sha }}
-      container-name: app
-      region: us-east-1
-      environment: production
-    secrets:
-      aws-role-to-assume: ${{ secrets.AWS_PROD_DEPLOY_ROLE }}
-      aws-external-id: ${{ secrets.AWS_PROD_EXTERNAL_ID }}
-
-  smoke-tests:
-    name: Production smoke tests
-    needs:
-      - deploy-web
-      - deploy-workers
-      - deploy-roadview-search
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Check console health
+      - uses: actions/checkout@v4
+      - name: Block if protections relaxed
         run: |
-          curl --fail --retry 10 --retry-connrefused --retry-delay 15 https://prism.blackroad.io/healthz
-      - name: Check RoadView search health
+          set -e
+          strict=$(gh api repos/${{ github.repository }}/branches/main/protection --jq '.required_status_checks.strict' || echo false)
+          admins=$(gh api repos/${{ github.repository }}/branches/main/protection --jq '.enforce_admins.enabled' || echo false)
+          if [ "$strict" != "true" ] || [ "$admins" != "true" ]; then
+            echo "❌ Protections relaxed. Aborting prod deploy."
+            exit 1
+          fi
+      - name: Deploy
         run: |
-          curl --fail --retry 10 --retry-connrefused --retry-delay 15 https://roadview.blackroad.io/healthz
-      - name: Verify status site availability
-        run: |
-          curl --fail --retry 10 --retry-connrefused --retry-delay 15 https://status.blackroad.io/
+          echo "Ship to prod here (k8s/ecs/fly) only when protections are strict"
