@@ -162,7 +162,7 @@ class DisplayClient:
                 img = img.resize(self._size, Image.Resampling.LANCZOS)
                 mode = img.mode
                 data_bytes = img.tobytes()
-        except (UnidentifiedImageError, OSError) as exc:
+        except (UnidentifiedImageError, OSError, Image.DecompressionBombError) as exc:
             raise PayloadError(f"invalid image payload: {exc}") from exc
         surface = pygame.image.fromstring(data_bytes, self._size, mode)
         return surface, (0, 0, 0)
