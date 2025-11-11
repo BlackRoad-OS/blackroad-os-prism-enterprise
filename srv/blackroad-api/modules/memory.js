@@ -3,6 +3,7 @@
 //      fts(content uses content=docs, content_rowid=rowid)
 const fs = require('fs');
 const path = require('path');
+const readline = require('readline');
 
 let Database;
 let databaseLoadError = null;
@@ -54,14 +55,25 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
     return j.embedding || j.data?.[0]?.embedding || [];
   }
 
-  function run(sql, p = []) {
-    return Promise.resolve(db.prepare(sql).run(p));
-  }
-  function all(sql, p = []) {
-    return Promise.resolve(db.prepare(sql).all(p));
-  }
-  function get(sql, p = []) {
-    return Promise.resolve(db.prepare(sql).get(p));
+  let run;
+  let all;
+  let get;
+  if (!fallbackMode) {
+    run = function(sql, p = []) {
+      return Promise.resolve(db.prepare(sql).run(p));
+    };
+    all = function(sql, p = []) {
+      return Promise.resolve(db.prepare(sql).all(p));
+    };
+    get = function(sql, p = []) {
+      return Promise.resolve(db.prepare(sql).get(p));
+    };
+  } else {
+    const notAvailable = () =>
+      Promise.reject(new Error('Database unavailable: fallback mode active'));
+    run = notAvailable;
+    all = notAvailable;
+    get = notAvailable;
   }
 
   function cosine(a, b) {
@@ -93,7 +105,11 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
         meta,
         ts: Date.now()
       };
-      fs.appendFileSync(FALLBACK_FILE, `${JSON.stringify(entry)}\n`, 'utf8');
+      await fs.promises.appendFile(
+        FALLBACK_FILE,
+        `${JSON.stringify(entry)}\n`,
+        'utf8'
+      );
       return res.json({ ok: true, id, fallback: true });
     }
 
@@ -128,11 +144,20 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
 
     if (fallbackMode) {
       try {
-        const data = fs.existsSync(FALLBACK_FILE) ? fs.readFileSync(FALLBACK_FILE, 'utf8') : '';
-        const lines = data.split(/\n+/).filter(Boolean);
-        const query = q.toLowerCase();
-        const matches = [];
-        for (const line of lines) {
+        await fs.promises.access(FALLBACK_FILE, fs.constants.F_OK);
+      } catch (accessError) {
+        return res.json({ results: [], fallback: true });
+      }
+
+      const matches = [];
+      const query = q.toLowerCase();
+      let stream;
+      let rl;
+      try {
+        stream = fs.createReadStream(FALLBACK_FILE, { encoding: 'utf8' });
+        rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
+        for await (const line of rl) {
+          if (!line.trim()) continue;
           try {
             const entry = JSON.parse(line);
             if ((entry.text || '').toLowerCase().includes(query)) {
@@ -148,11 +173,17 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
             // ignore malformed lines
           }
         }
-        matches.sort((a, b) => (b.ts || 0) - (a.ts || 0));
-        return res.json({ results: matches.slice(0, k), fallback: true });
       } catch (error) {
-        return res.status(500).json({ error: 'fallback read failed', detail: error.message });
+        return res
+          .status(500)
+          .json({ error: 'fallback read failed', detail: error.message });
+      } finally {
+        if (rl) rl.close();
+        if (stream && typeof stream.close === 'function') stream.close();
       }
+
+      matches.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+      return res.json({ results: matches.slice(0, k), fallback: true });
     }
 
     // coarse FTS
@@ -161,7 +192,7 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
       [q.split(/\s+/).join(' ')]
     );
     // embeddings rerank
-    const qv = await (async () => await embed(q))();
+    const qv = await embed(q);
     const scored = [];
     for (const r of rows) {
       const vrow = await get(`SELECT v FROM vecs WHERE id=?`, [r.id]);
