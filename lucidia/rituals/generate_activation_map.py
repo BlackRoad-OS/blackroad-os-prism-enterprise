@@ -7,20 +7,28 @@ import re
 import sys
 
 def sh(cmd, cwd=None):
-    return subprocess.run(
+    result = subprocess.run(
         cmd,
         cwd=cwd,
         shell=True,
         text=True,
         stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-    ).stdout.strip()
+        stderr=subprocess.PIPE,
+    )
+    if result.returncode != 0:
+        error_output = result.stderr.strip()
+        message = f"Error running command: {cmd}"
+        if error_output:
+            message = f"{message}\n{error_output}"
+        print(message, file=sys.stderr)
+        return ""
+    return result.stdout.strip()
 
 
 def harvest_repo(repo_path, default_branch, recent_hours, stale_days):
     now = datetime.datetime.utcnow()
     recent_cut = (now - datetime.timedelta(hours=recent_hours)).isoformat(timespec="seconds") + "Z"
-    stale_cut = (now - datetime.timedelta(days=stale_days)).date().isoformat()
+    stale_cut_date = (now - datetime.timedelta(days=stale_days)).date()
 
     current = sh("git rev-parse --abbrev-ref HEAD", cwd=repo_path)
     ahead = sh(f"git rev-list --left-right --count {default_branch}...HEAD", cwd=repo_path)
@@ -34,15 +42,26 @@ def harvest_repo(repo_path, default_branch, recent_hours, stale_days):
     )
 
     stale = []
-    for line in branches.splitlines():
-        b, d = line.split("|")
-        if b == default_branch:
+    for line in filter(None, branches.splitlines()):
+        if "|" not in line:
+            print(
+                f"Warning: Unexpected branch info format for repo '{repo_path}': '{line}'",
+                file=sys.stderr,
+            )
+            continue
+        branch_name, last_commit_str = (part.strip() for part in line.split("|", 1))
+        if branch_name == default_branch:
             continue
         try:
-            if d < stale_cut:
-                stale.append(f"{b} (last: {d})")
-        except Exception:
-            pass
+            last_commit_date = datetime.datetime.strptime(last_commit_str, "%Y-%m-%d").date()
+        except ValueError as exc:
+            print(
+                f"Warning: Could not parse date for branch '{branch_name}' in repo '{repo_path}': {exc}",
+                file=sys.stderr,
+            )
+            continue
+        if last_commit_date < stale_cut_date:
+            stale.append(f"{branch_name} (last: {last_commit_date.isoformat()})")
 
     return {
         "repo": repo_path,
@@ -99,7 +118,15 @@ def main(cfg_path):
             cfg.get("recent_commit_hours", 24),
             cfg.get("stale_branch_days", 7),
         )
-        behind, ahead = (info["divergence"].split() + ["0", "0"])[:2]
+        divergence_parts = info.get("divergence", "").split()
+        if len(divergence_parts) == 2 and all(part.isdigit() for part in divergence_parts):
+            behind, ahead = divergence_parts
+        else:
+            print(
+                f"Warning: Unexpected divergence format for repo '{repo['path']}': '{info.get('divergence', '')}'",
+                file=sys.stderr,
+            )
+            behind, ahead = "0", "0"
         recent_block = "\n".join(
             f"  - {line}" for line in info["recent_commits"] if line
         ) or "  - none"
