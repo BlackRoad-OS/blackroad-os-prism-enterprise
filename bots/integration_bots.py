@@ -29,7 +29,6 @@ PRIMARY_TEAM = "blackboxprogramming"
 PRIMARY_REPOSITORY = "blackboxprogramming/blackroad-prism-console"
 
 MENTION_ALIASES = {
-    "@blackboxprogramming": PRIMARY_HANDLE,
     "blackboxprogramming": PRIMARY_HANDLE,
     "@blackroad": PRIMARY_HANDLE,
     "blackroad": PRIMARY_HANDLE,
@@ -123,7 +122,11 @@ def _class_name(platform: str) -> str:
 def _normalize_handle(value: str) -> str | None:
     """Return the canonical BlackRoad routing handle for ``value`` if known."""
 
-    return MENTION_ALIASES.get(value.lower())
+    lowered = value.lower()
+    if lowered == PRIMARY_HANDLE.lower():
+        return PRIMARY_HANDLE
+
+    return MENTION_ALIASES.get(lowered)
 
 
 def _collect_mentions(task: Task) -> Set[str]:
@@ -131,6 +134,8 @@ def _collect_mentions(task: Task) -> Set[str]:
 
     detected: Set[str] = set()
     goal = task.goal.lower()
+    if PRIMARY_HANDLE.lower() in goal:
+        detected.add(PRIMARY_HANDLE)
     for alias, canonical in MENTION_ALIASES.items():
         if alias in goal:
             detected.add(canonical)
@@ -196,7 +201,8 @@ def _make_run(entry: Dict[str, str]):  # type: ignore[override]
                     "blackboxprogramming",
                     "blackboxprogramming-routing",
                 ],
-                "assignees": [PRIMARY_HANDLE],
+                "assignee_ids": [],
+                "assignee_handles": [PRIMARY_HANDLE],
                 "status": "pending-review",
             },
         }
