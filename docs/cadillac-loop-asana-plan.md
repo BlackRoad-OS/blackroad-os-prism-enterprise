@@ -15,6 +15,15 @@ This guide maps the Cadillac Loop workflow into a single Asana project so a smal
 
 > Keep the project lightweight: no custom fields beyond assignee, due date, and status. Use Slack for quick questions and GitHub Issues for engineering subtasks when needed.
 
+### Weekly Snapshot
+| Week | Sprint Focus | Anchor Ritual | Primary Owner |
+| --- | --- | --- | --- |
+| Week 0 | Capture out-of-scope ideas and dependencies. | Backlog triage note shared in Slack. | Ops lead |
+| Week 1 | Stand up tooling and align on scope. | 30-minute kickoff call. | Product lead |
+| Week 2 | Ship prototype experiences and test flows. | Mid-week build review async thread. | Tech lead |
+| Week 3 | Recruit testers and reward early adopters. | Live tester sessions (recorded). | Product & ops |
+| Week 4 | Reflect, package learnings, and publish recap. | 45-minute retro with notes in Asana. | Ops |
+
 ## Column Details & Tasks
 
 ### Week 0 – Backlog Intake
@@ -83,6 +92,7 @@ When a task is complete, move it here. Use Asana’s custom field or tags to cap
 - **Weekly recap:** End of each week, link Asana tasks to proof-of-work (GitHub PRs, Stripe test receipts).
 - **Integration with GitHub:** If engineering-heavy, keep detailed implementation notes in GitHub Issues; use Asana tasks as the high-level work units.
 - **Maintain focus:** Limit the board to active weeks only; defer any “nice to have” features to Week 0 backlog.
+- **Lightweight rituals:** Default to async docs and Loom clips; escalate to meetings only when a decision is blocked for 24 hours.
 
 ## Acceptance Criteria for Success
 - All Week 2 tasks include acceptance criteria and links to code references.
