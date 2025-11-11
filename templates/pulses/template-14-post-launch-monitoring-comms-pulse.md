@@ -23,7 +23,7 @@
 - Monitor customer channels for new bug chatter.
 - Keep a real-time log of anomalies (link to ClickUp or Notion).
 
-> 🟡 *If any metric feels off: “I don’t know yet — need eyes on ” → tag responsible owner.*
+> 🟡 *If any metric feels off: “I don’t know yet — need eyes on it” → tag responsible owner.*
 
 ---
 
@@ -55,7 +55,7 @@
 - Confirm no new alerts in 48 hrs.
 - Verify rollbacks not required.
 - Re-enable normal alerting thresholds.
-- Schedule short retro if anomalies > threshold.
+- Schedule short retro if anomalies > threshold (see team playbook for threshold definition; e.g., >3 anomalies in 72 hrs).
 
 ---
 
