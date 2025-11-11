@@ -19,6 +19,7 @@ This playbook maps the passkey upgrade guidance to the BlackRoad identity surfac
   - **Cloudflare:** My Profile → Authentication. Add security keys and platform authenticator; disable phone/SMS.
 - **Finance + billing (Stripe, Brex):** Add FIDO2 keys, rotate recovery codes, and ensure alerts route to `security@blackroad.io`.
 - **1Password (BlackRoad Vault):** Each account owner adds both hardware keys under Settings → Two-factor authentication → Security keys. Print Emergency Kits and append serial numbers + storage location notes.
+- **Shared status log:** Append each admin's enrollment status, hardware key serials, and recovery code storage location to the 1Password `2025-10 Passkey rollout` entry and mirror those notes in the security evidence tracker for compliance sign-offs.
 
 ## 2. Enforce passkey policy + recovery readiness
 
@@ -36,6 +37,7 @@ This playbook maps the passkey upgrade guidance to the BlackRoad identity surfac
 - **Audit GitHub PATs + app passwords:** Use Settings → Developer settings → Personal access tokens to prune unused tokens. Enable fine-grained PATs with short expiry for remaining automation.
 - **Okta:** Reports → Security → Administrator. Export the "Factors" report to confirm only WebAuthn/TOTP remain. Archive a copy in `security@blackroad.io` inbox for compliance.
 - **Device attestation check:** Spot check that enrolled hardware keys present FIDO2 attestation metadata. Record any keys lacking attestation for follow-up replacement.
+- **Finance console audit:** Review Stripe and Brex sign-in logs to confirm new passkey authentications, enable suspicious activity alerts, and capture screenshots for the compliance evidence folder.
 
 ## 4. 15-minute implementation sprint
 
