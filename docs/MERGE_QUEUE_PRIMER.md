@@ -71,6 +71,25 @@ Consider a merge queue when any of the following apply:
 
 ---
 
+## Manual Overrides for Administrators
+
+Sometimes you need to land a critical fix even though a required check is red or unavailable. Repository administrators can keep
+control without tearing down the merge queue entirely by following this playbook:
+
+1. **Temporarily relax branch protection.** Navigate to **Settings → Branches → main → Edit rule**, uncheck "Require status
+   checks to pass before merging" (or the specific failing checks), and ensure "Enforce for administrators" stays disabled while
+   you complete the override. Re-enable the protections immediately afterward.
+2. **Bypass the queue on purpose.** Skip adding the `queue:ready` label and merge manually through the GitHub UI, or run `gh pr
+   merge <pr-number> --merge --admin` so the admin bypass records in the audit trail.
+3. **Optionally gate with a label.** If you prefer automation, introduce a `manual-merge` label and tweak
+   `.github/workflows/auto-merge.yml` so the workflow ignores failing checks whenever that label is present.
+4. **Run the cleanup helper.** Execute `scripts/cleanup-merged-branches.sh` after the override so stale branches disappear from
+   the remote.
+
+Leave a short PR comment explaining why the override was necessary. That keeps the audit trail intact even when CI was skipped.
+
+---
+
 ## Metrics to Watch
 
 - **Lead time to merge**: Track queue wait plus CI runtime; aim for less than 2× the CI duration.
