@@ -180,7 +180,7 @@ describe("Insider enforcement", () => {
 });
 
 describe("Case workflow", () => {
-  it("creates case, tracks notes, and verifies WORM chain", () => {
+  it("creates case, tracks notes, and verifies WORM chain", async () => {
     const ledger = new InMemoryWormLedger();
     const cases = new CaseService(ledger);
     const alertA = {
@@ -214,7 +214,7 @@ describe("Case workflow", () => {
     });
     expect(closed.status).toBe("Closed_Remediation");
 
-    const chain = ledger.all();
+    const chain = await ledger.all();
     const verification = verifyChain(chain);
     expect(verification.valid).toBe(true);
   });
@@ -224,7 +224,7 @@ describe("Suppression", () => {
   it("suppresses repeat alerts and respects expiration", () => {
     const ledger = new InMemoryWormLedger();
     const suppression = new SuppressionService(ledger);
-    const deduper = new AlertDeduper();
+    const deduper = new AlertDeduper(10);
 
     suppression.addRule({
       scenario: "MIXER_PROXIMITY",
@@ -242,18 +242,27 @@ describe("Suppression", () => {
       status: "Open" as const,
       key: "wallet|0xabc",
       signal: { wallet: "0xabc" },
-      createdAt: new Date(),
+      createdAt: new Date(Date.now() - 20),
     };
 
     expect(suppression.shouldSuppress(alert)).toBe(true);
 
-    const deduped = deduper.filter([alert, alert]);
-    expect(deduped.length).toBe(1);
+    const firstPass = deduper.filter([alert, alert]);
+    expect(firstPass.length).toBe(1);
+
+    const laterAlert = {
+      ...alert,
+      id: "a2",
+      createdAt: new Date(),
+    };
+    const secondPass = deduper.filter([laterAlert]);
+    expect(secondPass.length).toBe(1);
+    expect(secondPass[0]?.id).toBe("a2");
   });
 });
 
 describe("Retention", () => {
-  it("archives, expires, and purges comms with WORM logs", () => {
+  it("archives, expires, and purges comms with WORM logs", async () => {
     const ledger = new InMemoryWormLedger();
     const retention = new RetentionService(ledger);
     retention.setPolicy({ retentionKey: "email_standard", days: 1 });
@@ -277,7 +286,7 @@ describe("Retention", () => {
     const purged = retention.purgeExpired();
     expect(purged).toHaveLength(1);
 
-    const chain = ledger.all();
+    const chain = await ledger.all();
     const verification = verifyChain(chain);
     expect(verification.valid).toBe(true);
   });

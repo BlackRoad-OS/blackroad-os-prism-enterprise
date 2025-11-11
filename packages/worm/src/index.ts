@@ -16,8 +16,8 @@ export interface WormBlock<T = unknown> {
 
 export interface WormLedger<T = unknown> {
   append(entry: WormAppendInput<T>): Promise<WormBlock<T>>;
-  tail(): Promise<WormBlock<T> | null> | WormBlock<T> | null;
-  all(): Promise<WormBlock<T>[]> | WormBlock<T>[];
+  tail(): Promise<WormBlock<T> | null>;
+  all(): Promise<WormBlock<T>[]>;
 }
 
 export class InMemoryWormLedger<T = unknown> implements WormLedger<T> {
@@ -38,11 +38,11 @@ export class InMemoryWormLedger<T = unknown> implements WormLedger<T> {
     return block;
   }
 
-  tail(): WormBlock<T> | null {
+  async tail(): Promise<WormBlock<T> | null> {
     return this.blocks[this.blocks.length - 1] ?? null;
   }
 
-  all(): WormBlock<T>[] {
+  async all(): Promise<WormBlock<T>[]> {
     return [...this.blocks];
   }
 }

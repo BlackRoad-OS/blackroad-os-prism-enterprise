@@ -84,7 +84,7 @@ export class InsiderListService {
   }
 
   getRestrictedIssuers(): InsiderIssuerRecord[] {
-    return [...new Set(this.issuers.values())].filter((issuer) => issuer.restrictedList);
+    return Array.from(this.issuers.values()).filter((issuer) => issuer.restrictedList);
   }
 
   assessTrade(trade: TradeRecord, actorId?: string): InsiderTradeAssessment {

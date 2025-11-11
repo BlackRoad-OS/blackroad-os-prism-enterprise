@@ -58,11 +58,13 @@ export class AlertDeduper {
       const key = `${alert.scenario}|${alert.key}`;
       const signalHash = hashSignal(alert.signal);
       const existing = this.recentAlerts.get(key);
-      if (existing && existing.signalHash === signalHash) {
-        continue;
-      }
-      if (existing && now - existing.alert.createdAt.getTime() > this.lookbackMs) {
-        this.recentAlerts.delete(key);
+      if (existing) {
+        const age = now - existing.alert.createdAt.getTime();
+        if (age > this.lookbackMs) {
+          this.recentAlerts.delete(key);
+        } else if (existing.signalHash === signalHash) {
+          continue;
+        }
       }
       this.recentAlerts.set(key, { signalHash, alert });
       filtered.push(alert);

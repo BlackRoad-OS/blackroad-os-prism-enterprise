@@ -166,10 +166,10 @@ export interface InsiderPersonRecord {
 
 export function minutesBetween(a: Date, b: Date): number {
   const diff = Math.abs(DateTime.fromJSDate(a).diff(DateTime.fromJSDate(b), "minutes").minutes);
-  return Math.abs(diff);
+  return diff;
 }
 
 export function hoursBetween(a: Date, b: Date): number {
   const diff = Math.abs(DateTime.fromJSDate(a).diff(DateTime.fromJSDate(b), "hours").hours);
-  return Math.abs(diff);
+  return diff;
 }
