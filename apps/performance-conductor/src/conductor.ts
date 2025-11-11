@@ -87,7 +87,7 @@ async function connectOBS() {
   }
 }
 
-void connectOBS();
+connectOBS().catch((err) => console.error('OBS connection failed:', err));
 
 app.post('/cmd', async (req, res) => {
   const { line } = req.body as { line?: string };
@@ -114,8 +114,6 @@ app.post('/cmd', async (req, res) => {
         break;
       case '/overlay':
         broadcast({ type: 'overlay', spec: rest.join(' ') });
-        break;
-      case '/rewrite':
         break;
       case '/quant':
         session.quant = rest[0] ?? session.quant;
@@ -164,10 +162,76 @@ async function planWithProsody(perf: Perf): Promise<{ seq: Say[]; ssml: string }
 }
 
 app.post('/perform', async (req, res) => {
-  const perf = req.body as Perf;
+  const payload = req.body as Partial<Perf> | undefined;
+
+  if (!payload || typeof payload !== 'object') {
+    res.status(400).json({ ok: false, error: 'Invalid performance payload' });
+    return;
+  }
+
+  if (!Array.isArray(payload.seq)) {
+    res.status(422).json({ ok: false, error: 'Performance payload requires seq array' });
+    return;
+  }
+
+  const invalidWord = payload.seq.some(
+    (word) => !word || typeof word !== 'object' || typeof word.t !== 'string',
+  );
+
+  if (invalidWord) {
+    res
+      .status(422)
+      .json({ ok: false, error: 'Each seq entry must be an object with text (t)' });
+    return;
+  }
+
+  if (payload.post !== undefined && !Array.isArray(payload.post)) {
+    res.status(422).json({ ok: false, error: 'Post events must be an array when provided' });
+    return;
+  }
+
+  const invalidPostEvent = Array.isArray(payload.post)
+    ? payload.post.some((event) => {
+        if (!event || typeof event !== 'object') {
+          return true;
+        }
+        const candidate = event as Partial<PostEvent> & Record<string, unknown>;
+        if (typeof candidate.kind !== 'string' || typeof candidate.beat !== 'string') {
+          return true;
+        }
+        if (candidate.kind === 'pause' && typeof candidate.ms !== 'number') {
+          return true;
+        }
+        return false;
+      })
+    : false;
+
+  if (invalidPostEvent) {
+    res
+      .status(422)
+      .json({ ok: false, error: 'Post events require kind and beat fields' });
+    return;
+  }
+
+  const perf: Perf = {
+    bpm: typeof payload.bpm === 'number' ? payload.bpm : session.bpm,
+    time: typeof payload.time === 'string' ? payload.time : session.time,
+    quant: typeof payload.quant === 'string' ? payload.quant : session.quant,
+    voice: typeof payload.voice === 'string' ? payload.voice : undefined,
+    seq: payload.seq as Say[],
+    post: Array.isArray(payload.post) ? payload.post : undefined,
+  };
+
   const bpm = perf.bpm ?? session.bpm;
 
-  const plan = await planWithProsody(perf);
+  let plan: { seq: Say[]; ssml: string };
+  try {
+    plan = await planWithProsody(perf);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to plan performance';
+    res.status(500).json({ ok: false, error: message });
+    return;
+  }
   const ssml = plan.ssml;
 
   const t0 = Date.now();

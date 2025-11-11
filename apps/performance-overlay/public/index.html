@@ -33,11 +33,18 @@ let theme = 'studio';
 let words = [];
 
 function renderCaption(word) {
-  words.push(word);
+  const safeWord = typeof word === 'string' ? word : String(word ?? '');
+  words.push(safeWord);
   if (words.length > 12) words.shift();
-  wrap.innerHTML = words.map((w, i) =>
-    `<span class="cap ${i===words.length-1?'active':''}">${w}</span>`
-  ).join(' ');
+
+  wrap.replaceChildren();
+  words.forEach((w, i) => {
+    const span = document.createElement('span');
+    span.className = 'cap';
+    if (i === words.length - 1) span.classList.add('active');
+    span.textContent = w;
+    wrap.appendChild(span);
+  });
 }
 
 function doGesture(name) {
