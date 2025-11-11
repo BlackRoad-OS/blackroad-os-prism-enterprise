@@ -79,3 +79,21 @@ Common `type` values:
 - `error`
 
 This structure makes it easy to stream the audit log to any downstream analytics system if needed.
+
+---
+
+## Manual Merge Override Procedure
+
+The queue is designed to keep `main` green, but administrators can still land a change when CI is unavailable or failing for
+reasons unrelated to the patch:
+
+1. **Relax branch protection just for the override.** Go to **Settings → Branches → main → Edit rule**, disable the failing
+   status checks (or uncheck "Require status checks to pass before merging"), and make sure "Enforce for administrators" is
+   turned off. Re-enable the protections immediately after the merge.
+2. **Merge outside the queue.** Leave the `queue:ready` label off and either use the GitHub UI or run `gh pr merge <pr-number>
+   --merge --admin` so the override is logged.
+3. **Restore automation and clean up.** Turn protections back on, then run `scripts/cleanup-merged-branches.sh` to prune merged
+   branches. If you often need this escape hatch, consider adding a `manual-merge` label and updating
+   `.github/workflows/auto-merge.yml` to skip failing checks when that label is present.
+
+Document the reason for the manual merge in a PR comment to maintain the audit trail even when CI was bypassed.
