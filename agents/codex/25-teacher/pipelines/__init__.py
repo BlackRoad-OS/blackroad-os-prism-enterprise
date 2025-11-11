@@ -5,11 +5,11 @@ from .make_practice import load_question_bank, next_practice_set
 from .mastery_report import build_report, save_report
 
 __all__ = [
-  "build_report",
-  "load_question_bank",
-  "next_practice_set",
-  "pr_to_lesson_cards",
-  "save_report",
-  "validate_card",
-  "write_cards",
+    "build_report",
+    "load_question_bank",
+    "next_practice_set",
+    "pr_to_lesson_cards",
+    "save_report",
+    "validate_card",
+    "write_cards",
 ]

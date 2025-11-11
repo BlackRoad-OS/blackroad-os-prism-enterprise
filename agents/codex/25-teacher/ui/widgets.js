@@ -55,7 +55,7 @@
     list.innerHTML = "<h2>Next Practice Sets</h2>";
     practiceSets.forEach((practice) => {
       const item = document.createElement("p");
-      item.innerHTML = `@${practice.user} → Mastery ${(practice.mastery * 100).toFixed(0)}%, Energy ${practice.energy}J, Review by ${new Date(practice.due).toLocaleString()}`;
+      item.innerHTML = `@${practice.user} → Mastery ${(practice.mastery * 100).toFixed(0)}%, Energy ${practice.energy}J, Review by ${new Date(practice.due).toLocaleString("en-US", { timeZone: "UTC" })}`;
       list.appendChild(item);
     });
     practiceEl.appendChild(list);

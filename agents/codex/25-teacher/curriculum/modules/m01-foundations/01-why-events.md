@@ -9,7 +9,7 @@ Events stitch the Codex ecosystem together. Teacher starts by helping learners s
 - Describe the safety net that validates payloads.
 
 ## Worked Example
-A PR merge fires `git:pr_merged`. Teacher's hook in `hooks/on_pr_merged.reflex.py` listens, validates the payload, and calls the lesson pipeline to spin a new card. Within three minutes, a builder has a learning trail connected to that change.
+A PR merge fires `git:pr_merged`. Teacher's hook in `hooks/on_pr_merged_reflex.py` listens, validates the payload, and calls the lesson pipeline to spin a new card. Within three minutes, a builder has a learning trail connected to that change.
 
 ## Reflection Prompt
 Which recent change in your project deserved an event but stayed hidden? Outline the event name and the first subscriber you would add.

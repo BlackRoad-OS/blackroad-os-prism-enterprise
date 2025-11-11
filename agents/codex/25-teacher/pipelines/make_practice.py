@@ -54,9 +54,9 @@ def next_practice_set(user: str, results: Dict[str, Any], *, now: Optional[datet
     candidates = _difficulty_filter(questions, target_difficulty) or questions
     selected = candidates[:DEFAULT_SET_SIZE]
     sanitized_items: List[Dict[str, Any]] = []
+    sensitive_keys = {"answer", "answers", "solution", "solutions", "key"}
     for item in selected:
-        sanitized = dict(item)
-        sanitized.pop("answer", None)
+        sanitized = {k: v for k, v in item.items() if k not in sensitive_keys}
         sanitized_items.append(sanitized)
 
     due = now + timedelta(hours=6 if mastery >= 0.85 else 3)

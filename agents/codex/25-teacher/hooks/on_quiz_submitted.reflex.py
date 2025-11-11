@@ -9,7 +9,7 @@ from ..pipelines.make_practice import next_practice_set
 try:
     from lucidia.reflex.core import BUS, start
 except ModuleNotFoundError:  # pragma: no cover - fallback for local runs.
-    from .on_pr_merged.reflex import BUS, start  # type: ignore
+    from .on_pr_merged_reflex import BUS, start  # type: ignore
 
 
 def _user_identifier(event: Dict[str, Any]) -> str:
