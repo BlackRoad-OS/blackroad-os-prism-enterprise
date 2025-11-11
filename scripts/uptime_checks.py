@@ -89,7 +89,7 @@ def normalize_status(value) -> List[int]:
         return [200]
     if isinstance(value, int):
         return [value]
-    if isinstance(value, Iterable):
+    if isinstance(value, Iterable) and not isinstance(value, str):
         try:
             return [int(v) for v in value]
         except (TypeError, ValueError) as exc:
