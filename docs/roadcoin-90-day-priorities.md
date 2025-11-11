@@ -29,6 +29,22 @@ _Phase 12 (Real-world bridge) stays on the backlog until the trust, distribution
 - **Distribution:** Weekly active integrated creators, SDK call volume, partner-sourced MRR.
 - **Insights:** Dashboard weekly active users, AI suggestion adoption rate, pre-orders or LOIs for predictive planner.
 
+## Workstream Breakdown
+### Trust & Governance
+- **Owner enablement:** Assign finance and operations dual-approvers for treasury updates and dispute escalations, then document the workflow inside the support playbook.
+- **Community proof points:** Publish monthly changelog posts summarizing treasury movements, proposal outcomes, and payout performance to keep early adopters engaged.
+- **Risk handling:** Stand up lightweight incident response drills covering failed payouts, ledger mismatches, and community conduct breaches.
+
+### Distribution Integrations
+- **Plugin delivery:** Pair engineers with two creator advisors to pressure-test each plugin beta before broader release and capture required onboarding docs.
+- **Partner activation:** Co-design launch campaigns with each pilot network, ensuring shared KPIs and clear attribution for referral incentives.
+- **Lifecycle measurement:** Instrument activation-to-retention funnels for integrated creators and review metrics weekly with GTM leadership.
+
+### Data & Insight Products
+- **Data readiness:** Finalize the analytics warehouse contracts, anonymization rules, and dashboard data dictionary before public previews.
+- **Insight UX:** Run qualitative sessions with 5–7 power creators to validate AI suggestion tone, timing, and usefulness.
+- **Commercialization:** Define pricing/packaging experiments for insight add-ons and prep revenue operations systems to quote and invoice early adopters.
+
 ## Dependencies & Guardrails
 - Treasury telemetry must use auditable data sources with review checkpoints before publishing externally.
 - Plugins/SDK integrations require security review and sandboxed API keys before beta launch.
