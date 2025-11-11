@@ -69,6 +69,8 @@ benchmarks/
 # Lucidia artifacts
 secrets/*
 datasets/
+!agents/codex/24-storyteller/datasets/
+!agents/codex/24-storyteller/datasets/*.json
 models/
 checkpoints/
 outputs/
