@@ -100,7 +100,7 @@ ${{ steps.changes.outputs.all_changed_files }}
 FILES
 )
 
-          if [[ -z "$changed_files" ]]; then
+          if [[ $(echo "$changed_files" | grep -cve '^$') -eq 0 ]]; then
             echo "No files changed; skipping gate."
             exit 0
           fi
