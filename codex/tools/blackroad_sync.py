@@ -263,7 +263,10 @@ def refresh_working_copy(cfg: SyncConfig) -> None:
     now = _timestamp()
 
     if target:
-        remote_path = shlex.quote(str(path or "~/Documents/WorkingCopy/blackroad"))
+        if path:
+            remote_path = shlex.quote(str(path))
+        else:
+            remote_path = "$HOME/Documents/WorkingCopy/blackroad"
         remote_cmd = f"cd {remote_path} && git pull --rebase"
         run_command(["ssh", target, remote_cmd], dry_run=cfg.dry_run)
         _append_log(f"Working Copy refreshed via SSH target {target}")
