@@ -8,6 +8,7 @@
     "start": "node ./node_modules/y-websocket/bin/server.js"
   },
   "dependencies": {
-    "y-websocket": "^1.5.0"
+    "y-websocket": "^1.5.0",
+    "y-leveldb": "^0.1.0"
   }
 }
