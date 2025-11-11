@@ -31,6 +31,12 @@
 - **Market risk:** The $15 billion bitcoin seizure—now held by U.S. authorities—could influence market liquidity depending on disposition strategy; monitoring DOJ liquidation timelines is advisable.
 - **Compliance urgency:** Financial institutions and crypto platforms must urgently audit exposure to Huione/Prince-linked addresses and counterparties, reinforce enhanced due diligence, and update sanctions-screening rulesets.
 
+## Immediate compliance actions
+- **Screening refresh:** Re-run sanctions screening and adverse media sweeps against the 146 U.S./U.K.-designated parties, with emphasis on Huione-affiliated payment processors, real-estate holding companies, and shell distributors.
+- **Counterparty outreach:** Contact correspondent banks, fiat off-ramps, and OTC brokers to confirm shared understanding of the Section 311 prohibition and identify any pending settlements requiring escalation.
+- **Wallet tracing blitz:** Task blockchain analytics teams to flag Huione-linked clusters, mixers, and cross-chain bridges; block or monitor addresses that appear on FinCEN or OFAC typology lists.
+- **Victim support coordination:** Coordinate with fraud response teams on survivor assistance obligations where customers report forced-labor or pig-butchering incidents tied to the Huione network.
+
 ## Open questions for follow-up analysis
 1. **Flow-of-funds reconstruction:** Mapping key wallet clusters, mixers, OTC brokers, and fiat off-ramps tied to Huione operations.
 2. **Scam infrastructure footprint:** Documenting the relationship between Huione platforms, forced-labor compounds, and global victim acquisition channels.
