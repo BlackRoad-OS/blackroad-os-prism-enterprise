@@ -1,0 +1,23 @@
+name: Promote
+on: workflow_dispatch
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Staging verify
+        uses: actions/github-script@v7
+        with:
+          script: core.setFailed('Run Staging Verify workflow first'); # guardrail
+
+      - name: Canary 10%
+        run: kubectl apply -k infra/k8s/overlays/prod-canary
+
+      - name: Pause & watch
+        run: |
+          sleep 120
+          curl -fsS https://api.yourdomain/health -o /dev/null
+
+      - name: Full promote
+        run: kubectl apply -k infra/k8s/overlays/prod
