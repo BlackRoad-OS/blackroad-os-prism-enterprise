@@ -16,7 +16,8 @@ def _reviewer_file() -> Path:
 def _load_cfg():
     file = _reviewer_file()
     if file.exists():
-        return yaml.safe_load(file.read_text())
+        data = yaml.safe_load(file.read_text())
+        return data or {}
     return {}
 
 

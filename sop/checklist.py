@@ -61,14 +61,13 @@ def attest_step(step_id: str, actor: str, note: str) -> None:
             if step.id == step_id:
                 done_at = datetime.utcnow().isoformat()
                 sig = esign.sign_statement(actor, note)
+                artifact_path = file.parent / f"{step_id}.json"
+                artifact_payload = {"actor": actor, "note": note, "done_at": done_at, **sig}
+                storage.write(str(artifact_path), artifact_payload)
                 step.done = True
                 step.actor = actor
                 step.done_at = done_at
                 save_checklist(cl)
-                storage.write(
-                    str(file.parent / f"{step_id}.json"),
-                    {"actor": actor, "note": note, "done_at": done_at, **sig},
-                )
                 return
     raise ValueError("step-not-found")
 

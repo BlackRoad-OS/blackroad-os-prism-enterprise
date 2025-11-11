@@ -34,7 +34,8 @@ def _type_dir() -> Dict[str, Path]:
 def _load_rules() -> List[Dict]:
     cfg = _config_file()
     if cfg.exists():
-        return yaml.safe_load(cfg.read_text())
+        data = yaml.safe_load(cfg.read_text())
+        return data or []
     return []
 
 
