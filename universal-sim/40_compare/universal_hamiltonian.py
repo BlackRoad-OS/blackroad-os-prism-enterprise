@@ -150,9 +150,9 @@ def gradients(q: Array, p: Array, system: CoupledHamiltonian, t: float) -> Tuple
 
 
 def leapfrog_step(q: Array, p: Array, system: CoupledHamiltonian, t: float, dt: float) -> Tuple[Array, Array]:
-    """Perform a symplectic leapfrog step."""
+    """Perform a symplectic leapfrog (kick-drift-kick) step."""
 
-    dHdq, dHdp = gradients(q, p, system, t)
+    dHdq, _ = gradients(q, p, system, t)
     damping_term = 1.0 - system.damping * dt
     p_half = damping_term * (p - 0.5 * dt * dHdq)
     q_new = q + dt * p_half
