@@ -87,11 +87,13 @@ jobs:
           fi
 
           FAILED_CONTEXTS=$(jq '
+            def normalize($value):
+              if $value == null then null else ($value | ascii_upcase) end;
             def is_success_state($value):
-              ($value != null) and ($value == "SUCCESS" or $value == "NEUTRAL" or $value == "SKIPPED");
+              (normalize($value) as $normalized | ($normalized != null) and ($normalized == "SUCCESS" or $normalized == "NEUTRAL" or $normalized == "SKIPPED"));
             def context_passed:
               is_success_state(.state)
-              or (((.status // empty) == "COMPLETED") and is_success_state(.conclusion));
+              or ((normalize(.status // empty) == "COMPLETED") and is_success_state(.conclusion));
             [ (.statusCheckRollup.contexts // [])[] | select(context_passed | not) ] | length
           ' "$SUMMARY_JSON")
           if [ "$FAILED_CONTEXTS" -gt 0 ]; then
