@@ -1,68 +1,27 @@
+/* eslint-env node, jest */
+const process = require('node:process');
+const { describe, it, expect } = require('@jest/globals');
 process.env.SESSION_SECRET = 'test-secret';
 process.env.INTERNAL_TOKEN = 'x';
 process.env.ALLOW_ORIGINS = 'https://example.com';
 process.env.MINT_PK = '0x' + '1'.repeat(64);
 process.env.ETH_RPC_URL = 'http://127.0.0.1:8545';
-const fs = require('fs');
-const path = require('path');
+process.env.MATH_ENGINE_URL = '';
+
+const fs = require('node:fs');
+const path = require('node:path');
+const request = require('supertest');
+
+// eslint-disable-next-line no-undef
 const originKeyPath = path.join(__dirname, 'origin.key');
 fs.writeFileSync(originKeyPath, 'test-origin-key');
 process.env.ORIGIN_KEY_PATH = originKeyPath;
-jest.mock(
-  'compression',
-  () => () => (_req, _res, next) => next(),
-  { virtual: true }
-);
-jest.mock(
-  'express-validator',
-  () => {
-    const wrap = () => {
-      const middleware = (_req, _res, next) => next();
-      middleware.isString = () => middleware;
-      middleware.isEmail = () => middleware;
-      middleware.trim = () => middleware;
-      middleware.escape = () => middleware;
-      return middleware;
-    };
-    return {
-      body: wrap,
-      validationResult: (req) => ({
-        isEmpty: () =>
-          typeof req.body?.username === 'string' &&
-          typeof req.body?.password === 'string',
-        array: () => [],
-      }),
-    };
-  },
-  { virtual: true }
-);
-jest.mock(
-  'winston',
-  () => {
-    const logger = {
-      info: () => {},
-      error: () => {},
-      warn: () => {},
-      debug: () => {},
-      child: () => logger,
-    };
-    const format = {
-      json: () => () => {},
-      simple: () => () => {},
-    };
-    function Console() {}
-    function File() {}
-    return {
-      createLogger: () => logger,
-      format,
-      transports: { Console, File },
-    };
-  },
-  { virtual: true }
-);
-const request = require('supertest');
+
+const originHeaders = {
+  'X-BlackRoad-Key': 'test-origin-key',
+};
+
 const { app, server } = require('../srv/blackroad-api/server_full.js');
-const originHeaders = { 'X-BlackRoad-Key': 'test-origin-key' };
 
 describe('API security and health', () => {
   afterAll((done) => {
@@ -73,17 +32,6 @@ describe('API security and health', () => {
 
   it('responds to /health', async () => {
     const res = await request(app).get('/health').set(originHeaders);
-process.env.MATH_ENGINE_URL = '';
-const request = require('supertest');
-const { app, server } = require('../srv/blackroad-api/server_full.js');
-
-describe('API security and health', () => {
-  afterAll((done) => {
-    server.close(done);
-  });
-
-  it('responds to /health', async () => {
-    const res = await request(app).get('/health');
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
   });
@@ -105,8 +53,8 @@ describe('API security and health', () => {
       .post('/api/login')
       .set(originHeaders)
       .send({});
-    const res = await request(app).post('/api/login').send({});
     expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: 'missing_credentials' });
   });
 
   it('returns default entitlements for logged-in user', async () => {
@@ -164,8 +112,10 @@ describe('API security and health', () => {
         salesforce: false,
       },
     });
+  });
+
   it('exposes seeded quantum research summaries', async () => {
-    const list = await request(app).get('/api/quantum');
+    const list = await request(app).get('/api/quantum').set(originHeaders);
     expect(list.status).toBe(200);
     expect(Array.isArray(list.body.topics)).toBe(true);
     expect(list.body.topics).toEqual(
@@ -173,25 +123,32 @@ describe('API security and health', () => {
         expect.objectContaining({ topic: 'reasoning' }),
         expect.objectContaining({ topic: 'memory' }),
         expect.objectContaining({ topic: 'symbolic' }),
-      ]),
+      ])
     );
 
-    const detail = await request(app).get('/api/quantum/reasoning');
+    const detail = await request(app)
+      .get('/api/quantum/reasoning')
+      .set(originHeaders);
     expect(detail.status).toBe(200);
     expect(detail.body).toEqual(
       expect.objectContaining({
         topic: 'reasoning',
-      }),
+      })
     );
     expect(detail.body.summary).toMatch(/Quantum/i);
+  });
+
   it('reports math engine unavailable when not configured', async () => {
-    const res = await request(app).get('/api/math/health');
+    const res = await request(app).get('/api/math/health').set(originHeaders);
     expect(res.status).toBe(503);
     expect(res.body).toEqual({ ok: false, error: 'engine_unavailable' });
   });
 
   it('blocks math evaluation when engine is unavailable', async () => {
-    const res = await request(app).post('/api/math/eval').send({ expr: '2+2' });
+    const res = await request(app)
+      .post('/api/math/eval')
+      .set(originHeaders)
+      .send({ expr: '2+2' });
     expect(res.status).toBe(503);
     expect(res.body).toEqual({ error: 'engine_unavailable' });
   });
