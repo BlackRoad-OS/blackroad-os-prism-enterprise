@@ -7,6 +7,12 @@ Designing JSON Schemas for agent tools often requires a balance between strict v
 - `additionalProperties: false` blocks any fields not explicitly listed in the current schema. It is safe but prevents downstream extensions from introducing new fields through composition (`allOf`, `anyOf`, etc.).
 - `unevaluatedProperties: false` blocks only properties that have not been validated by *any* subschema in a composition. Extensions can add fields in their own subschema, while still preventing unknown properties elsewhere.
 
+### Draft & Runtime Support
+
+- `unevaluatedProperties` was added in JSON Schema 2019-09. Make sure your schema declares a compatible draft via `$schema` (for example `https://json-schema.org/draft/2020-12/schema`).
+- Many validators default to older drafts. Confirm your tooling (Ajv, `jsonschema`, etc.) is configured for 2019-09+ so the constraint is enforced.
+- When targeting multiple runtimes, document the minimum draft level alongside the schema to avoid silent downgrades that ignore `unevaluatedProperties`.
+
 ## When to Use Each Constraint
 
 | Situation | Recommendation | Rationale |
@@ -74,6 +80,7 @@ This version still blocks unknown properties, but any subschema in an `allOf` ca
 
 - The extension's `filters` property is allowed because it is validated by the second subschema.
 - Any property not covered by either subschema is still blocked by the base schema's `unevaluatedProperties: false`.
+- Validators that do not understand `unevaluatedProperties` will fall back to draft-07 behavior—double-check your test harness catches this by asserting against a known invalid payload.
 
 ## Quick Checklist
 
