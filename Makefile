@@ -1,54 +1,49 @@
-.DEFAULT_GOAL := test
 
-VENV ?= .venv
-PYTHON ?= python3
-SAFE_MODE ?= 1
+SHELL := /bin/bash
+PROJECT_ROOT := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+PY_SERVICE := apps/svc-template-fastapi
+NODE_SERVICE := apps/svc-template-node
+WEB_APP := apps/web-next
+REGISTRY ?= ghcr.io/yourorg
+IMAGE_TAG ?= $(shell git rev-parse --short HEAD)
+ENV ?= dev
 
-export SAFE_MODE
+.PHONY: setup test build compose-up fly-deploy ecs-deploy k8s-apply rollback lint
 
-.PHONY: install test demo encompass-demo clean demo-cross-ratio demo-spectral-gap demo-angle-defect demo-invariants
+setup:
+	python3 -m venv .venv
+	. .venv/bin/activate && pip install -e $(PY_SERVICE)[dev]
+	npm install --prefix $(NODE_SERVICE)
+	npm install --prefix $(WEB_APP)
+	@if command -v pre-commit >/dev/null 2>&1; then pre-commit install; fi
 
-install:
-	$(PYTHON) -m venv $(VENV)
-	. $(VENV)/bin/activate && pip install -U pip wheel
-	. $(VENV)/bin/activate && pip install -U pytest numpy scipy hypothesis
+lint:
+	. .venv/bin/activate && python -m compileall $(PY_SERVICE)/app
+	npm run lint --prefix $(NODE_SERVICE)
+	npm run lint --prefix $(WEB_APP)
 
-# Run all tests with repo root on PYTHONPATH
-test: install
-	. $(VENV)/bin/activate && SAFE_MODE=$(SAFE_MODE) PYTHONPATH=$(PWD) pytest -q
+test: lint
+	. .venv/bin/activate && pytest $(PY_SERVICE)/tests
+	npm test --prefix $(NODE_SERVICE)
+	npm run build --prefix $(WEB_APP)
 
-# Optional: run the headline demo
-demo: install
-        . $(VENV)/bin/activate && SAFE_MODE=$(SAFE_MODE) PYTHONPATH=$(PWD) python scripts/demo_amundson_math_core.py
-        . $(VENV)/bin/activate && PYTHONPATH=$(PWD) python scripts/demo_amundson_math_core.py
+build:
+	docker buildx build --platform linux/amd64,linux/arm64 -t $(REGISTRY)/svc-template-fastapi:$(IMAGE_TAG) $(PY_SERVICE)
+	docker buildx build --platform linux/amd64,linux/arm64 -t $(REGISTRY)/svc-template-node:$(IMAGE_TAG) $(NODE_SERVICE)
+	docker buildx build --platform linux/amd64,linux/arm64 -t $(REGISTRY)/web-next:$(IMAGE_TAG) $(WEB_APP)
 
-demo-cross-ratio: install
-        mkdir -p data/demos
-        . $(VENV)/bin/activate && PYTHONPATH=$(PWD) python tools/projective/cross_ratio.py 0,0 1,0 2,0 4,0 > data/demos/cross_ratio.txt
+compose-up:
+	docker compose -f docker-compose.prod.yml up --detach
 
-demo-spectral-gap: install
-        mkdir -p data/demos
-        printf "0 1\n1 2\n0 2\n" > data/demos/spectral_gap_edges.txt
-        . $(VENV)/bin/activate && PYTHONPATH=$(PWD) python tools/dynamics/spectral_gap.py data/demos/spectral_gap_edges.txt > data/demos/spectral_gap.txt
+fly-deploy: build
+	fly deploy --config infra/terraform/fly/fly.toml --image $(REGISTRY)/svc-template-fastapi:$(IMAGE_TAG)
 
-demo-angle-defect: install
-        mkdir -p data/demos
-        cat <<'OBJ' > data/demos/tetrahedron.obj
-v 0 0 0
-v 1 0 0
-v 0 1 0
-v 0 0 1
-f 1 2 3
-f 1 4 2
-f 2 4 3
-f 3 4 1
-OBJ
-        . $(VENV)/bin/activate && PYTHONPATH=$(PWD) python tools/geometry/angle_defect.py data/demos/tetrahedron.obj --output data/demos/angle_defects.csv > data/demos/angle_defect_summary.txt
+ecs-deploy:
+	cd infra/terraform/aws && terraform init && terraform apply -auto-approve
 
-demo-invariants: demo-cross-ratio demo-spectral-gap demo-angle-defect
+k8s-apply:
+	@if [ -z "$(ENV)" ]; then echo "ENV must be set" && exit 1; fi
+	kubectl apply -k infra/k8s/overlays/$(ENV)
 
-encompass-demo: install
-        . $(VENV)/bin/activate && PYTHONPATH=$(PWD) python scripts/encompass_demo.py --prompt "Who are we?" --pretty --output ui/lucidia_viewer/packets.json
-
-clean:
-        rm -rf $(VENV) .pytest_cache __pycache__ */__pycache__
+rollback:
+	./ops/scripts/rollback.sh $(REGISTRY) $(IMAGE_TAG)
