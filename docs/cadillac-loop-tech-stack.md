@@ -43,6 +43,28 @@
 - Supabase: Free tier covers 500 MB database + 1 GB storage; upgrade if video uploads exceed limit.
 - Stripe: No platform fees in test mode; plan for standard 2.9% + 30¢ once live.
 
+## Data Model Sketch
+- **`creators`**: `id`, `display_name`, `email`, `roadcoin_balance`, `stripe_account_id`, timestamps.
+- **`uploads`**: `id`, `creator_id`, `asset_url`, `thumbnail_url`, `caption`, `view_count`, `status`, timestamps.
+- **`roadcoin_transactions`**: `id`, `creator_id`, `upload_id`, `delta`, `reason`, `meta` (JSONB for audit trail), timestamps.
+- **`payouts`**: `id`, `creator_id`, `stripe_transfer_id`, `amount_cents`, `status`, `executed_at`, timestamps.
+- **`view_events` (optional)**: `id`, `upload_id`, `viewer_fingerprint`, `source`, `recorded_at` for deeper analytics when bandwidth permits.
+
+Use Supabase Row Level Security policies on `uploads` and `roadcoin_transactions` so creators can only read their own rows, while admins rely on service-role keys for dashboard aggregation.
+
+## Loop Telemetry & Automation
+1. **Upload posted** → `uploads` row created via Next.js Server Action.
+2. **Gallery view** → Supabase Edge Function increments `view_count` and enqueues a `roadcoin_transactions` row.
+3. **Balance update** → Scheduled job sums pending transactions and persists the updated `roadcoin_balance`.
+4. **Payout window** → Cron task checks balances above threshold and calls Stripe Connect transfers in test mode.
+5. **Story post** → Next.js dashboard surfaces daily stats + screenshot workflow for social updates.
+
+## Risk Notes & Mitigations
+- **Over-counted views**: gate increments by IP/device fingerprint throttling in the Edge Function; export suspicious spikes to the analytics board.
+- **Stripe test data leakage**: keep test keys scoped to Vercel preview + local `.env`; production secrets injected via Vercel environment variables only.
+- **Supabase table bloat**: schedule weekly storage check, prune orphaned uploads, and set TTL on optional `view_events` table.
+- **Access drift**: automate Supabase policy checks in CI with a SQL test ensuring creators cannot select another creator's uploads.
+
 ## Why It Works
 - Minimizes infra setup so the team ships the proof-of-life loop fast.
 - Uses boring, well-supported integrations (Stripe, Supabase) that scale past the prototype.
