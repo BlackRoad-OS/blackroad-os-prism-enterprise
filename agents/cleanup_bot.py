@@ -23,8 +23,9 @@ class CleanupBot:
         """Run a command unless in dry-run mode.
 
         Raises:
-            CalledProcessError: If the command exits with a non-zero status while
-                ``dry_run`` is ``False``.
+            CalledProcessError: Propagated from :func:`subprocess.run` when a
+                command exits with a non-zero status while ``dry_run`` is
+                ``False``.
         """
         if self.dry_run:
             print("DRY-RUN:", " ".join(cmd))

@@ -18,5 +18,9 @@ def test_bot_modules_import_and_have_class() -> None:
     for module_name in iter_bot_modules():
         module = importlib.import_module(module_name)
         assert module.__doc__ and module.__doc__.strip()
-        bots = [name for name, obj in inspect.getmembers(module, inspect.isclass) if name.endswith("Bot")]
+        bots = [
+            name
+            for name, obj in inspect.getmembers(module, inspect.isclass)
+            if name.endswith(("Bot", "Agent"))
+        ]
         assert bots, f"{module_name} should define a bot class"
