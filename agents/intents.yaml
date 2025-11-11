@@ -19,8 +19,22 @@ intents:
     match: ["draft doc", "write readme"]
     action: "shell:node scripts/ai_docs.js"
   - key: slack_post_hello
-    match: ["slack hello", "post slack hello", "hello slack"]
+    match:
+      [
+        "slack hello",
+        "post slack hello",
+        "hello slack",
+        "post to slack",
+      ]
     action: "script:python scripts/agent_post_slack_hello.py"
+    requires_approval: false
   - key: asana_post_hello
-    match: ["asana hello", "post asana hello", "hello asana"]
+    match:
+      [
+        "asana hello",
+        "post asana hello",
+        "hello asana",
+        "post to asana",
+      ]
     action: "script:python scripts/agent_post_asana_hello.py"
+    requires_approval: false
