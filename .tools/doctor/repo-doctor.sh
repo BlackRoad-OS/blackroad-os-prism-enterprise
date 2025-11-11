@@ -42,8 +42,55 @@ line "Files without explicit copyright: ${miss}"
 
 # 5) Big files
 section "Large Files (>5MB tracked)"
-big=$(git ls-files -s | awk '{print $4}' | xargs -I{} -- du -m {} 2>/dev/null | awk '$1>5{print $2" ("$1"MB)"}')
-[ -n "$big" ] && echo "$big" | sed 's/^/- /' >> "$OUT" || line "✅ none"
+python3 - "$OUT" <<'PY'
+import os
+import subprocess
+import sys
+
+out_path = sys.argv[1]
+threshold = 5 * 1024 * 1024  # 5MB
+
+
+def iter_paths(stream):
+    buffer = bytearray()
+    for chunk in iter(lambda: stream.read(65536), b""):
+        buffer.extend(chunk)
+        start = 0
+        while True:
+            try:
+                end = buffer.index(0, start)
+            except ValueError:
+                # keep remaining bytes for the next chunk
+                if start:
+                    del buffer[:start]
+                break
+            path = buffer[start:end].decode("utf-8", errors="surrogateescape")
+            yield path
+            start = end + 1
+        else:  # pragma: no cover - safety net
+            buffer.clear()
+
+
+found = False
+with subprocess.Popen(["git", "ls-files", "-z"], stdout=subprocess.PIPE) as proc:
+    with open(out_path, "a", encoding="utf-8") as report:
+        for rel_path in iter_paths(proc.stdout):
+            if not rel_path:
+                continue
+            try:
+                size = os.path.getsize(rel_path)
+            except OSError:
+                continue
+            if size > threshold:
+                size_mb = size / (1024 * 1024)
+                report.write(f"- {rel_path} ({size_mb:.1f}MB)\n")
+                found = True
+        if not found:
+            report.write("- ✅ none\n")
+    proc.wait()
+    if proc.returncode != 0:
+        raise subprocess.CalledProcessError(proc.returncode, proc.args)
+PY
 
 # 6) Duplicate basenames
 section "Duplicate Filenames (basename collisions)"
