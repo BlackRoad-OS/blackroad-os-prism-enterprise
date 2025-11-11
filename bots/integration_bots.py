@@ -103,11 +103,18 @@ def _make_run(entry: Dict[str, str]):  # type: ignore[override]
     def run(self, task: Task, _entry: Dict[str, str] = entry, _slug: str = slug) -> BotResponse:
         mention_detected = _detect_mention(task)
 
-        state_word = "Activated" if mention_detected else "Ready"
-        summary = (
-            f"{state_word} {_entry['platform']} integration loop so the team stays in sync "
-            "after @blackboxprogramming is tagged."
-        )
+        if mention_detected:
+            state_word = "Activated"
+            summary = (
+                f"{state_word} {_entry['platform']} integration loop so the team stays in sync "
+                "after @blackboxprogramming is tagged."
+            )
+        else:
+            state_word = "Ready"
+            summary = (
+                f"{state_word} {_entry['platform']} integration loop so the team stays in sync "
+                "even before @blackboxprogramming is tagged."
+            )
 
         steps = [
             "Capture @blackboxprogramming mention and log the request context",

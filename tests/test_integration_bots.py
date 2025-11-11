@@ -48,6 +48,7 @@ def test_integration_bot_ready_without_mention() -> None:
 
     assert response.ok is True
     assert "Ready" in response.summary
+    assert "even before @blackboxprogramming is tagged" in response.summary
     assert response.data["linear_payload"]["status"] == "ready"
     assert any("Open the Linear draft proactively" in action for action in response.next_actions)
 
