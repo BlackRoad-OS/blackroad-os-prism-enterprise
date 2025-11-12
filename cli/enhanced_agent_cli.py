@@ -27,7 +27,6 @@ try:
     # from rich.progress import Progress, SpinnerColumn, TextColumn  # Removed unused imports
     from rich.syntax import Syntax
     from rich.markdown import Markdown
-    from rich.layout import Layout
     from rich.live import Live
     RICH_AVAILABLE = True
 except ImportError:
