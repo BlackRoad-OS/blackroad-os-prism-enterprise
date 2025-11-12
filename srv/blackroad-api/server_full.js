@@ -50,7 +50,7 @@ async function readJsonBody(req, res) {
   try {
     const raw = await readRequestBody(req);
     if (!raw) {
-      return {};
+      return null;
     }
     return JSON.parse(raw);
   } catch (error) {
