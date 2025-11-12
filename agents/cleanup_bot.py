@@ -22,8 +22,6 @@ class CleanupBot:
         seen: set[str] = set()
         normalized: List[str] = []
         for raw_name in self.branches:
-            if raw_name is None:
-                continue
             name = raw_name.strip()
             if not name or name in seen:
                 continue
@@ -101,8 +99,6 @@ class CleanupBot:
         results: Dict[str, bool] = {}
         for branch in self._normalized_branches:
             success = self.delete_branch(branch)
-            if not success:
-                print(f"Failed to delete branch '{branch}' locally or remotely")
             results[branch] = success
         return results
 
@@ -137,7 +133,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Entry point for the CleanupBot CLI."""
 
     args = _parse_args(argv)
-    branches = args.branches or CleanupBot.merged_branches(args.base)
+    branches = args.branches if args.branches is not None else CleanupBot.merged_branches(args.base)
     bot = CleanupBot(branches=branches, dry_run=args.dry_run)
     results = bot.cleanup()
     failures = [name for name, success in results.items() if not success]

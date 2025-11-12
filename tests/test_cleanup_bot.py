@@ -61,8 +61,5 @@ def test_cleanup_bot_cleanup_handles_failures(
 
     assert results == {"bugfix/failure": False}
     captured = capsys.readouterr().out.strip().splitlines()
-    assert captured == [
-        "Failed to delete local branch 'bugfix/failure'",
-        "Failed to delete branch 'bugfix/failure' locally or remotely",
-    ]
+    assert captured == ["Failed to delete local branch 'bugfix/failure'"]
     assert calls == [("branch", "-D", "bugfix/failure")]
