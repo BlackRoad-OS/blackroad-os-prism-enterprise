@@ -31,9 +31,19 @@ def test_encode_decode_round_trip_with_resets():
 
 def test_decode_to_text_uses_custom_alphabet():
     decoder = RohoncDecoder()
-    # Build a synthetic alphabet of 150 characters using ascii letters and digits.
-    alphabet = list((string.ascii_letters + string.digits + string.punctuation) * 3)
-    alphabet = alphabet[: decoder.symbol_space]
+    # Build a synthetic alphabet of 150 unique characters using ascii letters, digits, punctuation, and more if needed.
+    base_chars = string.ascii_letters + string.digits + string.punctuation
+    # If not enough unique characters, supplement with additional printable characters.
+    from itertools import islice
+    unique_chars = []
+    seen = set()
+    for c in base_chars + ''.join(chr(i) for i in range(0x20, 0x7F)):
+        if c not in seen:
+            unique_chars.append(c)
+            seen.add(c)
+        if len(unique_chars) == decoder.symbol_space:
+            break
+    alphabet = unique_chars
     encoded = decoder.encode_sequence([0, 1, 2, 3])
     decoded_text = decoder.decode_to_text(encoded, alphabet)
     assert decoded_text == "".join(alphabet[i] for i in range(4))
