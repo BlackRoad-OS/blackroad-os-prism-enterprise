@@ -20,7 +20,7 @@
 
 ```json
 {
-  "assignee": "BlackRoad Inc.",
+  "assignee": "Example Corp.",
   "inventors": [
     {"name":"Alexa Amundson","city":"Austin","state":"TX","country":"US","email":"..."}
   ],
