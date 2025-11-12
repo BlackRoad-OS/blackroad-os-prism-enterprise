@@ -224,7 +224,8 @@ def main():
 if __name__ == "__main__":
     # Check dependencies
     try:
-        import watchdog
+        from watchdog.observers import Observer
+        from watchdog.events import FileSystemEventHandler
     except ImportError:
         print("Error: 'watchdog' package not installed")
         print("Install with: pip install watchdog")
