@@ -138,10 +138,38 @@ class EnhancedAgentCLI:
             img = Image.new('RGB', (width, height), color=(40, 44, 52))
             draw = ImageDraw.Draw(img)
 
-            try:
-                font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 12)
-            except:
+            # Try to load a monospaced font appropriate for the platform
+            font = None
+            font_candidates = []
+            if sys.platform.startswith("linux"):
+                font_candidates = [
+                    "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
+                    "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
+                ]
+            elif sys.platform == "darwin":
+                font_candidates = [
+                    "/System/Library/Fonts/Menlo.ttc",
+                    "/Library/Fonts/Microsoft/Consolas.ttf",
+                ]
+            elif sys.platform.startswith("win"):
+                font_candidates = [
+                    "C:\\Windows\\Fonts\\consola.ttf",  # Consolas
+                    "C:\\Windows\\Fonts\\lucon.ttf",    # Lucida Console
+                ]
+            else:
+                font_candidates = []
+
+            for font_path in font_candidates:
+                try:
+                    font = ImageFont.truetype(font_path, 12)
+                    logger.info(f"Loaded font: {font_path}")
+                    break
+                except Exception as e:
+                    logger.debug(f"Could not load font {font_path}: {e}")
+
+            if font is None:
                 font = ImageFont.load_default()
+                logger.warning("Could not load a monospaced font for your platform; using default font.")
 
             # Capture current screen (simplified - would need terminal buffer)
             text = "BlackRoad Agent Terminal\n\n"
