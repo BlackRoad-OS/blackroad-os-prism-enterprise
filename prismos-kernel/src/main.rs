@@ -2,7 +2,6 @@
 #![no_main]
 
 use core::panic::PanicInfo;
-use core::fmt::Write;
 use spin::Mutex;
 use uart_16550::SerialPort;
 

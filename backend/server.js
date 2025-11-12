@@ -1,7 +1,5 @@
 // Prism backend server scaffold
 const express = require('express');
-const jwt = require('jsonwebtoken');
-// TODO: import routes
 const app = express();
 app.use(express.json());
 

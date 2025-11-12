@@ -11,3 +11,9 @@ uart_16550 = "0.2"
 
 [package.metadata.bootloader]
 target = "x86_64-prismos.json"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"

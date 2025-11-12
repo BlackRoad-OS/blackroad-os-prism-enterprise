@@ -91,10 +91,6 @@ function readPkgJson(dir) {
   catch { return null; }
 }
 
-function union(a, b) {
-  const s = new Set(a); for (const x of b) s.add(x); return Array.from(s);
-}
-
 console.log(`dep-scan: scanning ${targetDir}`);
 if (!fs.existsSync(targetDir) || !fs.lstatSync(targetDir).isDirectory()) {
   console.error('ERROR: --dir must be a directory');
