@@ -105,6 +105,14 @@ This document consolidates the formation, registration, and compliance workflow 
 - [ ] Review insurance coverage (D&O, E&O) annually and update limits as the business scales.
 - [ ] Engage counsel for significant governance changes, capital raises, or regulatory examinations.
 
+### 5.1 Compliance Calendar Setup
+
+- [ ] Create a shared calendar (e.g., Notion database, Jira, or Airtable) with recurring reminders for each filing obligation.
+- [ ] Assign an owner for each obligation and capture escalation contacts (counsel, accountants, regulators).
+- [ ] Document evidence of completion (filing confirmations, payment receipts) in a secure compliance drive with versioning enabled.
+- [ ] Reconcile calendar entries quarterly against regulator correspondence and bank statements to confirm no notices were missed.
+- [ ] Capture dependencies (e.g., financial statement preparation before ADV amendment) so upstream work is scheduled before filing deadlines.
+
 ## 6. Recommended Timeline Overview
 
 | Phase | Key Outputs | Approximate Duration |
@@ -113,5 +121,18 @@ This document consolidates the formation, registration, and compliance workflow 
 | Subsidiary formation | Articles/Operating agreements, EINs, BOI reports | 3–7 days per entity |
 | RIA registration | Form ADV, compliance docs, approvals | 4–8 weeks depending on state review |
 | Broker-dealer registration | NMA, FINRA/SEC approval, state registrations | 4–6+ months |
+| Ongoing compliance cadence | Board meetings, renewals, CE, surveillance reviews | Recurring (monthly/quarterly/annually) |
 
 Maintain this checklist with date and owner assignments as tasks are completed.
+
+## 7. Task Tracker Template
+
+| Workstream | Task | Owner | Target Date | Status | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Corporate | File BlackRoad Inc. articles, obtain EIN, file BOI |  |  | ☐ | Upload filing confirmations to corporate minute book. |
+| Subsidiaries | Form Lucidia and Alice entities, open bank accounts |  |  | ☐ | Ensure intercompany agreements captured in accounting system. |
+| RIA | Submit Form ADV Parts 1 & 2, fund IARD, schedule Series 65 coverage |  |  | ☐ | Track Minnesota Department of Commerce correspondence in compliance hub. |
+| Broker-dealer | Draft NMA package, schedule principal exams, submit Form BD |  |  | ☐ | Coordinate FINOP onboarding and SIPC enrollment prior to approval. |
+| Compliance | Build recurring calendar for renewals, CE, and regulatory filings |  |  | ☐ | Attach evidence (receipts, confirmations) to each completed task. |
+
+Duplicate the table per initiative and keep it updated as milestones progress to maintain regulator-ready documentation.
