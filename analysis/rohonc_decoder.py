@@ -13,10 +13,7 @@ form so that researchers can iterate on the hypothesis programmatically.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, List, Optional, Sequence, Set, Union
-
-Number = Union[int, float]
-IndexIterable = Iterable[int]
+from typing import Iterable, List, Optional, Sequence, Set
 
 
 @dataclass(frozen=True)
@@ -55,7 +52,7 @@ class RohoncDecoder:
 
     @property
     def symbol_space(self) -> int:
-        """Return the observable alphabet size (half of :pyattr:`total_space`)."""
+        """Return the observable alphabet size (half of :py:attr:`total_space`)."""
 
         return self.total_space // 2
 
@@ -173,7 +170,7 @@ def parse_symbol_stream(stream: str) -> List[int]:
     if not tokens:
         return []
     try:
-        return [int(token, 0) for token in tokens]
+        return [int(token) for token in tokens]
     except ValueError as exc:  # pragma: no cover - defensive programming
         raise ValueError("All tokens must be integers.") from exc
 
