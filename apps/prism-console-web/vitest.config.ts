@@ -9,6 +9,7 @@ export default defineConfig({
     globals: true,
     setupFiles: './vitest.setup.ts',
     include: ['**/*.spec.{ts,tsx}', '**/*.test.{ts,tsx}'],
+    // Exclude integration tests located under tests/**; unit tests live alongside source files.
     exclude: ['e2e/**', 'tests/**', '**/node_modules/**', '**/.next/**', '**/dist/**'],
     coverage: {
       provider: 'v8',
@@ -30,7 +31,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, '.')
+      '~': path.resolve(__dirname, '.')
     }
   }
 });

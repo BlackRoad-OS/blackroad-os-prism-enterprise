@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { DashboardPayload } from '@/features/dashboard-api';
+import { DashboardPayload } from '~features/dashboard-api';
 
 export function ShortcutList({ shortcuts }: Pick<DashboardPayload, 'shortcuts'>) {
   return (

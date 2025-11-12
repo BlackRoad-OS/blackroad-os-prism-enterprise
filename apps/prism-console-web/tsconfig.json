@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "esnext",
+    "target": "ES2022",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": false,
     "skipLibCheck": true,
@@ -17,12 +17,12 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@/components/*": ["components/*"],
-      "@/features/*": ["features/*"],
-      "@/hooks/*": ["hooks/*"],
-      "@/lib/*": ["lib/*"],
-      "@/mocks/*": ["mocks/*"],
-      "@/types/*": ["types/*"]
+      "~components/*": ["components/*"],
+      "~features/*": ["features/*"],
+      "~hooks/*": ["hooks/*"],
+      "~lib/*": ["lib/*"],
+      "~mocks/*": ["mocks/*"],
+      "~types/*": ["types/*"]
     },
     "types": ["vitest", "node"],
     "plugins": [

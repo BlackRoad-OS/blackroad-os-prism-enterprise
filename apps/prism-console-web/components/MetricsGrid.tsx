@@ -1,4 +1,4 @@
-import { DashboardPayload } from '@/features/dashboard-api';
+import { DashboardPayload } from '~features/dashboard-api';
 import clsx from 'clsx';
 
 const statusStyles: Record<DashboardPayload['metrics'][number]['status'], string> = {

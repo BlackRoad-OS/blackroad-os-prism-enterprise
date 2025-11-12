@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 
-import type { AgentRecord } from '@/types/dashboard';
+import type { AgentRecord } from '~types/dashboard';
 
 interface AgentTableProps {
   agents: AgentRecord[];

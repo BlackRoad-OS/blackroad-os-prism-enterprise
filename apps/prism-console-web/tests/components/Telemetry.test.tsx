@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { TelemetryProvider, useTelemetry } from '@/lib/telemetry';
+import { TelemetryProvider, useTelemetry } from '~lib/telemetry';
 import type { ReactNode } from 'react';
 
 const wrapper = ({ children }: { children: ReactNode }) => <TelemetryProvider>{children}</TelemetryProvider>;

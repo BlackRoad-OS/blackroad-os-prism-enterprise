@@ -1,10 +1,10 @@
 'use client';
 
-import { DashboardSummary } from '@/components/DashboardSummary';
-import { MetricsGrid } from '@/components/MetricsGrid';
-import { ShortcutList } from '@/components/ShortcutList';
-import { useDashboard } from '@/features/use-dashboard';
-import { useTelemetry } from '@/lib/telemetry';
+import { DashboardSummary } from '~components/DashboardSummary';
+import { MetricsGrid } from '~components/MetricsGrid';
+import { ShortcutList } from '~components/ShortcutList';
+import { useDashboard } from '~features/use-dashboard';
+import { useTelemetry } from '~lib/telemetry';
 import { useEffect } from 'react';
 
 export function OverviewContent() {

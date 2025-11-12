@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dashboardSchema } from '@/features/dashboard-api';
+import { dashboardSchema } from '~features/dashboard-api';
 import payload from '../../mocks/dashboard.json';
 
 describe('dashboard contract', () => {

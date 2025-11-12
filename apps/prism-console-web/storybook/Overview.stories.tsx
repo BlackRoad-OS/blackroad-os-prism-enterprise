@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { DashboardSummary } from '@/components/DashboardSummary';
-import { MetricsGrid } from '@/components/MetricsGrid';
-import { ShortcutList } from '@/components/ShortcutList';
+import { DashboardSummary } from '~components/DashboardSummary';
+import { MetricsGrid } from '~components/MetricsGrid';
+import { ShortcutList } from '~components/ShortcutList';
 import payload from '../mocks/dashboard.json';
 
 const meta: Meta = {

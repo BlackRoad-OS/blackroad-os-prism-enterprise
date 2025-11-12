@@ -2,8 +2,8 @@ import './globals.css';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ReactNode } from 'react';
-import { QueryClientProvider } from '@/features/query-client';
-import { TelemetryProvider } from '@/lib/telemetry';
+import { QueryClientProvider } from '~features/query-client';
+import { TelemetryProvider } from '~lib/telemetry';
 
 export const metadata: Metadata = {
   title: 'Prism Console',

@@ -1,15 +1,15 @@
-import { OverviewContent } from '@/components/OverviewContent';
+import { OverviewContent } from '~components/OverviewContent';
 
 export default function Page() {
   return <OverviewContent />;
 "use client";
 
-import { AgentTable } from "@/components/AgentTable";
-import { MetricCard } from "@/components/MetricCard";
-import { ShortcutGrid } from "@/components/ShortcutGrid";
-import { Skeleton } from "@/components/Skeleton";
-import { useAgents } from "@/hooks/useAgents";
-import { useDashboard } from "@/hooks/useDashboard";
+import { AgentTable } from "~components/AgentTable";
+import { MetricCard } from "~components/MetricCard";
+import { ShortcutGrid } from "~components/ShortcutGrid";
+import { Skeleton } from "~components/Skeleton";
+import { useAgents } from "~hooks/useAgents";
+import { useDashboard } from "~hooks/useDashboard";
 
 export default function OverviewPage() {
   const { data: dashboard, isLoading: isDashboardLoading } = useDashboard();

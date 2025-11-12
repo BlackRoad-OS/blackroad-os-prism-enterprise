@@ -1,6 +1,6 @@
-import { AgentTable } from '@/components/AgentTable';
-import { ShortcutList } from '@/components/ShortcutList';
-import { fetchDashboard } from '@/features/dashboard-api';
+import { AgentTable } from '~components/AgentTable';
+import { ShortcutList } from '~components/ShortcutList';
+import { fetchDashboard } from '~features/dashboard-api';
 
 export const revalidate = 0;
 
@@ -13,8 +13,8 @@ export default async function AgentsPage() {
       <ShortcutList shortcuts={payload.shortcuts} />
 "use client";
 
-import { AgentTable } from "@/components/AgentTable";
-import { useAgents } from "@/hooks/useAgents";
+import { AgentTable } from "~components/AgentTable";
+import { useAgents } from "~hooks/useAgents";
 
 export default function AgentsPage() {
   const { data: agents, isLoading } = useAgents();

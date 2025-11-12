@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { AgentTable } from "@/components/AgentTable";
-import agentsJson from "@/mocks/agents.json";
-import type { AgentRecord } from "@/types/dashboard";
+import { AgentTable } from "~components/AgentTable";
+import agentsJson from "~mocks/agents.json";
+import type { AgentRecord } from "~types/dashboard";
 
 const agents = agentsJson as AgentRecord[];
 

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { AgentTable } from "./AgentTable";
-import type { AgentRecord } from "@/types/dashboard";
+import type { AgentRecord } from "~types/dashboard";
 
 const agents: AgentRecord[] = [
   {

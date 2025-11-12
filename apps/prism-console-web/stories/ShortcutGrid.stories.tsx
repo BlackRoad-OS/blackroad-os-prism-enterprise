@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ShortcutGrid } from "@/components/ShortcutGrid";
-import dashboard from "@/mocks/dashboard.json";
+import { ShortcutGrid } from "~components/ShortcutGrid";
+import dashboard from "~mocks/dashboard.json";
 
 const meta: Meta<typeof ShortcutGrid> = {
   title: "Runbooks/ShortcutGrid",

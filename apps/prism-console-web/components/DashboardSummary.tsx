@@ -1,4 +1,4 @@
-import { DashboardPayload } from '@/features/dashboard-api';
+import { DashboardPayload } from '~features/dashboard-api';
 
 export function DashboardSummary({ summary }: Pick<DashboardPayload, 'summary'>) {
   return (

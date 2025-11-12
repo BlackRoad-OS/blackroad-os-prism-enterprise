@@ -1,5 +1,5 @@
-import { RunbookList } from '@/components/RunbookList';
-import { fetchDashboard } from '@/features/dashboard-api';
+import { RunbookList } from '~components/RunbookList';
+import { fetchDashboard } from '~features/dashboard-api';
 
 export const revalidate = 0;
 
@@ -8,8 +8,8 @@ export default async function RunbooksPage() {
   return <RunbookList />;
 "use client";
 
-import { ShortcutGrid } from "@/components/ShortcutGrid";
-import { useDashboard } from "@/hooks/useDashboard";
+import { ShortcutGrid } from "~components/ShortcutGrid";
+import { useDashboard } from "~hooks/useDashboard";
 
 export default function RunbooksPage() {
   const { data: dashboard, isLoading } = useDashboard();

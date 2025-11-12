@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { getDashboard } from "@/lib/api";
-import type { DashboardOverview } from "@/types/dashboard";
+import { getDashboard } from "~lib/api";
+import type { DashboardOverview } from "~types/dashboard";
 
 export function useDashboard() {
   return useQuery<DashboardOverview>({
