@@ -2,7 +2,6 @@
 """Convenient command-line wrapper around the Rohonc Bible cipher toolkit."""
 
 import argparse
-from functools import lru_cache
 from pathlib import Path
 from typing import Iterable, List, Optional, Sequence
 
@@ -11,18 +10,23 @@ from rohonc_decoder import RohoncDecoder
 from complete_cipher_mapper import CompleteCipherMapper
 
 
-@lru_cache(maxsize=1)
 def get_analyzer(verbose: bool = False) -> BibleCipherAnalyzer:
-    """Return a cached ``BibleCipherAnalyzer`` instance."""
+    """Return a ``BibleCipherAnalyzer`` instance."""
 
     return BibleCipherAnalyzer(verbose=verbose)
 
 
-@lru_cache(maxsize=1)
 def get_decoder(verbose: bool = False) -> RohoncDecoder:
-    """Return a cached ``RohoncDecoder`` instance."""
+    """Return a ``RohoncDecoder`` instance."""
 
     return RohoncDecoder(verbose=verbose)
+
+
+def _non_negative_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 0:
+        raise argparse.ArgumentTypeError("Offset must be non-negative.")
+    return parsed
 
 
 def parse_number_sequence(sequence: str) -> List[int]:
@@ -75,7 +79,7 @@ def command_word_search(args: argparse.Namespace) -> None:
     if not positions:
         print("Phrase not found in Bible text.")
         return
-    limit = args.limit if args.limit is not None else len(positions)
+    limit = min(args.limit, len(positions))
     snippet_positions = positions[:limit]
     print(f"Found {len(positions)} matches. Showing first {len(snippet_positions)} positions:")
     print(", ".join(map(str, snippet_positions)))
@@ -154,7 +158,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     numbers_parser.add_argument(
         "--offset",
-        type=int,
+        type=_non_negative_int,
         default=0,
         help="Starting index within the sequence (default: 0).",
     )
