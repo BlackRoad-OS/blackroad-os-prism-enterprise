@@ -2,9 +2,13 @@ process.env.SESSION_SECRET = 'test-secret';
 process.env.INTERNAL_TOKEN = 'x';
 process.env.ALLOW_ORIGINS = 'https://example.com';
 process.env.GIT_REPO_PATH = process.cwd();
+process.env.MINT_PK =
+  '0x1111111111111111111111111111111111111111111111111111111111111111';
+process.env.CLAIMREG_ADDR = '0x2222222222222222222222222222222222222222';
+process.env.ETH_RPC_URL = 'http://127.0.0.1:8545';
 
 const request = require('supertest');
-const { app, server } = require('../srv/blackroad-api/server_full.js');
+const { app, shutdown } = require('../srv/blackroad-api/server_full.js');
 
 // Logs in to the API and returns the authentication cookie
 async function getAuthCookie() {
@@ -16,14 +20,12 @@ async function getAuthCookie() {
 
 describe('Git API', () => {
   afterAll((done) => {
-    server.close(done);
+    shutdown(done);
   });
 
   it('returns git health info', async () => {
     const cookie = await getAuthCookie();
-    const res = await request(app)
-      .get('/api/git/health')
-      .set('Cookie', cookie);
+    const res = await request(app).get('/api/git/health').set('Cookie', cookie);
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
     expect(typeof res.body.repoPath).toBe('string');
@@ -32,9 +34,7 @@ describe('Git API', () => {
 
   it('returns git status info', async () => {
     const cookie = await getAuthCookie();
-    const res = await request(app)
-      .get('/api/git/status')
-      .set('Cookie', cookie);
+    const res = await request(app).get('/api/git/status').set('Cookie', cookie);
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
     expect(typeof res.body.branch).toBe('string');

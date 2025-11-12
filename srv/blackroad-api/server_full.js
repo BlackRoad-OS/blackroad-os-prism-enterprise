@@ -26,7 +26,6 @@ const { Server: SocketIOServer } = require('socket.io');
 const { exec } = require('child_process');
 const { randomUUID } = require('crypto');
 const Stripe = require('stripe');
-const verify = require('./lib/verify');
 const notify = require('./lib/notify');
 const logger = require('./lib/log');
 const attachLlmRoutes = require('./routes/admin_llm');
@@ -42,7 +41,6 @@ const ALLOW_SHELL =
 const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
 const BILLING_DISABLE =
   String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
-const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || 'change-me';
 const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
 const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
@@ -303,9 +301,8 @@ app.post('/api/billing/webhook', (req, res) => {
     return res.status(501).json({ error: 'stripe_unconfigured' });
   }
   const sig = req.headers['stripe-signature'];
-  let event;
   try {
-    event = stripeClient.webhooks.constructEvent(
+    stripeClient.webhooks.constructEvent(
       JSON.stringify(req.body),
       sig,
       STRIPE_WEBHOOK_SECRET
@@ -605,7 +602,7 @@ app.post('/api/subscribe/checkout', (req, res) => {
 });
 
 app.post('/api/subscribe/invoice-intent', (req, res) => {
-  const { plan, cycle, email, name, company, address, notes } = req.body || {};
+  const { plan, cycle, email, name, company } = req.body || {};
   if (!email || !VALID_PLANS.includes(plan) || !VALID_CYCLES.includes(cycle)) {
     return res.status(400).json({ error: 'invalid_input' });
   }
@@ -693,7 +690,8 @@ app.post('/api/llm/chat', requireAuth, async (req, res) => {
       .status(upstream.ok ? 200 : upstream.status)
       .type('text/plain')
       .send(out || '(no content)');
-  } catch (e) {
+  } catch (err) {
+    logger.error('llm_proxy_error', err);
     res.status(502).type('text/plain').send('(llm upstream error)');
   }
 });
@@ -767,7 +765,7 @@ require('./modules/truth_diff')({ app });
 io.on('connection', (socket) => {
   socket.emit('hello', { ok: true, t: Date.now() });
 });
-setInterval(() => {
+const metricsTimer = setInterval(() => {
   const total = os.totalmem(),
     free = os.freemem();
   const payload = {
@@ -791,4 +789,9 @@ server.listen(PORT, () => {
 process.on('unhandledRejection', (e) => console.error('UNHANDLED', e));
 process.on('uncaughtException', (e) => console.error('UNCAUGHT', e));
 
-module.exports = { app, server };
+function shutdown(done) {
+  clearInterval(metricsTimer);
+  server.close(done);
+}
+
+module.exports = { app, server, shutdown };
