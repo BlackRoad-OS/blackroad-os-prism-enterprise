@@ -11,9 +11,10 @@
     "frontend"
   ],
   "scripts": {
-    "dev": "npm --prefix frontend run dev",
-    "build": "npm --prefix frontend run build",
-    "preview": "npm --prefix frontend run preview",
-    "test": "npm --prefix frontend run test"
+    "dev": "npm run dev --workspace frontend",
+    "build": "npm run build --workspace frontend",
+    "preview": "npm run preview --workspace frontend",
+    "test": "npm run test --workspace frontend",
+    "postinstall": "npm install --prefix frontend"
   }
 }
