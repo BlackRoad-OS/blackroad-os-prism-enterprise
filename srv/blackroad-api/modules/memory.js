@@ -3,6 +3,7 @@
 //      fts(content uses content=docs, content_rowid=rowid)
 const fs = require('fs');
 const path = require('path');
+const readline = require('readline');
 
 let Database;
 let databaseLoadError = null;
@@ -32,9 +33,7 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
     } catch (error) {
       fallbackMode = true;
       console.warn(`[memory] SQLite unavailable; using fallback file ${FALLBACK_FILE}`);
-      if (error) {
-        console.warn(error);
-      }
+      console.warn(error);
     }
   } else {
     fallbackMode = true;
@@ -61,9 +60,15 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
     return j.embedding || j.data?.[0]?.embedding || [];
   }
 
-  function run(sql, p=[]) { return Promise.resolve(db.prepare(sql).run(p)); }
-  function all(sql, p=[]) { return Promise.resolve(db.prepare(sql).all(p)); }
-  function get(sql, p=[]) { return Promise.resolve(db.prepare(sql).get(p)); }
+  let run = async () => { throw new Error('SQLite unavailable'); };
+  let all = async () => { throw new Error('SQLite unavailable'); };
+  let get = async () => { throw new Error('SQLite unavailable'); };
+
+  if (db) {
+    run = (sql, p = []) => Promise.resolve(db.prepare(sql).run(p));
+    all = (sql, p = []) => Promise.resolve(db.prepare(sql).all(p));
+    get = (sql, p = []) => Promise.resolve(db.prepare(sql).get(p));
+  }
 
   function cosine(a,b){ let dot=0,na=0,nb=0; for(let i=0;i<Math.min(a.length,b.length);i++){dot+=a[i]*b[i];na+=a[i]*a[i];nb+=b[i]*b[i];} return dot/(Math.sqrt(na)*Math.sqrt(nb)+1e-9); }
 
@@ -101,39 +106,62 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
     const q = String(body.q||'').trim(); const k = Math.max(1, Math.min(20, body.top_k||5));
     if (!q) return res.status(400).json({error:'empty query'});
     if (fallbackMode || !db) {
-      let data = '';
+      const query = q.toLowerCase();
+      const matches = [];
+      const windowSize = Math.max(k, 50);
+      let fileMissing = false;
+
       try {
-        data = fs.readFileSync(FALLBACK_FILE, 'utf8');
+        await new Promise((resolve, reject) => {
+          const stream = fs.createReadStream(FALLBACK_FILE, { encoding: 'utf8' });
+          let rl;
+          stream.on('error', (error) => {
+            if (rl) rl.close();
+            stream.destroy();
+            if (error.code === 'ENOENT') {
+              fileMissing = true;
+              resolve();
+              return;
+            }
+            reject(error);
+          });
+
+          rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
+          rl.on('line', (line) => {
+            if (!line.trim()) return;
+            try {
+              const entry = JSON.parse(line);
+              if (!entry?.text) return;
+              if (entry.text.toLowerCase().includes(query)) {
+                matches.push({
+                  id: entry.id,
+                  score: 1,
+                  text: String(entry.text || '').slice(0, 2000),
+                  meta: entry.meta || {},
+                  ts: entry.ts || 0,
+                });
+                matches.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+                if (matches.length > windowSize) {
+                  matches.length = windowSize;
+                }
+              }
+            } catch (error) {
+              console.warn('[memory] failed to parse fallback entry', error);
+            }
+          });
+
+          rl.on('close', resolve);
+        });
       } catch (error) {
-        if (error.code === 'ENOENT') {
-          return res.json({ results: [], fallback: true });
-        }
         console.error('[memory] fallback read failed', error);
         return res.status(500).json({ error: 'fallback read failed', details: String(error.message||error) });
       }
 
-      const query = q.toLowerCase();
-      const lines = data.split(/\n+/).filter(Boolean);
-      const matches = [];
-      for (const line of lines) {
-        try {
-          const entry = JSON.parse(line);
-          if (!entry?.text) continue;
-          if (entry.text.toLowerCase().includes(query)) {
-            matches.push({
-              id: entry.id,
-              score: 1,
-              text: String(entry.text || '').slice(0, 2000),
-              meta: entry.meta || {},
-              ts: entry.ts || 0,
-            });
-          }
-        } catch (error) {
-          console.warn('[memory] failed to parse fallback entry', error);
-        }
+      if (fileMissing) {
+        return res.json({ results: [], fallback: true });
       }
-      matches.sort((a,b)=> (b.ts||0) - (a.ts||0));
-      return res.json({ results: matches.slice(0,k), fallback: true });
+
+      return res.json({ results: matches.slice(0, k), fallback: true });
     }
 
     // coarse FTS
