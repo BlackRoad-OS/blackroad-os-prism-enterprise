@@ -61,5 +61,11 @@ def chat(req: ChatReq):
         content = f"Lucidia stub: {last}"
     else:
         result = pipe(last, max_new_tokens=60)
-        content = result[0]["generated_text"]
+        first = result[0]
+        if isinstance(first, dict):
+            content = first.get("generated_text") or first.get("text") or ""
+        else:  # pragma: no cover - transformers may change return type in future
+            content = str(first)
+        if not content:
+            content = ""
     return {"choices": [{"role": "assistant", "content": content}]}
