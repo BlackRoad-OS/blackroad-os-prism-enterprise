@@ -5,7 +5,7 @@
 | ✅ Done | Bootstrap Express worker and JSON contract | historical | Legacy stub pre-existing |
 | ✅ Done | Generate project skeleton + zip archive pipeline | gpt-5-codex | Produces Assets/Scenes, Packages, ProjectSettings, README |
 | ✅ Done | Document request/response schema & curl example | gpt-5-codex | Captured in README (request/response samples) |
-| ⏳ Ready | Add automated test coverage (unit test for `buildScenes`, integration smoke via supertest) | open | Recommend using Vitest; needs package + CI wiring |
+| ✅ Done | Add automated test coverage (unit test for `buildScenes`, integration smoke via supertest) | gpt-5-codex | Implemented with Vitest & supertest (this PR) |
 | ⏳ Ready | Support binary artifact upload (S3/MinIO) post-zip | open | Requires credentials interface + env config |
 | ⏳ Ready | Add Unity license + CLI bridge for real builds | open | Blocked on access to Unity build agents |
 | ⏳ Ready | Provide GitHub Actions workflow for worker deploy | open | Should build container and push to registry |

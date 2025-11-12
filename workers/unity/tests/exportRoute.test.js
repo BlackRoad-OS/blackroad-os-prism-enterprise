@@ -18,7 +18,11 @@ describe("POST /export", () => {
 
   afterAll(async () => {
     delete process.env.UNITY_EXPORT_ROOT;
-    await rm(cleanupDir, { recursive: true, force: true });
+    try {
+      await rm(cleanupDir, { recursive: true, force: true });
+    } catch (err) {
+      console.warn("Cleanup failed in afterAll:", err);
+    }
   });
 
   it("creates a Unity archive and returns metadata", async () => {
