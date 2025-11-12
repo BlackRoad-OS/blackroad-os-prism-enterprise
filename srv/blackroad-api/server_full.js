@@ -1,6 +1,8 @@
 const http = require('http');
 const { randomUUID } = require('crypto');
 
+const MAX_REQUEST_BODY_SIZE = 1 * 1024 * 1024; // 1MB
+
 function parseAllowedOrigins(value = '') {
   return value
     .split(',')
@@ -36,9 +38,11 @@ async function readRequestBody(req) {
     let data = '';
     req.on('data', (chunk) => {
       data += chunk;
-      if (data.length > 1e6) {
-        reject(new Error('payload too large'));
-        req.destroy();
+      if (data.length > MAX_REQUEST_BODY_SIZE) {
+        const error = new Error('payload too large');
+        error.statusCode = 413;
+        reject(error);
+        req.destroy(error);
       }
     });
     req.on('end', () => resolve(data));
@@ -46,24 +50,42 @@ async function readRequestBody(req) {
   });
 }
 
-async function readJsonBody(req, res) {
+async function getJsonBody(req, res, { allowEmpty = false } = {}) {
+  let raw;
   try {
-    const raw = await readRequestBody(req);
-    if (!raw) {
-      return null;
-    }
-    return JSON.parse(raw);
+    raw = await readRequestBody(req);
   } catch (error) {
-    if (!res.headersSent) {
+    if (!res.writableEnded) {
+      const statusCode = error.statusCode === 413 ? 413 : 400;
+      const errorMessage = statusCode === 413 ? 'payload too large' : 'invalid json';
+      sendJson(res, statusCode, { error: errorMessage });
+    }
+    return { ok: false };
+  }
+
+  if (!raw) {
+    if (allowEmpty) {
+      return { ok: true, body: null };
+    }
+    sendJson(res, 400, { error: 'request body required' });
+    return { ok: false };
+  }
+
+  try {
+    return { ok: true, body: JSON.parse(raw) };
+  } catch (error) {
+    if (!res.writableEnded) {
       sendJson(res, 400, { error: 'invalid json' });
     }
-    throw error;
+    return { ok: false };
   }
 }
 
 function createServer({
   allowedOrigins = [],
+  sessionSecret = undefined,
 } = {}) {
+  void sessionSecret;
   const sessions = new Map();
   const tasks = [];
   const VALID_USER = { username: 'root', password: 'Codex2025' };
@@ -78,10 +100,25 @@ function createServer({
     const origin = req.headers.origin;
     if (origin && allowedOrigins.includes(origin)) {
       res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
       res.setHeader('Vary', 'Origin');
     }
 
     const url = new URL(req.url, 'http://localhost');
+
+    if (
+      req.method === 'OPTIONS' &&
+      ['/api/login', '/api/tasks'].includes(url.pathname) &&
+      origin &&
+      allowedOrigins.includes(origin)
+    ) {
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+      res.setHeader('Access-Control-Max-Age', '600');
+      res.statusCode = 204;
+      res.end();
+      return;
+    }
 
     if (req.method === 'GET' && url.pathname === '/health') {
       return sendJson(res, 200, { ok: true });
@@ -92,22 +129,23 @@ function createServer({
     }
 
     if (req.method === 'POST' && url.pathname === '/api/login') {
-      try {
-        const body = await readJsonBody(req, res);
-        if (body.username === VALID_USER.username && body.password === VALID_USER.password) {
-          const sessionId = randomUUID();
-          sessions.set(sessionId, { username: VALID_USER.username });
-          return sendJson(res, 200, { ok: true }, {
-            'Set-Cookie': `session=${sessionId}; HttpOnly; Path=/; SameSite=Lax`,
-          });
-        }
-        return sendJson(res, 401, { error: 'invalid credentials' });
-      } catch {
-        if (!res.writableEnded) {
-          sendJson(res, 400, { error: 'invalid json' });
-        }
+      const { ok, body } = await getJsonBody(req, res);
+      if (!ok) {
         return undefined;
       }
+
+      if (!body || typeof body !== 'object') {
+        return sendJson(res, 400, { error: 'invalid json payload' });
+      }
+
+      if (body.username === VALID_USER.username && body.password === VALID_USER.password) {
+        const sessionId = randomUUID();
+        sessions.set(sessionId, { username: VALID_USER.username });
+        return sendJson(res, 200, { ok: true }, {
+          'Set-Cookie': `session=${sessionId}; HttpOnly; Path=/; SameSite=Lax`,
+        });
+      }
+      return sendJson(res, 401, { error: 'invalid credentials' });
     }
 
     const cookies = parseCookies(req.headers.cookie);
@@ -118,20 +156,21 @@ function createServer({
         return sendJson(res, 401, { error: 'unauthorized' });
       }
 
-      try {
-        const body = await readJsonBody(req, res);
-        if (typeof body.title !== 'string' || body.title.trim() === '') {
-          return sendJson(res, 400, { error: 'invalid task' });
-        }
-        const task = { id: tasks.length + 1, title: body.title.trim() };
-        tasks.push(task);
-        return sendJson(res, 201, { ok: true, task });
-      } catch {
-        if (!res.writableEnded) {
-          sendJson(res, 400, { error: 'invalid json' });
-        }
+      const { ok, body } = await getJsonBody(req, res);
+      if (!ok) {
         return undefined;
       }
+
+      if (!body || typeof body !== 'object') {
+        return sendJson(res, 400, { error: 'invalid json payload' });
+      }
+
+      if (typeof body.title !== 'string' || body.title.trim() === '') {
+        return sendJson(res, 400, { error: 'invalid task' });
+      }
+      const task = { id: tasks.length + 1, title: body.title.trim() };
+      tasks.push(task);
+      return sendJson(res, 201, { ok: true, task });
     }
 
     if (req.method === 'GET' && url.pathname === '/api/tasks') {
