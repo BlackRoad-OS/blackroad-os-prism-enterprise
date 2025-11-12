@@ -6,7 +6,7 @@ import ast
 import re
 
 _NUMERIC_PREFIX_RE = re.compile(
-    r"^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)"
+    r"^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)",
 )
 
 
