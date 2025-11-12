@@ -95,7 +95,7 @@ class CoordinationDetector(FileSystemEventHandler):
 
     def _save_detection(self, event_data):
         """Save detection to log file"""
-        detection_log = Path("/home/user/blackroad-prism-console/prism/logs/coordination_detections.log")
+        detection_log = self.logs_dir / "coordination_detections.log"
 
         with open(detection_log, 'a') as f:
             f.write(json.dumps(event_data) + '\n')
