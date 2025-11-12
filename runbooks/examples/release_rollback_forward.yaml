@@ -13,7 +13,8 @@ steps:
         checklist:
           - "Confirm latest deploy SHA from GitHub Actions and artifact version."
           - "Verify change-approve workflow completed with required reviewers."
-          - "Run health checks: curl -fsSL <primary_url>/healthz and <api_url>/health."
+          - "Run health checks: curl -fsSL <health_url> and curl -fsSL <api_health_url>."
+          - "Defaults match scripts/deploy.sh: https://blackroad.io/health and https://blackroad.io/api/health."
           - "Capture metrics snapshots for dashboards noted in README-OPS.md."
   - action: create_task
     params:

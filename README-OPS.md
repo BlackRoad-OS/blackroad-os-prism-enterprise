@@ -21,19 +21,20 @@ scripts/nginx-enable-tls.sh   # optional TLS helper
 - Run `runbooks/examples/release_rollback_forward.yaml` when a deployment needs
   validation or recovery. It documents the health checks, rollback commands, and
   roll-forward steps. The artifacts land under
-  `artifacts/runbooks/releases/<environment>/`.
+  `artifacts/runbooks/releases/<environment>/` (e.g.,
+  `artifacts/runbooks/releases/prod/`).
 - Quick health probes:
 
   ```sh
-  curl -fsSL https://blackroad.io/healthz
-  curl -fsSL https://api.blackroad.io/health
+  curl -fsSL https://blackroad.io/health
+  curl -fsSL https://blackroad.io/api/health
   ```
 - Roll back with the previous tarball if needed:
 
   ```sh
   scripts/deploy.sh release-<prior>.tar.gz
   ```
-- After stabilising, re-run `.github/workflows/blackroad-deploy.yml` from the
+- After stabilizing, re-run `.github/workflows/blackroad-deploy.yml` from the
   desired SHA to roll forward.
 
 ## Cleanup broom

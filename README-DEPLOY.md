@@ -67,12 +67,13 @@ Quick reference from the runbook:
    change approval status, and health probes).
 2. Record the decision in the runbook artifacts and, if rolling back, point the
    symlinks at the previous release using `scripts/deploy.sh <prior-tarball>`.
-3. After the environment stabilises, either re-run the deploy workflow from the
+3. After the environment stabilizes, either re-run the deploy workflow from the
    target SHA (roll forward) or confirm rollback completion in `#eng` with links
    to the collected metrics and health checks.
 
 All evidence collected through the runbook lands in
-`artifacts/runbooks/releases/<environment>/`, making it easy to hand off context
+`artifacts/runbooks/releases/<environment>/` (for example,
+`artifacts/runbooks/releases/staging/`), making it easy to hand off context
 to the next on-call or audit the decision later.
 
 Monorepo notes
