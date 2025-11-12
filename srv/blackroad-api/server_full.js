@@ -21,12 +21,12 @@ const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const cookieSession = require('cookie-session');
 const { body, validationResult } = require('express-validator');
-const Database = require('better-sqlite3');
+const { createDatabase } = require('./lib/sqlite');
 const { Server: SocketIOServer } = require('socket.io');
 const { exec } = require('child_process');
 const { randomUUID } = require('crypto');
 const Stripe = require('stripe');
-const verify = require('./lib/verify');
+const { verifyToken } = require('./lib/verify');
 const notify = require('./lib/notify');
 const logger = require('./lib/log');
 const attachLlmRoutes = require('./routes/admin_llm');
@@ -149,6 +149,14 @@ const PLAN_ENTITLEMENTS = {
 // Ensure DB dir exists
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
+const safeAttach = (label, attachFn) => {
+  try {
+    attachFn();
+  } catch (err) {
+    console.warn(`[bootstrap] ${label} module disabled: ${err.message}`);
+  }
+};
+
 // --- App & server
 const app = express();
 require('./modules/jsonEnvelope')(app);
@@ -168,8 +176,8 @@ require('./modules/projects')({ app });
 require('./modules/pr_proxy')({ app });
 require('./modules/patentnet')({ app });
 require('./modules/love_math')({ app });
-require('./modules/jobs')({ app });
-require('./modules/memory')({ app });
+safeAttach('jobs', () => require('./modules/jobs')({ app }));
+safeAttach('memory', () => require('./modules/memory')({ app }));
 require('./modules/brain_chat')({ app });
 // --- Middleware
 app.disable('x-powered-by');
@@ -210,6 +218,17 @@ app.use(
   })
 );
 
+app.use((req, _res, next) => {
+  const bearer = req.get('authorization');
+  const headerToken =
+    req.get('x-internal-token') ||
+    (typeof bearer === 'string' ? bearer.replace(/^Bearer\s+/i, '') : '');
+  if (headerToken && verifyToken(headerToken, INTERNAL_TOKEN)) {
+    req.internal = true;
+  }
+  next();
+});
+
 // --- Homepage
 app.get('/', (_, res) => {
   res.sendFile(path.join(WEB_ROOT, 'index.html'));
@@ -226,7 +245,9 @@ app.get('/api/health', async (_req, res) => {
   try {
     const r = await fetch('http://127.0.0.1:8000/health');
     llm = r.ok;
-  } catch {}
+  } catch (err) {
+    logger.warn({ event: 'health_llm_check_failed', error: err.message });
+  }
   res.json({
     ok: true,
     version: '1.0.0',
@@ -314,11 +335,15 @@ app.post('/api/billing/webhook', (req, res) => {
     logger.error('stripe_webhook_verify_failed', e);
     return res.status(400).json({ error: 'invalid_signature' });
   }
+  logger.info({
+    event: 'stripe_webhook_received',
+    type: event?.type || 'unknown',
+  });
   res.json({ received: true });
 });
 
 // --- SQLite bootstrap
-const db = new Database(DB_PATH);
+const db = createDatabase(DB_PATH);
 db.pragma('journal_mode = WAL');
 db.pragma('synchronous = NORMAL');
 
@@ -605,7 +630,7 @@ app.post('/api/subscribe/checkout', (req, res) => {
 });
 
 app.post('/api/subscribe/invoice-intent', (req, res) => {
-  const { plan, cycle, email, name, company, address, notes } = req.body || {};
+  const { plan, cycle, email, name, company } = req.body || {};
   if (!email || !VALID_PLANS.includes(plan) || !VALID_CYCLES.includes(cycle)) {
     return res.status(400).json({ error: 'invalid_input' });
   }
@@ -688,12 +713,15 @@ app.post('/api/llm/chat', requireAuth, async (req, res) => {
     try {
       const j = JSON.parse(txt);
       if (j && typeof j.text === 'string') out = j.text;
-    } catch {}
+    } catch (err) {
+      logger.debug({ event: 'llm_fallback_parse_failed', error: err.message });
+    }
     res
       .status(upstream.ok ? 200 : upstream.status)
       .type('text/plain')
       .send(out || '(no content)');
-  } catch (e) {
+  } catch (err) {
+    logger.error({ event: 'llm_stream_proxy_failed', error: err.message });
     res.status(502).type('text/plain').send('(llm upstream error)');
   }
 });
@@ -714,6 +742,14 @@ app.post('/api/exec', requireAuth, (req, res) => {
   });
 });
 
+const logConnectorStatusError = (connector, err) => {
+  logger.warn({
+    event: 'connector_status_check_failed',
+    connector,
+    error: err.message,
+  });
+};
+
 app.get('/api/connectors/status', async (_req, res) => {
   const status = {
     slack: false,
@@ -726,16 +762,24 @@ app.get('/api/connectors/status', async (_req, res) => {
       await notify.slack('status check');
       status.slack = true;
     }
-  } catch {}
+  } catch (err) {
+    logConnectorStatusError('slack', err);
+  }
   try {
     if (process.env.AIRTABLE_API_KEY) status.airtable = true;
-  } catch {}
+  } catch (err) {
+    logConnectorStatusError('airtable', err);
+  }
   try {
     if (process.env.LINEAR_API_KEY) status.linear = true;
-  } catch {}
+  } catch (err) {
+    logConnectorStatusError('linear', err);
+  }
   try {
     if (process.env.SF_USERNAME) status.salesforce = true;
-  } catch {}
+  } catch (err) {
+    logConnectorStatusError('salesforce', err);
+  }
   res.json(status);
 });
 

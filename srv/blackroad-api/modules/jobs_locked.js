@@ -28,7 +28,7 @@ const { spawn, spawnSync } = require('child_process');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const path = require('path');
-const Database = require('better-sqlite3');
+const { createDatabase } = require('../lib/sqlite');
 const YAML = require('yaml');
 
 const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
@@ -109,7 +109,7 @@ function resolveImageDigest(image) {
 }
 
 function db() {
-  return new Database(DB_PATH);
+  return createDatabase(DB_PATH);
 }
 function run(db, sql, p = []) {
   return Promise.resolve(db.prepare(sql).run(p));
@@ -242,7 +242,7 @@ function buildContainerArgs({
 function wireChild(job_id, child, onClose) {
   return new Promise((resolve) => {
     let lastPct = 0;
-    const handleChunk = async (buf, source) => {
+    const handleChunk = async (buf) => {
       const s = buf.toString();
       await appendEvent(job_id, 'log', s);
       for (const line of s.split(/\r?\n/)) {
@@ -265,8 +265,8 @@ function wireChild(job_id, child, onClose) {
         }
       }
     };
-    child.stdout?.on('data', (buf) => handleChunk(buf, 'stdout'));
-    child.stderr?.on('data', (buf) => handleChunk(buf, 'stderr'));
+    child.stdout?.on('data', (buf) => handleChunk(buf));
+    child.stderr?.on('data', (buf) => handleChunk(buf));
     child.on('close', async (code) => {
       PROCS.delete(job_id);
       await onClose(code, lastPct);
@@ -415,7 +415,6 @@ async function runPipeline(job_id, project, env) {
     const image = st.image || DEFAULT_IMG;
     const binds = Array.isArray(st.binds) ? st.binds.slice() : [];
     const stepEnv = { ...pipe.env, ...env, ...(st.env || {}) };
-    const user = st.user; // e.g., "1000:1000"
 
     let child;
     const cmdString = st.cmd || 'true';

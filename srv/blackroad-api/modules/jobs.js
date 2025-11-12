@@ -28,7 +28,7 @@ const { spawn } = require('child_process');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const path = require('path');
-const Database = require('better-sqlite3');
+const { createDatabase } = require('../lib/sqlite');
 const YAML = require('yaml');
 
 const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
@@ -40,7 +40,7 @@ const RUNNER = (process.env.JOB_RUNNER || 'docker').toLowerCase();
 const DEFAULT_IMG = process.env.DOCKER_DEFAULT_IMAGE || 'node:20-slim';
 
 function db() {
-  return new Database(DB_PATH);
+  return createDatabase(DB_PATH);
 }
 function run(db, sql, p = []) {
   return Promise.resolve(db.prepare(sql).run(p));
@@ -156,7 +156,7 @@ function spawnDockerTracked(
 // core streaming/LED updates
 async function wireChild(job_id, child, onClose) {
   let lastPct = 0;
-  const handleChunk = async (buf, source) => {
+  const handleChunk = async (buf) => {
     const s = buf.toString();
     await appendEvent(job_id, 'log', s);
     for (const line of s.split(/\r?\n/)) {
@@ -179,8 +179,8 @@ async function wireChild(job_id, child, onClose) {
       }
     }
   };
-  child.stdout?.on('data', (buf) => handleChunk(buf, 'stdout'));
-  child.stderr?.on('data', (buf) => handleChunk(buf, 'stderr'));
+  child.stdout?.on('data', (buf) => handleChunk(buf));
+  child.stderr?.on('data', (buf) => handleChunk(buf));
   child.on('close', async (code) => {
     PROCS.delete(job_id);
     await onClose(code, lastPct);
