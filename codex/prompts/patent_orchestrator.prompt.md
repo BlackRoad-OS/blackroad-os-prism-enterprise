@@ -22,7 +22,7 @@
 {
   "assignee": "Example Corp.",
   "inventors": [
-    {"name":"Alexa Amundson","city":"Austin","state":"TX","country":"US","email":"..."}
+    {"name":"Jane Doe","city":"Austin","state":"TX","country":"US","email":"..."}
   ],
   "docket_prefix": "BR-PRISM",
   "priority_strategy": {"provisional": true, "pct": "evaluate", "paris_priority": true},
@@ -144,7 +144,7 @@ wherein <measurable advantage> (e.g., variance reduced by at least X%).
 {
   "key": "DE-001",
   "title": "...",
-  "assignee": "BlackRoad Inc.",
+  "assignee": "Example Corp.",
   "inventors":[{"name":"...","citizenship":"..."}],
   "priority": {"provisional_no":"TBD","pct_intent":"evaluate"},
   "docket":"BR-PRISM-DE-001",
@@ -194,7 +194,7 @@ Use these as **starting points**; Codex expands them into full ladders.
 
 **QC-005 — Hamiltonian Stability**
 
-* **Ind. method:** constrain agent policy update by discrete Hamiltonian step, enforcing ∥U†U−I∥≤ 10^-6 and purity>0.9999; maintain phase drift <0.5% over T.
+* **Ind. method:** constrain agent policy update by discrete Hamiltonian step, enforcing ∥U†U−I∥≤ 1e-6 and purity>0.9999; maintain phase drift <0.5% over T.
 * **Dependent:** qutrit simulator; control term for long-horizon credit assignment.
 
 ---
