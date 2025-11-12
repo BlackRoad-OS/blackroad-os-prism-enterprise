@@ -228,7 +228,7 @@ Use these as **starting points**; Codex expands them into full ladders.
 ## 7) Docketing & Deadlines (scaffold)
 
 * **T0:** Provisional filing date (actual)
-* **T0+12mo:** Paris deadline for non-provisional / PCT (**confirm jurisdictional rules**)
+* **T0+12mo:** Paris deadline for non-provisional / PCT (typical for US provisional; other jurisdictions may differ — **confirm jurisdictional rules**)
 * **OA deadlines:** Create calendar entries with response windows and reminders at T−30, T−10, T−2
 
 *(All dates marked “CALCULATED — VERIFY”)*
