@@ -194,7 +194,7 @@ Use these as **starting points**; Codex expands them into full ladders.
 
 **QC-005 — Hamiltonian Stability**
 
-* **Ind. method:** constrain agent policy update by discrete Hamiltonian step, enforcing ∥U†U−I∥≤ 10⁻⁶ and purity>0.9999; maintain phase drift <0.5% over T.
+* **Ind. method:** constrain agent policy update by discrete Hamiltonian step, enforcing ∥U†U−I∥≤ 10^-6 and purity>0.9999; maintain phase drift <0.5% over T.
 * **Dependent:** qutrit simulator; control term for long-horizon credit assignment.
 
 ---
