@@ -247,7 +247,7 @@ class MultiPlatformOrchestrator:
             "email": agent.email,
             "name": agent.name,
             "workspace": "blackboxprogramming",
-            "team_id": "c33efc9b-38b7-43f3-bccf-eb93ad2e3f93"
+            "team_id": os.environ.get("LINEAR_TEAM_ID")
         }
 
         return {
