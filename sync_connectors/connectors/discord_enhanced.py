@@ -11,7 +11,6 @@ import requests
 import logging
 from typing import Dict, List, Optional
 from datetime import datetime
-import asyncio
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
