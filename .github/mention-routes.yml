@@ -17,5 +17,20 @@
       "mention": "@alexalouise"
     }
   ],
-  "always": ["@copilot", "@dependabot", "@claude", "@codex", "@blackboxprogramming"]
+  "always": [
+    "@copilot",
+    "@dependabot",
+    "@claude",
+    "@codex",
+    "@blackboxprogramming",
+    "@blackroad",
+    "@cadillac",
+    "@lucidia",
+    "@cecilia",
+    "@gitguardian",
+    "@slackbot",
+    "@blackroadagents",
+    "@vercel",
+    "@github-actions"
+  ]
 }
