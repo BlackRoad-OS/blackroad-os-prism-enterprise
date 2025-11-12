@@ -264,10 +264,13 @@ class MultiPlatformOrchestrator:
     def _provision_asana(self, agent: AgentPlatformIdentity, agent_data: Dict) -> Dict:
         """Provision agent on Asana"""
         # Asana requires workspace admin to invite users
+        asana_workspace_url = os.environ.get("ASANA_WORKSPACE_URL")
+        if not asana_workspace_url:
+            raise ValueError("ASANA_WORKSPACE_URL environment variable is not set.")
         credentials = {
             "email": agent.email,
             "name": agent.name,
-            "workspace_url": "https://app.asana.com/0/1211130261655445/1211130261655445"
+            "workspace_url": asana_workspace_url
         }
 
         return {
