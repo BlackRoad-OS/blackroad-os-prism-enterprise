@@ -15,6 +15,7 @@ Ensures all 1,250 agents have complete platform presence.
 """
 
 import json
+import os
 import sys
 import logging
 from pathlib import Path
@@ -109,6 +110,16 @@ class MultiPlatformOrchestrator:
                     self.provisioning_log.append(result)
 
                     if result.get("success"):
+                        platform_user_id = result.get("platform_user_id")
+                        if not platform_user_id:
+                            credentials = result.get("credentials", {})
+                            platform_user_id = credentials.get("user_id")
+
+                        self.identity_manager.mark_platform_active(
+                            agent.agent_id,
+                            platform,
+                            platform_user_id,
+                        )
                         logger.info(f"✓ {platform}: {agent.name} ({agent.agent_id})")
                     else:
                         logger.warning(f"✗ {platform}: {agent.name} - {result.get('error')}")
