@@ -84,7 +84,8 @@ Treat this as a one-afternoon sprint: you can work top-to-bottom and end with a 
    sudo -u backup . /etc/restic.env && restic init
    ```
    (Replace `backup` with whichever service account executes backups; by default run as `root`.)
-4. **Update the backup unit:** Point `ops/backup/restic.env` to source `/etc/restic.env` or replace its placeholders
+4. **Update the backup unit:**
+   Point `ops/backup/restic.env` to source `/etc/restic.env` or replace its placeholders
    so `backup.timer` pushes to Spaces as well as the existing MinIO target.
    The repository copy of `restic.env` no longer ships static credentials—populate the variables at deploy time
    via your secret manager or an OIDC exchange job.

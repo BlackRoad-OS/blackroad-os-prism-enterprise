@@ -43,6 +43,9 @@ Short-lived credentials reduce blast radius and eliminate secret sprawl in CI. T
    }
    ```
 
+   > **Note:** The sample `token.actions.githubusercontent.com:sub` condition only authorizes workflows on the `main` branch.
+   > Replace it or add a `StringLike` stanza if feature branches or pull requests must assume the role.
+
    - Add additional `StringLike` conditions if you need to scope to tags, environments, or workflows: e.g. `"token.actions.githubusercontent.com:sub": "repo:BlackRoadOrg/blackroad-prism-console:environment:Production"`.
    - Grant the role only the IAM permissions required by the workflow (e.g., `AmazonECSFullAccess` is usually too broad—prefer task-, deploy-, or S3-specific policies).
    - Export the ARN as `AWS_ROLE_TO_ASSUME` (or workload-specific secrets such as `PREVIEW_ENV_AWS_ROLE`).
