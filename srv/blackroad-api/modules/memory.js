@@ -5,11 +5,13 @@ const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
 
-const WEB_DAV_BASE_URL = (process.env.WEBDAV_BASE_URL || 'http://192.168.4.55:8080/agents/cecilia/memory/').trim();
-const WEB_DAV_USER = process.env.WEBDAV_USER || 'mobile';
+const rawWebDAVBaseUrl = (process.env.WEBDAV_BASE_URL || '').trim();
+const WEB_DAV_BASE_URL = rawWebDAVBaseUrl ? `${rawWebDAVBaseUrl.replace(/\/+$/, '')}/` : '';
+const WEB_DAV_USER = process.env.WEBDAV_USER || '';
 const WEB_DAV_PASS = process.env.WEBDAV_PASS || '';
 const WEB_DAV_TIMEOUT_MS = Number(process.env.WEBDAV_TIMEOUT_MS || 7000);
 const FALLBACK_FILE = process.env.MEMORY_FALLBACK_FILE || '/srv/blackroad-api/memory_fallback.jsonl';
+const MAX_WEBDAV_DOCS_TO_SCAN = 200;
 
 module.exports = function attachMemory({ app }) {
   const DBP = process.env.MEMORY_DB || '/srv/blackroad-api/memory.db';
@@ -171,7 +173,7 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
     const names = await listWebDAVDocuments();
     if (!names.length) return [];
     const results = [];
-    for (const name of names.slice(0, 200)) {
+    for (const name of names.slice(0, MAX_WEBDAV_DOCS_TO_SCAN)) {
       const raw = await readWebDAVDocument(name);
       if (!raw) continue;
       for (const line of raw.split('\n')) {
@@ -239,11 +241,7 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
     for (let i = 0; i < text.length; i += 1000) {
       chunks.push(text.slice(i, i + 1000));
     }
-    const embs = [];
-    for (const c of chunks) {
-      // eslint-disable-next-line no-await-in-loop
-      embs.push(await embed(c));
-    }
+    const embs = await Promise.all(chunks.map((c) => embed(c)));
     const flat = embs.flat().slice(0, 1536);
     try {
       await run(`INSERT OR REPLACE INTO vecs(id,v) VALUES(?,?)`, [id, JSON.stringify(flat)]);
