@@ -112,18 +112,25 @@ class RohoncDecoder:
         self,
         symbols: Sequence[str],
         sleep_markers: Iterable[str] | None = None,
+        theta: float | None = None,
     ) -> str:
         """Decode ``symbols`` using the rotational Caesar hypothesis."""
 
+        theta_value = self.theta if theta is None else theta
+
         if sleep_markers is None:
-            sleep_markers = set()
+            sleep_marker_set: set[str] = set()
+        else:
+            sleep_marker_set = set(sleep_markers)
+
+        mapping_size = len(self.num_to_symbol) or self.symbol_space
 
         plaintext: List[str] = []
         k_value = 0
         position = 0
 
         for symbol in symbols:
-            if symbol in sleep_markers:
+            if symbol in sleep_marker_set:
                 k_value = 0
                 plaintext.append("\n")
                 position = 0
@@ -134,12 +141,12 @@ class RohoncDecoder:
                 plaintext.append("?")
                 continue
 
-            decoded_value = (encoded_value - k_value) % self.symbol_space
+            decoded_value = (encoded_value - k_value) % mapping_size
             decoded_char = self.num_to_symbol.get(decoded_value, "?")
             plaintext.append(decoded_char)
 
             position += 1
-            k_value = int(self.theta * position) % self.symbol_space
+            k_value = int(theta_value * position) % mapping_size
 
         return "".join(plaintext)
 
@@ -191,8 +198,11 @@ class RohoncDecoder:
         best_preview = ""
 
         for theta in candidates:
-            self.theta = theta
-            decoded_text = self.decode_rotational_caesar(symbols, sleep_markers)
+            decoded_text = self.decode_rotational_caesar(
+                symbols,
+                sleep_markers,
+                theta,
+            )
             score = self._score_text(decoded_text)
             if score > best_score:
                 best_theta = theta
@@ -259,7 +269,7 @@ class RohoncDecoder:
             if bigram in text.upper():
                 score += 0.1
 
-        unique_ratio = len(set(text)) / max(len(text), 1)
+        unique_ratio = len(set(text)) / len(text)
         if unique_ratio < 0.1:
             score *= 0.5
 
