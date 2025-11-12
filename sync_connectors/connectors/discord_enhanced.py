@@ -24,18 +24,19 @@ class DiscordConnector:
         self.bot_token = bot_token or os.getenv("DISCORD_BOT_TOKEN")
         self.base_url = "https://discord.com/api/v10"
 
+        # Load Discord invite URLs from environment variables for security
         self.servers = [
             {
                 "name": "Server 1",
-                "invite_url": "https://discord.gg/r3KDvBXPn"
+                "invite_url": os.getenv("DISCORD_INVITE_URL_1")
             },
             {
                 "name": "Server 2",
-                "invite_url": "https://discord.gg/tcj5MZsxH"
+                "invite_url": os.getenv("DISCORD_INVITE_URL_2")
             },
             {
                 "name": "Server 3",
-                "invite_url": "https://discord.gg/CB3XfazUV"
+                "invite_url": os.getenv("DISCORD_INVITE_URL_3")
             }
         ]
 
