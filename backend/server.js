@@ -1,87 +1,189 @@
-const http = require('http');
+'use strict';
+
+const express = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+const {
+  getDb,
+  addUser,
+  addProject,
+  getProjects,
+  addTask,
+  getTasks,
+  getTask,
+  updateTask,
+  closeDb,
+} = require('./data');
 
 const PORT = process.env.PORT || 4000;
 const HOST = '0.0.0.0';
+const JWT_SECRET = process.env.JWT_SECRET || 'testsecret';
 
-// Sample credentials for tests
-const VALID_USER = {
-  username: 'root',
-  password: 'Codex2025', // pragma: allowlist secret
-  token: 'test-token', // pragma: allowlist secret
-};
-const tasks = [];
+const app = express();
+app.use(express.json());
 
-function send(res, status, obj) {
-  res.statusCode = status;
-  res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify(obj));
+function findUserByUsername(username) {
+  const db = getDb();
+  return db.prepare('SELECT * FROM users WHERE email = ?').get(username);
 }
 
-function parseBody(req) {
-  return new Promise((resolve, reject) => {
-    let data = '';
-    req.on('data', (chunk) => {
-      data += chunk;
-      if (data.length > 1e6) req.destroy();
-    });
-    req.on('end', () => {
-      if (!data) return resolve({});
-      try {
-        resolve(JSON.parse(data));
-      } catch {
-        reject();
-      }
-    });
-  });
+function ensureProjectForUser(userId, username) {
+  const projects = getProjects(userId);
+  if (projects.length > 0) return projects[0];
+  return addProject(userId, `${username}'s project`);
 }
 
-const app = http.createServer(async (req, res) => {
-  if (req.method === 'POST' && req.url === '/api/auth/login') {
-    try {
-      const body = await parseBody(req);
-      if (body.username === VALID_USER.username && body.password === VALID_USER.password) {
-        return send(res, 200, { token: VALID_USER.token });
-      }
-      return send(res, 401, { error: 'invalid credentials' });
-    } catch {
-      return send(res, 400, { error: 'invalid json' });
-    }
+function buildUserPayload(userRow, project) {
+  return {
+    id: userRow.id,
+    username: userRow.email,
+    projectId: project.id,
+  };
+}
+
+function issueToken(user, project) {
+  return jwt.sign(
+    { userId: user.id, projectId: project.id },
+    JWT_SECRET,
+    { expiresIn: '1h' }
+  );
+}
+
+app.post('/api/auth/signup', (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) {
+    return res.status(400).json({ error: 'missing_fields' });
   }
 
-  if (req.method === 'POST' && req.url === '/api/tasks') {
-    if (req.headers.authorization !== `Bearer ${VALID_USER.token}`) {
-      return send(res, 401, { error: 'unauthorized' });
-    }
-    try {
-      const body = await parseBody(req);
-      if (typeof body.title !== 'string' || !body.title.trim()) {
-        return send(res, 400, { error: 'invalid task' });
-      }
-      const task = { id: tasks.length + 1, title: body.title };
-      tasks.push(task);
-      return send(res, 201, { ok: true, task });
-    } catch {
-      return send(res, 400, { error: 'invalid json' });
-    }
+  const existing = findUserByUsername(username);
+  if (existing) {
+    return res.status(409).json({ error: 'user_exists' });
   }
 
-  // invalid JSON catch-all
-  if (req.method === 'POST') {
-    try {
-      await parseBody(req);
-    } catch {
-      return send(res, 400, { error: 'invalid json' });
-    }
-  }
+  const passwordHash = bcrypt.hashSync(password, 10);
+  const id = addUser(username, passwordHash);
+  const project = ensureProjectForUser(id, username);
+  const user = buildUserPayload({ id, email: username }, project);
 
-  send(res, 404, { error: 'not found' });
+  return res.status(200).json({ user });
 });
 
-module.exports = { app };
+app.post('/api/auth/login', (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) {
+    return res.status(400).json({ error: 'missing_fields' });
+  }
 
-if (require.main === module) {
-  app.listen(PORT, HOST, () => {
-    // eslint-disable-next-line no-console
-    console.log(`Backend listening on http://${HOST}:${PORT}`);
-  });
+  const userRow = findUserByUsername(username);
+  if (!userRow) {
+    return res.status(401).json({ error: 'invalid_credentials' });
+  }
+
+  const valid = bcrypt.compareSync(password, userRow.password_hash);
+  if (!valid) {
+    return res.status(401).json({ error: 'invalid_credentials' });
+  }
+
+  const project = ensureProjectForUser(userRow.id, username);
+  const token = issueToken(userRow, project);
+  const user = buildUserPayload(userRow, project);
+
+  return res.json({ token, user });
+});
+
+function authMiddleware(req, res, next) {
+  const header = req.headers.authorization || '';
+  if (!header.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'missing_token' });
+  }
+
+  const token = header.slice('Bearer '.length);
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.auth = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'invalid_token' });
+  }
 }
+
+app.get('/api/auth/me', authMiddleware, (req, res) => {
+  const userRow = getDb()
+    .prepare('SELECT * FROM users WHERE id = ?')
+    .get(req.auth.userId);
+  if (!userRow) {
+    return res.status(404).json({ error: 'user_not_found' });
+  }
+
+  const project = ensureProjectForUser(userRow.id, userRow.email);
+  const user = buildUserPayload(userRow, project);
+  return res.json({ user });
+});
+
+app.get('/api/tasks', authMiddleware, (req, res) => {
+  const tasks = getTasks(req.auth.projectId);
+  return res.json({ tasks });
+});
+
+app.post('/api/tasks', authMiddleware, (req, res) => {
+  const { title, projectId } = req.body || {};
+  const targetProject = projectId || req.auth.projectId;
+
+  if (!title || typeof title !== 'string' || !title.trim()) {
+    return res.status(400).json({ error: 'invalid_task' });
+  }
+
+  if (!targetProject || targetProject !== req.auth.projectId) {
+    return res.status(403).json({ error: 'forbidden_project' });
+  }
+
+  const task = addTask(targetProject, title.trim());
+  return res.status(201).json({ task });
+});
+
+app.patch('/api/tasks/:id', authMiddleware, (req, res) => {
+  const task = getTask(req.params.id);
+  if (!task || task.project_id !== req.auth.projectId) {
+    return res.status(404).json({ error: 'task_not_found' });
+  }
+
+  const fields = {};
+  if (typeof req.body?.title === 'string') {
+    fields.title = req.body.title;
+  }
+  if (typeof req.body?.status === 'string') {
+    fields.status = req.body.status;
+  }
+
+  const updated = updateTask(task.id, fields);
+  return res.json({ task: updated });
+});
+
+app.use((req, res) => {
+  res.status(404).json({ error: 'not_found' });
+});
+
+let runningServer = null;
+
+function start(port = PORT, host = HOST) {
+  if (!runningServer) {
+    runningServer = app.listen(port, host, () => {
+      // eslint-disable-next-line no-console
+      console.log(`Backend listening on http://${host}:${port}`);
+    });
+  }
+  return runningServer;
+}
+
+function stop() {
+  if (runningServer) {
+    runningServer.close();
+    runningServer = null;
+  }
+  closeDb();
+}
+
+const exportedServer = require.main === module ? start() : { close: stop };
+
+module.exports = { app, server: exportedServer, start, stop };

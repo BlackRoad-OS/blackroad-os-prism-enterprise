@@ -32,6 +32,11 @@ db.exec(`
   );
 `);
 
+function isIgnorableMigrationError(err) {
+  const message = String(err?.message || err || '');
+  return /duplicate column name/i.test(message) || /already exists/i.test(message);
+}
+
 const applied = new Set(db.prepare('SELECT filename FROM schema_migrations').all().map(r => r.filename));
 
 const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith('.sql')).sort();
@@ -39,6 +44,25 @@ for (const file of files) {
   if (!applied.has(file)) {
     const full = path.join(migrationsDir, file);
     const sql = fs.readFileSync(full, 'utf-8');
+    const hasManualTransaction = /\bBEGIN\b/i.test(sql);
+
+    if (hasManualTransaction) {
+      try {
+        db.exec(sql);
+        db.prepare('INSERT INTO schema_migrations (filename) VALUES (?)').run(file);
+        console.log(`[db] applied migration ${file}`);
+      } catch (e) {
+        if (isIgnorableMigrationError(e)) {
+          db.prepare('INSERT INTO schema_migrations (filename) VALUES (?)').run(file);
+          console.warn(`[db] skipped migration ${file}: ${e.message}`);
+        } else {
+          console.error(`[db] migration ${file} failed:`, e);
+          throw e;
+        }
+      }
+      continue;
+    }
+
     db.exec('BEGIN');
     try {
       db.exec(sql);
@@ -46,6 +70,12 @@ for (const file of files) {
       db.exec('COMMIT');
       console.log(`[db] applied migration ${file}`);
     } catch (e) {
+      if (isIgnorableMigrationError(e)) {
+        db.exec('ROLLBACK');
+        db.prepare('INSERT INTO schema_migrations (filename) VALUES (?)').run(file);
+        console.warn(`[db] skipped migration ${file}: ${e.message}`);
+        continue;
+      }
       db.exec('ROLLBACK');
       console.error(`[db] migration ${file} failed:`, e);
       throw e;
