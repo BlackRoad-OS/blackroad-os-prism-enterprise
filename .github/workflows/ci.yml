@@ -1,27 +1,44 @@
+# Stack summary:
+# - Frontend: React + Vite (Node 20, npm workspace at ./frontend)
+# - Tests: npm run test (currently runs the Vite build until dedicated tests exist)
 name: CI
-on: [pull_request]
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
+  frontend:
+    name: Frontend (Node 20)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: corepack enable || true
-      - run: pnpm -v || npm i -g pnpm
-      - run: pnpm install --ignore-scripts || npm install
-      - run: pnpm -r build || npm run build --workspaces || true
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: pnpm -r test --if-present || npm test --workspaces || true
-      - run: pytest -q || true
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: pnpm dlx eslint . --ext .ts,.tsx,.js || true
-  policy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: echo "opa eval would run here" # placeholder; keep alias 'policy'
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Run tests
+        run: npm run test
+        # TODO: Update this command when dedicated unit/integration tests are available.
