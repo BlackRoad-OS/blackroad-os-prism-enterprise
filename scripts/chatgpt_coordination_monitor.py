@@ -131,7 +131,8 @@ def monitor_agent_processes():
                     logger.info(f"  Command: {cmdline}")
 
         except (psutil.NoSuchProcess, psutil.AccessDenied):
-            pass
+            # These exceptions are expected when iterating over processes that may terminate or be inaccessible.
+            logger.debug(f"Skipped process (NoSuchProcess or AccessDenied): {proc.info.get('name', 'unknown')} (PID {proc.info.get('pid', 'unknown')})")
 
 
 def check_github_multi_agent_trigger():
