@@ -2,11 +2,12 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const { EventEmitter } = require('events');
-const test = require('node:test');
-const assert = require('node:assert/strict');
-
 function loadWireChild() {
-  const filePath = path.join(__dirname, '..', 'srv/blackroad-api/modules/jobs_locked.js');
+  const filePath = path.join(
+    __dirname,
+    '..',
+    'srv/blackroad-api/modules/jobs_locked.js'
+  );
   let code = fs.readFileSync(filePath, 'utf8');
   code += '\n;globalThis.wireChild = wireChild; globalThis.PROCS = PROCS;';
   const sandbox = {
@@ -17,9 +18,15 @@ function loadWireChild() {
         return class FakeDB {
           prepare() {
             return {
-              run() { return this; },
-              all() { return []; },
-              get() { return {}; },
+              run() {
+                return this;
+              },
+              all() {
+                return [];
+              },
+              get() {
+                return {};
+              },
             };
           }
         };
@@ -42,32 +49,34 @@ function loadWireChild() {
   return { wireChild: sandbox.wireChild, PROCS: sandbox.PROCS };
 }
 
-test('wireChild resolves and cleans up even if onClose throws', async () => {
-  const { wireChild, PROCS } = loadWireChild();
-  const jobId = 'job-123';
-  PROCS.set(jobId, {});
-  const child = new EventEmitter();
-  child.stdout = new EventEmitter();
-  child.stderr = new EventEmitter();
+describe('jobs_locked wireChild', () => {
+  it('resolves and cleans up even if onClose throws', async () => {
+    const { wireChild, PROCS } = loadWireChild();
+    const jobId = 'job-123';
+    PROCS.set(jobId, {});
+    const child = new EventEmitter();
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
 
-  const origDelete = PROCS.delete.bind(PROCS);
-  let deleteCalls = 0;
-  PROCS.delete = (key) => {
-    deleteCalls++;
-    return origDelete(key);
-  };
+    const origDelete = PROCS.delete.bind(PROCS);
+    let deleteCalls = 0;
+    PROCS.delete = (key) => {
+      deleteCalls++;
+      return origDelete(key);
+    };
 
-  let onCloseCalls = 0;
-  function onClose() {
-    onCloseCalls++;
-    throw new Error('boom');
-  }
+    let onCloseCalls = 0;
+    function onClose() {
+      onCloseCalls++;
+      throw new Error('boom');
+    }
 
-  const promise = wireChild(jobId, child, onClose);
-  child.emit('close', 0);
-  await promise;
+    const promise = wireChild(jobId, child, onClose);
+    child.emit('close', 0);
+    await expect(promise).resolves.toBeUndefined();
 
-  assert.equal(onCloseCalls, 1);
-  assert.equal(deleteCalls, 1);
-  assert.ok(!PROCS.has(jobId));
+    expect(onCloseCalls).toBe(1);
+    expect(deleteCalls).toBe(1);
+    expect(PROCS.has(jobId)).toBe(false);
+  });
 });

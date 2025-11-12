@@ -7,12 +7,27 @@ const CONFIG_PATH =
   path.join(__dirname, '../../config/providers.yaml');
 
 let cache;
+const FALLBACK_PROVIDERS = {
+  openai: { display_name: 'OpenAI', env_key: 'OPENAI_API_KEY' },
+  anthropic: { display_name: 'Anthropic', env_key: 'ANTHROPIC_API_KEY' },
+};
 
 function loadConfig() {
   if (!cache) {
-    const file = fs.readFileSync(CONFIG_PATH, 'utf8');
-    const data = yaml.parse(file);
-    cache = data.providers || {};
+    try {
+      const file = fs.readFileSync(CONFIG_PATH, 'utf8');
+      const data = yaml.parse(file);
+      cache =
+        data?.providers && Object.keys(data.providers).length
+          ? data.providers
+          : { ...FALLBACK_PROVIDERS };
+    } catch (err) {
+      console.warn(
+        '[providers] using fallback configuration:',
+        err?.message || err
+      );
+      cache = { ...FALLBACK_PROVIDERS };
+    }
   }
   return cache;
 }

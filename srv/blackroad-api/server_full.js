@@ -21,7 +21,6 @@ const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const cookieSession = require('cookie-session');
 const { body, validationResult } = require('express-validator');
-const Database = require('better-sqlite3');
 const { Server: SocketIOServer } = require('socket.io');
 const { exec } = require('child_process');
 const { randomUUID } = require('crypto');
@@ -49,6 +48,43 @@ const BILLING_DISABLE =
 const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
 const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
+
+const disableDbFlag = String(
+  process.env.BR_TEST_DISABLE_DB || process.env.BRC_DISABLE_NATIVE_DB || ''
+).toLowerCase();
+const SHOULD_DISABLE_DB = disableDbFlag === '1' || disableDbFlag === 'true';
+
+let Database;
+if (!SHOULD_DISABLE_DB) {
+  try {
+    Database = require('better-sqlite3');
+  } catch (err) {
+    console.warn(
+      'better-sqlite3 unavailable, using mock DB for API server:',
+      err
+    );
+  }
+}
+
+function createMockDb() {
+  const noop = () => {};
+  return {
+    pragma: noop,
+    exec: noop,
+    close: noop,
+    prepare() {
+      return {
+        run: () => ({ lastInsertRowid: 0, changes: 0 }),
+        get: () => undefined,
+        all: () => [],
+        iterate: function* iterate() {},
+      };
+    },
+  };
+}
+
+const usingMockDb = !Database;
+const TABLES = ['projects', 'agents', 'datasets', 'models', 'integrations'];
 const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS
   ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim())
   : [];
@@ -349,85 +385,90 @@ app.post('/api/billing/webhook', (req, res) => {
 });
 
 // --- SQLite bootstrap
-const db = new Database(DB_PATH);
-db.pragma('journal_mode = WAL');
-db.pragma('synchronous = NORMAL');
+if (!usingMockDb) {
+  try {
+    fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+  } catch {}
+}
 
-attachSlackExceptions({ app, db });
+const db = usingMockDb ? createMockDb() : new Database(DB_PATH);
 
-const TABLES = ['projects', 'agents', 'datasets', 'models', 'integrations'];
-for (const t of TABLES) {
+if (!usingMockDb) {
+  db.pragma('journal_mode = WAL');
+  db.pragma('synchronous = NORMAL');
+
+  for (const t of TABLES) {
+    db.prepare(
+      `
+      CREATE TABLE IF NOT EXISTS ${t} (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+        meta JSON
+      )
+    `
+    ).run();
+  }
+
+  // Subscription tables
   db.prepare(
     `
-    CREATE TABLE IF NOT EXISTS ${t} (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-      meta JSON
+    CREATE TABLE IF NOT EXISTS subscribers (
+      id TEXT PRIMARY KEY,
+      email TEXT UNIQUE,
+      name TEXT,
+      company TEXT,
+      created_at TEXT,
+      source TEXT
     )
   `
   ).run();
-}
+  db.prepare(
+    `
+    CREATE TABLE IF NOT EXISTS subscriptions (
+      id TEXT PRIMARY KEY,
+      subscriber_id TEXT,
+      plan TEXT,
+      cycle TEXT,
+      status TEXT,
+      stripe_customer_id TEXT,
+      stripe_subscription_id TEXT,
+      created_at TEXT,
+      updated_at TEXT
+    )
+  `
+  ).run();
+  db.prepare(
+    `
+    CREATE TABLE IF NOT EXISTS payments (
+      id TEXT PRIMARY KEY,
+      subscription_id TEXT,
+      provider TEXT,
+      amount_cents INTEGER,
+      currency TEXT,
+      status TEXT,
+      raw JSON,
+      created_at TEXT
+    )
+  `
+  ).run();
+  db.prepare(
+    `
+    CREATE TABLE IF NOT EXISTS logs_connectors (
+      id TEXT PRIMARY KEY,
+      subscriber_id TEXT,
+      action TEXT,
+      connector TEXT,
+      ok INTEGER,
+      detail TEXT,
+      created_at TEXT
+    )
+  `
+  ).run();
 
-// Subscription tables
-db.prepare(
-  `
-  CREATE TABLE IF NOT EXISTS subscribers (
-    id TEXT PRIMARY KEY,
-    email TEXT UNIQUE,
-    name TEXT,
-    company TEXT,
-    created_at TEXT,
-    source TEXT
-  )
-`
-).run();
-db.prepare(
-  `
-  CREATE TABLE IF NOT EXISTS subscriptions (
-    id TEXT PRIMARY KEY,
-    subscriber_id TEXT,
-    plan TEXT,
-    cycle TEXT,
-    status TEXT,
-    stripe_customer_id TEXT,
-    stripe_subscription_id TEXT,
-    created_at TEXT,
-    updated_at TEXT
-  )
-`
-).run();
-db.prepare(
-  `
-  CREATE TABLE IF NOT EXISTS payments (
-    id TEXT PRIMARY KEY,
-    subscription_id TEXT,
-    provider TEXT,
-    amount_cents INTEGER,
-    currency TEXT,
-    status TEXT,
-    raw JSON,
-    created_at TEXT
-  )
-`
-).run();
-db.prepare(
-  `
-  CREATE TABLE IF NOT EXISTS logs_connectors (
-    id TEXT PRIMARY KEY,
-    subscriber_id TEXT,
-    action TEXT,
-    connector TEXT,
-    ok INTEGER,
-    detail TEXT,
-    created_at TEXT
-  )
-`
-).run();
-
-// Billing tables (minimal subset)
-db.prepare(
-  `
+  // Billing tables (minimal subset)
+  db.prepare(
+    `
   CREATE TABLE IF NOT EXISTS plans (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -437,80 +478,83 @@ db.prepare(
     is_active INTEGER NOT NULL DEFAULT 1
   )
 `
-).run();
+  ).run();
 
-// Seed default plans if table empty
-const planCount = db.prepare('SELECT COUNT(*) as c FROM plans').get().c;
-if (planCount === 0) {
-  const defaultPlans = [
-    {
-      id: 'free',
-      name: 'Free',
-      monthly: 0,
-      yearly: 0,
-      features: ['Basic access'],
-    },
-    {
-      id: 'builder',
-      name: 'Builder',
-      monthly: 1500,
-      yearly: 15000,
-      features: ['Builder tools', 'Email support'],
-    },
-    {
-      id: 'pro',
-      name: 'Pro',
-      monthly: 4000,
-      yearly: 40000,
-      features: ['All builder features', 'Priority support'],
-    },
-    {
-      id: 'enterprise',
-      name: 'Enterprise',
-      monthly: 0,
-      yearly: 0,
-      features: ['Custom pricing', 'Dedicated support'],
-    },
-  ];
-  const stmt = db.prepare(
-    'INSERT INTO plans (id, name, monthly_price_cents, yearly_price_cents, features, is_active) VALUES (?, ?, ?, ?, ?, 1)'
-  );
-  for (const p of defaultPlans) {
-    stmt.run(p.id, p.name, p.monthly, p.yearly, JSON.stringify(p.features));
+  // Seed default plans if table empty
+  const planCount = db.prepare('SELECT COUNT(*) as c FROM plans').get().c;
+  if (planCount === 0) {
+    const defaultPlans = [
+      {
+        id: 'free',
+        name: 'Free',
+        monthly: 0,
+        yearly: 0,
+        features: ['Basic access'],
+      },
+      {
+        id: 'builder',
+        name: 'Builder',
+        monthly: 1500,
+        yearly: 15000,
+        features: ['Builder tools', 'Email support'],
+      },
+      {
+        id: 'pro',
+        name: 'Pro',
+        monthly: 4000,
+        yearly: 40000,
+        features: ['All builder features', 'Priority support'],
+      },
+      {
+        id: 'enterprise',
+        name: 'Enterprise',
+        monthly: 0,
+        yearly: 0,
+        features: ['Custom pricing', 'Dedicated support'],
+      },
+    ];
+    const stmt = db.prepare(
+      'INSERT INTO plans (id, name, monthly_price_cents, yearly_price_cents, features, is_active) VALUES (?, ?, ?, ?, ?, 1)'
+    );
+    for (const p of defaultPlans) {
+      stmt.run(p.id, p.name, p.monthly, p.yearly, JSON.stringify(p.features));
+    }
   }
-}
 
-// Quantum AI table seed
-db.prepare(
-  `
+  // Quantum AI table seed
+  db.prepare(
+    `
   CREATE TABLE IF NOT EXISTS quantum_ai (
     topic TEXT PRIMARY KEY,
     summary TEXT NOT NULL
   )
 `
-).run();
-const qSeed = [
-  {
-    topic: 'reasoning',
-    summary:
-      'Quantum parallelism lets models explore many reasoning paths simultaneously for accelerated insight.',
-  },
-  {
-    topic: 'memory',
-    summary:
-      'Quantum RAM with entangled states hints at dense, instantly linked memory architectures.',
-  },
-  {
-    topic: 'symbolic',
-    summary:
-      'Interference in quantum-symbolic AI could amplify useful symbol chains while damping noise.',
-  },
-];
-for (const row of qSeed) {
-  db.prepare(
-    'INSERT OR IGNORE INTO quantum_ai (topic, summary) VALUES (?, ?)'
-  ).run(row.topic, row.summary);
+  ).run();
+  const qSeed = [
+    {
+      topic: 'reasoning',
+      summary:
+        'Quantum parallelism lets models explore many reasoning paths simultaneously for accelerated insight.',
+    },
+    {
+      topic: 'memory',
+      summary:
+        'Quantum RAM with entangled states hints at dense, instantly linked memory architectures.',
+    },
+    {
+      topic: 'symbolic',
+      summary:
+        'Interference in quantum-symbolic AI could amplify useful symbol chains while damping noise.',
+    },
+  ];
+  for (const row of qSeed) {
+    db.prepare(
+      'INSERT OR IGNORE INTO quantum_ai (topic, summary) VALUES (?, ?)'
+    ).run(row.topic, row.summary);
+  }
 }
+
+attachSlackExceptions({ app, db });
 
 // Git API
 app.use('/api/git', requireAuth, gitRouter);

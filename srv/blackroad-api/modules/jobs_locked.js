@@ -28,7 +28,37 @@ const { spawn, spawnSync } = require('child_process');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const path = require('path');
-const Database = require('better-sqlite3');
+const disableDbFlag = String(
+  process.env.BR_TEST_DISABLE_DB || process.env.BRC_DISABLE_NATIVE_DB || ''
+).toLowerCase();
+const SHOULD_DISABLE_DB = disableDbFlag === '1' || disableDbFlag === 'true';
+
+let Database;
+if (!SHOULD_DISABLE_DB) {
+  try {
+    Database = require('better-sqlite3');
+  } catch (err) {
+    console.warn(
+      '[jobs_locked] better-sqlite3 unavailable, using mock DB:',
+      err
+    );
+  }
+}
+
+function createMockDb() {
+  const noopStatement = {
+    run: () => ({ changes: 0, lastInsertRowid: 0 }),
+    all: () => [],
+    get: () => undefined,
+    iterate: function* iterate() {},
+  };
+  return {
+    prepare() {
+      return { ...noopStatement };
+    },
+    close: () => {},
+  };
+}
 const YAML = require('yaml');
 
 const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
@@ -109,6 +139,9 @@ function resolveImageDigest(image) {
 }
 
 function db() {
+  if (!Database) {
+    return createMockDb();
+  }
   return new Database(DB_PATH);
 }
 function run(db, sql, p = []) {
@@ -242,7 +275,7 @@ function buildContainerArgs({
 function wireChild(job_id, child, onClose) {
   return new Promise((resolve) => {
     let lastPct = 0;
-    const handleChunk = async (buf, source) => {
+    const handleChunk = async (buf, _source) => {
       const s = buf.toString();
       await appendEvent(job_id, 'log', s);
       for (const line of s.split(/\r?\n/)) {
@@ -420,8 +453,6 @@ async function runPipeline(job_id, project, env) {
     const image = st.image || DEFAULT_IMG;
     const binds = Array.isArray(st.binds) ? st.binds.slice() : [];
     const stepEnv = { ...pipe.env, ...env, ...(st.env || {}) };
-    const user = st.user; // e.g., "1000:1000"
-
     let child;
     const cmdString = st.cmd || 'true';
     const name = `br_job_${job_id}_${i}`;

@@ -1,9 +1,10 @@
 const js = require('@eslint/js');
+const globals = require('globals');
 
 module.exports = [
   js.configs.recommended,
   {
-    files: ['eslint.config.js'],
+    files: ['eslint.config.js', 'jest.config.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'commonjs',
@@ -14,32 +15,38 @@ module.exports = [
     },
   },
   {
-    files: [
-      'srv/blackroad-api/server_full.js',
-      'tests/api_health.test.js',
-      'tests/git_api.test.js',
-    ],
+    files: ['src/**/*.js', 'srv/**/*.js', 'scripts/**/*.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'commonjs',
       globals: {
-        require: 'readonly',
-        module: 'readonly',
-        __dirname: 'readonly',
-        process: 'readonly',
-        describe: 'readonly',
-        test: 'readonly',
-        it: 'readonly',
-        expect: 'readonly',
-        beforeAll: 'readonly',
-        afterAll: 'readonly',
-        console: 'readonly',
-        Buffer: 'readonly',
+        ...globals.node,
         fetch: 'readonly',
-        setInterval: 'readonly',
-        setTimeout: 'readonly',
-        clearInterval: 'readonly',
-        clearTimeout: 'readonly',
+        Request: 'readonly',
+        Response: 'readonly',
+        Headers: 'readonly',
+      },
+    },
+    rules: {
+      'no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+      'no-empty': ['error', { allowEmptyCatch: true }],
+    },
+  },
+  {
+    files: ['tests/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'commonjs',
+      globals: {
+        ...globals.node,
+        ...globals.jest,
+        fetch: 'readonly',
+        Request: 'readonly',
+        Response: 'readonly',
+        Headers: 'readonly',
       },
     },
     rules: {
