@@ -169,7 +169,7 @@ class RohoncDecoder:
 def parse_symbol_stream(stream: str) -> List[int]:
     """Parse a whitespace separated stream of integers into a symbol list."""
 
-    tokens = [token for token in stream.replace("\n", " ").split(" ") if token]
+    tokens = [token for token in stream.split() if token]
     if not tokens:
         return []
     try:
