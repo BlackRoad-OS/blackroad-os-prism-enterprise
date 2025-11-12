@@ -18,7 +18,7 @@ class AutoNovelAgent:
         default_factory=lambda: set(DEFAULT_SUPPORTED_ENGINES)
     )
 
-    SAMPLE_SNIPPETS: ClassVar[Dict[str, str]] = {
+    SAMPLE_SNIPPETS: ClassVar[dict[str, str]] = {
         "python": "def solve():\n    pass\n",
         "javascript": "function solve() {\n  return null;\n}\n",
         "java": "class Solution {\n    void solve() {\n    }\n}\n",
