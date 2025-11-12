@@ -6,6 +6,6 @@
   "capabilities": [
     "profile",
     "memory-summary",
-    "ipc-log"
+    "manifest-export"
   ]
 }

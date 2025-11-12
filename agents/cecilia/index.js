@@ -9,19 +9,28 @@ const agentDir = path.join(prismRoot, 'agents', name);
 const logDir = path.join(prismRoot, 'logs');
 const logFile = path.join(logDir, `${name}.log`);
 const ipcDir = path.join(prismRoot, 'ipc', name);
-const manifest = require('./manifest.json');
-const profile = require('./profile.json');
-
 fs.mkdirSync(agentDir, { recursive: true });
 fs.mkdirSync(logDir, { recursive: true });
 fs.mkdirSync(ipcDir, { recursive: true });
 
-fs.writeFileSync(path.join(agentDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
-fs.writeFileSync(path.join(agentDir, 'profile.json'), JSON.stringify(profile, null, 2));
-
 function logMessage(msg) {
   fs.appendFileSync(logFile, msg + '\n');
 }
+
+function readJson(targetPath, fallback) {
+  try {
+    if (fs.existsSync(targetPath)) {
+      return JSON.parse(fs.readFileSync(targetPath, 'utf8'));
+    }
+  } catch (error) {
+    logMessage(`failed to read ${targetPath}: ${error.message}`);
+  }
+  return fallback;
+}
+
+const profilePath = path.join(agentDir, 'profile.json');
+const fallbackProfile = require('./profile.json');
+const profile = readJson(profilePath, fallbackProfile);
 
 function sendMessage(msg) {
   process.stdout.write(msg + '\n');

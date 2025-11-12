@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
+from copy import deepcopy
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Iterable, Optional
@@ -31,7 +33,7 @@ class CeciliaAgent:
     def profile(self) -> Dict[str, Any]:
         """Return a copy of the structured agent profile."""
 
-        profile_copy: Dict[str, Any] = json.loads(json.dumps(CECILIA_PROFILE))
+        profile_copy: Dict[str, Any] = deepcopy(CECILIA_PROFILE)
         profile_copy["memory"] = self.memory_summary()
         profile_copy["aliases"] = sorted(self.aliases)
         return profile_copy
@@ -78,6 +80,12 @@ class CeciliaAgent:
 
         if self.memory_db_path is not None:
             return self.memory_db_path if self.memory_db_path.exists() else None
+
+        env_override = os.getenv("MEMORY_DB_PATH")
+        if env_override:
+            override_path = Path(env_override)
+            if override_path.exists():
+                return override_path
 
         candidate = self.memory_path / "memory.db"
         if candidate.exists():
