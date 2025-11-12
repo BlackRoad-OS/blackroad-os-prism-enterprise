@@ -19,7 +19,7 @@ architecture:
       - "Secondary: GitHub private repo (commit-signed logs)"
       - "Tertiary: Cold archive (Pi cluster AES-256)"
   - hash_algorithm: "SHA-512 with time-based nonce"
-  - retention: "7 years (per SEC Rule 17a-4 / MN Rule 2876.4110)"
+  - retention: "7 years (per SEC Rule 17a-4/MN Rule 2876.4110)"
   - ledger_entry_format:
       fields:
         - "timestamp_utc"
