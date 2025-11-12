@@ -1,64 +1,41 @@
-const test = require('node:test');
-const assert = require('node:assert/strict');
-
+process.env.NODE_ENV = 'test';
+process.env.USE_SQLITE_MOCK = '1';
 process.env.JWT_SECRET = 'test-secret';
+jest.mock('better-sqlite3', () => require('./mocks/better-sqlite3.js'));
+const request = require('supertest');
 const { app } = require('../backend/server');
 
-function getPort(server) {
-  return server.address().port;
-}
+describe('Backend validation', () => {
+  it('rejects malformed json and missing fields', async () => {
+    const agent = request(app);
 
-test('rejects malformed json and missing fields', async () => {
-  const server = app.listen(0);
-  const port = getPort(server);
-  try {
-    // login to get token
-    const loginRes = await fetch(`http://127.0.0.1:${port}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: 'root', password: 'Codex2025' })
-    });
-    const loginJson = await loginRes.json();
-    const token = loginJson.token;
+    const loginRes = await agent
+      .post('/api/auth/login')
+      .send({ username: 'root', password: 'Codex2025' });
 
-    // malformed json
-    const badRes = await fetch(`http://127.0.0.1:${port}/api/tasks`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: '{"title": "bad"' // missing closing brace
-    });
-    assert.equal(badRes.status, 400);
+    expect(loginRes.status).toBe(200);
+    const token = loginRes.body.token;
+    expect(token).toBeDefined();
 
-    // missing title field
-    const missRes = await fetch(`http://127.0.0.1:${port}/api/tasks`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({})
-    });
-    assert.equal(missRes.status, 400);
-  } finally {
-    server.close();
-  }
-});
+    const badRes = await agent
+      .post('/api/tasks')
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json')
+      .send('{"title": "bad"');
+    expect(badRes.status).toBe(400);
 
-test('returns json for not found routes', async () => {
-  const server = app.listen(0);
-  const port = getPort(server);
-  try {
-    const res = await fetch(`http://127.0.0.1:${port}/nope`);
-    assert.equal(res.status, 404);
-    const contentType = res.headers.get('content-type') || '';
-    assert.ok(contentType.includes('application/json'));
-    const body = await res.json();
-    assert.equal(body.error, 'not found');
-  } finally {
-    server.close();
-  }
+    const missingRes = await agent
+      .post('/api/tasks')
+      .set('Authorization', `Bearer ${token}`)
+      .send({});
+    expect(missingRes.status).toBe(400);
+  });
+
+  it('returns json for not found routes', async () => {
+    const res = await request(app).get('/nope');
+    expect(res.status).toBe(404);
+    expect(res.headers['content-type']).toContain('application/json');
+    expect(res.body.error).toBe('not found');
+  });
 });
 

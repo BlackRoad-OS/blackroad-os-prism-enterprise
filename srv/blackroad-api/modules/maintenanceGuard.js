@@ -1,5 +1,12 @@
 const { getMaintenanceConfig } = require('../lib/maintenanceConfig');
 
+const HEALTH_PATHS = new Set([
+  '/health',
+  '/health/live',
+  '/health/ready',
+  '/api/health',
+]);
+
 const SPECIAL_CASES = {
   'POST /secrets/materialize': {
     status: 403,
@@ -114,7 +121,7 @@ function shouldBypassWithBreakGlass(req, maintenanceConfig, logger) {
         method: req.method,
         path: req.originalUrl ? req.originalUrl.split('?')[0] : req.path,
       });
-    } catch (_) {
+    } catch {
       // ignore logging errors
     }
     return { allowed: true, attempted: true };
@@ -127,6 +134,12 @@ module.exports = function maintenanceGuard({ logger } = {}) {
   return function maintenanceGuardMiddleware(req, res, next) {
     const config = getMaintenanceConfig();
     if (config.feature_flags?.global_enabled !== false) {
+      return next();
+    }
+
+    const normalizedPath = normalizePath(req.path);
+    if (HEALTH_PATHS.has(normalizedPath)) {
+      res.setHeader('X-AutoPal-Mode', 'maintenance');
       return next();
     }
 
@@ -186,7 +199,7 @@ module.exports = function maintenanceGuard({ logger } = {}) {
         status,
         breakGlassAttempted: breakGlass.attempted,
       });
-    } catch (_) {
+    } catch {
       // Never block on audit/logging failures during maintenance.
     }
 

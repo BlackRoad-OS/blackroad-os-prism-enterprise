@@ -2,12 +2,22 @@
 // Requires: ethers@6, crypto, fs. ENV: ETH_RPC_URL, MINT_PK, CLAIMREG_ADDR
 const fs = require("fs"); const path = require("path"); const crypto = require("crypto");
 let ethers;
-try { ({ ethers } = require("ethers")); } catch (e) { console.warn("[patentnet] WARNING: ethers not installed"); }
+try { ({ ethers } = require("ethers")); } catch { console.warn("[patentnet] WARNING: ethers not installed"); }
 
 module.exports = function attachPatentNet({ app }) {
   const ARCH = "/srv/patent-archive"; fs.mkdirSync(ARCH, {recursive:true});
-  const provider = ethers ? new ethers.JsonRpcProvider(process.env.ETH_RPC_URL) : null;
-  const wallet = ethers ? new ethers.Wallet(process.env.MINT_PK, provider) : null;
+  const rpcUrl = process.env.ETH_RPC_URL || "";
+  const mintKey = process.env.MINT_PK || "";
+  const provider = ethers && rpcUrl ? new ethers.JsonRpcProvider(rpcUrl) : null;
+  let wallet = null;
+  if (ethers && mintKey) {
+    try {
+      wallet = new ethers.Wallet(mintKey, provider || undefined);
+    } catch {
+      console.warn("[patentnet] WARNING: invalid MINT_PK provided; blockchain features disabled");
+      wallet = null;
+    }
+  }
   const claimAddr = process.env.CLAIMREG_ADDR || (fs.existsSync("/srv/blackroad-api/.claimregistry.addr") ?
     fs.readFileSync("/srv/blackroad-api/.claimregistry.addr","utf8").trim() : "");
   if (!claimAddr) console.warn("[patentnet] WARNING: no CLAIMREG_ADDR set");
@@ -16,7 +26,7 @@ module.exports = function attachPatentNet({ app }) {
     "function commitDailyRoot(uint256 yyyymmdd, bytes32 root) external",
     "event ClaimRegistered(uint256 indexed tokenId, address indexed owner, bytes32 contentHash, string uri, string claimType, uint64 timestamp)"
   ];
-  const contract = claimAddr && ethers ? new ethers.Contract(claimAddr, abi, wallet) : null;
+  const contract = claimAddr && wallet ? new ethers.Contract(claimAddr, abi, wallet) : null;
 
   const OK = (res, x)=>res.type("application/json").send(JSON.stringify({ok:true, data:x, error:null}));
   const FAIL=(res, msg,code=400)=>res.status(code).type("application/json").send(JSON.stringify({ok:false,data:null,error:String(msg)}));
