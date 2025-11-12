@@ -1,11 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-const base = process.env.E2E_BASE || "http://127.0.0.1:5173";
-
 test("team dropdown filters items", async ({ page }) => {
-  await page.goto(`${base}/roadview`);
+  await page.goto("/portal.html#/roadview");
   await expect(page.getByRole("heading", { name: /RoadView/i })).toBeVisible();
-  await page.selectOption(page.getByRole("combobox", { name: "Team" }), "alpha");
+  await page.getByRole("combobox", { name: "Team" }).selectOption("alpha");
   await expect(page.getByText("Quest Engine")).toBeVisible();
   await expect(page.getByText("City Skyline")).toBeHidden();
 });
