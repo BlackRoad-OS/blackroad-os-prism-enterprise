@@ -103,9 +103,6 @@ class CoordinationDetector(FileSystemEventHandler):
 
 def monitor_network_connections():
     """Monitor for suspicious network connections"""
-    openai_ips = []
-    anthropic_ips = []
-
     try:
         connections = psutil.net_connections(kind='inet')
 
