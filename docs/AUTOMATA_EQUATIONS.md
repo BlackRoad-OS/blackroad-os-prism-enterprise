@@ -86,17 +86,17 @@ Some automata-inspired systems can be represented with linear state space equati
 
 where $A, B, C,$ and $D$ are matrices and $\mathbf{z}, \mathbf{x}, \mathbf{w}$ are vectors of compatible sizes.
 
-## 6. Feedback Interpretation
+## 6. Feedback and Equilibrium in Automata
 
-For a feedback relationship of the form
+In automata theory, feedback can be interpreted as routing the output of an automaton (such as a Mealy machine) back as part of its input, creating a closed-loop system. This mirrors classical feedback systems while remaining grounded in state transitions and output functions.
 
-$$z = y \cdot x - w$$
+Consider a Mealy machine where the output at step $n$, $w_n = y(z_n, x_n)$, is fed back as an input for the next step, i.e., $x_{n+1} = f(w_n)$. The state update then becomes:
 
-substituting the Mealy-style output $w = y(x)$ yields:
+$$z_{n+1} = \delta(z_n, x_{n+1}) = \delta(z_n, f(w_n))$$
 
-$$z = y \cdot x - y(x)$$
+An equilibrium (or fixed point) occurs when the state and input/output values stop changing, i.e., $z_{n+1} = z_n$ and $x_{n+1} = x_n$. This happens when the feedback loop stabilizes, so that $w = y(z, x)$ and $x = f(w)$ yield consistent values.
 
-At equilibrium $z = 0$, which holds when $y \cdot x = y(x)$. This is automatic for linear transformations where $y(x) = y \cdot x$, and it can also occur at fixed points of nonlinear feedback functions.
+For example, if $f$ is the identity and $y$ is a linear function, equilibrium is reached when $x = y(z, x)$, analogous to the condition $y \cdot x = y(x)$ in linear systems. In automata, such equilibria correspond to stable cycles or fixed points in the state transition graph.
 
 ## 7. Composition Patterns
 
@@ -152,6 +152,7 @@ States track the remainder when reading a binary number modulo 3:
 
 - $Q = \{0, 1, 2\}$
 - $\Sigma = \{0, 1\}$
+- $F = \{0\}$
 - $\delta(q, a) = (2q + a) \bmod 3$
 
 | Current state | Input | Next state |
