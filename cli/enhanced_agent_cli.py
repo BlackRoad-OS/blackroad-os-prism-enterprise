@@ -24,7 +24,7 @@ try:
     from rich.console import Console
     from rich.table import Table
     from rich.panel import Panel
-    from rich.progress import Progress, SpinnerColumn, TextColumn
+    # from rich.progress import Progress, SpinnerColumn, TextColumn  # Removed unused imports
     from rich.syntax import Syntax
     from rich.markdown import Markdown
     from rich.layout import Layout
