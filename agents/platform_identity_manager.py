@@ -18,7 +18,7 @@ import json
 import os
 import logging
 from dataclasses import dataclass, asdict
-from typing import List, Dict, Optional, Set
+from typing import List, Dict, Optional
 from pathlib import Path
 from datetime import datetime
 import hashlib
