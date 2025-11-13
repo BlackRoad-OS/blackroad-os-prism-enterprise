@@ -1,7 +1,7 @@
 """Tests for ``parse_numeric_prefix``.
 
-These checks cover both successful numeric parsing and the fallback to 1.0
-for invalid prefixes.
+The cases below capture both valid numeric prefixes and the fallback behavior
+when the input does not start with a parseable number.
 """
 
 from prism_utils import parse_numeric_prefix
