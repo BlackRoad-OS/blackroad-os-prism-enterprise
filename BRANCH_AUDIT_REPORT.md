@@ -152,6 +152,8 @@ Both critical unmerged branches have been successfully merged:
    - Establish branch lifecycle policy
    - Use cleanup scripts (already exists: `cleanup-dead-branches.sh`)
    - Regularly audit and prune stale branches
+   - Automate status snapshots via `python tools/branch_audit.py` (see
+     `docs/branch_audit.md`) so the numbers in this report stay fresh
 
 ### Branch Management Strategy
 
