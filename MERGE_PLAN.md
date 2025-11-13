@@ -8,6 +8,16 @@
 | Tests | Scheduled | Rerunning auth and permission-focused suites; monitoring for regressions or timeout edges. |
 | Merge plan | Pending review | Will proceed to main once verification steps below are complete and no blockers are reported. |
 
+## Cross-Repository Readiness
+
+| Repository | Status | Blockers / Notes | Required Action |
+| --- | --- | --- | --- |
+| blackboxprogramming/blackroad-prism-console | ❌ Broken | Latest merge from `codex/ecs-canary-proto` updated multiple workflows and now fails the required Vercel deployment plus commit-signature enforcement checks. | Fix or revert the workflow changes on a stabilization branch and re-run CI before merging anything else to `main`. |
+| blackboxprogramming/codex-infinity | ✅ OK (no CI) | Recent merge commit shows no regressions, but the repo lacks automated checks. | Optionally enable basic CI so that future merges surface failures automatically. |
+| blackboxprogramming/quantum-math-lab | ✅ OK (no CI) | Head commit is a straightforward merge without diff visibility; no issues reported, but CI is absent. | Set up minimal tests/linting prior to high-risk merges to avoid silent regressions. |
+
+**Important:** we cannot "just merge everything" while the console repo is red. Hold merges there until the CI gates are green again; otherwise downstream repos inherit the instability described above.
+
 ### Next Steps
 
 - [ ] Confirm agents are configured with least-privilege access scopes.
