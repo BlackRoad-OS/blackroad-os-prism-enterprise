@@ -53,11 +53,11 @@ function Window({ id, title, layout, setLayout, children }) {
         aria-labelledby={`${id}-title`}
       >
         <div className="flex items-center justify-between bg-neutral-800 text-white px-2 py-1 cursor-move">
-          <span id={`${id}-title`} className="text-sm flex items-center gap-1">
+          <span className="text-sm flex items-center gap-1">
             <span className="text-green-400" aria-hidden="true">
               ●
             </span>
-            {title}
+            <span id={`${id}-title`}>{title}</span>
           </span>
           <div className="space-x-1">
             <button type="button" aria-label="minimize" onClick={() => update({ open: false })}>
