@@ -124,6 +124,12 @@ def audit_branches(scope: str, remote: str, base: str, limit: int) -> dict:
 
     unmerged_info = [_branch_metadata(br, base_ref) for br in unmerged[:limit]]
 
+    sample_unmerged = []
+    for info in unmerged_info:
+        entry = dataclasses.asdict(info)
+        entry["last_commit_at"] = info.last_commit_at.isoformat()
+        sample_unmerged.append(entry)
+
     return {
         "scope": scope,
         "remote": remote,
@@ -131,7 +137,7 @@ def audit_branches(scope: str, remote: str, base: str, limit: int) -> dict:
         "total_branches": total,
         "merged": len(merged),
         "unmerged": len(unmerged),
-        "sample_unmerged": [dataclasses.asdict(info) for info in unmerged_info],
+        "sample_unmerged": sample_unmerged,
     }
 
 
