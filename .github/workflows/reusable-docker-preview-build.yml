@@ -86,9 +86,7 @@ jobs:
           echo "primary-tag=${PRIMARY_TAG}" >> "$GITHUB_OUTPUT"
 
           if [ -n "${EXTRA}" ]; then
-            mapfile -t EXTRA_LINES <<'EOF_INPUT'
-${EXTRA}
-EOF_INPUT
+            mapfile -t EXTRA_LINES <<< "${EXTRA}"
             TAG_LIST=()
             for suffix in "${EXTRA_LINES[@]}"; do
               if [ -n "$suffix" ]; then

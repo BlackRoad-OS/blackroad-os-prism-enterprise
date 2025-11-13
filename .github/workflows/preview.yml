@@ -190,7 +190,7 @@ jobs:
           aws ecs wait services-stable --cluster "$ECS_CLUSTER" --services "$NAME"
           echo "PREVIEW_URL=https://${HOST}" >> $GITHUB_ENV
 
-      - name: Smoke: UI health page
+      - name: "Smoke: UI health page"
         if: github.event.action != 'closed'
         run: |
           set -euo pipefail
