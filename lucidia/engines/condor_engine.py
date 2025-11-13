@@ -28,6 +28,8 @@ try:  # Condor itself may not be installed in all environments
 except Exception:  # pragma: no cover - Condor may be absent
     condor = None  # type: ignore
 
+CONDOR_PACKAGE_PREFIX = "condor"
+
 ALLOWED_IMPORTS = {"condor", "math", "numpy", "dataclasses"}
 FORBIDDEN_NAMES = {
     "open",
@@ -115,8 +117,11 @@ def solve_algebraic(model_cls: Type[Any], **params: Any) -> Any:
     models remain supported even without Condor installed.
     """
 
-    if condor is None and model_cls.__module__.split(".")[0] == "condor":
-        raise RuntimeError("Condor is not installed")
+    if condor is None and model_cls.__module__.split(".")[0] == CONDOR_PACKAGE_PREFIX:
+        raise RuntimeError(
+            "Condor is not installed. Install it with: pip install condor\n"
+            "See https://github.com/nasa/condor for documentation."
+        )
 
     model = model_cls(**params)
     result = model.solve() if hasattr(model, "solve") else model
