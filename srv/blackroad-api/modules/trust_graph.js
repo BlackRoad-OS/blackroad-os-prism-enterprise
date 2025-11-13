@@ -2,15 +2,107 @@
 // Uses signed TrustRank: t = (1-α)·s + α·(P+^T t - β P-^T t), clip to [0,1].
 // Caches Truth objects from IPFS locally for fast ranking.
 
+const { randomUUID } = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 
-const IPFS_API = process.env.IPFS_API || 'http://127.0.0.1:5001';
 const IPFS_GATE = process.env.IPFS_GATE || 'http://127.0.0.1:8080'; // for GET /ipfs/:cid
 const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
 const TRUTH_DIR = process.env.TRUTH_DIR || '/srv/truth';
 const CACHE_DIR = path.join(TRUTH_DIR, 'cache');
+const ORIGIN_KEY_PATH = process.env.ORIGIN_KEY_PATH || '/srv/secrets/origin.key';
+const MAX_BODY_BYTES = Number(process.env.TRUST_GRAPH_MAX_BODY || 256 * 1024);
+const CID_RE = /^[a-zA-Z0-9_-]{10,128}$/;
+
+let ORIGIN_KEY = '';
+try {
+  ORIGIN_KEY = fs.readFileSync(ORIGIN_KEY_PATH, 'utf8').trim();
+} catch {}
+
+function payloadError(code, message) {
+  const err = new Error(message);
+  err.statusCode = code;
+  return err;
+}
+
+async function readJsonBody(req, limitBytes = MAX_BODY_BYTES) {
+  const lenHeader = Number(req.headers['content-length'] || '0');
+  if (lenHeader && lenHeader > limitBytes) {
+    throw payloadError(413, 'payload_too_large');
+  }
+  if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+    return req.body;
+  }
+  let raw = '';
+  for await (const chunk of req) {
+    raw += chunk;
+    if (Buffer.byteLength(raw, 'utf8') > limitBytes) {
+      throw payloadError(413, 'payload_too_large');
+    }
+  }
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw);
+  } catch {
+    throw payloadError(400, 'bad_json');
+  }
+}
+
+function requireAuth(req, res, next) {
+  const ip = req.socket?.remoteAddress || '';
+  if (ip.startsWith('127.') || ip === '::1') return next();
+  const key = req.get ? req.get('X-BlackRoad-Key') : req.headers['x-blackroad-key'];
+  if (ORIGIN_KEY && key === ORIGIN_KEY) return next();
+  return res.status(401).json({ error: 'unauthorized' });
+}
+
+function ensureCidFormat(cid) {
+  if (typeof cid !== 'string' || !CID_RE.test(cid)) {
+    throw new Error('invalid_cid');
+  }
+  return cid;
+}
+
+function safeCachePath(cid) {
+  const safeCid = ensureCidFormat(cid);
+  const fp = path.join(CACHE_DIR, `${safeCid}.json`);
+  const resolved = path.resolve(fp);
+  if (!resolved.startsWith(path.resolve(CACHE_DIR))) throw new Error('invalid_cid');
+  return { safeCid, fp };
+}
+
+function tailFileLines(filePath, maxLines = 500) {
+  if (!fs.existsSync(filePath)) return [];
+  const fd = fs.openSync(filePath, 'r');
+  try {
+    const stat = fs.fstatSync(fd);
+    const chunkSize = 64 * 1024;
+    let position = stat.size;
+    let buffer = '';
+    const lines = [];
+    while (position > 0 && lines.length < maxLines) {
+      const toRead = Math.min(chunkSize, position);
+      position -= toRead;
+      const chunk = Buffer.alloc(toRead);
+      fs.readSync(fd, chunk, 0, toRead, position);
+      buffer = chunk.toString('utf8') + buffer;
+      let idx;
+      while ((idx = buffer.lastIndexOf('\n')) !== -1) {
+        const line = buffer.slice(idx + 1);
+        buffer = buffer.slice(0, idx);
+        if (line) {
+          lines.push(line);
+          if (lines.length === maxLines) break;
+        }
+      }
+    }
+    if (buffer && lines.length < maxLines) lines.push(buffer);
+    return lines.reverse();
+  } finally {
+    fs.closeSync(fd);
+  }
+}
 
 function dbOpen() { return new sqlite3.Database(DB_PATH); }
 function all(db, sql, p=[]) { return new Promise((r,j)=>db.all(sql,p,(e,x)=>e?j(e):r(x))); }
@@ -95,16 +187,19 @@ function trustRank({ idArr, outPlus, outMinus, seeds={}, alpha=0.85, beta=0.5, i
 
 async function fetchTruth(cid){
   fs.mkdirSync(CACHE_DIR, {recursive:true});
-  const fp = path.join(CACHE_DIR, cid+'.json');
+  const { safeCid, fp } = safeCachePath(cid);
   if (fs.existsSync(fp)){
     try { return JSON.parse(fs.readFileSync(fp,'utf8')); } catch {}
   }
-  // fetch from local IPFS gateway
-  const r = await fetch(`${IPFS_GATE}/ipfs/${cid}`, { method:'GET' });
+  const r = await fetch(`${IPFS_GATE}/ipfs/${safeCid}`, { method:'GET' });
   if (!r.ok) throw new Error('ipfs fetch '+r.status);
   const txt = await r.text();
   fs.writeFileSync(fp, txt);
-  return JSON.parse(txt);
+  try {
+    return JSON.parse(txt);
+  } catch (e) {
+    throw new Error('invalid_truth_json');
+  }
 }
 
 function ageSeconds(tsIso){
@@ -114,47 +209,55 @@ function ageSeconds(tsIso){
 
 module.exports = function attachTrustGraph({ app }){
   const db = dbOpen();
+  const sendError = (res, err) => {
+    if (err?.statusCode) return res.status(err.statusCode).json({ error: err.message });
+    return res.status(500).json({ error: String(err) });
+  };
 
   // identities
-  app.post('/api/trust/identities', async (req,res)=>{
-    let raw=''; req.on('data',d=>raw+=d); await new Promise(r=>req.on('end',r));
-    let o={}; try{o=JSON.parse(raw||'{}');}catch{return res.status(400).json({error:'bad json'})}
-    if (!o.did) return res.status(400).json({error:'did required'});
-    try{
+  app.post('/api/trust/identities', requireAuth, async (req,res)=>{
+    try {
+      const o = await readJsonBody(req);
+      if (!o.did) return res.status(400).json({error:'did required'});
       await run(db, `INSERT OR IGNORE INTO trust_identities (did,label,created_at) VALUES (?,?,?)`, [o.did, o.label||null, Math.floor(Date.now()/1000)]);
       res.json({ok:true});
-    }catch(e){ res.status(500).json({error:String(e)}); }
+    } catch (err) {
+      sendError(res, err);
+    }
   });
 
   // add/replace edge
-  app.post('/api/trust/edge', async (req,res)=>{
-    let raw=''; req.on('data',d=>raw+=d); await new Promise(r=>req.on('end',r));
-    let o={}; try{o=JSON.parse(raw||'{}');}catch{return res.status(400).json({error:'bad json'})}
-    const {src,dst,weight,evidence} = o;
-    if (!(src&&dst) || typeof weight!=='number') return res.status(400).json({error:'src,dst,weight required'});
-    if (weight<-1 || weight>1) return res.status(400).json({error:'weight in [-1,1]'});
-    try{
+  app.post('/api/trust/edge', requireAuth, async (req,res)=>{
+    try {
+      const o = await readJsonBody(req);
+      const {src,dst,weight,evidence} = o;
+      if (!(src&&dst) || typeof weight!=='number') return res.status(400).json({error:'src,dst,weight required'});
+      if (weight<-1 || weight>1) return res.status(400).json({error:'weight in [-1,1]'});
       await run(db, `INSERT INTO trust_edges (src,dst,weight,evidence_cid,created_at) VALUES (?,?,?,?,?)
                      ON CONFLICT(src,dst) DO UPDATE SET weight=excluded.weight, evidence_cid=excluded.evidence_cid, created_at=excluded.created_at`,
                 [src,dst,weight,evidence||null, Math.floor(Date.now()/1000)]);
       res.json({ok:true});
-    }catch(e){ res.status(500).json({error:String(e)}); }
+    } catch (err) {
+      sendError(res, err);
+    }
   });
 
   // lenses
-  app.post('/api/lenses', async (req,res)=>{
-    let raw=''; req.on('data',d=>raw+=d); await new Promise(r=>req.on('end',r));
-    let o={}; try{o=JSON.parse(raw||'{}');}catch{return res.status(400).json({error:'bad json'})}
-    const id = (o.lens_id || o.id || 'lens-'+Math.random().toString(36).slice(2,8));
-    const seeds = JSON.stringify(o.seeds||{});
-    const loveOver = JSON.stringify(o.love_override||null);
-    const lambda = Math.max(0, Math.min(1, +o.lambda ?? 0.6));
-    try{
+  app.post('/api/lenses', requireAuth, async (req,res)=>{
+    try {
+      const o = await readJsonBody(req);
+      const id = o.lens_id || o.id || `lens-${randomUUID()}`;
+      const seeds = JSON.stringify(o.seeds||{});
+      const loveOver = JSON.stringify(o.love_override||null);
+      const rawLambda = Number.isFinite(+o.lambda) ? +o.lambda : 0.6;
+      const lambda = Math.max(0, Math.min(1, rawLambda));
       await run(db, `INSERT OR REPLACE INTO trust_lenses (lens_id,label,lambda,seeds_json,love_override_json,created_at)
                      VALUES (?,?,?,?,?,?)`,
                 [id, o.label||id, lambda, seeds, loveOver, Math.floor(Date.now()/1000)]);
       res.json({ok:true, lens_id:id});
-    }catch(e){ res.status(500).json({error:String(e)}); }
+    } catch (err) {
+      sendError(res, err);
+    }
   });
   app.get('/api/lenses', async (_req,res)=>{
     const rows = await all(db, `SELECT lens_id,label,lambda,seeds_json,love_override_json FROM trust_lenses ORDER BY created_at DESC`);
@@ -167,13 +270,16 @@ module.exports = function attachTrustGraph({ app }){
   });
 
   // compute trust scores
-  app.post('/api/trust/compute', async (req,res)=>{
-    let raw=''; req.on('data',d=>raw+=d); await new Promise(r=>req.on('end',r));
-    let o={}; try{o=JSON.parse(raw||'{}');}catch{}
-    const { idArr,index,outPlus,outMinus } = await getEdges(db);
-    const seeds = o.seeds || {};
-    const t = trustRank({ idArr, outPlus, outMinus, seeds, alpha:o.alpha??0.85, beta:o.beta??0.5, iters:o.iters??50 });
-    res.json(t);
+  app.post('/api/trust/compute', requireAuth, async (req,res)=>{
+    try {
+      const o = await readJsonBody(req);
+      const { idArr,outPlus,outMinus } = await getEdges(db);
+      const seeds = o.seeds || {};
+      const t = trustRank({ idArr, outPlus, outMinus, seeds, alpha:o.alpha??0.85, beta:o.beta??0.5, iters:o.iters??50 });
+      res.json(t);
+    } catch (err) {
+      sendError(res, err);
+    }
   });
 
   // ranked feed with lens
@@ -181,33 +287,44 @@ module.exports = function attachTrustGraph({ app }){
     try{
       const lid = req.query.lid || null;
       const lens = lid ? (await all(db, `SELECT * FROM trust_lenses WHERE lens_id=?`, [lid]))[0] : null;
-      const seeds = lens ? JSON.parse(lens.seeds_json||'{}') : {};
-      const lambda = lens ? +lens.lambda : 0.6;
+      let seeds = {};
+      let lambda = 0.6;
+      if (lens){
+        try { seeds = JSON.parse(lens.seeds_json||'{}'); } catch { seeds = {}; }
+        lambda = Number.isFinite(+lens.lambda) ? +lens.lambda : 0.6;
+      }
 
       const { idArr,outPlus,outMinus } = await getEdges(db);
       const trustVec = trustRank({ idArr, outPlus, outMinus, seeds, alpha:0.85, beta:0.5, iters:50 });
 
-      // load local feed
       const feedPath = path.join(TRUTH_DIR, 'feed.ndjson');
-      const lines = fs.existsSync(feedPath) ? fs.readFileSync(feedPath,'utf8').trim().split('\n').filter(Boolean) : [];
-      const rows = lines.slice(-500).map(x=>JSON.parse(x)).reverse();
+      const lines = tailFileLines(feedPath, 500);
+      const rows = lines.map(line=>{ try { return JSON.parse(line); } catch { return null; } }).filter(r=>r && typeof r.cid==='string');
 
+      const fetchTasks = rows.map(r=>{
+        try {
+          const safeCid = ensureCidFormat(r.cid);
+          return fetchTruth(safeCid).then(obj=>({ cid:safeCid, obj }));
+        } catch {
+          return null;
+        }
+      }).filter(Boolean);
+
+      const results = await Promise.allSettled(fetchTasks);
       const out = [];
-      for (const r of rows){
-        try{
-          const obj = await fetchTruth(r.cid);                // {title, meta.publisher, love, ...}
-          const pub = obj?.meta?.publisher || obj?.meta?.did || 'unknown';
-          const love = Math.max(0, Math.min(1, +obj?.love || 0.5));
-          const attestCids = Array.isArray(obj?.evidence) ? obj.evidence : [];
-          // NOTE: if you store attestors separately, pull their DIDs; here we just use publisher trust
-          const T = Math.max(0, Math.min(1, trustVec[pub] ?? 0.5));
-          const age = ageSeconds(obj?.meta?.created);
-          const rec = Math.exp(-age/172800);  // ~2 days
-          const attestBoost = 1 + 0.3*Math.log(1 + attestCids.length);
-          const score = (lambda*love + (1-lambda)*T) * rec * attestBoost;
+      for (const result of results){
+        if (result.status !== 'fulfilled') continue;
+        const { cid, obj } = result.value;
+        const pub = obj?.meta?.publisher || obj?.meta?.did || 'unknown';
+        const love = Math.max(0, Math.min(1, Number.isFinite(+obj?.love) ? +obj.love : 0.5));
+        const attestCids = Array.isArray(obj?.evidence) ? obj.evidence : [];
+        const T = Math.max(0, Math.min(1, trustVec[pub] ?? 0.5));
+        const age = ageSeconds(obj?.meta?.created);
+        const rec = Math.exp(-age/172800);
+        const attestBoost = 1 + 0.3*Math.log(1 + attestCids.length);
+        const score = (lambda*love + (1-lambda)*T) * rec * attestBoost;
 
-          out.push({ cid:r.cid, title:obj?.title||obj?.type||'(untitled)', publisher: pub, love, trust:T, score, created: obj?.meta?.created });
-        }catch{}
+        out.push({ cid, title:obj?.title||obj?.type||'(untitled)', publisher: pub, love, trust:T, score, created: obj?.meta?.created });
       }
       out.sort((a,b)=>b.score-a.score);
       res.json(out.slice(0,200));
