@@ -122,7 +122,17 @@ export default [
     rules: {}
   },
   {
-    files: ['**/*.{js,cjs,jsx}'],
+    files: ['**/*.{js,jsx}'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      parserOptions: { ecmaFeatures: { jsx: true } },
+      globals: sharedGlobals
+    },
+    rules: sharedRules
+  },
+  {
+    files: ['**/*.cjs'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'commonjs',
