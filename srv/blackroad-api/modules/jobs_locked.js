@@ -1,7 +1,7 @@
 // Jobs • LOCKED sandbox runner: Docker-first + security policy + allowed-writes gate.
 // Replaces modules/jobs.js. Same endpoints & SSE as before.
 //
-// Install deps:  npm i --prefix /srv/blackroad-api uuid yaml minimatch
+// Install deps:  node tools/dep-scan.js --dir srv/blackroad-api   OR   bash ops/install.sh
 //
 const { spawn, spawnSync } = require('child_process');
 const { v4: uuidv4 } = require('uuid');
@@ -195,24 +195,30 @@ async function updateJob(job_id, patch){
 
 // ---- child wiring + LED ----
 async function wireChild(job_id, child, onClose){
-  let lastPct = 0;
-  const handler = async buf => {
-    const s = buf.toString();
-    await appendEvent(job_id, 'log', s);
-    for (const line of s.split(/\r?\n/)){
-      const p = parseProgressLine(line);
-      if (p!=null && Math.abs(p-lastPct)>=0.01){
-        lastPct = clamp01(p);
-        await updateJob(job_id, {progress: lastPct});
-        await led({type:'led.progress', pct: Math.round(lastPct*100), ttl_s:90});
+  return new Promise(resolve => {
+    let lastPct = 0;
+    const handler = async buf => {
+      const s = buf.toString();
+      await appendEvent(job_id, 'log', s);
+      for (const line of s.split(/\r?\n/)){
+        const p = parseProgressLine(line);
+        if (p!=null && Math.abs(p-lastPct)>=0.01){
+          lastPct = clamp01(p);
+          await updateJob(job_id, {progress: lastPct});
+          await led({type:'led.progress', pct: Math.round(lastPct*100), ttl_s:90});
+        }
+        const st = parseStageLine(line);
+        if (st && st.name) await appendEvent(job_id,'stage',{name:st.name,status: st.error?'error':(st.done?'done':'start')});
       }
-      const st = parseStageLine(line);
-      if (st && st.name) await appendEvent(job_id,'stage',{name:st.name,status: st.error?'error':(st.done?'done':'start')});
-    }
-  };
-  child.stdout?.on('data', handler);
-  child.stderr?.on('data', handler);
-  child.on('close', async code => { PROCS.delete(job_id); await onClose(code, lastPct); });
+    };
+    child.stdout?.on('data', handler);
+    child.stderr?.on('data', handler);
+    child.on('close', async code => {
+      PROCS.delete(job_id);
+      await onClose(code, lastPct);
+      resolve();
+    });
+  });
 }
 
 // ---- ALLOWED-WRITES gate ----
@@ -275,7 +281,10 @@ async function runPipeline(job_id, project, env){
     ], on_error:'stop' };
   }
   // weights
-  let total=pipe.steps.reduce((s,x)=> s + (+x.weight||0), 0); if (total<=0){ const w=100/Math.max(1,pipe.steps.length); pipe.steps.forEach(s=>s.weight=w); total=100; }
+  if (pipe.steps.reduce((s,x)=> s + (+x.weight||0), 0) <= 0){
+    const w = 100 / Math.max(1, pipe.steps.length);
+    pipe.steps.forEach(s => s.weight = w);
+  }
   let base=0;
 
   for (let i=0;i<pipe.steps.length;i++){
