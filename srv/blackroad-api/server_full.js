@@ -209,13 +209,19 @@ app.use(
 );
 const resolveClientIp = (req) => {
   const forwarded = req.headers['x-forwarded-for'];
-  if (typeof forwarded === 'string' && forwarded.length > 0) {
-    const first = forwarded.split(',')[0].trim();
-    if (first) return first;
-  } else if (Array.isArray(forwarded) && forwarded.length > 0) {
-    const first = forwarded[0].split(',')[0].trim();
-    if (first) return first;
+  // Express normalizes headers to strings but may surface arrays when the
+  // header is supplied multiple times by intermediaries.
+  const extractFirst = (value) => {
+    if (typeof value !== 'string' || value.length === 0) return null;
+    const first = value.split(',')[0]?.trim();
+    return first || null;
+  };
+  if (Array.isArray(forwarded) && forwarded.length > 0) {
+    const fromArray = extractFirst(forwarded[0]);
+    if (fromArray) return fromArray;
   }
+  const fromHeader = extractFirst(forwarded);
+  if (fromHeader) return fromHeader;
   return req.socket?.remoteAddress || req.ip;
 };
 

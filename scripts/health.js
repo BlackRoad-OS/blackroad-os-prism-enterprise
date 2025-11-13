@@ -3,6 +3,11 @@ const http = require('http');
 const port = process.env.PORT || 4000;
 const timeoutMs = Number(process.env.HEALTH_TIMEOUT_MS || 5000);
 
+// Exit codes:
+// 0: API healthy and all dependent services report ok
+// 1: API unreachable, timed out, or returned a non-200 / malformed payload
+// 2: API reachable but at least one dependent service reported unhealthy
+
 const req = http.request(
   { hostname: '127.0.0.1', port, path: '/api/health', method: 'GET' },
   (res) => {
