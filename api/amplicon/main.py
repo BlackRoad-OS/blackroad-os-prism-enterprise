@@ -37,7 +37,7 @@ async def health() -> HealthResponse:
     return HealthResponse(ok=True)
 
 
-@app.get("/")
+@app.get("/", response_model=HealthResponse)
 async def root() -> HealthResponse:
     """Default root endpoint mirroring health response."""
     return HealthResponse(ok=True)

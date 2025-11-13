@@ -37,7 +37,7 @@ async def health() -> HealthResponse:
     return HealthResponse(ok=True, model=LUCIDIA_MODEL)
 
 @app.post("/chat")
-async def chat(body: ChatBody):
+async def chat(body: ChatBody) -> StreamingResponse | JSONResponse:
     model = body.model or LUCIDIA_MODEL
     if body.stream:
         async def gen():
