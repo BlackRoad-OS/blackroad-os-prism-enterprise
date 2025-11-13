@@ -20,3 +20,9 @@
 - Which metrics (classification accuracy, energy per inference, adaptability) best justify the inclusion of organoids relative to silicon baselines?
 - How can orchestration frameworks synchronize biological time constants with digital event loops without destabilizing agents or violating tissue health constraints?
 - What governance and audit mechanisms are required to track interventions on living substrates within production workflows?
+
+## Validation & CI Considerations
+- **Wetware-in-the-loop simulations**: Establish a deterministic simulator that mirrors each electrode array and stimulation routine so CI can replay workflows without live tissue while still exercising spike–wave translation logic.
+- **Hardware safety checks**: Gate deployments on telemetry that confirms culture viability (temperature, nutrient flow, spike health) before an agent fabric can route workloads to a biological node.
+- **Dual-path observability**: Log both biological signals and digital agent state transitions into the same tracing back-end so investigators can correlate divergence when debugging.
+- **Policy enforcement**: Require signed interventions and reproducible lab notebooks in the deployment pipeline to maintain provenance for every wetware experiment promoted through release channels.
