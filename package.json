@@ -15,5 +15,9 @@
     "build": "npm --prefix frontend run build",
     "preview": "npm --prefix frontend run preview",
     "test": "npm --prefix frontend run test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^8.57.1",
+    "@typescript-eslint/parser": "^6.21.0"
   }
 }

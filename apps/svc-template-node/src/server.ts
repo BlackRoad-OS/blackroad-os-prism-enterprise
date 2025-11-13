@@ -55,6 +55,7 @@ export const createApp = (config: AppConfig = loadConfig()) => {
   app.use(metricsRouter);
 
   app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    void _next;
     logger.error({ event: 'unhandled_error', err: err.message });
     res.status(500).json({ error: 'internal_server_error' });
   });
