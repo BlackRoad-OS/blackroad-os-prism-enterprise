@@ -72,7 +72,7 @@ jobs:
 
             ## Details
             Review `.justfix-summary.md` (available as a workflow artifact) for the full report.
-          commit-message: ${{ steps.detect.outputs.message || 'chore(justfix): create/fix configs & workflows; format & lint-fix' }}
-          author: ${{ secrets.BOT_USER && format('{0} <{0}@users.noreply.github.com>', secrets.BOT_USER) || 'blackroad-bot <blackroad-bot@users.noreply.github.com>' }}
-          committer: ${{ secrets.BOT_USER && format('{0} <{0}@users.noreply.github.com>', secrets.BOT_USER) || 'blackroad-bot <blackroad-bot@users.noreply.github.com>' }}
+          commit-message: "${{ steps.detect.outputs.message || 'chore(justfix): create/fix configs & workflows; format & lint-fix' }}"
+          author: "${{ secrets.BOT_USER && format('{0} <{0}@users.noreply.github.com>', secrets.BOT_USER) || 'blackroad-bot <blackroad-bot@users.noreply.github.com>' }}"
+          committer: "${{ secrets.BOT_USER && format('{0} <{0}@users.noreply.github.com>', secrets.BOT_USER) || 'blackroad-bot <blackroad-bot@users.noreply.github.com>' }}"
           delete-branch: false

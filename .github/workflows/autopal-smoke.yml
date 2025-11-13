@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Prepare environment
         id: prep
-        run: |
+        run: |2
           set -euo pipefail
 
           if [ -z "${BASE_URL}" ]; then
@@ -38,13 +38,8 @@ jobs:
           BASE_URL_NO_SLASH="${BASE_URL%/}"
           echo "base_url=${BASE_URL_NO_SLASH}" >> "$GITHUB_OUTPUT"
 
-          python - <<'PY' | tee -a "$GITHUB_OUTPUT"
-import os
-from urllib.parse import quote
-
-aud = os.environ["AUDIENCE"]
-print(f"encoded_audience={quote(aud, safe='')}")
-PY
+          python -c "from urllib.parse import quote; import os; aud=os.environ['AUDIENCE']; print(f'encoded_audience={quote(aud, safe="")}')" \
+            | tee -a "$GITHUB_OUTPUT"
 
       - name: Ping live health endpoint
         env:

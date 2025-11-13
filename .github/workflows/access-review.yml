@@ -9,21 +9,21 @@ jobs:
   collect:
     runs-on: ubuntu-latest
     steps:
-      - name: AWS: roles & users
+      - name: "AWS: roles & users"
         run: |
           aws iam list-users > aws_users.json
           aws iam list-roles > aws_roles.json
-      - name: Okta: groups & app assignments
+      - name: "Okta: groups & app assignments"
         run: |
           curl -s -H "Authorization: SSWS $OKTA_TOKEN" "$OKTA_URL/api/v1/groups" > okta_groups.json
         env:
           OKTA_TOKEN: ${{ secrets.OKTA_TOKEN }}
           OKTA_URL: ${{ secrets.OKTA_URL }}
-      - name: GitHub: members & teams
+      - name: "GitHub: members & teams"
         run: gh api orgs/${{ github.repository_owner }}/members --paginate > gh_members.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: 1Password: vault audit (summary)
+      - name: "1Password: vault audit (summary)"
         run: op vault list --format json > op_vaults.json
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SA_TOKEN }}

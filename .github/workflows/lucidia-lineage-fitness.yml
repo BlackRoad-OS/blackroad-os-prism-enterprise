@@ -16,7 +16,7 @@ jobs:
       - name: Install deps
         run: |
           pip install -r prism/requirements.txt || true
-      - name: Optional: run a reproduction if consent present
+      - name: "Optional: run a reproduction if consent present"
         run: |
           if [ -f prism/consent.json ]; then
             python prism/reproduction/reproduce.py \
