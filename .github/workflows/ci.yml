@@ -35,6 +35,14 @@ jobs:
           node-version: "20"
           cache: ${{ env.PKG_MANAGER }}
 
+      - name: Ensure pnpm is available
+        if: env.PKG_MANAGER == 'pnpm'
+        run: |
+          corepack enable
+          if ! command -v pnpm >/dev/null 2>&1; then
+            npm install -g pnpm
+          fi
+
       - name: Restore Docker Buildx cache
         uses: actions/cache@v4
         with:
@@ -84,6 +92,27 @@ jobs:
           echo "passes=$PASSES" >> "$GITHUB_OUTPUT"
           echo "fails=$FAILS" >> "$GITHUB_OUTPUT"
           [ "$FAILS" -eq 0 ]
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements-dev.txt ]; then
+            pip install -r requirements-dev.txt
+          elif [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          elif [ -f pyproject.toml ]; then
+            pip install .
+          else
+            echo "No Python dependency manifest detected; skipping install."
+          fi
+
+      - name: Run Python tests
+        run: pytest -q
 
       - name: Annotate flake signal
         if: failure() || steps.testloop.outputs.fails != '0'
