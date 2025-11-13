@@ -65,6 +65,9 @@ class CleanupSummary:
     def to_dict(self, include_results: bool = True) -> Dict[str, object]:
         """Serialize the summary to a dictionary."""
 
+        # Work from a fresh snapshot so callers cannot mutate the internal state.
+        results_snapshot = dict(self.results)
+
         payload: Dict[str, object] = {
             "deleted": list(self.deleted),
             "failed": list(self.failed),
@@ -74,7 +77,7 @@ class CleanupSummary:
             "exit_code": self.exit_code(),
         }
         if include_results:
-            payload["results"] = dict(self.results)
+            payload["results"] = results_snapshot
         return payload
 
 
