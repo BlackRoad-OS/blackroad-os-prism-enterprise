@@ -12,7 +12,7 @@ from typing import Dict, List
 class CleanupBot:
     """Delete local and remote branches after merges.
 
-    Attributes
+    Parameters
     ----------
     branches:
         A list of branch names to remove.
