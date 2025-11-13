@@ -92,7 +92,7 @@
       "text": "Published whitepaper with a 100-item Evidence Map; released streaming co-coding UI with agent presence and contradiction flags.",
       "evidence_ids": [1, 9, 10, 41, 48, 74],
       "files": [
-        "docs/… (whitepaper md)",
+        "docs/whitepaper.md",
         "services/lucidia_api/app/routes.py",
         "agents/auto_novel_agent.py",
         "lucidia/brain.py",
@@ -113,7 +113,8 @@
         "analytics/dbt/models/marts/ops/fct_github_issues_daily.sql",
         "tools/export_embeddings.py",
         "lucidia/roadie.py",
-        ".github/workflows/* (if present)"
+        ".github/workflows/*.yml",
+        ".github/workflows/*.yaml"
       ],
       "checks": [
         "Open dbt models; confirm normalized schema + marts.",
