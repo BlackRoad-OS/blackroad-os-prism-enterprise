@@ -27,7 +27,9 @@ def parse_numeric_prefix(text: str) -> float:
             return float(value)
     except (ValueError, SyntaxError):
         # Non-numeric literals—such as strings, malformed expressions, or
-        # whitespace—raise ``ValueError``/``SyntaxError`` and fall through to the
-        # default of ``1.0``.
+        # whitespace (which becomes an empty string after ``strip`` and raises
+        # ``SyntaxError`` from ``ast.literal_eval``)—raise
+        # ``ValueError``/``SyntaxError`` and fall through to the default of
+        # ``1.0``.
         pass
     return 1.0

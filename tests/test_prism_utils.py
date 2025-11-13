@@ -22,11 +22,11 @@ def test_parse_numeric_prefix_valid(text: str, expected: float) -> None:
 @pytest.mark.parametrize(
     "text",
     [
-        pytest.param("", id="empty"),  # Empty string should fall back to default.
-        pytest.param("   ", id="whitespace"),  # Whitespace-only input is ignored.
-        pytest.param("abc", id="non-numeric"),  # Alphabetic input cannot be parsed.
-        pytest.param("1a", id="mixed"),  # Mixed alphanumeric raises ValueError.
-        pytest.param("(", id="syntax-error"),  # Malformed literal triggers SyntaxError.
+        pytest.param("", id="empty"),
+        pytest.param("   ", id="whitespace"),
+        pytest.param("abc", id="non-numeric"),
+        pytest.param("1a", id="mixed"),
+        pytest.param("(", id="syntax-error"),
     ],
 )
 def test_parse_numeric_prefix_invalid(text: str) -> None:
