@@ -1,42 +1,64 @@
-"""Streamlit app for BlackRoad Prism Generator with GPT and voice input."""
+"""Streamlit console for the BlackRoad Prism holographic assistant."""
 
+from __future__ import annotations
+
+import io
 import os
 import tempfile
 
+import matplotlib.pyplot as plt
+import numpy as np
 import streamlit as st
 import whisper
 from openai import OpenAI
+from streamlit.runtime.uploaded_file_manager import UploadedFile
+
+from prism_utils import parse_numeric_prefix
 
 st.set_page_config(layout="wide")
 st.title("BlackRoad Prism Generator with GPT + Voice Console")
 
 _api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=_api_key) if _api_key else None
-if not _api_key:
-    st.warning("OpenAI API key not set; responses will be unavailable.")
-# Initialize the OpenAI client if an API key is provided
-api_key = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=api_key) if api_key else None
 if client is None:
     st.warning("OpenAI API key not set. Set OPENAI_API_KEY to enable responses.")
 
 
 @st.cache_resource
-def load_whisper_model():
-    """Load the Whisper model once and reuse across reruns."""
+def get_whisper_model():
+    """Load and cache the Whisper model so repeated runs stay responsive."""
+
     return whisper.load_model("base")
 
-def _transcribe_audio(uploaded_file) -> str:
-    """Transcribe an uploaded audio file using Whisper and clean up temp file."""
+
+def transcribe_audio(uploaded_file: UploadedFile) -> str:
+    """Transcribe an uploaded audio clip using Whisper."""
+
     suffix = os.path.splitext(uploaded_file.name)[1] or ".wav"
-    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_audio:
-        temp_audio.write(uploaded_file.read())
-        temp_path = temp_audio.name
-    model = load_whisper_model()
-    result = model.transcribe(temp_path)
-    os.remove(temp_path)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        tmp.write(uploaded_file.read())
+        tmp_path = tmp.name
+    try:
+        model = get_whisper_model()
+        result = model.transcribe(tmp_path)
+    finally:
+        try:
+            os.remove(tmp_path)
+        except OSError:
+            pass
     return result["text"]
 
+
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = [
+        {
+            "role": "system",
+            "content": (
+                "You are the BlackRoad Venture Console AI, a holographic assistant that "
+                "replies with scientific and symbolic insights."
+            ),
+        }
+    ]
 
 st.markdown(
     "#### Speak or type an idea, formula, or question. The AI will respond and project a hologram:"
@@ -44,7 +66,7 @@ st.markdown(
 
 audio_file = st.file_uploader("Upload your voice (mp3 or wav)", type=["mp3", "wav"])
 if audio_file is not None:
-    user_input = _transcribe_audio(audio_file)
+    user_input = transcribe_audio(audio_file)
     st.markdown(f"**You said:** {user_input}")
 else:
     user_input = st.text_input("Or type here")
@@ -53,24 +75,31 @@ if user_input:
     if not client:
         st.error("OpenAI API key not set.")
     else:
-        st.session_state.setdefault(
-            "chat_history",
-            [
-                {
-                    "role": "system",
-                    "content": (
-                        "You are the BlackRoad Venture Console AI, a holographic assistant "
-                        "that replies with scientific and symbolic insights."
-                    ),
-                }
-            ],
-        )
         st.session_state.chat_history.append({"role": "user", "content": user_input})
-        placeholder = st.empty()
-        placeholder.write("Processing request...")
         response = client.chat.completions.create(
-            model="gpt-4o-mini", messages=st.session_state.chat_history
+            model="gpt-4o-mini",
+            messages=st.session_state.chat_history,
         )
-        reply = response.choices[0].message["content"]
-        st.session_state.chat_history.append({"role": "assistant", "content": reply})
-        placeholder.markdown(f"**AI:** {reply}")
+        assistant_reply = response.choices[0].message.content
+        st.session_state.chat_history.append({"role": "assistant", "content": assistant_reply})
+        st.markdown(f"**Venture Console AI:** {assistant_reply}")
+
+        magnitude = parse_numeric_prefix(user_input)
+        fig = plt.figure(figsize=(6, 4))
+        ax = fig.add_subplot(111, projection="3d")
+        x = np.linspace(-5, 5, 100)
+        y = np.linspace(-5, 5, 100)
+        x, y = np.meshgrid(x, y)
+        z = np.sin(np.sqrt(x**2 + y**2)) * magnitude
+        ax.plot_surface(x, y, z, cmap="plasma")
+        ax.axis("off")
+
+        buf = io.BytesIO()
+        plt.savefig(buf, format="png", bbox_inches="tight", pad_inches=0)
+        buf.seek(0)
+        st.image(buf, caption="Holographic projection based on your prompt")
+        plt.close(fig)
+
+st.markdown("---")
+st.markdown("**BlackRoad Prism Console** | Live UI Simulation")
+st.image("72BF9767-A2EE-4CB6-93F4-4D738108BC4B.png", caption="Live Console Interface")
