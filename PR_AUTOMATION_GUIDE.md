@@ -107,6 +107,43 @@ Your existing open PRs won't get the new automation automatically. You can:
 - Add label: `automerge`
 - Auto-merge will enable
 
+## 🧯 Legacy Fallback When Automation Stalls
+
+Sometimes Actions jobs can get stuck in the queue or fail to trigger (for
+example, when GitHub is degraded or a workflow file was renamed). When that
+happens, you can still lean on the “old ideas” playbook that predates the
+fully automated flow:
+
+1. **Check workflow status manually**
+   - Open the PR → _Checks_ tab → confirm if any workflow even started.
+   - Visit **Actions → All workflows** and look for the run tied to your PR.
+   - If nothing fired, click into the workflow and press **`Run workflow`** to
+     launch it manually.
+2. **Recreate the old bot mentions + labels by hand**
+   - Comment exactly what we used to type: `@copilot @dependabot @claude @codex`.
+   - Add labels `automerge`, `needs-review`, or `no-mentions` the same way we
+     did before automation. This mirrors the prior human-driven steps so the
+     downstream workflows still have the right metadata once they eventually run.
+3. **Use the legacy `scripts/autopr.sh` helper when you need the full kit**
+   - The script (documented in [`README_PR_AUTOMATION.md`](README_PR_AUTOMATION.md))
+     recreates the branch, sync, evidence bundle, label, and reviewer steps
+     exactly like the original process.
+   - Example fallback run:
+     ```bash
+     export GH_TOKEN="<token>"
+     OWNER=BlackRoad REPO=masterpack ./scripts/autopr.sh
+     ```
+   - If you also need to refresh generator artifacts, follow it with
+     `./scripts/sync_artifacts.sh --from ./generated`.
+4. **Escalate or close/reopen to re-trigger**
+   - Once the manual steps are in place, closing and reopening the PR usually
+     causes the idle workflows to kick back in.
+   - If the automation is still idle, drop a note in Slack with a link to the PR
+     so someone can investigate the queue.
+
+This ensures that even if automations fail to kick off, you still have a clear
+path to apply the legacy approach and keep work moving.
+
 ## ❓ FAQ
 
 ### Q: Do I still need to comment `@copilot @dependabot` on PRs?
