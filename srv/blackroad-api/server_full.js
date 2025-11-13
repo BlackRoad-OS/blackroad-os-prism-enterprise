@@ -14,6 +14,10 @@ const { body, validationResult } = require('express-validator');
 
 const gitRouter = require('./routes/git');
 
+// Custom environment variable loader replaces the standard 'dotenv' package.
+// Rationale: We use a custom loader to reduce external dependencies, avoid issues with dotenv's parsing logic,
+// and to allow for more controlled loading (e.g., skipping variables already set in process.env).
+// See coding guidelines: dependency changes must be documented.
 function loadEnvFile() {
   const envPath = process.env.DOTENV_PATH || path.join(process.cwd(), '.env');
   if (!fs.existsSync(envPath)) {
