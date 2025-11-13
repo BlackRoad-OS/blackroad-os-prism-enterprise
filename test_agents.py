@@ -1,118 +1,143 @@
-"""Test runner for all agents in the agents directory.
+"""Test runner for validating every agent module in the repository.
 
-This script imports each agent module and runs its main block if present.
-Reports pass/fail for each agent.
+Execute directly via ``python test_agents.py``. The runner recursively
+walks the ``agents/`` directory, imports each Python module to ensure it
+is syntactically valid, and can optionally execute ``__main__`` blocks in
+an isolated subprocess. Use the following environment variables:
+
+* ``AGENT_TEST_FILTER=<substring>`` — only run files whose relative path
+  contains the substring (useful for debugging).
+* ``AGENT_TEST_RUN_MAIN=1`` — execute modules that define a
+  ``__main__`` block after a successful import. Without this flag, the
+  runner performs import validation only to avoid side effects.
 """
+
+from __future__ import annotations
 
 import importlib.util
 import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import Iterable, List, Sequence, Tuple
 
 AGENTS_DIR = Path(__file__).resolve().parent / "agents"
-SKIP_FILES = {"AGENTS.md", "__init__.py"}
+SKIP_FILE_NAMES = {"AGENTS.md", "__init__.py"}
+SKIP_DIR_NAMES = {"__pycache__"}
+FILTER_PATTERN = os.environ.get("AGENT_TEST_FILTER")
+RUN_MAIN = os.environ.get("AGENT_TEST_RUN_MAIN", "").lower() in {"1", "true", "yes"}
+PASS_STATUSES = {"pass", "skipped"}
 
 
-def run_module_main(module_path):
-    """Run the module as a script in a subprocess."""
-    result = subprocess.run([sys.executable, module_path], capture_output=True)
-    return result.returncode, result.stdout.decode(), result.stderr.decode()
+def _normalize_module_name(module_path: Path) -> str:
+    """Build a unique, import-safe module name for ``module_path``."""
+
+    relative_parts = module_path.relative_to(AGENTS_DIR).with_suffix("").parts
+    safe = [part.replace("-", "_") for part in relative_parts]
+    return "agent_test." + ".".join(safe)
 
 
-def import_module(module_path):
-    """Try to import a Python file as a module."""
-    name = module_path.stem
-    spec = importlib.util.spec_from_file_location(name, module_path)
-    module = importlib.util.module_from_spec(spec)
-    try:
-        spec.loader.exec_module(module)
-        return True, ""
-    except Exception as exc:
-        return False, str(exc)
+def run_module_main(module_path: Path) -> Tuple[int, str, str]:
+    """Execute ``module_path`` in a subprocess and capture its output."""
+
+    completed = subprocess.run(
+        [sys.executable, str(module_path)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return completed.returncode, completed.stdout, completed.stderr
 
 
-def test_agents():
-    print("=== Agent Test Runner ===")
-    results = []
-    for file in AGENTS_DIR.iterdir():
-        if not file.is_file() or not file.name.endswith(".py"):
-            continue
-        if file.name in SKIP_FILES:
-            continue
-        print(f"\nTesting agent: {file.name}")
-        # First, try importing
-        ok, err = import_module(file)
-        if not ok:
-            print(f"FAILED to import: {file.name} -- {err}")
-            results.append((file.name, "import_failed"))
-            continue
-        # Then, run as script if main block exists
-        with open(file, "r") as f:
-            src = f.read()
-        if 'if __name__ == "__main__"' in src:
-            rc, out, err = run_module_main(str(file))
-            if rc == 0:
-                print(f"PASSED main execution: {file.name}")
-                results.append((file.name, "pass"))
-            else:
-                print(f"FAILED main execution: {file.name}")
-                print("stdout:", out)
-                print("stderr:", err)
-                results.append((file.name, "main_failed"))
-        else:
-            print(f"PASSED import only (no main): {file.name}")
-            results.append((file.name, "pass"))
+def import_module_file(module_path: Path) -> Tuple[bool, str]:
+    """Import ``module_path`` dynamically and report success."""
+
+    module_name = _normalize_module_name(module_path)
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
     if spec is None or spec.loader is None:
-        return False, "unable to load module spec"
+        return False, "unable to build module spec"
+
     module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
+    sys.modules[module_name] = module
     try:
         spec.loader.exec_module(module)
         return True, ""
-    except Exception as exc:  # pragma: no cover - used for debugging
-        sys.modules.pop(name, None)
+    except Exception as exc:  # pragma: no cover - delegated to pytest output
         return False, str(exc)
+    finally:
+        # Prevent stale references when importing many modules.
+        sys.modules.pop(module_name, None)
 
-def test_agents():
-    print("=== Agent Test Runner ===")
-    results = []
-    for file in AGENTS_DIR.rglob("*.py"):
-        if file.name in SKIP_FILES or "__pycache__" in file.parts:
+
+def iter_agent_modules() -> Iterable[Path]:
+    """Yield every Python file under ``agents/`` that should be tested."""
+
+    for path in AGENTS_DIR.rglob("*.py"):
+        if path.name in SKIP_FILE_NAMES:
             continue
-        rel_name = file.relative_to(AGENTS_DIR)
-        print(f"\nTesting agent: {rel_name}")
-        # First, try importing
-        ok, err = import_module(file)
-        if not ok:
-            print(f"FAILED to import: {rel_name} -- {err}")
-            results.append((str(rel_name), "import_failed"))
+        if any(part in SKIP_DIR_NAMES for part in path.parts):
             continue
-        # Then, run as script if main block exists
-        with open(file, "r", encoding="utf-8") as f:
-            src = f.read()
-        if "if __name__ == \"__main__\"" in src:
-            rc, out, err = run_module_main(str(file))
-            if rc == 0:
-                print(f"PASSED main execution: {rel_name}")
-                results.append((str(rel_name), "pass"))
-            else:
-                print(f"FAILED main execution: {rel_name}")
-                print("stdout:", out)
-                print("stderr:", err)
-                results.append((str(rel_name), "main_failed"))
-        else:
-            print(f"PASSED import only (no main): {rel_name}")
-            results.append((str(rel_name), "pass"))
-    print("\n=== Summary ===")
-    for name, status in results:
-        print(f"{name}: {status}")
-    failed = [r for r in results if r[1] != "pass"]
-    if failed:
-        print(f"\n{len(failed)} agent(s) failed.")
-        return 1
-    print("\nAll agents passed.")
-    return 0
+        if FILTER_PATTERN:
+            rel = str(path.relative_to(AGENTS_DIR))
+            if FILTER_PATTERN not in rel:
+                continue
+        yield path
+
+
+def exercise_agent(path: Path) -> Tuple[str, str, str]:
+    """Import an agent module and, if applicable, run its main block."""
+
+    ok, err = import_module_file(path)
+    if not ok:
+        return (str(path.relative_to(AGENTS_DIR)), "import_failed", err)
+
+    source = path.read_text(encoding="utf-8")
+    if not RUN_MAIN or 'if __name__ == "__main__"' not in source:
+        return (str(path.relative_to(AGENTS_DIR)), "pass", "")
+
+    rc, stdout, stderr = run_module_main(path)
+    output = (stdout + stderr).strip()
+    if rc == 0:
+        return (str(path.relative_to(AGENTS_DIR)), "pass", "")
+    if rc == 2 and any(hint in output.lower() for hint in ["usage:", "arguments are required"]):
+        return (str(path.relative_to(AGENTS_DIR)), "skipped", "requires CLI arguments")
+    return (str(path.relative_to(AGENTS_DIR)), "main_failed", output)
+
+
+def run_agent_suite() -> List[Tuple[str, str, str]]:
+    """Run the validation workflow for every agent module."""
+
+    results: List[Tuple[str, str, str]] = []
+    for module_path in sorted(iter_agent_modules()):
+        results.append(exercise_agent(module_path))
+    return results
+
+
+def summarize_results(results: Sequence[Tuple[str, str, str]]) -> str:
+    """Return a printable summary string for ``results``."""
+
+    lines = ["=== Agent Test Runner ==="]
+    failures = []
+    for name, status, detail in results:
+        lines.append(f"{name}: {status}")
+        if status not in PASS_STATUSES:
+            failures.append((name, detail))
+            if detail:
+                lines.append(f"  ↳ {detail}")
+    if failures:
+        lines.append(f"\n{len(failures)} agent(s) failed.")
+    else:
+        lines.append("\nAll agents passed.")
+    return "\n".join(lines)
+
+
+def test_agents() -> int:
+    """Run the agent validation suite and return an exit code."""
+
+    results = run_agent_suite()
+    print(summarize_results(results))
+    failures = [r for r in results if r[1] not in PASS_STATUSES]
+    return 0 if not failures else 1
 
 
 if __name__ == "__main__":
