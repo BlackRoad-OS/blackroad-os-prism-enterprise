@@ -8,22 +8,24 @@ BODY="$(echo "${GITHUB_COMMENT_BODY:-}" | tr '[:upper:]' '[:lower:]')"
 [ -n "$BODY" ] || { echo "no comment body"; exit 0; }
 BASE="${LED_BASE:-http://127.0.0.1:4000}"
 KEY="${LED_KEY:-}"
+DEVICE_ID="${LED_DEVICE_ID:-pi-01}"
 
 say(){ printf '[router] %s\n' "$*"; }
 
 run_notify(){ bash scripts/led/led_notify.sh "$@"; }
-post_json(){ 
+post_json(){
   hdr=(-H 'content-type: application/json'); [ -n "$KEY" ] && hdr+=(-H "X-BlackRoad-Key: $KEY")
-  curl -sS "${hdr[@]}" -d "$1" "$BASE/api/devices/pi-01/command" >/dev/null || true
+  curl -sS "${hdr[@]}" -d "$1" "$BASE/api/devices/$DEVICE_ID/command" >/dev/null || true
 }
 
 # Map simple "athena <emotion>" and "/led <emotion> [ttl]"
-if [[ "$BODY" =~ (^|[[:space:]])(athena[[:space:]]+ok)($|[[:space:]]) ]];         then run_notify ok 12;        exit 0; fi
-if [[ "$BODY" =~ (^|[[:space:]])(athena[[:space:]]+busy)($|[[:space:]]) ]];       then run_notify busy 15;      exit 0; fi
-if [[ "$BODY" =~ (^|[[:space:]])(athena[[:space:]]+thinking)($|[[:space:]]) ]];   then run_notify thinking 15;  exit 0; fi
-if [[ "$BODY" =~ (^|[[:space:]])(athena[[:space:]]+error)($|[[:space:]]) ]];      then run_notify error 12;     exit 0; fi
-if [[ "$BODY" =~ (^|[[:space:]])(athena[[:space:]]+celebrate)($|[[:space:]]) ]];  then run_notify celebrate 12; exit 0; fi
-if [[ "$BODY" =~ (^|[[:space:]])(athena[[:space:]]+help)($|[[:space:]]) ]];       then run_notify help 20;      exit 0; fi
+for cmd in "ok:12" "busy:15" "thinking:15" "error:12" "celebrate:12" "help:20"; do
+  emo="${cmd%%:*}"; ttl="${cmd#*:}"
+  if [[ "$BODY" =~ (^|[[:space:]])(athena[[:space:]]+${emo})($|[[:space:]]) ]]; then
+    run_notify "$emo" "$ttl"
+    exit 0
+  fi
+done
 
 if [[ "$BODY" =~ /led[[:space:]]+([a-z]+)([[:space:]]+([0-9]+))? ]]; then
   emo="${BASH_REMATCH[1]}"; ttl="${BASH_REMATCH[3]:-12}"
