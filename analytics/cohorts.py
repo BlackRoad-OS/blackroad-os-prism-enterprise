@@ -32,9 +32,13 @@ def _period(ts: str, window: str) -> str:
 
 METRIC_FUNCS = {
     "revenue": lambda rows: sum(r["revenue"] for r in rows),
-    "gross_margin_pct": lambda rows: round(
-        (sum(r["revenue"] - r["cost"] for r in rows) / sum(r["revenue"] for r in rows)) * 100,
-        2,
+    "gross_margin_pct": lambda rows: (
+        round(
+            (sum(r["revenue"] - r["cost"] for r in rows) / revenue_sum * 100)
+            if (revenue_sum := sum(r["revenue"] for r in rows))
+            else 0,
+            2,
+        )
     ),
     "nps": lambda rows: round(sum(r["nps"] for r in rows) / len(rows), 2),
     "return_rate": lambda rows: round(sum(r["return_rate"] for r in rows) / len(rows), 4),

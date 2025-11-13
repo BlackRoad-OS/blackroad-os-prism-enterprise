@@ -12,6 +12,7 @@ from .utils import increment, log_event, validate
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "samples" / "metrics"
 ART = ROOT / "artifacts" / "anomalies"
+MIN_DATA_POINTS = 5
 
 
 class SafeEval(ast.NodeVisitor):
@@ -54,9 +55,9 @@ def detect_anomalies(metric: str, group_by: str, window: str, rule: Dict[str, st
     series = _load_series(metric, group_by)
     anomalies: List[Dict] = []
     for grp, rows in series.items():
-        if len(rows) < 5:
+        if len(rows) < MIN_DATA_POINTS:
             continue
-        trailing = rows[-5:-1]
+        trailing = rows[-MIN_DATA_POINTS:-1]
         mean = sum(r["value"] for r in trailing) / len(trailing)
         current = rows[-1]["value"]
         prev = rows[-2]["value"]

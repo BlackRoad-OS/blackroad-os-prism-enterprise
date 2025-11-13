@@ -20,7 +20,7 @@ def test_cohort_analysis():
     assert res2[0]["revenue"] == 900
 
 
-def test_anomaly_and_plan_and_narrative(tmp_path):
+def test_anomaly_and_plan_and_narrative():
     anomalies = run_rules(ROOT / "configs/anomaly_rules.yaml", "W")
     assert any(a["metric"] == "revenue" and a["group"] == "APAC" for a in anomalies)
     assert any(a["metric"] == "uptime" and a["group"] == "db" for a in anomalies)
