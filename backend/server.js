@@ -1,15 +1,38 @@
 const http = require('http');
+const crypto = require('crypto');
 const data = require('./data');
 const tickets = require('./tickets');
 
 const PORT = process.env.PORT || 4000;
 const HOST = '0.0.0.0';
 
-// Sample credentials for tests
+const devMode = process.env.NODE_ENV !== 'production';
+const warnedCredentialKeys = new Set();
+
+function resolveCredential(envKey, fallbackFactory) {
+  const value = process.env[envKey];
+  if (value) {
+    return value;
+  }
+  if (!devMode) {
+    throw new Error(`Missing required environment variable: ${envKey}`);
+  }
+  const fallbackValue = fallbackFactory();
+  if (!warnedCredentialKeys.has(envKey)) {
+    warnedCredentialKeys.add(envKey);
+    console.warn(
+      `[security] ${envKey} not set; using generated development-only value: ${fallbackValue}`,
+    );
+  }
+  return fallbackValue;
+}
+
 const VALID_USER = {
-  username: 'root',
-  password: 'Codex2025', // pragma: allowlist secret
-  token: 'test-token', // pragma: allowlist secret
+  username: resolveCredential('BACKEND_ADMIN_USERNAME', () => 'dev-admin'),
+  password: resolveCredential('BACKEND_ADMIN_PASSWORD', () =>
+    crypto.randomBytes(16).toString('hex'),
+  ),
+  token: resolveCredential('BACKEND_ADMIN_TOKEN', () => crypto.randomBytes(24).toString('hex')),
 };
 const tasks = [];
 
@@ -92,17 +115,6 @@ function ensureAuth(req, res) {
   }
   return true;
 }
-
-const PORT = process.env.PORT || 4000;
-const HOST = '0.0.0.0';
-
-// Sample credentials for tests
-const VALID_USER = {
-  username: 'root',
-  password: 'Codex2025', // pragma: allowlist secret
-  token: 'test-token', // pragma: allowlist secret
-};
-const tasks = [];
 
 function send(res, status, obj) {
   res.statusCode = status;
