@@ -135,9 +135,9 @@ def _normalize_covenants(raw: Optional[object]) -> List[str]:
     if isinstance(raw, dict):
         tags = raw.get("tags") or raw.get("values") or raw.values()
         return sorted({tag for tag in _flatten_strings(tags) if tag})
-    if isinstance(raw, str):
+    elif isinstance(raw, str):
         return [raw.strip()] if raw.strip() else []
-    if isinstance(raw, Iterable):
+    elif isinstance(raw, Iterable) and not isinstance(raw, str):
         return sorted({tag for tag in _flatten_strings(raw) if tag})
     return [str(raw)]
 
@@ -191,6 +191,7 @@ def _normalize_lineage(raw: Optional[dict]) -> Dict[str, object]:
         try:
             lineage["ancestryDepth"] = int(raw[ancestry_key])
         except (TypeError, ValueError):
+            # If ancestry depth is not numeric, omit it instead of failing the build.
             pass
     return lineage
 
@@ -238,8 +239,9 @@ def load_manifests(limit: int) -> tuple[List[dict], Dict[str, int]]:
                     ("id", manifest_id),
                     ("cluster", cluster),
                     ("clusterLabel", label),
+                    # Fallback priority: name > title > manifest_id (title-cased, spaced).
                     ("name", data.get("name") or data.get("title") or manifest_id.replace("-", " ").title()),
-                    ("title", data.get("title") or data.get("name") or manifest_id.title()),
+                    ("title", data.get("title") or manifest_id.title()),
                     ("role", data.get("role") or data.get("title") or "Agent"),
                     ("generation", generation),
                     ("ethos", data.get("ethos")),

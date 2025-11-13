@@ -23,6 +23,8 @@ import {
 
 // ==================== Configuration ====================
 
+const DEFAULT_AUTO_SPAWN_LIMIT = 25;
+
 const CONFIG = {
   port: process.env.METAVERSE_API_PORT || 8080,
   wsPort: process.env.METAVERSE_WS_PORT || 8081,
@@ -430,8 +432,11 @@ export async function integrateWithAgentSwarm() {
     console.log(`[Metaverse API] ${summarizeRoster()}`);
 
     if (process.env.AUTO_SPAWN_AGENTS === 'true') {
-      const limit = Number(process.env.AUTO_SPAWN_LIMIT ?? '25');
-      const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.min(Math.floor(limit), roster.length) : 25;
+      const configuredLimit = Number(process.env.AUTO_SPAWN_LIMIT ?? DEFAULT_AUTO_SPAWN_LIMIT);
+      const normalizedLimit = Number.isFinite(configuredLimit) && configuredLimit > 0
+        ? Math.floor(configuredLimit)
+        : DEFAULT_AUTO_SPAWN_LIMIT;
+      const safeLimit = Math.min(normalizedLimit, roster.length);
       let spawned = 0;
 
       console.log(`[Metaverse API] Auto-spawning up to ${safeLimit} agents for metaverse warm-up...`);
