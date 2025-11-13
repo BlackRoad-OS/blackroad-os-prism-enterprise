@@ -17,7 +17,7 @@ def parse_numeric_prefix(text: str) -> float:
         value = ast.literal_eval(text.split(",", maxsplit=1)[0].strip())
         if isinstance(value, (int, float)):
             return float(value)
-    except Exception:  # noqa: BLE001 - literal_eval may raise many Exception subclasses.
+    except Exception:  # noqa: BLE001 - literal_eval may raise ValueError, SyntaxError, RecursionError, MemoryError, etc.
         # Non-numeric, malformed, or pathological prefixes fall through to the
         # default below.
         pass
