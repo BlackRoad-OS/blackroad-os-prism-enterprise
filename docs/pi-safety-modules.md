@@ -14,6 +14,19 @@ opt-in and designed to stay private by default.
   shell environment before launching. The compose bundle now fails fast unless
   a non-empty `BITCOIN_RPCPASSWORD` is supplied, so choose a strong value before
   starting the services.
+* Run `docker compose --env-file ~/btc.env config` from the Pi to confirm
+  environment substitution works before bringing the services up. This produces
+  a resolved view of the bundle and immediately errors if the password is
+  missing.
+
+If `BITCOIN_RPCPASSWORD` is omitted you will see an error like:
+
+```text
+BITCOIN_RPCPASSWORD is required
+```
+
+Set the variable and rerun the command before attempting to start `bitcoind`
+and `cln`.
 
 ```bash
 # bootstrap from the repository root on the Pi

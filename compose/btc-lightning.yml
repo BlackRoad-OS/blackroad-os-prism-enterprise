@@ -9,6 +9,8 @@ services:
     restart: unless-stopped
     stop_grace_period: 1m
     environment:
+      # RPC user retains a safe default for local Pi deployments, but the
+      # password must always be provided explicitly before the services start.
       BITCOIN_RPCUSER: ${BITCOIN_RPCUSER:-bitcoin}
       BITCOIN_RPCPASSWORD: ${BITCOIN_RPCPASSWORD:?BITCOIN_RPCPASSWORD is required}
     command:
