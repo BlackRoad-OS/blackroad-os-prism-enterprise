@@ -18,7 +18,7 @@ class LucidiaBrain:
 
     Functions registered via :meth:`register` are called in the order they
     were added when :meth:`think` is invoked. Each step has a unique name,
-    allowing introspection via :pyattr:`steps` as well as selective removal
+    allowing introspection via :attr:`steps` as well as selective removal
     with :meth:`unregister` or clearing with :meth:`reset`.
     """
 
