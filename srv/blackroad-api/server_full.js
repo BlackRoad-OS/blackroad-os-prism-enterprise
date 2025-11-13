@@ -754,6 +754,7 @@ app.post('/api/actions/mint', requireAuth, (req, res) => {
     await require('./modules/truth_pubsub')({ app });
   } catch (err) {
     console.error('truth_pubsub init failed', err);
+    throw err;
   }
   require('./modules/yjs_callback')({ app });
 
