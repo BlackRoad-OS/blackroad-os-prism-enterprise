@@ -114,7 +114,7 @@ function Scatter({title, pts, labels, centers}){
     return palette[idx];
   };
   const uniqueLabels = labels ? Array.from(new Set(labels)) : [];
-  const sortedLabels = uniqueLabels.slice().sort((a, b) => {
+  const sortedLabels = uniqueLabels.sort((a, b) => {
     if (typeof a === "number" && typeof b === "number") return a - b;
     return String(a).localeCompare(String(b));
   });

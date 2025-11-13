@@ -101,9 +101,9 @@ export default function MaxFlowLab(){
   // augmenting path step-by-step
   const step = ()=>{
     const r = edmondsKarp(C, 0, n-1);
-    setResult(r);
     const {paths} = r;
     if(!paths.length){ setLastAug(null); return; }
+    setResult(r);
     const idx = lastAug==null ? 0 : Math.min(paths.length-1, lastAug+1);
     setLastAug(idx);
   };

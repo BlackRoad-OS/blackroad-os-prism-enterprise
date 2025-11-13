@@ -48,7 +48,7 @@ export default function BezierSurfaceLab(){
       return null;
     };
     const downH=(e)=>{ downRef.current=true; const {x,y}=clientToSvg(e,svg); const h=hit(x,y); if(h) dragRef.current=h; };
-    const moveH=(e)=>{ if(!downRef.current || !dragRef.current) return; const {x,y}=clientToSvg(e,svg);
+    const moveH=(e)=>{ if(!downRef.current || !dragRef.current) return; const {y}=clientToSvg(e,svg);
       const [i,j]=dragRef.current; const val = 2*( (H-pad - y)/(H-2*pad) ) - 1; // invert Y mapping
       setP(prev=>{ const copy=prev.map(r=>r.slice()); copy[i][j]=Math.max(-1,Math.min(1,val)); return copy; });
     };
