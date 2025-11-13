@@ -578,11 +578,51 @@ class ConsentRegistry:
     def _iter_log(self) -> Iterable[Mapping[str, object]]:
         if not self.log_path.exists():
             return []
+        signing_key = _load_signing_key()
+        expected_previous_hash: str | None = None
         with self.log_path.open("r", encoding="utf-8") as handle:
-            for line in handle:
-                if not line.strip():
+            for line_number, raw_line in enumerate(handle, 1):
+                line = raw_line.strip()
+                if not line:
                     continue
-                entry = json.loads(line)
+                try:
+                    entry = json.loads(line)
+                except json.JSONDecodeError as exc:  # pragma: no cover - defensive
+                    raise ConsentError(
+                        f"corrupted consent log entry at line {line_number}: invalid JSON"
+                    ) from exc
+                payload = {
+                    key: value
+                    for key, value in entry.items()
+                    if key not in {"timestamp", "previous_hash", "hash", "signature"}
+                }
+                payload_json = json.dumps(payload, sort_keys=True)
+                entry_previous_hash = entry.get("previous_hash")
+                if entry_previous_hash != expected_previous_hash:
+                    raise ConsentError(
+                        f"tampered consent log at line {line_number}: previous hash mismatch"
+                    )
+                entry_hash = entry.get("hash")
+                if not isinstance(entry_hash, str):
+                    raise ConsentError(
+                        f"tampered consent log at line {line_number}: missing hash"
+                    )
+                expected_hash = _hash_payload(payload_json, entry_previous_hash)
+                if entry_hash != expected_hash:
+                    raise ConsentError(
+                        f"tampered consent log at line {line_number}: hash mismatch"
+                    )
+                signature = entry.get("signature")
+                if not isinstance(signature, str):
+                    raise ConsentError(
+                        f"tampered consent log at line {line_number}: missing signature"
+                    )
+                expected_signature = _sign_payload(payload_json, signing_key)
+                if not hmac.compare_digest(signature, expected_signature):
+                    raise ConsentError(
+                        f"tampered consent log at line {line_number}: signature mismatch"
+                    )
+                expected_previous_hash = entry_hash
                 yield entry
 
     def _append_log(self, payload: Mapping[str, object]) -> None:

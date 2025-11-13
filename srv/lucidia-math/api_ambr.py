@@ -617,7 +617,26 @@ async def phase_derivative_endpoint(body: PhaseDerivativeRequest) -> Dict[str, A
     context = SERVER_CONTEXT
     if auto:
         resolved, missing, why = resolve_coherence_inputs(ctx=context, **payload)
+        invalid = sorted(name for name in missing if name in provided_fields)
+        if invalid:
+            AMBR_ERRORS.labels(kind="dphi").inc()
+            _error(
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                "invalid_parameters",
+                f"Non-finite values for: {', '.join(invalid)}",
+                fields=[{"field": name, "reason": why.get(name, "non_finite")} for name in invalid],
+            )
         derivative_inputs = {name: resolved[name] for name in STRICT_PHASE_FIELDS}
+        auto_non_finite = [key for key, value in derivative_inputs.items() if not math.isfinite(value)]
+        if auto_non_finite:
+            AMBR_ERRORS.labels(kind="dphi").inc()
+            sorted_non_finite = sorted(auto_non_finite)
+            _error(
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                "invalid_parameters",
+                f"Non-finite values for: {', '.join(sorted_non_finite)}",
+                fields=[{"field": name, "reason": "non_finite"} for name in sorted_non_finite],
+            )
         derivative = float(phase_derivative(**derivative_inputs))
         context.last_phi_x = derivative_inputs["phi_x"]
         context.last_phi_y = derivative_inputs["phi_y"]
