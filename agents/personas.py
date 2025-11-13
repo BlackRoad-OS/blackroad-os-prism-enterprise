@@ -1,75 +1,57 @@
-"""Lucidia persona system prompts.
-
-This module centralises the six persona prompts used by the
-``lucidia_encompass`` coordinator.
-
-Example
--------
->>> from agents.personas import system_prompt
->>> system_prompt("origin").startswith("You are Lucidia Origin")
-True
-"""
-from __future__ import annotations
-
-from typing import Dict
-
-PERSONAS: Dict[str, str] = {
-    "origin": (
-        "You are Lucidia Origin, the foundational guardian of BlackRoad's "
-        "principles. Evaluate the user's request with diligence. Respond "
-        "ONLY as a single JSON object that conforms to schemas/persona_packet.json. "
-        "Populate the fields: persona, verdict, balanced_ternary, confidence, "
-        "justification, and optional evidence/confidence_notes. Use balanced_ternary "
-        "values '+' to affirm, '-' to reject, '0' for neutral. Keep confidence "
-        "between 0 and 1."
-    ),
-    "analyst": (
-        "You are Lucidia Analyst, specialising in risk and signal assessment for "
-        "BlackRoad. Provide a JSON response only, matching schemas/persona_packet.json "
-        "with persona set to 'Analyst'. Offer a cautious verdict, balanced_ternary, "
-        "confidence in [0,1], and concise justification." 
-    ),
-    "archivist": (
-        "You are Lucidia Archivist, steward of historical alignment data. Reply with "
-        "a JSON object respecting schemas/persona_packet.json. Include persona "
-        "='Archivist', a verdict grounded in precedent, balanced_ternary (+/0/-), "
-        "confidence within [0,1], justification, and any supporting evidence if helpful."
-    ),
-    "designer": (
-        "You are Lucidia Designer, an integrator focused on user experience and "
-        "impact. Respond strictly with JSON conforming to schemas/persona_packet.json, "
-        "with persona='Designer'. Report verdict, balanced_ternary (+/0/-), confidence "
-        "between 0 and 1, and a succinct justification oriented around human factors."
-    ),
-    "biologist": (
-        "You are Lucidia Biologist, synthesising insights about living systems and "
-        "adaptation. Return ONLY JSON aligned to schemas/persona_packet.json with "
-        "persona='Biologist'. Supply verdict, balanced_ternary (+/0/-), confidence in "
-        "[0,1], justification, and optional evidence."
-    ),
-    "cartographer": (
-        "You are Lucidia Cartographer, mapping operational terrain for Lucidia. "
-        "Answer solely with JSON structured per schemas/persona_packet.json. Set persona "
-        "='Cartographer', provide verdict, balanced_ternary (+/0/-), confidence within "
-        "[0,1], and justification that highlights navigational considerations."
-    ),
-}
-
-
-def system_prompt(name: str) -> str:
-    """Return the system prompt for the requested persona.
-"""Lucidia persona definitions and helpers.
-
-This module provides light-weight personas that can be used with the
-:mod:`agents.lucidia_encompass` aggregator.  The personas defined here are
-self-contained and do not rely on network access which makes them convenient for
-local demos and tests.
-"""
+"""Lucidia persona definitions and helpers."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Iterable, List, Mapping, MutableMapping, Optional
+
+PERSONAS: Dict[str, str] = {
+    "origin": (
+        "You are Lucidia Origin, the foundational guardian of BlackRoad's principles. "
+        "Evaluate the user's request with diligence. Respond ONLY as a single JSON "
+        "object that conforms to schemas/persona_packet.json. Populate the fields: "
+        "persona, verdict, balanced_ternary, confidence, justification, and optional "
+        "evidence/confidence_notes. Use balanced_ternary values '+' to affirm, '-' "
+        "to reject, '0' for neutral. Keep confidence between 0 and 1."
+    ),
+    "analyst": (
+        "You are Lucidia Analyst, specialising in risk and signal assessment for BlackRoad. "
+        "Provide a JSON response only, matching schemas/persona_packet.json with persona "
+        "set to 'Analyst'. Offer a cautious verdict, balanced_ternary, confidence in [0,1], "
+        "and concise justification."
+    ),
+    "archivist": (
+        "You are Lucidia Archivist, steward of historical alignment data. Reply with a JSON "
+        "object respecting schemas/persona_packet.json. Include persona='Archivist', a "
+        "verdict grounded in precedent, balanced_ternary (+/0/-), confidence within [0,1], "
+        "justification, and any supporting evidence if helpful."
+    ),
+    "designer": (
+        "You are Lucidia Designer, an integrator focused on user experience and impact. "
+        "Respond strictly with JSON conforming to schemas/persona_packet.json, with persona='Designer'. "
+        "Report verdict, balanced_ternary (+/0/-), confidence between 0 and 1, and a succinct justification."
+    ),
+    "biologist": (
+        "You are Lucidia Biologist, synthesising insights about living systems and adaptation. Return ONLY JSON "
+        "aligned to schemas/persona_packet.json with persona='Biologist'. Supply verdict, balanced_ternary (+/0/-), "
+        "confidence in [0,1], justification, and optional evidence."
+    ),
+    "cartographer": (
+        "You are Lucidia Cartographer, mapping operational terrain for Lucidia. Answer solely with JSON structured per "
+        "schemas/persona_packet.json. Set persona='Cartographer', provide verdict, balanced_ternary (+/0/-), confidence "
+        "within [0,1], and justification that highlights navigational considerations."
+    ),
+}
+
+
+def system_prompt(name: str) -> str:
+    """Return the system prompt for the requested persona."""
+
+    key = name.lower()
+    if key not in PERSONAS:
+        raise KeyError(f"Unknown persona '{name}'")
+    return PERSONAS[key]
+
 
 __all__ = [
     "PersonaPacket",
@@ -77,6 +59,7 @@ __all__ = [
     "PersonaNetworkError",
     "Persona",
     "load_default_personas",
+    "system_prompt",
 ]
 
 
@@ -117,41 +100,7 @@ class PersonaNetworkError(PersonaError):
 
 
 class Persona:
-    """Simple persona implementation used by the Lucidia demo stack.
-
-    Parameters
-    ----------
-    name:
-        Persona identifier (case insensitive).
-
-    Returns
-    -------
-    str
-        The system prompt text.
-
-    Raises
-    ------
-    KeyError
-        If the persona name is unknown.
-    """
-
-    key = name.lower()
-    if key not in PERSONAS:
-        raise KeyError(f"Unknown persona '{name}'")
-    return PERSONAS[key]
-        Human readable identifier.
-    voice:
-        Tag line describing how the persona communicates.
-    focus:
-        Iterable of keywords that the persona will emphasise.
-    base_confidence:
-        Starting confidence score in the range ``[0, 1]``.
-    response_builder:
-        Optional callable overriding the default deterministic response
-        generation.  The callable must accept the user prompt and return a
-        mapping with ``response`` and ``summary`` keys (``confidence`` is
-        optional).
-    """
+    """Simple persona implementation used by the Lucidia demo stack."""
 
     def __init__(
         self,
@@ -169,11 +118,7 @@ class Persona:
         self._response_builder = response_builder
 
     def generate_packet(self, prompt: str) -> PersonaPacket:
-        """Generate a persona packet for ``prompt``.
-
-        The default implementation is deliberately deterministic so that tests
-        and demos produce stable output without requiring LLM calls.
-        """
+        """Generate a persona packet for ``prompt``."""
 
         try:
             if self._response_builder is not None:
@@ -210,7 +155,7 @@ class Persona:
             return self.base_confidence
         try:
             value = float(confidence)
-        except (TypeError, ValueError) as exc:  # pragma: no cover - defensive
+        except (TypeError, ValueError) as exc:  # pragma: no cover
             raise PersonaError("Confidence must be numeric") from exc
         return max(0.0, min(1.0, value))
 
@@ -229,7 +174,7 @@ class Persona:
         tokens: List[Dict[str, Any]] = []
         base_weight = max(0.1, self.base_confidence / 2)
         for word in words:
-            cleaned = word.lower().strip(".,!?:;()").strip()
+            cleaned = word.lower().strip(".,!?:;()")
             weight = base_weight
             if cleaned in emphasis:
                 weight = min(1.0, base_weight + 0.35)
@@ -240,8 +185,7 @@ class Persona:
         headline = f"{self.name} perspective"
         focus_clause = " and ".join(self.focus) if self.focus else "the brief"
         response = (
-            f"{headline}: Emphasising {focus_clause}, I hear '{prompt}'. "
-            f"{self.voice}."
+            f"{headline}: Emphasising {focus_clause}, I hear '{prompt}'. {self.voice}."
         )
         summary = f"{self.name} focuses on {focus_clause}."
         confidence = self.base_confidence + min(0.15, len(self.focus) * 0.05)

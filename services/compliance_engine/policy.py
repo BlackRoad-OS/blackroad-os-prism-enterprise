@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Iterable, List
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 
 class AccountOpeningRequest(BaseModel):
@@ -22,17 +22,14 @@ class AccountOpeningRequest(BaseModel):
     liability_acknowledged: bool = Field(..., description="Client acknowledged liability language")
     disclosures: List[str] = Field(default_factory=list, description="List of disclosure codes provided")
 
-    @field_validator("product_type")
-    @classmethod
-    def _normalise_product_type(cls, value: str) -> str:
-        return value.lower()
-
-    @field_validator("disclosures", mode="before")
-    @classmethod
-    def _normalise_disclosures(cls, value: Iterable[str] | None) -> List[str]:
-        if value is None:
-            return []
-        return [str(item).strip().lower() for item in value]
+    def __init__(self, **data):  # type: ignore[override]
+        raw_disclosures = data.get("disclosures")
+        if raw_disclosures is None:
+            data["disclosures"] = []
+        else:
+            data["disclosures"] = [str(item).strip().lower() for item in raw_disclosures]
+        super().__init__(**data)
+        object.__setattr__(self, "product_type", self.product_type.lower())
 
 
 class AccountOpeningPolicy:

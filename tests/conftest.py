@@ -6,7 +6,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Sequence
 
+from pathlib import Path
+import sys
+
 import pytest
+
+# Ensure the project root is importable even when pytest is executed via the
+# Pyenv shim (which sets ``sys.path[0]`` to the interpreter bin directory).
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 if TYPE_CHECKING:  # pragma: no cover - import-time typing only
     from bots import build_registry as BuildRegistryFunc

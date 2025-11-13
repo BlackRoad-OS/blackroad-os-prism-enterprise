@@ -13,16 +13,25 @@ Example
 >>> score_packets(packets)
 {'winner': 'Origin', 'consensus_r': 0.5}
 """
+
 from __future__ import annotations
 
+import datetime as dt
 import json
+import math
 import os
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Sequence
 
-from openai import OpenAI
-
-from .personas import PERSONAS, system_prompt
+from .personas import (
+    PERSONAS,
+    Persona,
+    PersonaError,
+    PersonaNetworkError,
+    PersonaPacket as PersonaResponsePacket,
+    load_default_personas,
+    system_prompt,
+)
 
 BALANCED_TERNARY_VALUES = {"+": 1, "0": 0, "-": -1}
 DEFAULT_MODEL = os.environ.get("SILAS_MODEL", "gpt-4o-mini")
@@ -30,8 +39,8 @@ DEFAULT_BASE_URL = os.environ.get("SILAS_BASE_URL", "http://localhost:8000/v1")
 
 
 @dataclass
-class PersonaPacket:
-    """Normalised persona response."""
+class _VotePacket:
+    """Normalised persona response used by the OpenAI-backed runner."""
 
     persona: str
     balanced_ternary: str
@@ -42,7 +51,7 @@ class PersonaPacket:
     confidence_notes: Optional[str] = None
 
     @classmethod
-    def from_raw(cls, persona: str, payload: Any, error: Optional[str] = None) -> "PersonaPacket":
+    def from_raw(cls, persona: str, payload: Any, error: Optional[str] = None) -> "_VotePacket":
         """Create a packet from a raw JSON payload or failure message."""
 
         if isinstance(payload, str):
@@ -127,7 +136,7 @@ def _coerce_confidence(value: Any) -> float:
     return max(0.0, min(1.0, number))
 
 
-def _score_value(packet: PersonaPacket) -> float:
+def _score_value(packet: _VotePacket) -> float:
     return BALANCED_TERNARY_VALUES.get(packet.balanced_ternary, 0) * packet.confidence
 
 
@@ -135,7 +144,7 @@ def score_packets(packets: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
     """Evaluate persona packets and compute the winner and consensus value."""
 
     packet_objs = [
-        PersonaPacket(
+        _VotePacket(
             persona=str(pkt.get("persona")),
             balanced_ternary=_normalise_balanced_ternary(str(pkt.get("balanced_ternary", "0"))),
             confidence=_coerce_confidence(pkt.get("confidence")),
@@ -162,7 +171,7 @@ def score_packets(packets: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
     return {"winner": winner_packet.persona, "consensus_r": consensus_r}
 
 
-def _invoke_persona(client: OpenAI, persona_key: str, prompt: str, model: str) -> PersonaPacket:
+def _invoke_persona(client: OpenAI, persona_key: str, prompt: str, model: str) -> _VotePacket:
     system_text = system_prompt(persona_key)
     messages = [
         {"role": "system", "content": system_text},
@@ -175,9 +184,9 @@ def _invoke_persona(client: OpenAI, persona_key: str, prompt: str, model: str) -
             response_format={"type": "json_object"},
         )
         content = response.choices[0].message.content if response.choices else ""
-        return PersonaPacket.from_raw(persona_key, content)
+        return _VotePacket.from_raw(persona_key, content)
     except Exception as exc:  # pragma: no cover - network failure path
-        return PersonaPacket.from_raw(
+        return _VotePacket.from_raw(
             persona_key,
             payload={},
             error=f"persona request failed: {exc}",
@@ -202,6 +211,11 @@ def run(prompt: str, base_url: Optional[str] = None, model: Optional[str] = None
         A dictionary with keys ``winner``, ``consensus_r``, and ``packets``.
     """
 
+    try:
+        from openai import OpenAI  # type: ignore import-not-found
+    except ImportError as exc:  # pragma: no cover - optional dependency
+        raise RuntimeError("OpenAI client is required to call run()") from exc
+
     if base_url is None:
         base_url = DEFAULT_BASE_URL
     if model is None:
@@ -209,7 +223,7 @@ def run(prompt: str, base_url: Optional[str] = None, model: Optional[str] = None
 
     client = OpenAI(base_url=base_url)
 
-    packets: List[PersonaPacket] = []
+    packets: List[_VotePacket] = []
     for persona_key in PERSONAS:
         packet = _invoke_persona(client, persona_key, prompt, model)
         packets.append(packet)
@@ -220,30 +234,9 @@ def run(prompt: str, base_url: Optional[str] = None, model: Optional[str] = None
         "consensus_r": result["consensus_r"],
         "packets": [packet.to_dict() for packet in packets],
     }
-"""Lucidia Encompass aggregator.
 
-The aggregator coordinates multiple personas, scores their responses and
-surfaces a consensus recommendation.  The implementation intentionally avoids
-external dependencies so it can be executed inside the repository without
-network connectivity.
-"""
 
-from __future__ import annotations
-
-import datetime as dt
-import math
-from dataclasses import dataclass
-from typing import Iterable, List, Sequence
-
-from .personas import (
-    Persona,
-    PersonaError,
-    PersonaNetworkError,
-    PersonaPacket,
-    load_default_personas,
-)
-
-__all__ = ["ConsensusScore", "LucidiaEncompass", "WeightedConsensusScorer"]
+__all__ = ["ConsensusScore", "LucidiaEncompass", "WeightedConsensusScorer", "score_packets", "run"]
 
 
 @dataclass
@@ -259,46 +252,39 @@ class ConsensusScore:
 
 
 class WeightedConsensusScorer:
-    """Compute per-packet scores using a transparent heuristic."""
+    """Score packets based on coverage, depth, and persona confidence."""
 
-    def __init__(self, *, coverage_weight: float = 0.35, depth_weight: float = 0.2) -> None:
-        self.coverage_weight = coverage_weight
-        self.depth_weight = depth_weight
+    def __init__(self, coverage_weight: float = 0.4, depth_weight: float = 0.4, confidence_weight: float = 0.2) -> None:
+        total = coverage_weight + depth_weight + confidence_weight
+        if total <= 0:
+            raise ValueError("weights must sum to a positive value")
+        self.coverage_weight = coverage_weight / total
+        self.depth_weight = depth_weight / total
+        self.confidence_weight = confidence_weight / total
 
-    def score_packet(self, packet: PersonaPacket, prompt: str) -> ConsensusScore:
-        words = [w.lower().strip(".,!?:;()").strip() for w in prompt.split() if w]
-        unique_words = {w for w in words if len(w) > 3}
-        emphasis_hits = 0
-        for token in packet.tokens:
-            candidate = str(token.get("text", "")).lower().strip(".,!?:;()").strip()
-            if candidate in unique_words:
-                emphasis_hits += 1
-        coverage = 0.0
-        if unique_words:
-            coverage = min(1.0, emphasis_hits / max(len(unique_words), 1))
+    def score_packets(self, packets: Sequence[PersonaResponsePacket], prompt: str) -> List[ConsensusScore]:
+        """Apply heuristic scoring to persona packets."""
 
-        response_length = len(packet.response.split())
-        depth = min(1.0, response_length / 120)  # treat 120 words as "complete"
-        base = packet.confidence * (1 - self.coverage_weight - self.depth_weight)
-        raw_score = base + coverage * self.coverage_weight + depth * self.depth_weight
-        rationale = (
-            f"confidence={packet.confidence:.2f}, coverage={coverage:.2f}, depth={depth:.2f}"
-        )
-        packet.score = round(max(0.0, min(1.0, raw_score)), 4)
-        packet.metadata.setdefault("scoring", rationale)
-        return ConsensusScore(raw=packet.score, rationale=rationale)
-
-    def score_packets(self, packets: Sequence[PersonaPacket], prompt: str) -> List[ConsensusScore]:
-        return [self.score_packet(packet, prompt) for packet in packets]
+        scores: List[ConsensusScore] = []
+        for packet in packets:
+            coverage = min(1.0, len(packet.tokens) / max(1, len(prompt.split())))
+            depth = min(1.0, len(packet.response) / 512)
+            score = (
+                self.coverage_weight * coverage
+                + self.depth_weight * depth
+                + self.confidence_weight * packet.confidence
+            )
+            scores.append(ConsensusScore(raw=score, rationale=packet.summary))
+            packet.score = score
+        return scores
 
 
 class LucidiaEncompass:
-    """Orchestrate persona execution and compute a consensus."""
+    """Local orchestrator that aggregates persona outputs without API calls."""
 
     def __init__(
         self,
-        personas: Iterable[Persona] | None = None,
-        *,
+        personas: Sequence[Persona] | None = None,
         scorer: WeightedConsensusScorer | None = None,
     ) -> None:
         self.personas: List[Persona] = list(personas or load_default_personas())
@@ -323,14 +309,14 @@ class LucidiaEncompass:
             "generated_at": dt.datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
         }
 
-    def _collect_packets(self, prompt: str) -> List[PersonaPacket]:
-        packets: List[PersonaPacket] = []
+    def _collect_packets(self, prompt: str) -> List[PersonaResponsePacket]:
+        packets: List[PersonaResponsePacket] = []
         for persona in self.personas:
             try:
                 packets.append(persona.generate_packet(prompt))
             except PersonaNetworkError as exc:
                 packets.append(
-                    PersonaPacket(
+                    PersonaResponsePacket(
                         persona=persona.name,
                         summary="Persona unavailable",
                         response="",
@@ -343,7 +329,7 @@ class LucidiaEncompass:
                 )
             except PersonaError as exc:
                 packets.append(
-                    PersonaPacket(
+                    PersonaResponsePacket(
                         persona=persona.name,
                         summary="Persona failed",
                         response="",
@@ -356,7 +342,7 @@ class LucidiaEncompass:
                 )
         return packets
 
-    def _compute_consensus(self, packets: Sequence[PersonaPacket]) -> float:
+    def _compute_consensus(self, packets: Sequence[PersonaResponsePacket]) -> float:
         if not packets:
             return 0.0
         total = sum(packet.score for packet in packets)
