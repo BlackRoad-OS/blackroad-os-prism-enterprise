@@ -1,14 +1,14 @@
-# Placeholder for bot registry with webhooks and commands
-# Populate each bot entry with the webhook endpoints, supported commands,
-# and the owning team. Use this as the single source of truth for
-# automation bots across environments.
+# BlackRoad Bot Registry
+# Single source of truth for automation bots across BlackRoad environments
+# Each bot entry includes webhook endpoints, supported commands, and owning team
 bots:
-  - name: example-deploy-bot            # TODO: replace with bot slug
-    description: "Coordinates deploy orchestration and status fan-out."
+  - name: blackroad-deploy-bot
+    description: "Coordinates deploy orchestration and status fan-out for BlackRoad services."
     owner:
-      team: "Automation"               # TODO: owning team or squad
+      team: "Platform Engineering"
       contacts:
-        - "automation-oncall@example.com"
+        - "platform-oncall@blackroad.io"
+        - "sre@blackroad.io"
     commands:
       - trigger: "/deploy"
         description: "Kick off staged deployment pipeline."
