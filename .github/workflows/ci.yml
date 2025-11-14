@@ -190,6 +190,16 @@ jobs:
           else
             npm run build --workspaces
           fi
+      - name: Enable corepack
+        run: corepack enable
+        continue-on-error: true
+      - name: Ensure pnpm is available
+        run: pnpm -v || npm i -g pnpm
+      - name: Install dependencies
+        run: pnpm install --ignore-scripts || npm install
+      - name: Build all packages
+        run: pnpm -r build || npm run build --workspaces
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -209,11 +219,41 @@ jobs:
             npm test --workspaces
           fi
       - run: pytest -q
+      - name: Enable corepack
+        run: corepack enable
+        continue-on-error: true
+      - name: Ensure pnpm is available
+        run: pnpm -v || npm i -g pnpm
+      - name: Install dependencies
+        run: pnpm install --ignore-scripts || npm install
+      - name: Run JavaScript tests
+        run: pnpm -r test --if-present || npm test --workspaces
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Run Python tests
+        run: pytest -q
+
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: pnpm dlx eslint . --ext .ts,.tsx,.js || true
+      - name: Enable corepack
+        run: corepack enable
+        continue-on-error: true
+      - name: Ensure pnpm is available
+        run: pnpm -v || npm i -g pnpm
+      - name: Install dependencies
+        run: pnpm install --ignore-scripts || npm install
+      - name: Run ESLint
+        run: pnpm dlx eslint . --ext .ts,.tsx,.js
+
   policy:
     runs-on: ubuntu-latest
     steps:
@@ -240,3 +280,5 @@ jobs:
       - name: Run tests
         run: npm run test
         # TODO: Update this command when dedicated unit/integration tests are available.
+      - name: Policy check placeholder
+        run: echo "opa eval would run here" # placeholder; keep alias 'policy'

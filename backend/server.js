@@ -2,9 +2,13 @@ const http = require('http');
 const crypto = require('crypto');
 const data = require('./data');
 const tickets = require('./tickets');
+const { exec } = require('child_process');
+const { rateLimitMiddleware } = require('./rate-limiter');
+const { validate, schemas, sanitize } = require('./validators');
 
 const PORT = process.env.PORT || 4000;
 const HOST = '0.0.0.0';
+const ALLOW_SHELL = process.env.ALLOW_SHELL === 'true';
 
 const devMode = process.env.NODE_ENV !== 'production';
 const warnedCredentialKeys = new Set();
@@ -31,7 +35,20 @@ const VALID_USER = {
   username: resolveCredential('BACKEND_ADMIN_USERNAME', () => 'root'),
   password: resolveCredential('BACKEND_ADMIN_PASSWORD', () => 'Codex2025'),
   token: resolveCredential('BACKEND_ADMIN_TOKEN', () => 'test-token'),
+// Load credentials from environment variables
+const VALID_USER = {
+  username: process.env.AUTH_USERNAME || 'admin',
+  password: process.env.AUTH_PASSWORD,
+  token: process.env.AUTH_TOKEN,
 };
+
+// Validate required environment variables
+if (!VALID_USER.password || !VALID_USER.token) {
+  console.error('ERROR: AUTH_PASSWORD and AUTH_TOKEN environment variables must be set');
+  console.error('Please copy backend/.env.example to backend/.env and configure credentials');
+  process.exit(1);
+}
+
 const tasks = [];
 
 const securitySpotlights = {
@@ -43,19 +60,6 @@ const securitySpotlights = {
     lastFailsafe: '2025-03-08T11:24:00.000Z',
     killSwitchEngaged: false,
     manualOverride: false,
-const { Server } = require('socket.io');
-const { signToken, authMiddleware, nowISO, requireAdmin } = require('./utils');
-const { store, addTimeline } = require('./data');
-const autoheal = require('./autoheal');
-const { exec } = require('child_process');
-const { v4: uuidv4 } = require('uuid');
-
-// Sample Roadbook data
-const roadbookChapters = [
-  {
-    id: '1',
-    title: 'Introduction',
-    content: 'Welcome to the Roadbook. This chapter introduces the journey.'
   },
   dpAccountant: {
     epsilonCap: 3.5,
@@ -107,7 +111,8 @@ function snapshotSpotlights() {
 }
 
 function ensureAuth(req, res) {
-  if (req.headers.authorization !== `Bearer ${VALID_USER.token}`) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || authHeader !== `Bearer ${VALID_USER.token}`) {
     send(res, 401, { error: 'unauthorized' });
     return false;
   }
@@ -145,25 +150,43 @@ function safeNumber(value) {
   return Number.isFinite(n) ? n : null;
 }
 
+// Start background tasks
 data.expireApprovedExceptions();
 setInterval(() => {
   try {
     data.expireApprovedExceptions();
   } catch (err) {
-    console.error('exception expiry failed', err); // eslint-disable-line no-console
+    console.error('exception expiry failed', err);
   }
 }, ONE_DAY_MS);
 
 tickets.startTicketWorker();
 
 const app = http.createServer(async (req, res) => {
+  // Apply rate limiting
+  if (!rateLimitMiddleware(req, res)) {
+    return; // Request was rate limited
+  }
+
   const url = new URL(req.url, 'http://localhost');
   const segments = url.pathname.split('/').filter(Boolean);
 
+  // Login endpoint
   if (req.method === 'POST' && url.pathname === '/api/auth/login') {
     try {
       const body = await parseBody(req);
-      if (body.username === VALID_USER.username && body.password === VALID_USER.password) {
+
+      // Validate input
+      const validation = validate(body, schemas.login);
+      if (!validation.isValid()) {
+        return send(res, 400, { error: 'validation failed', details: validation.getErrors() });
+      }
+
+      // Sanitize inputs
+      const username = sanitize.trim(body.username);
+      const password = body.password;
+
+      if (username === VALID_USER.username && password === VALID_USER.password) {
         return send(res, 200, { token: VALID_USER.token });
       }
       return send(res, 401, { error: 'invalid credentials' });
@@ -172,32 +195,22 @@ const app = http.createServer(async (req, res) => {
     }
   }
 
+  // Tasks endpoints
   if (req.method === 'POST' && url.pathname === '/api/tasks') {
     if (!ensureAuth(req, res)) return;
-
-const app = http.createServer(async (req, res) => {
-  if (req.method === 'POST' && req.url === '/api/auth/login') {
     try {
       const body = await parseBody(req);
-      if (body.username === VALID_USER.username && body.password === VALID_USER.password) {
-        return send(res, 200, { token: VALID_USER.token });
-      }
-      return send(res, 401, { error: 'invalid credentials' });
-    } catch {
-      return send(res, 400, { error: 'invalid json' });
-    }
-  }
 
-  if (req.method === 'POST' && req.url === '/api/tasks') {
-    if (req.headers.authorization !== `Bearer ${VALID_USER.token}`) {
-      return send(res, 401, { error: 'unauthorized' });
-    }
-    try {
-      const body = await parseBody(req);
-      if (typeof body.title !== 'string' || !body.title.trim()) {
-        return send(res, 400, { error: 'invalid task' });
+      // Validate input
+      const validation = validate(body, schemas.task);
+      if (!validation.isValid()) {
+        return send(res, 400, { error: 'validation failed', details: validation.getErrors() });
       }
-      const task = { id: tasks.length + 1, title: body.title };
+
+      // Sanitize input
+      const title = sanitize.trim(sanitize.escapeHtml(body.title));
+
+      const task = { id: tasks.length + 1, title };
       tasks.push(task);
       return send(res, 201, { ok: true, task });
     } catch {
@@ -210,11 +223,13 @@ const app = http.createServer(async (req, res) => {
     return send(res, 200, { tasks });
   }
 
+  // Security spotlights endpoint
   if (req.method === 'GET' && url.pathname === '/api/security/spotlights') {
     if (!ensureAuth(req, res)) return;
     return send(res, 200, { spotlights: snapshotSpotlights() });
   }
 
+  // Security spotlight updates
   if (
     req.method === 'POST'
     && segments[0] === 'api'
@@ -315,6 +330,7 @@ const app = http.createServer(async (req, res) => {
     return send(res, 200, { key: panelKey, spotlight: snapshot[panelKey] });
   }
 
+  // Exception management endpoints
   if (req.method === 'POST' && url.pathname === '/exceptions') {
     let body;
     try {
@@ -343,24 +359,6 @@ const app = http.createServer(async (req, res) => {
     });
     return send(res, 201, created);
   }
-// ---- RoadChain ----
-app.get('/api/roadchain/blocks', (req, res) => {
-  res.json({ blocks: store.roadchainBlocks });
-});
-
-app.get('/api/roadchain/block/:id', (req, res) => {
-  const id = req.params.id;
-  const block = store.roadchainBlocks.find(b => b.hash === id || String(b.height) === id);
-  if (!block) return res.status(404).json({ error: 'not found' });
-  res.json({ block });
-});
-
-// Actions
-app.post('/api/actions/run', authMiddleware(JWT_SECRET), (req,res)=>{
-  const item = addTimeline({ type: 'action', text: 'Run triggered', by: req.user.username });
-  io.emit('timeline:new', { at: nowISO(), item });
-  res.json({ ok: true });
-});
 
   if (req.method === 'POST' && segments[0] === 'exceptions' && segments.length === 3) {
     const exceptionId = safeNumber(segments[1]);
@@ -409,67 +407,28 @@ app.post('/api/actions/run', authMiddleware(JWT_SECRET), (req,res)=>{
       status: url.searchParams.get('status') || undefined,
     });
     return send(res, 200, { exceptions: list });
-  if (req.method === 'GET' && req.url === '/api/tasks') {
-    if (req.headers.authorization !== `Bearer ${VALID_USER.token}`) {
-      return send(res, 401, { error: 'unauthorized' });
-    }
-    return send(res, 200, { tasks });
   }
 
-  // invalid JSON catch-all
-  if (req.method === 'POST') {
+  // Shell execution endpoint (optional, guarded)
+  if (req.method === 'POST' && url.pathname === '/api/exec') {
+    if (!ensureAuth(req, res)) return;
+    if (!ALLOW_SHELL) return send(res, 403, { error: 'shell disabled' });
+
+    let body;
     try {
-      await parseBody(req);
+      body = await parseBody(req);
     } catch {
       return send(res, 400, { error: 'invalid json' });
     }
+
+    const cmd = String(body?.cmd || '').slice(0, 256);
+    exec(cmd, { timeout: 5000 }, (err, stdout, stderr) => {
+      send(res, 200, { ok: !err, stdout, stderr, error: err?.message || null });
+    });
+    return;
   }
 
-  send(res, 404, { error: 'not found' });
-});
-
-module.exports = { app };
-
-
-const app = http.createServer(async (req, res) => {
-  if (req.method === 'POST' && req.url === '/api/auth/login') {
-    try {
-      const body = await parseBody(req);
-      if (body.username === VALID_USER.username && body.password === VALID_USER.password) {
-        return send(res, 200, { token: VALID_USER.token });
-      }
-      return send(res, 401, { error: 'invalid credentials' });
-    } catch {
-      return send(res, 400, { error: 'invalid json' });
-    }
-  }
-
-  if (req.method === 'POST' && req.url === '/api/tasks') {
-    if (req.headers.authorization !== `Bearer ${VALID_USER.token}`) {
-      return send(res, 401, { error: 'unauthorized' });
-    }
-    try {
-      const body = await parseBody(req);
-      if (typeof body.title !== 'string' || !body.title.trim()) {
-        return send(res, 400, { error: 'invalid task' });
-      }
-      const task = { id: tasks.length + 1, title: body.title };
-      tasks.push(task);
-      return send(res, 201, { ok: true, task });
-    } catch {
-      return send(res, 400, { error: 'invalid json' });
-    }
-  }
-
-  if (req.method === 'GET' && req.url === '/api/tasks') {
-    if (req.headers.authorization !== `Bearer ${VALID_USER.token}`) {
-      return send(res, 401, { error: 'unauthorized' });
-    }
-    return send(res, 200, { tasks });
-    }
-  }
-
-  // invalid JSON catch-all
+  // Invalid JSON catch-all for POST requests
   if (req.method === 'POST') {
     try {
       await parseBody(req);
@@ -485,20 +444,6 @@ module.exports = { app };
 
 if (require.main === module) {
   app.listen(PORT, HOST, () => {
-    // eslint-disable-next-line no-console
     console.log(`Backend listening on http://${HOST}:${PORT}`);
-// Manual control panel
-app.post('/api/autoheal/restart/:service', authMiddleware(JWT_SECRET), requireAdmin, autoheal.restart);
-app.post('/api/rollback/latest', authMiddleware(JWT_SECRET), requireAdmin, autoheal.rollbackLatest);
-app.post('/api/rollback/:id', authMiddleware(JWT_SECRET), requireAdmin, autoheal.rollbackTo);
-app.delete('/api/contradictions/all', authMiddleware(JWT_SECRET), requireAdmin, autoheal.purgeContradictions);
-app.post('/api/contradictions/test', authMiddleware(JWT_SECRET), requireAdmin, autoheal.injectContradictionTest);
-
-// Optional shell exec (guarded)
-app.post('/api/exec', authMiddleware(JWT_SECRET), (req, res)=>{
-  if (!ALLOW_SHELL) return res.status(403).json({ error: 'shell disabled' });
-  const cmd = String(req.body?.cmd || '').slice(0, 256);
-  exec(cmd, { timeout: 5000 }, (err, stdout, stderr)=>{
-    res.json({ ok: !err, stdout, stderr, error: err?.message || null });
   });
 }
