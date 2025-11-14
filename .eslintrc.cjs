@@ -56,7 +56,11 @@ module.exports = {
     {
       files: ['**/*.{js,cjs,mjs,jsx}'],
       env: { es2022: true, node: true },
-      parserOptions: { ecmaVersion: 2022, sourceType: 'module' },
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
+        ecmaFeatures: { jsx: true },
+      },
       globals: sharedGlobals,
       rules: {
         'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
