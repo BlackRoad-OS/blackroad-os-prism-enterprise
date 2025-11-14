@@ -46,8 +46,17 @@ spec:
       max_parallel: 5
     tasks:
       - name: schedule-key-rotation
-        command: >-
-          kli rotate --name ${KERI_NAME:-field-agent} --witness ${KERIA_WITNESS_AIDS}
+        command: |-
+          bash -lc '
+            IFS="," read -ra _witnesses <<< "${KERIA_WITNESS_AIDS:-}"
+            cmd=(kli rotate --name "${KERI_NAME:-field-agent}")
+            for witness in "${_witnesses[@]}"; do
+              if [ -n "$witness" ]; then
+                cmd+=(--witness "$witness")
+              fi
+            done
+            "${cmd[@]}"
+          '
         when:
           any:
             - condition: key_age_exceeds
