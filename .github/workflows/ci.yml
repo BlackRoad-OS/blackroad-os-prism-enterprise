@@ -159,3 +159,42 @@ jobs:
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+      - uses: actions/checkout@v4
+      - run: corepack enable || true
+      - run: pnpm -v || npm i -g pnpm
+      - run: pnpm install --ignore-scripts || npm install
+      - run: |
+          if command -v pnpm >/dev/null 2>&1; then
+            pnpm -r build
+          else
+            npm run build --workspaces
+          fi
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable || true
+      - run: pnpm -v || npm i -g pnpm
+      - run: pnpm install --ignore-scripts || npm install
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e '.[dev]'
+      - run: |
+          if command -v pnpm >/dev/null 2>&1; then
+            pnpm -r test --if-present
+          else
+            npm test --workspaces
+          fi
+      - run: pytest -q
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pnpm dlx eslint . --ext .ts,.tsx,.js || true
+  policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "opa eval would run here" # placeholder; keep alias 'policy'

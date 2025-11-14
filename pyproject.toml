@@ -33,6 +33,9 @@ dependencies = [
     "regopy>=1.0.0,<2",
     "sympy>=1.12",
     "typer>=0.15.1,<0.22",
+    "sympy>=1.12",
+    "nbformat>=5.10",
+    "nbconvert>=7.16",
 ]
 
 [project.optional-dependencies]
@@ -44,6 +47,9 @@ dev = [
     "mypy",
     "pytest",
     "pytest-cov",
+    "pytest",
+    "pytest-cov",
+    "mypy",
     "ruff",
 ]
 qiskit = ["qiskit", "qiskit-aer", "qiskit-ibm-runtime"]
@@ -67,6 +73,7 @@ testpaths = [
     "tests/test_amundson_integrator_module.py",
 ]
 addopts = "-q"
+addopts = "-q --cov=quantum_lab --cov-report=term-missing --cov-fail-under=90"
 testpaths = ["tests"]
 
 [tool.mypy]
@@ -76,6 +83,7 @@ ignore_missing_imports = true
 [tool.ruff]
 target-version = "py311"
 line-length = 100
+target-version = "py311"
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -89,3 +97,10 @@ pythonpath = ["."]
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["quantum_lab*", "qlm_lab*"]
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["quantum_lab*"]
