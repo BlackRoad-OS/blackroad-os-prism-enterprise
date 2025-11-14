@@ -11,13 +11,19 @@ import { createServer } from 'http';
 import jwt from 'jsonwebtoken';
 import {
   avatarManager,
-  AgentProfile,
   SpawnRequest,
   FormationType,
   AgentTransform
 } from './agent-avatar-system';
+import {
+  getAgentRoster,
+  summarizeRoster,
+  toSpawnRequest
+} from './agent-roster';
 
 // ==================== Configuration ====================
+
+const DEFAULT_AUTO_SPAWN_LIMIT = 25;
 
 const CONFIG = {
   port: process.env.METAVERSE_API_PORT || 8080,
@@ -421,20 +427,33 @@ export async function integrateWithAgentSwarm() {
 
   console.log('[Metaverse API] Integrating with agent swarm...');
 
-  // Load agent profiles from covenant registry
   try {
-    // Dynamic import to avoid circular dependencies
-    const covenantRegistry = await import('../agents/covenant_registry.json');
+    const roster = getAgentRoster();
+    console.log(`[Metaverse API] ${summarizeRoster()}`);
 
-    console.log(`[Metaverse API] Found ${covenantRegistry.default.agents?.length || 0} agents in covenant registry`);
-
-    // Auto-spawn agents if configured
     if (process.env.AUTO_SPAWN_AGENTS === 'true') {
-      console.log('[Metaverse API] Auto-spawning agents...');
-      // Implementation for auto-spawning
+      const configuredLimit = Number(process.env.AUTO_SPAWN_LIMIT ?? DEFAULT_AUTO_SPAWN_LIMIT);
+      const normalizedLimit = Number.isFinite(configuredLimit) && configuredLimit > 0
+        ? Math.floor(configuredLimit)
+        : DEFAULT_AUTO_SPAWN_LIMIT;
+      const safeLimit = Math.min(normalizedLimit, roster.length);
+      let spawned = 0;
+
+      console.log(`[Metaverse API] Auto-spawning up to ${safeLimit} agents for metaverse warm-up...`);
+
+      for (const agent of roster.slice(0, safeLimit)) {
+        try {
+          await avatarManager.spawnAgent(toSpawnRequest(agent));
+          spawned += 1;
+        } catch (error) {
+          console.error(`[Metaverse API] Failed to auto-spawn ${agent.id}:`, error);
+        }
+      }
+
+      console.log(`[Metaverse API] Auto-spawned ${spawned} agent(s) into the metaverse.`);
     }
   } catch (err) {
-    console.error('[Metaverse API] Could not load covenant registry:', err);
+    console.error('[Metaverse API] Could not load metaverse roster:', err);
   }
 }
 
