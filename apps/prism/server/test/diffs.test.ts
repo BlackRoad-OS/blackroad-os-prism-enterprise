@@ -164,10 +164,12 @@ describe("diff apply endpoint integration", () => {
 
   it("handles directory traversal attempts", () => {
     const maliciousPath = "../../../etc/passwd";
-    const normalizedPath = path.normalize(path.join(TEST_WORK_DIR, maliciousPath));
+    const resolvedTarget = path.resolve(TEST_WORK_DIR, maliciousPath);
+    const relativeTarget = path.relative(TEST_WORK_DIR, resolvedTarget);
 
     // Verify security check would catch this
-    expect(normalizedPath.startsWith(TEST_WORK_DIR)).toBe(false);
+    expect(relativeTarget.startsWith(".."))
+      .toBe(true);
   });
 
   it("creates parent directories for new files", () => {

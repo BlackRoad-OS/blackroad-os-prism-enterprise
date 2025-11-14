@@ -43,11 +43,15 @@ export async function diffRoutes(fastify: FastifyInstance) {
       const selected = body.selection?.[diff.path] ?? diff.hunks.map((_, i) => i);
       const selectedHunks = diff.hunks.filter((_, i) => selected.includes(i));
       const patch = selectedHunks.join("\n");
-      const target = path.join(WORK_DIR, diff.path);
+      const target = path.resolve(WORK_DIR, diff.path);
 
       // Ensure target is within WORK_DIR (security check)
-      const normalizedTarget = path.normalize(target);
-      if (!normalizedTarget.startsWith(WORK_DIR)) {
+      const relativeTarget = path.relative(WORK_DIR, target);
+      if (
+        relativeTarget.length === 0 ||
+        relativeTarget.startsWith("..") ||
+        path.isAbsolute(relativeTarget)
+      ) {
         results.push({
           path: diff.path,
           applied: false,
