@@ -1,11 +1,15 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+import json
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
+from typer.testing import CliRunner
 
+from cli.consent_cli import build_cli_app
 from orchestrator.consent import ConsentGrant, ConsentRegistry, ConsentRequest, ConsentType
+from orchestrator.exceptions import ConsentError
 
 
 def test_consent_lifecycle(tmp_path: Path) -> None:
@@ -80,14 +84,6 @@ def test_revoke_requires_participant(tmp_path: Path) -> None:
     registry.grant_consent(grant)
     with pytest.raises(PermissionError):
         registry.revoke_consent(grant.grant_id, "random-agent")
-from datetime import datetime, timedelta, timezone
-
-import pytest
-from typer.testing import CliRunner
-
-from cli.consent_cli import build_cli_app
-from orchestrator.consent import ConsentRegistry, ConsentRequest
-from orchestrator.exceptions import ConsentError
 
 
 def test_consent_request_natural_language() -> None:
@@ -203,6 +199,26 @@ def test_registry_persistence_round_trip(consent_registry: ConsentRegistry) -> N
     reloaded = ConsentRegistry(log_path)
     grant = reloaded.get_grant(grant_id)
     assert grant.matches("finance", "Treasury-BOT", "task_assignment")
+
+
+def test_registry_rejects_tampered_log(tmp_path: Path) -> None:
+    log_path = tmp_path / "consent.jsonl"
+    registry = ConsentRegistry(log_path)
+    request = ConsentRequest(
+        from_agent="alpha",
+        to_agent="beta",
+        consent_type=ConsentType.DATA_ACCESS,
+        purpose="tamper check",
+        scope="*",
+    )
+    registry.request_consent(request)
+    lines = [line for line in log_path.read_text().splitlines() if line.strip()]
+    assert lines
+    entry = json.loads(lines[0])
+    entry["hash"] = "corrupted"
+    log_path.write_text(json.dumps(entry) + "\n")
+    with pytest.raises(ConsentError):
+        ConsentRegistry(log_path)
 
 
 def test_audit_filters_by_agent(consent_registry: ConsentRegistry) -> None:

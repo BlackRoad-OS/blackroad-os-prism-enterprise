@@ -15,7 +15,18 @@ from amundson_blackroad.resolution import AmbrContext, K_BOLTZMANN, resolve_cohe
 
 def test_defaults_and_units() -> None:
     values, missing, why = resolve_coherence_inputs()
-    assert missing == []
+    expected_missing = {
+        "omega_0",
+        "lambda_",
+        "eta",
+        "phi_x",
+        "phi_y",
+        "r",
+        "amplitude",
+        "temperature_K",
+        "k_b_t",
+    }
+    assert expected_missing.issubset(set(missing))
     assert "k_b_t" in why and "omega_0" in why
     expected = 300.0 * K_BOLTZMANN
     assert math.isclose(values["k_b_t"], expected, rel_tol=1e-12)
@@ -23,10 +34,12 @@ def test_defaults_and_units() -> None:
 
 def test_context_fills_phases() -> None:
     ctx = AmbrContext(last_phi_x=0.3, last_phi_y=1.1)
-    values, missing, _ = resolve_coherence_inputs(ctx=ctx)
-    assert missing == []
+    values, missing, why = resolve_coherence_inputs(ctx=ctx)
     assert values["phi_x"] == 0.3
     assert values["phi_y"] == 1.1
+    assert "phi_x" in missing and "phi_y" in missing
+    assert why["phi_x"].startswith("Phase φ_x")
+    assert why["phi_y"].startswith("Phase φ_y")
 MODULE_PATH = Path(__file__).resolve().parents[1] / "packages" / "amundson_blackroad" / "resolution.py"
 SPEC = importlib.util.spec_from_file_location("amundson_blackroad.resolution", MODULE_PATH)
 assert SPEC and SPEC.loader

@@ -45,6 +45,8 @@ class AgentGitHubIdentity:
     name: str
     role: str
     category: str
+    cluster: Optional[str] = None
+    manifest_path: Optional[str] = None
     permissions: List[str] = field(default_factory=list)
     # Optional fields from registry
     specialization: Optional[str] = None
@@ -55,6 +57,7 @@ class AgentGitHubIdentity:
     file_path: Optional[str] = None
     manifest_path: Optional[str] = None
     cluster: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def has_permission(self, permission: str) -> bool:
         """Check if agent has a specific permission"""
@@ -100,29 +103,46 @@ class GitHubCommunicationHub:
             with open(self.registry_path, 'r') as f:
                 data = json.load(f)
                 for agent in data.get('agents', []):
-                    identities[agent['id']] = AgentGitHubIdentity(**agent)
+                    identities[agent['id']] = self._create_identity(agent)
 
                 # Load service bots (add default role if missing)
                 for bot in data.get('service_bots', {}).get('agents', []):
                     if 'role' not in bot:
                         bot['role'] = 'service'
                     identities[bot['id']] = AgentGitHubIdentity(**bot)
+                    identities[bot['id']] = self._create_identity(bot)
 
         # Load archetypes
         if self.archetypes_path.exists():
             with open(self.archetypes_path, 'r') as f:
                 for line in f:
                     agent = json.loads(line.strip())
-                    identities[agent['id']] = AgentGitHubIdentity(**agent)
+                    identities[agent['id']] = self._create_identity(agent)
 
         # Load specialized
         if self.specialized_path.exists():
             with open(self.specialized_path, 'r') as f:
                 for line in f:
                     agent = json.loads(line.strip())
-                    identities[agent['id']] = AgentGitHubIdentity(**agent)
+                    identities[agent['id']] = self._create_identity(agent)
 
         return identities
+
+    def _create_identity(self, payload: Dict[str, Any]) -> AgentGitHubIdentity:
+        core_fields = {
+            "id": payload.get("id", ""),
+            "github_username": payload.get("github_username", ""),
+            "github_handle": payload.get("github_handle", ""),
+            "name": payload.get("name", ""),
+            "role": payload.get("role", ""),
+            "category": payload.get("category", ""),
+            "cluster": payload.get("cluster"),
+            "manifest_path": payload.get("manifest_path"),
+            "permissions": list(payload.get("permissions", [])),
+        }
+        known_keys = set(core_fields.keys())
+        core_fields["metadata"] = {k: v for k, v in payload.items() if k not in known_keys}
+        return AgentGitHubIdentity(**core_fields)
 
     def get_agent(self, agent_id: str) -> Optional[AgentGitHubIdentity]:
         """Get agent identity by ID"""

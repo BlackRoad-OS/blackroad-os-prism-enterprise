@@ -71,26 +71,45 @@ def energy_increment(*args, **kwargs) -> float:
     if len(args) == 5:
         T, da, dtheta, a, theta = args
         return _energy_increment_scalar(T, da, dtheta, a, theta, **kwargs)
+    if len(args) == 6:
+        T, da, dtheta, a, theta, Omega = args
+        return _energy_increment_scalar(T, da, dtheta, a, theta, Omega=Omega, **kwargs)
     if len(args) == 3:
         a, theta, dt = args
         return _energy_increment_field(a, theta, dt, **kwargs)
     raise TypeError("energy_increment expects either (T, da, dtheta, a, theta) or (a, theta, dt)")
 
 
-def landauer_min(T: float, n_bits: float, k_b: float = K_BOLTZMANN) -> float:
+def landauer_min(
+    value: float,
+    other: float | None = None,
+    *,
+    k_b: float = K_BOLTZMANN,
+    n_bits: float | None = None,
+) -> float:
     """Return the Landauer minimum energy for irreversible computation."""
 
-    if n_bits < 0:
+    if n_bits is not None and other is not None:
+        raise TypeError("provide bits via positional argument or n_bits keyword, not both")
+    if n_bits is not None:
+        temperature = float(value)
+        bits = float(n_bits)
+    elif other is not None:
+        bits = float(value)
+        temperature = float(other)
+    else:
+        raise TypeError("landauer_min requires both bits and temperature")
+    if bits < 0:
         raise ValueError("n_bits must be non-negative")
-    if T <= 0:
+    if temperature <= 0:
         raise ValueError("temperature must be positive")
-    return k_b * T * math.log(2.0) * n_bits
+    return k_b * temperature * math.log(2.0) * bits
 
 
 def landauer_floor(bits: float, temperature: float, *, k_b: float = K_BOLTZMANN) -> float:
     """Return the Landauer floor for a given bit count and temperature."""
 
-    return landauer_min(temperature, bits, k_b=k_b)
+    return landauer_min(bits, temperature, k_b=k_b)
 
 
 def irreversible_energy(transitions: int, temperature: float) -> float:
@@ -130,7 +149,7 @@ def annotate_run_with_thermo(
     """Attach Landauer provenance and optional AM-4 ledger entries."""
 
     effective_bits = float(n_bits if n_bits is not None else bits)
-    delta_e_min_effective = landauer_min(temperature, effective_bits)
+    delta_e_min_effective = landauer_min(temperature, n_bits=effective_bits)
     delta_e_bits = landauer_floor(bits, temperature)
     provided_energy = None if energy is None else float(energy)
     landauer_ok = None if provided_energy is None else provided_energy >= delta_e_bits

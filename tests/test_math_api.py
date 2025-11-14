@@ -347,6 +347,14 @@ def test_phase_derivative_endpoint_auto_resolves(client: TestClient) -> None:
     assert "phi_y" in payload["why"]
 
 
+def test_phase_derivative_endpoint_auto_rejects_nan(client: TestClient) -> None:
+    response = client.post("/api/ambr/coherence/dphi", json={"phi_x": "nan"})
+    assert response.status_code == 422
+    payload = response.json()
+    assert payload["error_code"] == "invalid_parameters"
+    assert any(field["field"] == "phi_x" for field in payload.get("fields", []))
+
+
 @pytest.mark.parametrize(
     "payload, inferred",
     [

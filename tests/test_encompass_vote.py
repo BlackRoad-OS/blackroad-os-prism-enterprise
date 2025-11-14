@@ -1,14 +1,52 @@
-"""Unit tests for Lucidia Encompass scoring."""
+"""Tests for the Lucidia Encompass voting heuristic."""
+
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
+
+import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from agents.lucidia_encompass import score_packets
+from agents.lucidia_encompass import LucidiaEncompass, WeightedConsensusScorer, score_packets
+from agents.personas import Persona, PersonaError, PersonaNetworkError
+
+
+class StaticPersona(Persona):
+    """Persona returning a preconfigured payload for deterministic tests."""
+
+    def __init__(self, name: str, *, response: str, confidence: float) -> None:
+        super().__init__(
+            name=name,
+            voice=f"{name} voice",
+            focus=("focus",),
+            base_confidence=confidence,
+            response_builder=lambda prompt: {
+                "response": response,
+                "summary": f"{name} summary",
+                "confidence": confidence,
+            },
+        )
+
+
+class FailingPersona(Persona):
+    """Persona raising errors to simulate network/API failures."""
+
+    def __init__(self, name: str, exc: Exception) -> None:
+        super().__init__(
+            name=name,
+            voice=f"{name} voice",
+            focus=(),
+            response_builder=lambda prompt: _raise(exc),
+        )
+
+
+def _raise(exc: Exception):  # pragma: no cover - helper used indirectly
+    raise exc
 
 
 def test_score_packets_prefers_positive_signal() -> None:
@@ -55,59 +93,9 @@ def test_score_packets_handles_negative_votes() -> None:
     result = score_packets(packets)
     assert result["winner"] == "Designer"
     assert result["consensus_r"] == 1.0
-"""Tests for the Lucidia Encompass voting heuristic."""
-
-from __future__ import annotations
-
-import json
-import pathlib
-import sys
-from pathlib import Path
-
-ROOT = pathlib.Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
-import pytest
-
-from agents.lucidia_encompass import LucidiaEncompass, WeightedConsensusScorer
-from agents.personas import Persona, PersonaError, PersonaNetworkError
 
 
-class StaticPersona(Persona):
-    """Persona returning a preconfigured payload for deterministic tests."""
-
-    def __init__(self, name: str, *, response: str, confidence: float) -> None:
-        super().__init__(
-            name=name,
-            voice=f"{name} voice",
-            focus=("focus",),
-            base_confidence=confidence,
-            response_builder=lambda prompt: {
-                "response": response,
-                "summary": f"{name} summary",
-                "confidence": confidence,
-            },
-        )
-
-
-class FailingPersona(Persona):
-    """Persona raising errors to simulate network/API failures."""
-
-    def __init__(self, name: str, exc: Exception) -> None:
-        super().__init__(
-            name=name,
-            voice=f"{name} voice",
-            focus=(),
-            response_builder=lambda prompt: _raise(exc),
-        )
-
-
-def _raise(exc: Exception):  # pragma: no cover - helper used indirectly
-    raise exc
-
-
-def test_encompass_orders_packets_by_score():
+def test_encompass_orders_packets_by_score() -> None:
     personas = [
         StaticPersona("Low", response="Short reply", confidence=0.2),
         StaticPersona(
@@ -126,7 +114,7 @@ def test_encompass_orders_packets_by_score():
     assert 0.0 <= result["consensus"] <= 1.0
 
 
-def test_encompass_handles_network_error(tmp_path: Path):
+def test_encompass_handles_network_error(tmp_path: Path) -> None:
     personas = [
         StaticPersona("Stable", response="All good here", confidence=0.6),
         FailingPersona("Offline", PersonaNetworkError("gateway timeout")),
@@ -139,14 +127,13 @@ def test_encompass_handles_network_error(tmp_path: Path):
     assert packets["Offline"]["confidence"] == 0.0
     assert packets["Stable"]["score"] > 0.0
 
-    # Write output to ensure JSON serialisation matches schema expectations.
     output_file = tmp_path / "packets.json"
     output_file.write_text(json.dumps(result), encoding="utf-8")
     loaded = json.loads(output_file.read_text(encoding="utf-8"))
     assert "winner" in loaded and loaded["winner"]
 
 
-def test_persona_builder_raises_clean_error():
+def test_persona_builder_raises_clean_error() -> None:
     persona = Persona(
         name="Errant",
         voice="",
