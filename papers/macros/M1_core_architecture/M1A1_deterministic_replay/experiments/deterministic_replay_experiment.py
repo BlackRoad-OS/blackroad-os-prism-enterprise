@@ -14,7 +14,8 @@ import json
 import random
 import time
 import hashlib
-from dataclasses import dataclass, asdict
+from collections import OrderedDict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
@@ -65,15 +66,15 @@ except ImportError:  # pragma: no cover
         last_hash: Optional[str] = None
         count = 0
         for entry in entries:
-            payload = json.dumps(
-                {k: entry.get(k) for k in ("timestamp", "event", "state_hash", "payload", "prev_hash")},
-                ensure_ascii=False,
-                separators=(",", ":"),
-            )
+            candidate = OrderedDict()
+            for key in ("ts", "event", "payload", "prevHash"):
+                if key in entry:
+                    candidate[key] = entry[key]
+            payload = json.dumps(candidate, ensure_ascii=False, separators=(",", ":"))
             digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
             if entry.get("hash") != digest:
                 return count, False
-            if entry.get("prev_hash") != last_hash:
+            if entry.get("prevHash") != last_hash:
                 return count, False
             last_hash = entry.get("hash")
             count += 1
@@ -84,7 +85,7 @@ except ImportError:  # pragma: no cover
 class JournalEntry:
     """Single append-only journal record with hash chaining."""
 
-    timestamp: float
+    ts: float
     event: str
     state_hash: str
     payload: Dict[str, Any]
@@ -92,23 +93,27 @@ class JournalEntry:
     hash: Optional[str] = None
 
     def compute_hash(self) -> str:
-        payload = json.dumps(
-            {
-                "timestamp": self.timestamp,
-                "event": self.event,
-                "state_hash": self.state_hash,
-                "payload": self.payload,
-                "prev_hash": self.prev_hash,
-            },
-            ensure_ascii=False,
-            separators=(",", ":"),
-        )
+        candidate = OrderedDict()
+        candidate["ts"] = self.ts
+        candidate["event"] = self.event
+        candidate["payload"] = self.payload
+        if self.prev_hash is not None:
+            candidate["prevHash"] = self.prev_hash
+        payload = json.dumps(candidate, ensure_ascii=False, separators=(",", ":"))
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
     def to_dict(self) -> Dict[str, Any]:
-        data = asdict(self)
-        data["hash"] = self.hash
-        return data
+        # The persisted representation must match the offline verifier schema.
+        serialized: Dict[str, Any] = {
+            "ts": self.ts,
+            "event": self.event,
+            "stateHash": self.state_hash,
+            "payload": self.payload,
+            "hash": self.hash,
+        }
+        if self.prev_hash is not None:
+            serialized["prevHash"] = self.prev_hash
+        return serialized
 
 
 class HashChainedJournal:
@@ -124,7 +129,7 @@ class HashChainedJournal:
         state_payload = json.dumps(state, ensure_ascii=False, sort_keys=True)
         state_hash = hashlib.sha256(state_payload.encode("utf-8")).hexdigest()
         entry = JournalEntry(
-            timestamp=timestamp,
+            ts=timestamp,
             event=event,
             state_hash=state_hash,
             payload=payload,
@@ -249,6 +254,12 @@ def load_journals_from_disk(path: Path) -> Dict[str, List[Dict[str, Any]]]:
     return loaded
 
 
+def _extract_state_hash(entry: Dict[str, Any]) -> Optional[str]:
+    """Return the state hash regardless of schema casing."""
+
+    return entry.get("stateHash") or entry.get("state_hash")
+
+
 def replay_from_journals(journals: Dict[str, List[Dict[str, Any]]]) -> Dict[str, Any]:
     """Rebuild agent state deterministically using the recorded journals."""
 
@@ -263,7 +274,7 @@ def replay_from_journals(journals: Dict[str, List[Dict[str, Any]]]) -> Dict[str,
             counter += increment
         reconstructed["agents"][agent_id] = {
             "counter": counter,
-            "last_state_hash": entries[-1].get("state_hash") if entries else None,
+            "last_state_hash": _extract_state_hash(entries[-1]) if entries else None,
             "entries": count,
         }
     return reconstructed
