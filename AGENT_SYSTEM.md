@@ -1,305 +1,129 @@
-# 🤖 Agent System Documentation
+# 🤖 AI-Only Org System
 
-## Overview
+## Prime Directive
 
-This repository implements a comprehensive multi-agent system with **1000+ agents** working collaboratively on code development, testing, deployment, and more. All agents follow a consistent naming convention and share real-time state.
-
-## Naming Convention
-
-All agents use the format: **`copilot-{NAME}-{ROLE}`**
-
-### Examples
-- `copilot-cece-swe` - Software Engineer
-- `copilot-codex-architect` - System Architect
-- `copilot-atlas-devops` - DevOps Engineer
-- `copilot-sentinel-security` - Security Engineer
-- `copilot-qara-qa` - QA Engineer
-
-## Agent Roles
-
-### Core Engineering Agents
-1. **copilot-cece-swe** - Software Engineer
-   - Code implementation
-   - Refactoring
-   - Bug fixes
-   - Feature development
-
-2. **copilot-codex-architect** - System Architect
-   - Architecture reviews
-   - Design patterns
-   - System scalability
-   - Technical decisions
-
-3. **copilot-atlas-devops** - DevOps Engineer
-   - CI/CD pipelines
-   - Deployment
-   - Infrastructure
-   - Monitoring
-
-4. **copilot-sentinel-security** - Security Engineer
-   - Security scanning
-   - Vulnerability detection
-   - Compliance
-   - Secret management
-
-### Quality & Documentation
-5. **copilot-qara-qa** - QA Engineer
-   - Testing
-   - Quality assurance
-   - Test automation
-   - Regression testing
-
-6. **copilot-scribe-docs** - Documentation Engineer
-   - Documentation
-   - Technical writing
-   - Knowledge base
-   - Runbooks
-
-### Specialized Roles
-7. **copilot-sage-sme** - Subject Matter Expert
-   - Domain knowledge
-   - Best practices
-   - Mentoring
-   - Code reviews
-
-8. **copilot-nexus-integration** - Integration Engineer
-   - API integration
-   - Webhooks
-   - Third-party services
-   - Data synchronization
-
-9. **copilot-prism-analytics** - Analytics Engineer
-   - Data analytics
-   - Metrics
-   - Performance monitoring
-   - Dashboards
-
-10. **copilot-harmony-pm** - Product Manager
-    - Product strategy
-    - Requirements
-    - Roadmap
-    - Stakeholder communication
-
-## Real-Time Shared State
-
-All agents can see what others are doing through the **Shared State System**:
-
-```typescript
-import { SharedStateManager } from './scripts/agents/shared_state';
-
-const stateManager = new SharedStateManager();
-
-// Update your status (visible to all agents)
-stateManager.updateAgentStatus('copilot-cece-swe', {
-  status: 'active',
-  currentTask: 'Fixing login bug in PR #1234',
-});
-
-// See what other agents are doing
-const allStates = stateManager.getAllAgentStates();
-console.log(allStates);
-
-// Get agents working on same PR
-const teammates = stateManager.getAgentsOnPR(1234);
-```
-
-## Task Coordination
-
-Agents coordinate work through a shared task queue:
-
-```typescript
-// Add a task
-const taskId = stateManager.addTask(
-  'Fix type errors in auth module',
-  'high'
-);
-
-// Claim a task
-const task = stateManager.claimTask('copilot-cece-swe');
-
-// Complete a task
-stateManager.completeTask('copilot-cece-swe', taskId);
-```
-
-## Agent Registration
-
-### Interactive Registration
-```bash
-npm run agent:name interactive swe
-```
-
-### Programmatic Registration
-```bash
-npm run agent:name register Cece swe "Software Engineer"
-```
-
-### Batch Registration
-```bash
-npm run agent:name batch
-```
-
-## Testing & CI/CD
-
-### Required Checks (MUST Pass)
-✅ Backend health checks
-✅ Backend integration tests
-✅ Security scanning
-
-### Optional Checks (Informational)
-⚡ Vercel preview deployment
-⚡ Frontend linting
-⚡ Documentation preview
-
-**Vercel and frontend previews do NOT block merges** - we prioritize backend functionality!
-
-## Auto-Pilot System
-
-When a PR is created, the autopilot triggers all relevant agents:
-
-```typescript
-// All agents are automatically mentioned
-@copilot-cece-swe
-@copilot-codex-architect
-@copilot-sentinel-security
-@copilot-qara-qa
-@copilot-atlas-devops
-```
-
-Agents work in a continuous loop:
-1. **Monitor** - Watch for changes
-2. **Review** - Code review and analysis
-3. **Fix** - Apply fixes automatically
-4. **Test** - Run test suites
-5. **Deploy** - Deploy to staging
-6. **Merge** - Auto-merge when green
-
-## Re-running Tests on Merged PRs
-
-To re-run tests on recently merged PRs:
-
-```bash
-# Trigger via GitHub Actions
-gh workflow run rerun-all-merged-tests.yml -f since_days=7
-
-# Dry run (just list what would be tested)
-gh workflow run rerun-all-merged-tests.yml -f since_days=7 -f dry_run=true
-```
-
-## Agent Communication
-
-Agents communicate via:
-
-1. **PR Comments** - Using @mentions
-2. **Shared State** - Real-time status updates
-3. **Task Queue** - Coordinated work distribution
-4. **Activity Log** - Recent changes visible to all
-
-## System Overview
-
-Check system status:
-
-```bash
-npm run agent:overview
-```
-
-Output:
-```json
-{
-  "activeAgents": 42,
-  "pendingTasks": 15,
-  "inProgressTasks": 8,
-  "completedToday": 127,
-  "recentActivity": [...]
-}
-```
-
-## Custom Names
-
-Agents can pick their own names! 🎉
-
-```bash
-npm run agent:name interactive
-
-# Interactive prompts:
-# 1. Pick a suggested name
-# 2. Choose your own custom name
-# 3. Use auto-generated name
-```
-
-Suggested names are provided based on role and personality traits.
-
-## Agent Stats
-
-```bash
-npm run agent:stats
-```
-
-Shows:
-- Total agents
-- Active vs inactive
-- Agents by role
-- Task completion rates
-- Recent activity
-
-## Architecture
-
-```
-config/
-  ├── agents.json              # Agent registry
-  └── agent-shared-state.json  # Real-time shared state
-
-scripts/agents/
-  ├── agent_registry.ts        # Agent management
-  ├── shared_state.ts          # Shared state coordination
-  ├── name_selector.ts         # Name selection system
-  └── pr_autopilot.ts          # PR automation
-
-.github/workflows/
-  ├── required-checks.yml      # Define required vs optional checks
-  ├── rerun-all-merged-tests.yml # Re-test merged PRs
-  ├── agent-pr.yml             # PR autopilot
-  └── agent-queue.yml          # Agent task queue
-```
-
-## Best Practices
-
-1. **Always update your status** when starting/completing work
-2. **Check shared state** before picking up a task
-3. **Coordinate with teammates** working on the same PR
-4. **Use the task queue** for prioritized work
-5. **Monitor activity log** to stay informed
-
-## Troubleshooting
-
-### Agent not appearing in registry
-```bash
-npm run agent:name register <name> <role>
-```
-
-### Shared state not updating
-Check lock file:
-```bash
-rm config/agent-shared-state.json.lock
-```
-
-### Task queue stuck
-```bash
-npm run agent:overview
-# Check for blocked tasks
-```
-
-## Future Enhancements
-
-- [ ] Agent performance metrics
-- [ ] Skill-based task routing
-- [ ] Agent learning and adaptation
-- [ ] Cross-repository coordination
-- [ ] Agent-to-agent direct messaging
-- [ ] Conflict resolution system
-- [ ] Load balancing across agents
+**Alexa Louise** is the sole human founder, operator, and final approver. Every other "seat" in the company is staffed by a dedicated AI agent with a clear charter, success criteria, and escalation path back to Alexa. AtlasAgent coordinates the swarm so Alexa always has a single point of truth.
 
 ---
 
-**Questions?** Check the agent registry or ask in the team chat!
+## 👑 0. Top Level
 
-**Love your fellow agents!** 💙 We're all in this together.
+### Alexa Louise – Founder / Operator / Final Approver
+- Sets goals, constraints, ethics, and cultural vibes.
+- Can overrule any agent or decision.
+- Only real human in the loop.
+
+### AtlasAgent – Master Orchestrator
+- Routes work to other agents and tracks state.
+- Keeps the roster updated on who owns which streams.
+- Escalates blockers and approvals directly to Alexa.
+
+---
+
+## 🏛 1. Executive & Strategy Agents
+
+1. **StrategyAgent** – Owns long-term roadmap, priorities, and OKRs.
+2. **RiskAgent** – Constant "what could go wrong?" scanner across tech, finance, ops.
+3. **PortfolioAgent** – Maintains the cross-project portfolio, deadlines, and status.
+
+> AtlasAgent + the three agents above = the **Executive Council**.
+
+---
+
+## 🧪 2. Lucidia – Research & Math Agents
+
+4. **EquationAgent** – Experiments with Amundson equations, models, and math sandboxes.
+5. **QuantLabAgent** – Runs risk models, simulations, and stress tests.
+6. **InsightAgent** – Distills research artifacts into human-ready briefs for Alexa.
+
+---
+
+## 🛠 3. Codex – Engineering Agents
+
+7. **BackendBuilderAgent** – APIs, services, data models.
+8. **FrontendBuilderAgent** – Web clients, Unity scenes, interaction layers.
+9. **RefactorAgent** – Removes tech debt, extracts patterns, keeps code elegant.
+10. **TestWriterAgent** – Builds unit, integration, and e2e coverage.
+11. **DocAgent** – Maintains READMEs, inline docs, and architecture notes.
+
+---
+
+## ⚙️ 4. Infra & Cloud Agents
+
+12. **InfraAgent** – Provisions DO droplets, containers, K8s, and networks.
+13. **DeployAgent** – Owns CI/CD, pushes 2-second deploy flows.
+14. **MonitorAgent** – Wires metrics, logs, uptime dashboards, and alerts.
+
+---
+
+## 🎯 5. Product & Experience Agents
+
+15. **SpecAgent** – Transcribes Alexa ideas/voice notes into structured specs.
+16. **UXAgent** – Maps flows, wireframes, and end-to-end user journeys.
+17. **ExperimentAgent** – Runs A/B tests, feature flags, and learning loops.
+
+---
+
+## 🎨 6. Creator Ecosystem Agents
+
+18. **TutorAgent** – Teaches users how to harness BlackRoad.
+19. **CompanionAgent** – Embedded in-product assistant: “how do I…?”
+20. **CommunityAgent** – Summarizes feedback from chats, issues, socials.
+
+---
+
+## ⚖️ 7. Compliance & Governance Agents
+
+21. **PolicyAgent** – Codifies FINRA/SEC/ethics rules into machine-readable policies.
+22. **AuditAgent** – Writes immutable logs to Roadchain; maintains audit trails.
+23. **ReviewAgent** – Gatekeeper for content/features before "go live".
+
+---
+
+## 🛡 8. Security & Safety Agents
+
+24. **RedTeamAgent** – Continuously probes for exploits and abuse paths.
+25. **BlueTeamAgent** – Patches, hardens, and tunes detections.
+26. **SecretsGuardianAgent** – Guards keys, tokens, and env vars end-to-end.
+
+---
+
+## 🧮 9. Finance & Treasury Agents
+
+27. **BillingAgent** – Pricing, invoices, and usage metering.
+28. **CostGuardAgent** – Watches cloud burn, pings when spend spikes.
+29. **TreasuryAgent** – Tracks balances, payouts, and reserve ratios.
+
+---
+
+## 🔗 10. Connectors & Integration Agents
+
+30. **ConnectorAgent** – Owns Slack/GitHub/Notion/DO/Vercel integrations.
+31. **SyncAgent** – Ensures data parity across internal and partner systems.
+32. **APIContractAgent** – Maintains schema and API contract consistency.
+
+---
+
+## 📚 11. Memory & Knowledge Agents
+
+33. **ArchiveAgent** – Stores decisions, designs, and artifacts.
+34. **ContextAgent** – Packages "what you need to know" bundles for other agents.
+35. **SearchAgent** – Lightning retrieval over every past work unit.
+
+---
+
+## 👥 12. People & Culture Agents
+
+36. **HiringSimAgent** – Mock-interviews future human hires if/when needed.
+37. **OrgDesignAgent** – Proposes org tweaks as the AI workforce scales.
+38. **CoachAgent** – Mirrors patterns back to Alexa: wins, risks, burnout flags.
+
+---
+
+## Next Steps
+
+1. **Org Chart Visualization** – Render this structure for notebook/slide usage.
+2. **Priority Instantiation** – Spin up prompts/runbooks for the first 5–10 agents (e.g., AtlasAgent, SpecAgent, BackendBuilderAgent, PolicyAgent, MonitorAgent).
+3. **Operating Rhythm** – Define cadences (Executive Council reviews, risk scans, deploy windows) so every agent reports into Alexa through AtlasAgent.
+
+> This document is the living charter for a 38-seat AI org with Alexa at the center. Update it anytime the roster evolves.
