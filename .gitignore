@@ -14,8 +14,12 @@ __pycache__/
 node_modules/
 
 # Project artifacts
-artifacts/
+artifacts/*
 !artifacts/.gitkeep
+!artifacts/agents/
+!artifacts/agents/identities.jsonl
+!artifacts/agents/
+!artifacts/agents/identities.jsonl
 dist/
 coverage/
 reports/
@@ -47,7 +51,6 @@ config/dev_signing_key.txt
 Thumbs.db
 
 # Artifacts
-artifacts/
 coverage/
 tests/_codex_autogen/
 .tmp/
@@ -139,4 +142,6 @@ ssh-*
 *.ogg
 output/**
 artifacts/**
+!artifacts/agents/
+!artifacts/agents/**
 *.tsbuildinfo
