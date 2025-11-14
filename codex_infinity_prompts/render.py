@@ -17,6 +17,7 @@ TEMPLATE_MAP = {
     "pi_ops": "PI_OPS.md",
     "pi_zero": "PI_ZERO.md",
     "arduino_uno": "ARDUINO_UNO.md",
+    "blackroad_codex_engineer": "BLACKROAD_CODEX_METAVERSE_ENGINEER.md",
 }
 PLACEHOLDER_PATTERN = re.compile(r"{{\s*([a-zA-Z0-9_]+)\s*}}")
 
