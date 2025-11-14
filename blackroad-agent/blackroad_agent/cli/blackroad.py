@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import click
-from agent import jobs
+
+from ..agent import jobs
 
 
 @click.group()
