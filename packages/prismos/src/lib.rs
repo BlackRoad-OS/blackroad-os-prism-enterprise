@@ -9,7 +9,7 @@ use std::time::Duration;
 
 #[derive(Clone)]
 pub struct Agent {
-    pub name: &'static str,
+    pub name: String,
     pub state: AgentState,
     pub entrypoint: fn(),
 }
@@ -30,9 +30,9 @@ struct AgentRuntime {
     stop_rx: Arc<Mutex<mpsc::Receiver<()>>>,
 }
 
-static AGENT_TABLE: OnceCell<Mutex<HashMap<&'static str, AgentRuntime>>> = OnceCell::new();
+static AGENT_TABLE: OnceCell<Mutex<HashMap<String, AgentRuntime>>> = OnceCell::new();
 
-fn table() -> &'static Mutex<HashMap<&'static str, AgentRuntime>> {
+fn table() -> &'static Mutex<HashMap<String, AgentRuntime>> {
     AGENT_TABLE.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
@@ -48,7 +48,7 @@ pub fn spawn_agent(agent: &Agent) {
     fs::create_dir_all(ipc_dir()).ok();
     fs::create_dir_all(log_dir()).ok();
     let mut tbl = table().lock().unwrap();
-    if tbl.contains_key(agent.name) {
+    if tbl.contains_key(agent.name.as_str()) {
         return;
     }
     let (stop_tx, stop_rx) = mpsc::channel();
@@ -58,14 +58,14 @@ pub fn spawn_agent(agent: &Agent) {
     let agent_clone = agent.clone();
     let inbox_clone = inbox.clone();
     let outbox_clone = outbox.clone();
-    let name = agent.name;
+    let name = agent.name.clone();
     let handle = thread::spawn(move || {
         let res = std::panic::catch_unwind(|| {
             (agent_clone.entrypoint)();
         });
         if res.is_err() {
             let mut tbl = table().lock().unwrap();
-            if let Some(rt) = tbl.get_mut(name) {
+            if let Some(rt) = tbl.get_mut(name.as_str()) {
                 rt.agent.state = AgentState::Crashed;
             }
             let path = log_dir().join(format!("{}.log", name));
@@ -75,7 +75,7 @@ pub fn spawn_agent(agent: &Agent) {
         }
     });
     tbl.insert(
-        agent.name,
+        agent.name.clone(),
         AgentRuntime {
             agent: Agent {
                 state: AgentState::Running,
@@ -92,7 +92,7 @@ pub fn spawn_agent(agent: &Agent) {
 
 pub fn stop_agent(agent: &mut Agent) {
     let mut tbl = table().lock().unwrap();
-    if let Some(rt) = tbl.get_mut(agent.name) {
+    if let Some(rt) = tbl.get_mut(agent.name.as_str()) {
         let _ = rt.stop_tx.send(());
         if let Some(handle) = rt.handle.take() {
             let _ = handle.join();
@@ -156,7 +156,7 @@ fn should_stop(agent: &str) -> bool {
 pub fn list_agents() -> Vec<(String, AgentState)> {
     let tbl = table().lock().unwrap();
     tbl.values()
-        .map(|rt| (rt.agent.name.to_string(), rt.agent.state))
+        .map(|rt| (rt.agent.name.clone(), rt.agent.state))
         .collect()
 }
 
@@ -188,13 +188,13 @@ fn echo_agent() {
 
 pub fn boot() {
     let system = Agent {
-        name: "system",
+        name: "system".to_string(),
         state: AgentState::Stopped,
         entrypoint: system_agent,
     };
     spawn_agent(&system);
     let echo = Agent {
-        name: "echo",
+        name: "echo".to_string(),
         state: AgentState::Stopped,
         entrypoint: echo_agent,
     };
