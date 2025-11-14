@@ -212,9 +212,29 @@ class AutoNovelAgent:
         title_clean = title.strip() or "Untitled"
         return [f"Chapter {index}: TBD" for index in range(1, chapters + 1)]
 
+    def generate_storyline(self, protagonist: str, setting: str) -> str:
+        """Generate a simple storyline for a given protagonist and setting.
+
+        Args:
+            protagonist: Name of the main character.
+            setting: Location where the story takes place.
+
+        Returns:
+            A short storyline sentence.
+        """
+        return (
+            f"{protagonist} embarks on an adventure in {setting}, "
+            "discovering the true meaning of courage."
+        )
+
 
 __all__ = [
     "AutoNovelAgent",
     "DEFAULT_CONSENT_SCOPES",
     "DEFAULT_SUPPORTED_ENGINES",
 ]
+if __name__ == "__main__":
+    agent = AutoNovelAgent()
+    agent.deploy()
+    agent.create_game("unity")
+    print(agent.generate_storyline("Ada", "a digital forest"))
