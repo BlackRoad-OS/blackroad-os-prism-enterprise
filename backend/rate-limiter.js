@@ -9,6 +9,7 @@ const CLEANUP_INTERVAL = 60000; // Cleanup every minute
 // Configuration from environment
 const RATE_LIMIT_WINDOW = parseInt(process.env.RATE_LIMIT_WINDOW || '60000', 10); // 1 minute default
 const RATE_LIMIT_MAX_REQUESTS = parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100', 10); // 100 requests per window
+const TRUST_PROXY_IP_HEADER = (process.env.RATE_LIMIT_TRUST_PROXY || '').toLowerCase() === 'true';
 
 // Periodically clean up old entries
 setInterval(() => {
@@ -77,11 +78,17 @@ function checkRateLimit(ip) {
  * Handles X-Forwarded-For header for proxied requests
  */
 function getClientIp(req) {
-  const forwarded = req.headers['x-forwarded-for'];
-  if (forwarded) {
-    return forwarded.split(',')[0].trim();
+  if (TRUST_PROXY_IP_HEADER) {
+    const forwarded = req.headers['x-forwarded-for'];
+    if (forwarded) {
+      const ipFromHeader = forwarded.split(',')[0].trim();
+      if (ipFromHeader) {
+        return ipFromHeader;
+      }
+    }
   }
-  return req.socket.remoteAddress || 'unknown';
+  const directIp = (req && req.socket && req.socket.remoteAddress) || req.ip;
+  return directIp || 'unknown';
 }
 
 /**
