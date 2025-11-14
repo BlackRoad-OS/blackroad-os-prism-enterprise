@@ -54,7 +54,8 @@ def _summarise_manifest(data: Dict[str, Any]) -> Dict[str, Any]:
                 "name": wf.get("name"),
                 "file": wf.get("file"),
                 "triggers": wf.get("triggers", []),
-                "secrets": wf.get("secrets", []),
+                "secrets_required": wf.get("secrets_required", []),
+                "variables_required": wf.get("variables_required", []),
                 "summary": wf.get("summary"),
             }
         )
@@ -70,7 +71,10 @@ def _summarise_manifest(data: Dict[str, Any]) -> Dict[str, Any]:
                 "workflow": dep.get("workflow"),
                 "domain": dep.get("domain") or dep.get("domain_pattern"),
                 "terraform_directory": dep.get("terraform_directory"),
+                "terraform_backend": dep.get("terraform_backend"),
+                "module": dep.get("module"),
                 "notes": dep.get("notes"),
+                "health_check": dep.get("health_check"),
             }
         )
 
@@ -91,9 +95,37 @@ def _summarise_manifest(data: Dict[str, Any]) -> Dict[str, Any]:
             "terraform_root": terraform.get("root"),
             "terraform_backend": terraform.get("backend"),
         },
+        "required_checks": automation.get("required_checks", {}),
         "change_management": data.get("change_management", {}),
         "observability": data.get("observability", {}),
     }
+
+
+def _format_required_checks(
+    payload: Dict[str, Any],
+    *,
+    indent: str = "    ",
+    depth: int = 1,
+) -> List[str]:
+    lines: List[str] = []
+    prefix = indent * depth
+    for key, value in payload.items():
+        if isinstance(value, dict):
+            lines.append(f"{prefix}{key}:")
+            lines.extend(
+                _format_required_checks(
+                    value,
+                    indent=indent,
+                    depth=depth + 1,
+                )
+            )
+        else:
+            if isinstance(value, list):
+                rendered = ", ".join(str(item) for item in value)
+            else:
+                rendered = str(value)
+            lines.append(f"{prefix}{key}: {rendered}")
+    return lines
 
 
 def _render_text(summaries: Iterable[Dict[str, Any]]) -> str:
@@ -111,9 +143,25 @@ def _render_text(summaries: Iterable[Dict[str, Any]]) -> str:
             for wf in env["workflows"]:
                 triggers = ", ".join(wf.get("triggers") or [])
                 trigger_text = f" ({triggers})" if triggers else ""
+                suffix_parts = []
+                if wf.get("secrets_required"):
+                    suffix_parts.append(
+                        "secrets=" + ", ".join(wf["secrets_required"])
+                    )
+                if wf.get("variables_required"):
+                    suffix_parts.append(
+                        "vars=" + ", ".join(wf["variables_required"])
+                    )
+                suffix = f" [{' | '.join(suffix_parts)}]" if suffix_parts else ""
                 lines.append(
                     f"    - {wf.get('name')} [{wf.get('file')}]" + trigger_text
+                    + suffix
                 )
+        if env.get("required_checks"):
+            lines.append("  Required checks:")
+            lines.extend(
+                _format_required_checks(env["required_checks"], depth=2)
+            )
         if env.get("services"):
             lines.append("  Services:")
             for svc in env["services"]:
@@ -133,6 +181,13 @@ def _render_text(summaries: Iterable[Dict[str, Any]]) -> str:
                     + domain
                     + workflow
                 )
+                if svc.get("health_check"):
+                    health = svc["health_check"]
+                    if isinstance(health, list):
+                        for check in health:
+                            lines.append(f"      health: {check}")
+                    else:
+                        lines.append(f"      health: {health}")
         infra = env.get("infrastructure") or {}
         terraform_root = infra.get("terraform_root")
         if terraform_root:
