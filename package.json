@@ -29,5 +29,10 @@
     "tsx": "^4.19.2",
     "typescript": "^5.6.3",
     "yaml": "^2.6.1"
+    "test": "npm --prefix frontend run test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^8.57.1",
+    "@typescript-eslint/parser": "^6.21.0"
   }
 }
