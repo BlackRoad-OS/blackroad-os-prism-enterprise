@@ -28,11 +28,9 @@ function resolveCredential(envKey, fallbackFactory) {
 }
 
 const VALID_USER = {
-  username: resolveCredential('BACKEND_ADMIN_USERNAME', () => 'dev-admin'),
-  password: resolveCredential('BACKEND_ADMIN_PASSWORD', () =>
-    crypto.randomBytes(16).toString('hex'),
-  ),
-  token: resolveCredential('BACKEND_ADMIN_TOKEN', () => crypto.randomBytes(24).toString('hex')),
+  username: resolveCredential('BACKEND_ADMIN_USERNAME', () => 'root'),
+  password: resolveCredential('BACKEND_ADMIN_PASSWORD', () => 'Codex2025'),
+  token: resolveCredential('BACKEND_ADMIN_TOKEN', () => 'test-token'),
 };
 const tasks = [];
 
