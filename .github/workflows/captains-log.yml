@@ -50,7 +50,7 @@ jobs:
           jq -r '.' /tmp/ci.json      | redact > /tmp/ci.redacted.json
 
           # Render Markdown from template
-          python3 - << 'PY'
+          digest_path="$(python3 - << 'PY'
 import json, os, datetime, textwrap
 from pathlib import Path
 now = datetime.datetime.utcnow()
@@ -87,7 +87,9 @@ out_path.parent.mkdir(parents=True, exist_ok=True)
 out_path.write_text(out)
 print(out_path)
 PY
-          echo "digest_path=$(tail -n1)" >> $GITHUB_OUTPUT
+)"
+          echo "Digest generated at $digest_path"
+          echo "digest_path=$digest_path" >> $GITHUB_OUTPUT
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -100,6 +102,9 @@ PY
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}  # store in repo/org secrets
         run: |
-          summary="$(sed -n '1,80p' ${{ steps.gather.outputs.digest_path }} | sed 's/"/\\"/g')"
-          payload="{\"text\":\"Weekly Captain's Log for *${GITHUB_REPOSITORY}*:\\n\\n${summary}\\n\\n(Full digest committed as artifact)\"}"
+          summary="$(sed -n '1,80p' ${{ steps.gather.outputs.digest_path }})"
+          heading="Weekly Captain's Log for *"
+          closing="(Full digest committed as artifact)"
+          payload=$(jq -Rn --slurp --arg heading "$heading" --arg repo "$GITHUB_REPOSITORY" --arg summary "$summary" --arg closing "$closing" \
+            '{text: ($heading + $repo + "*:\n\n" + $summary + "\n\n" + $closing)}')
           curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
