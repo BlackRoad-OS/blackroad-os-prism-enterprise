@@ -20,8 +20,8 @@ import {
 // ==================== Configuration ====================
 
 const CONFIG = {
-  port: process.env.METAVERSE_API_PORT || 8080,
-  wsPort: process.env.METAVERSE_WS_PORT || 8081,
+  port: parseInt(process.env.METAVERSE_API_PORT || '8080', 10),
+  wsPort: parseInt(process.env.METAVERSE_WS_PORT || '8081', 10),
   jwtSecret: process.env.JWT_SECRET || 'blackroad-prism-console-secret',
   jwtIssuer: 'blackroad-prism-console',
   tickRate: 30, // Hz for state sync
@@ -426,7 +426,7 @@ export async function integrateWithAgentSwarm() {
     // Dynamic import to avoid circular dependencies
     const covenantRegistry = await import('../agents/covenant_registry.json');
 
-    console.log(`[Metaverse API] Found ${covenantRegistry.default.agents?.length || 0} agents in covenant registry`);
+    console.log(`[Metaverse API] Found ${(covenantRegistry.default as any).entries?.length || 0} agents in covenant registry`);
 
     // Auto-spawn agents if configured
     if (process.env.AUTO_SPAWN_AGENTS === 'true') {
