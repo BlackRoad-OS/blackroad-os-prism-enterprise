@@ -47,5 +47,17 @@ describe('Git API', () => {
     expect(typeof res.body.shortHash).toBe('string');
     expect(typeof res.body.ahead).toBe('number');
     expect(typeof res.body.behind).toBe('number');
+      .send({ username: 'root', password: 'Codex2025' });
+    const cookie = login.headers['set-cookie'];
+    const res = await request(app)
+      .get('/api/git/status')
+      .set('Cookie', cookie);
+    expect(res.status).toBe(200);
+    expect(typeof res.body.branch).toBe('string');
+    expect(res.body.counts).toBeDefined();
+    expect(res.body.counts).toHaveProperty('staged');
+    expect(res.body.counts).toHaveProperty('unstaged');
+    expect(res.body.counts).toHaveProperty('untracked');
+    expect(typeof res.body.isDirty).toBe('boolean');
   });
 });
