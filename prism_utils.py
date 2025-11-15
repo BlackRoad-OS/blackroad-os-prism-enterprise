@@ -15,6 +15,12 @@ _NUMERIC_PREFIX = re.compile(r"^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))(?![0-9A-Za-z_]
 
 def parse_numeric_prefix(text: str) -> float:
     """Return the leading numeric value in ``text`` or ``1.0`` if parsing fails."""
+# Regex for a decimal number, allowing leading whitespace, optional sign and fraction.
+_NUMERIC_PREFIX = re.compile(r"^\s*([+-]?\d+(?:\.\d+)?)")
+
+
+def parse_numeric_prefix(text: str) -> float:
+    """Extracts the leading decimal value from ``text``.
 
     match = _NUMERIC_PREFIX.match(text)
     if not match:
