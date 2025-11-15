@@ -11,6 +11,10 @@ from typing import Iterable, List
 LOGGER = logging.getLogger(__name__)
 from subprocess import CalledProcessError
 from typing import List
+import subprocess
+from dataclasses import dataclass
+from subprocess import CalledProcessError
+from typing import Dict, List
 
 
 @dataclass
@@ -80,6 +84,23 @@ class CleanupBot:
         """Construct a bot configured with branches merged into ``base``."""
 
         return cls(branches=cls.merged_branches(base), dry_run=dry_run)
+    def _run_git(self, *args: str) -> subprocess.CompletedProcess:
+        """Execute a git command and return its result.
+
+        Parameters
+        ----------
+        *args:
+            Additional arguments passed directly to ``git``.
+
+        Returns
+        -------
+        subprocess.CompletedProcess
+            The completed process instance with captured output.
+        """
+        return subprocess.run(["git", *args], check=True, capture_output=True, text=True)
+
+    def delete_branch(self, branch: str) -> bool:
+        """Attempt to delete a branch locally and remotely.
 
     def _run(self, *cmd: str) -> CompletedProcess[str] | None:
         """Execute ``cmd`` unless running in dry-run mode."""
@@ -118,6 +139,7 @@ class CleanupBot:
         Returns:
             True if the branch was deleted both locally and remotely, False otherwise.
         """
+        success = True
         try:
             self._run("git", "branch", "-D", branch)
             self._run("git", "push", "origin", "--delete", branch)
@@ -127,6 +149,19 @@ class CleanupBot:
 
     def cleanup(self) -> None:
         """Remove the configured branches locally and remotely.
+            self._run_git("branch", "-D", branch)
+        except CalledProcessError:
+            print(f"Failed to delete local branch '{branch}'")
+            success = False
+        try:
+            self._run_git("push", "origin", "--delete", branch)
+        except CalledProcessError:
+            print(f"Failed to delete remote branch '{branch}'")
+            success = False
+        return success
+
+    def cleanup(self) -> Dict[str, bool]:
+        """Attempt to remove the configured branches locally and remotely.
 
         Branches missing either locally or remotely are skipped with a message.
         """
@@ -139,6 +174,12 @@ class CleanupBot:
                 self._run("git", "push", "origin", "--delete", branch)
             except CalledProcessError:
                 print(f"Remote branch '{branch}' does not exist.")
+            if self.dry_run:
+                print(f"Would delete branch '{branch}' locally and remotely")
+                results[branch] = True
+                continue
+            results[branch] = self.delete_branch(branch)
+        return results
 
 
 __all__ = ["CleanupBot"]
