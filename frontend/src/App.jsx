@@ -202,6 +202,23 @@ export default function App(){
         connectSocket()
       } catch (err) {
         console.error('Failed to restore session', err)
+  // Restore auth token from local storage on load and reset when missing
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      // Clear any lingering state when no token exists
+      resetState()
+      return
+    }
+    setToken(token)
+    ;(async () => {
+      try {
+        const u = await me()
+        setUser(u)
+        await bootData()
+        connectSocket()
+      } catch (e) {
+        // Reset state on auth failure and log for debugging
         resetState()
       } finally {
         setAuthChecked(true)
