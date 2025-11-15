@@ -27,3 +27,4 @@ The report titled *From Idea to Empire — Developer Mode Research Report (2025)
 
 When the final PDF (or updated formats) are available, add them to this directory and update `docs/index.json` if additional
 artifacts or references are introduced during the planning phase.
+- [Company-wide Template Plan](company-wide-template-plan.md)
