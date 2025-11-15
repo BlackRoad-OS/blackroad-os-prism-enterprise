@@ -61,12 +61,14 @@ from typing import Final, List
 
 
 DEFAULT_SUPPORTED_ENGINES: Final[tuple[str, ...]] = ("unity", "unreal")
+from typing import ClassVar
 
 
 @dataclass
 class AutoNovelAgent:
     """A small agent that can build games and craft stories."""
     """A toy agent that can deploy itself, create simple games, and write novels."""
+    """A toy agent that can deploy itself and create simple games or stories."""
 
     name: str = "AutoNovelAgent"
     gamma: float = 1.0
@@ -211,6 +213,11 @@ class AutoNovelAgent:
         if not self.supports_engine(engine_lower):
             supported = ", ".join(sorted(self.supported_engines))
             raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
+        if engine_lower not in self.SUPPORTED_ENGINES:
+            supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
+            raise ValueError(
+                f"Unsupported engine '{engine}'. Choose one of: {supported}."
+            )
         if include_weapons:
             raise ValueError("Weapons are not allowed in generated games.")
         message = f"Creating a {normalized.capitalize()} game without weapons..."
@@ -294,6 +301,7 @@ class AutoNovelAgent:
 
     def list_supported_engines(self) -> list[str]:
     def list_supported_engines(self) -> List[str]:
+    def list_supported_engines(self) -> list[str]:
         """Return a list of supported game engines."""
         return sorted(self.supported_engines)
 
@@ -349,6 +357,18 @@ class AutoNovelAgent:
         """Return a copy of the games created by the agent."""
         return list(self.games)
 
+    def write_novel(self, title: str, protagonist: str) -> str:
+        """Generate a minimal novel blurb.
+
+        Args:
+            title: Title of the story to generate.
+            protagonist: Main character of the story.
+
+        Returns:
+            A short string describing the novel.
+        """
+        return f"{title} is a thrilling tale about {protagonist}."
+
 
 __all__ = [
     "AutoNovelAgent",
@@ -364,3 +384,4 @@ if __name__ == "__main__":
         print(line)
     for record in agent.list_created_games():
         print(record)
+    print(agent.write_novel("Journey", "Alice"))
