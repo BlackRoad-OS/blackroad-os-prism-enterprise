@@ -119,3 +119,8 @@ observability:
     - terraform output -raw preview_url
     - aws ecs describe-services --cluster <cluster-arn> --services pr-<pr-number> --region us-east-1
     - curl -fsS https://pr-<pr-number>.dev.blackroad.io/healthz/ui
+# Preview environments are provisioned per pull request; replace <pr> with the PR number.
+url: "https://pr-<pr>.dev.blackroad.io"
+reviewers:
+  users:
+    - blackboxprogramming

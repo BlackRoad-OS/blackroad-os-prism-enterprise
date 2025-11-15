@@ -192,3 +192,7 @@ observability:
       url: https://blackroad-ollama-bridge.fly.dev/api/llm/health
   scripts:
     - scripts/blackroad-autoheal.sh
+url: https://blackroad.io
+reviewers:
+  users:
+    - blackboxprogramming

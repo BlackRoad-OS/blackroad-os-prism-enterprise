@@ -116,3 +116,7 @@ observability:
 notes:
   - Exercise the autopal environment access workflow when dual control is
     required.
+url: https://staging.blackroad.io
+reviewers:
+  users:
+    - blackboxprogramming
