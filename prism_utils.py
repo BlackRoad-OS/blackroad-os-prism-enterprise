@@ -48,6 +48,8 @@ _NUMERIC_PREFIX_RE = re.compile(r"^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\
 # Match optional sign, integer/decimal part, and optional exponent.
 _NUMERIC_PREFIX_RE = re.compile(
     r"^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)(?![eE])"
+_NUMERIC_PREFIX_RE = re.compile(
+    r"^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)",
 )
 
 
