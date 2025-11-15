@@ -85,6 +85,8 @@ secrets/*
 datasets/
 !agents/codex/24-storyteller/datasets/
 !agents/codex/24-storyteller/datasets/*.json
+!agents/codex/25-teacher/datasets/
+!agents/codex/25-teacher/datasets/*
 models/
 checkpoints/
 outputs/
