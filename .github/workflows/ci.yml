@@ -54,6 +54,12 @@ jobs:
 
       - name: Setup Node
         uses: actions/setup-node@v4
+        # v4.3.0 https://github.com/actions/checkout/releases/tag/v4.3.0
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Use Node.js 20.x
+        # v4.4.0 https://github.com/actions/setup-node/releases/tag/v4.4.0
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "20"
           cache: ${{ env.PKG_MANAGER }}
@@ -167,6 +173,9 @@ jobs:
 
       - name: Build (use/push cache)
         uses: docker/build-push-action@v6
+      - name: Upload artifact
+        # v4.6.2 https://github.com/actions/upload-artifact/releases/tag/v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           context: .
           push: false
@@ -266,6 +275,13 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
+      - name: Checkout
+        # v4.3.0 https://github.com/actions/checkout/releases/tag/v4.3.0
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Download artifact
+        # v4.3.0 https://github.com/actions/download-artifact/releases/tag/v4.3.0
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           node-version: "20"
           cache: npm
