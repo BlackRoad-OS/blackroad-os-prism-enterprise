@@ -9,12 +9,15 @@ export default function FourierOpticsLab(){
   const cnvA=useRef(null), cnvF=useRef(null);
   const worker=useRef(null);
   const [F,setF]=useState(null);
+<<<<<<< main
   const [F,setF]=useState(null);
   const workerRef=useRef();
   const requestIdRef=useRef(0);
   const lastHandledRef=useRef(0);
   const [useFallback,setUseFallback]=useState(false);
   const [workerReady,setWorkerReady]=useState(false);
+=======
+>>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx-hu73id
 
   const A = useMemo(()=>makeAperture(N, ap, param),[N,ap,param]);
 
@@ -26,6 +29,7 @@ export default function FourierOpticsLab(){
 
   useEffect(()=>{ if(worker.current) worker.current.postMessage({N,ap,param}); },[N,ap,param]);
 
+<<<<<<< main
     if(typeof Worker === "undefined"){
       setUseFallback(true);
       return undefined;
@@ -87,6 +91,8 @@ export default function FourierOpticsLab(){
       setUseFallback(true);
     }
   },[A,useFallback,workerReady]);
+=======
+>>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx-hu73id
   useEffect(()=>{ drawField(cnvA.current, A, false); },[A]);
   useEffect(()=>{ if(F) drawField(cnvF.current, F, true); },[F]);
 

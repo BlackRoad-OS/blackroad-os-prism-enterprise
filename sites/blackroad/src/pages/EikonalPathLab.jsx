@@ -49,8 +49,11 @@ export default function EikonalPathLab(){
     };
     frame=requestAnimationFrame(draw);
     return ()=>cancelAnimationFrame(frame);
+<<<<<<< main
     draw();
     return()=>{ if(frame) cancelAnimationFrame(frame); };
+=======
+>>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx-hu73id
   },[sim,iters,start,goal]);
 
   return (

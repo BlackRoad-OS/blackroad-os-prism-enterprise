@@ -44,6 +44,7 @@ function dft2(A){
   }
   return B;
 }
+<<<<<<< HEAD
 /* global addEventListener, postMessage */
 import { dft2 } from "../lib/fourier.js";
 
@@ -53,3 +54,5 @@ addEventListener("message", ({ data }) => {
   const F = dft2(A);
   postMessage({ id, F });
 });
+=======
+>>>>>>> 8496122f646c8fa9b56e1b806ab892d53ebe819e
