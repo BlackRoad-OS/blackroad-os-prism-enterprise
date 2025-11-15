@@ -64,6 +64,10 @@ def parse_numeric_prefix(text: str) -> float:
     and scientific-notation exponents (``1e-3`` or ``.5E+2``). The extracted
     token is parsed with :func:`ast.literal_eval` for safety. If the token
     cannot be parsed or is absent, ``1.0`` is returned.
+    This uses :func:`ast.literal_eval` for safety instead of ``eval`` and
+    accepts inputs like ``"2, something"``. Non-numeric or invalid values
+    would raise ``ValueError`` or ``SyntaxError``, but these are suppressed
+    and result in a default return of ``1.0``.
     """
     match = _NUMERIC_PREFIX_RE.match(text)
     if not match:
