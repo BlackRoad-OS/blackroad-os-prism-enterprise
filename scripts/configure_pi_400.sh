@@ -24,7 +24,9 @@ update_block() {
   local end="# <<< ${marker} <<<"
   python3 - "$file" "$start" "$end" 3<<<"$content" <<'PY'
 import os
+  CONTENT="$content" python3 - "$file" "$start" "$end" <<'PY'
 import sys
+import os
 from pathlib import Path
 
 path = Path(sys.argv[1])
@@ -32,6 +34,7 @@ start = sys.argv[2]
 end = sys.argv[3]
 with os.fdopen(3) as block_fd:
     body = block_fd.read().rstrip("\n")
+body = os.environ["CONTENT"].rstrip("\n")
 block = f"{start}\n{body}\n{end}\n"
 if path.exists():
     text = path.read_text()
