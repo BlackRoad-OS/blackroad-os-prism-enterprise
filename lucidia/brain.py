@@ -4,6 +4,12 @@ This module defines a tiny `LucidiaBrain` class that can register named
 processing steps and execute them sequentially. Steps may later be
 introspected, unregistered, or the entire pipeline reset. It acts as a
 very small placeholder for more sophisticated reasoning engines.
+This module defines a tiny :class:`LucidiaBrain` class that can register
+processing steps and execute them sequentially. Steps may be given unique
+names so they can later be inspected, removed, or replaced. Attempting to
+reuse a step name raises :class:`ValueError`, clarifying how named steps are
+managed. The class acts as a very small placeholder for more sophisticated
+reasoning engines.
 """
 from __future__ import annotations
 
@@ -18,6 +24,9 @@ class LucidiaBrain:
     were added when :meth:`think` is invoked. Each function receives the
     current value and returns the next value. Steps can be named to allow
     subsequent removal or inspection.
+    were added when :meth:`think` is invoked. Each step has a unique name,
+    allowing introspection via :attr:`steps` as well as selective removal
+    with :meth:`unregister` or clearing with :meth:`reset`.
     """
 
     def __init__(self) -> None:
@@ -34,6 +43,11 @@ class LucidiaBrain:
         name:
             Optional unique identifier for the step. If omitted the
             function's ``__name__`` attribute is used.
+
+        Raises
+        ------
+        ValueError
+            If a step with the same ``name`` is already registered.
         """
 
         if name is None:
