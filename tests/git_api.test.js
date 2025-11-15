@@ -42,6 +42,7 @@ describe('Git API', () => {
     expect(res.status).toBe(200);
     expect(typeof res.body.ok).toBe('boolean');
     expect(res.body.ok).toBe(!res.body.isDirty);
+    expect(res.body.ok).toBe(true);
     expect(typeof res.body.branch).toBe('string');
     expect(typeof res.body.shortHash).toBe('string');
     expect(typeof res.body.ahead).toBe('number');

@@ -77,6 +77,7 @@ router.get('/status', async (_req, res) => {
     ).stdout.trim();
     res.json({
       ok,
+      ok: true,
       branch,
       ahead,
       behind,
@@ -85,6 +86,8 @@ router.get('/status', async (_req, res) => {
     });
   } catch (error) {
     res.status(500).json({ ok: false, error: error.message });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
   }
 });
 
