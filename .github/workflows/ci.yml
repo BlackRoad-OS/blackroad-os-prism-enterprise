@@ -5,6 +5,8 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+    branches: ['main']
+  workflow_dispatch:
 
 env:
   DOCKER_BUILDKIT: "1"
@@ -282,3 +284,22 @@ jobs:
         # TODO: Update this command when dedicated unit/integration tests are available.
       - name: Policy check placeholder
         run: echo "opa eval would run here" # placeholder; keep alias 'policy'
+      - name: Deploy (SSH + atomic symlinks + rollback)
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          # Deploy + targets (match your known paths)
+          DEPLOY_ROOT: /opt/blackroad/releases
+          WEB_PATH: /var/www/blackroad
+          API_PATH: /srv/blackroad-api
+          # Health checks (external)
+          HEALTH_URL: https://blackroad.io/health
+          API_HEALTH_URL: https://blackroad.io/api/health
+          RELEASE: ${{ github.sha }}
+          KEEP_RELEASES: '3'
+          DO_API_DEPLOY: '1'
+        run: |
+          chmod +x scripts/deploy.sh
+          ./scripts/deploy.sh release.tar.gz
