@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlackRoad - Website Navigation</title>
+  <link rel="stylesheet" href="assets/blackroad.css" />
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-xl);
+      background: radial-gradient(1200px 900px at 80% -10%, rgba(124,108,255,.15), transparent 40%),
+                  radial-gradient(1000px 800px at -20% 100%, rgba(0,208,255,.12), transparent 50%),
+                  var(--bg-dark);
+    }
+
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: var(--space-4xl);
+    }
+
+    .logo {
+      width: 150px;
+      height: 150px;
+      margin: 0 auto var(--space-2xl);
+      background: var(--gradient-spectrum);
+      border-radius: var(--radius-xl);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      font-weight: 900;
+      color: var(--bg-black);
+      box-shadow: 0 0 50px rgba(255, 79, 216, 0.8);
+      animation: glowPulse 3s ease-in-out infinite;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: var(--space-xl);
+    }
+
+    .site-card {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all var(--transition-base);
+    }
+
+    .site-card:hover {
+      transform: translateY(-8px);
+    }
+
+    .site-icon {
+      font-size: 64px;
+      margin-bottom: var(--space-lg);
+      filter: drop-shadow(0 0 20px currentColor);
+    }
+
+    .site-title {
+      font-size: var(--text-2xl);
+      font-weight: 900;
+      margin-bottom: var(--space-md);
+    }
+
+    .site-desc {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: var(--space-lg);
+    }
+
+    .badge-group {
+      display: flex;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .logo {
+        width: 100px;
+        height: 100px;
+        font-size: 50px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <div class="logo">RB</div>
+      <h1 class="text-4xl font-black text-gradient" style="margin-bottom: var(--space-lg);">
+        BlackRoad Websites
+      </h1>
+      <p class="text-xl text-secondary">
+        Choose your destination in the BlackRoad ecosystem
+      </p>
+    </div>
+
+    <div class="grid">
+      <!-- BlackRoad.io Platform -->
+      <div class="card site-card hover-lift" onclick="navigate('blackroad.io.html')">
+        <div class="site-icon text-glow-cyan">🚀</div>
+        <h2 class="site-title text-gradient">BlackRoad.io</h2>
+        <p class="site-desc">
+          The Quantum AI Platform for next-generation development. Build, deploy, and scale
+          intelligent applications with autonomous AI agents.
+        </p>
+        <div class="badge-group">
+          <span class="badge badge-cyan">Platform</span>
+          <span class="badge badge-pink">AI Agents</span>
+          <span class="badge badge-purple">Quantum</span>
+        </div>
+      </div>
+
+      <!-- BlackRoad Inc Corporate -->
+      <div class="card site-card hover-lift card-retro" onclick="navigate('blackroadinc.us.html')">
+        <div class="site-icon text-glow-gold">🏢</div>
+        <h2 class="site-title text-glow-cyan">BlackRoad Inc.</h2>
+        <p class="site-desc">
+          Corporate website for BlackRoad Technologies, Inc. Learn about our mission,
+          team, values, and career opportunities.
+        </p>
+        <div class="badge-group">
+          <span class="badge badge-gold">Corporate</span>
+          <span class="badge badge-success">Careers</span>
+          <span class="badge badge-cyan">About Us</span>
+        </div>
+      </div>
+
+      <!-- Design System Showcase -->
+      <div class="card site-card hover-lift" onclick="navigate('blackroad-showcase.html')">
+        <div class="site-icon text-glow-pink">🎨</div>
+        <h2 class="site-title text-gradient">Design System</h2>
+        <p class="site-desc">
+          Interactive showcase of the BlackRoad design system with retro-futuristic
+          components, Matrix vibes, and Y2K aesthetics.
+        </p>
+        <div class="badge-group">
+          <span class="badge badge-spectrum">Components</span>
+          <span class="badge badge-pink">CSS</span>
+          <span class="badge badge-cyan">JS</span>
+        </div>
+      </div>
+
+      <!-- Pi Boot Screen -->
+      <div class="card site-card hover-lift card-glass" onclick="navigate('blackroad-pi-boot.html')">
+        <div class="site-icon">💻</div>
+        <h2 class="site-title text-glow-purple">Pi Boot Screen</h2>
+        <p class="site-desc">
+          Retro CRT-style boot sequence for BlackRoad OS on Raspberry Pi 5.
+          Full scanline effects and terminal aesthetics.
+        </p>
+        <div class="badge-group">
+          <span class="badge badge-purple">Retro CRT</span>
+          <span class="badge badge-matrix">Terminal</span>
+        </div>
+      </div>
+
+      <!-- Social Platform -->
+      <div class="card site-card hover-lift" onclick="navigate('blackroad-social.html')">
+        <div class="site-icon text-glow-purple">💬</div>
+        <h2 class="site-title text-gradient">BlackRoad Social</h2>
+        <p class="site-desc">
+          Modern social platform with Reddit-style features, AI assistants,
+          games, and community engagement.
+        </p>
+        <div class="badge-group">
+          <span class="badge badge-pink">Social</span>
+          <span class="badge badge-gold">Community</span>
+          <span class="badge badge-cyan">AI Chat</span>
+        </div>
+      </div>
+
+      <!-- Quantum Demo -->
+      <div class="card site-card hover-lift card-retro" onclick="navigate('quantum.html')">
+        <div class="site-icon text-glow-cyan">⚛️</div>
+        <h2 class="site-title text-glow-cyan">Quantum</h2>
+        <p class="site-desc">
+          Quantum computing visualization and demonstration. Explore quantum
+          algorithms and real QPU integration.
+        </p>
+        <div class="badge-group">
+          <span class="badge badge-cyan">Quantum</span>
+          <span class="badge badge-purple">Science</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Info -->
+    <div class="card" style="margin-top: var(--space-4xl); text-align: center; padding: var(--space-2xl);">
+      <div class="terminal-text">
+        <div class="text-xl font-bold text-gradient" style="margin-bottom: var(--space-md);">
+          SPECTRUM INITIALIZED
+        </div>
+        <div class="text-secondary">
+          All websites built with the BlackRoad Design System<br>
+          Retro-futuristic • Matrix vibes • Y2K aesthetics • Unified colors
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid" style="margin-top: var(--space-xl);">
+      <div class="card text-center">
+        <div class="text-3xl font-black text-glow-cyan">6</div>
+        <div class="text-secondary">Websites</div>
+      </div>
+      <div class="card text-center">
+        <div class="text-3xl font-black text-glow-pink">1</div>
+        <div class="text-secondary">Design System</div>
+      </div>
+      <div class="card text-center">
+        <div class="text-3xl font-black text-glow-gold">∞</div>
+        <div class="text-secondary">Possibilities</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/blackroad.js"></script>
+  <script>
+    function navigate(url) {
+      BlackRoad.Audio.powerUp();
+      BlackRoad.Loading.show('Initializing ' + url + '...');
+      setTimeout(() => {
+        window.location.href = url;
+      }, 1500);
+    }
+
+    // Add hover effects
+    document.querySelectorAll('.site-card').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        BlackRoad.Audio.click();
+      });
+    });
+
+    // Welcome message
+    setTimeout(() => {
+      BlackRoad.Toast.success('Welcome to the BlackRoad ecosystem! Click any card to explore.', 4000);
+    }, 1000);
+
+    // Easter egg: Konami code
+    let konamiCode = [];
+    const konami = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+
+    document.addEventListener('keydown', (e) => {
+      konamiCode.push(e.key);
+      konamiCode = konamiCode.slice(-10);
+
+      if (konamiCode.join(',') === konami.join(',')) {
+        BlackRoad.Audio.powerUp();
+        BlackRoad.Effects.flash('var(--spectrum-pink)');
+        BlackRoad.Toast.success('SPECTRUM POWER UNLOCKED! 🌈✨', 5000);
+
+        // Add matrix effect to body
+        document.body.classList.add('matrix-bg');
+
+        // Particle burst
+        for (let i = 0; i < 50; i++) {
+          setTimeout(() => {
+            BlackRoad.Effects.particleBurst(
+              Math.random() * window.innerWidth,
+              Math.random() * window.innerHeight,
+              BlackRoad.Colors.random(),
+              15
+            );
+          }, i * 100);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
