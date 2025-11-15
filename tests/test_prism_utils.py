@@ -21,6 +21,7 @@ def test_parse_numeric_prefix_valid():
     """Return the numeric prefix when the input starts with a valid number."""
     """It returns the numeric portion when the prefix is well formed."""
 
+    """Return the numeric part when valid values are provided."""
     assert parse_numeric_prefix("2, rest") == 2.0
     assert parse_numeric_prefix("3.5") == 3.5
     assert parse_numeric_prefix("-1 stuff") == -1.0
@@ -43,6 +44,7 @@ def test_parse_numeric_prefix_invalid():
     """Default to 1.0 when the prefix is missing or cannot be parsed."""
     """It falls back to ``1.0`` for missing or malformed prefixes."""
 
+    """Fall back to ``1.0`` when the prefix is invalid."""
     assert parse_numeric_prefix("abc") == 1.0
     assert parse_numeric_prefix("1a") == 1.0
     assert parse_numeric_prefix("") == 1.0
