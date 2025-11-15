@@ -1,4 +1,13 @@
 'use strict';
+/* BlackRoad API — Express + SQLite + Socket.IO + LLM bridge
+   Runs behind Nginx on port 4000 with cookie-session auth.
+   Env (optional):
+     PORT=4000
+     SESSION_SECRET=change_me
+     DB_PATH=/srv/blackroad-api/blackroad.db
+     LLM_URL=http://127.0.0.1:8000/chat
+     ALLOW_SHELL=false
+*/
 
 const http = require('http');
 const path = require('path');
@@ -142,6 +151,46 @@ app.use(
   }),
 );
 
+const resolveClientIp = (req) => {
+  const forwarded = req.headers['x-forwarded-for'];
+  // Express normalizes headers to strings but may surface arrays when the
+  // header is supplied multiple times by intermediaries.
+  const extractFirst = (value) => {
+    if (typeof value !== 'string' || value.length === 0) return null;
+    const first = value.split(',')[0]?.trim();
+    return first || null;
+  };
+  if (Array.isArray(forwarded) && forwarded.length > 0) {
+    const fromArray = extractFirst(forwarded[0]);
+    if (fromArray) return fromArray;
+  }
+  const fromHeader = extractFirst(forwarded);
+  if (fromHeader) return fromHeader;
+  return req.socket?.remoteAddress || req.ip;
+};
+
+const loginLimiter = rateLimit({
+  windowMs: 5 * 60_000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  keyGenerator: resolveClientIp,
+  handler: (req, res) => {
+    const ip = resolveClientIp(req);
+    logger.warn({ event: 'login_rate_limited', ip });
+    res.status(429).json({ error: 'too_many_attempts' });
+  },
+});
+app.use((req, res, next) => {
+  const id = randomUUID();
+  req.id = id;
+  const start = Date.now();
+  res.on('finish', () => {
+    logger.info({ id, method: req.method, path: req.originalUrl, status: res.statusCode, duration: Date.now() - start });
+  });
+  next();
+});
 app.use(compression());
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: false, limit: '1mb' }));
@@ -179,6 +228,8 @@ app.get('/api/session', (req, res) => {
 app.post(
   '/api/login',
   [body('username').isString().trim().notEmpty(), body('password').isString()],
+  loginLimiter,
+  [body('username').isString(), body('password').isString()],
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -236,3 +287,4 @@ if (process.env.JEST_WORKER_ID) {
 }
 
 module.exports = { app, server, start, INTERNAL_TOKEN, ALLOW_ORIGINS };
+module.exports = { app, server, loginLimiter };

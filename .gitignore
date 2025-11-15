@@ -9,6 +9,9 @@ __pycache__/
 .mypy_cache/
 .pytest_cache/
 .ruff_cache/
+# Sensitive SSH keys
+sshprivate.sh
+publicssh.sh
 
 # Node
 node_modules/
