@@ -108,3 +108,11 @@ __all__ = ["AgentConfig", "AgentRuntime"]
 from .api import app
 
 __all__ = ["app"]
+"""BlackRoad agent package."""
+
+from . import telemetry, jobs
+
+__all__ = [
+    "telemetry",
+    "jobs",
+]
