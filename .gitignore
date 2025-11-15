@@ -48,6 +48,14 @@ _trash/
 # Secrets
 secrets/
 config/dev_signing_key.txt
+# Logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+# Deployment logs written by CLI tooling or remote runners
+blackroad_deploy.log*
+logs/blackroad_deploy.log*
+**/blackroad_deploy.log*
 
 # OS
 .DS_Store
