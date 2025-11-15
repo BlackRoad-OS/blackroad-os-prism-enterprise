@@ -22,11 +22,13 @@ export default function RoadChain(){
   }, [])
 
   // Clear errors on query change and collapse blocks when the query is empty
+  // Clear stale search results and collapse blocks when the query is empty or whitespace
   useEffect(() => {
     const q = query.trim()
     setError('')
     if (!q) {
       setResult(null)
+      setError('')
       setExpanded({})
     }
   // Clear stale search results when the query changes, collapsing blocks if empty

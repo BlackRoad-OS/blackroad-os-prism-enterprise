@@ -218,6 +218,21 @@ export default function App(){
         await bootData()
         connectSocket()
       } catch (e) {
+  // Restore auth token from local storage on load and clear state if missing
+  useEffect(()=>{
+    const token = localStorage.getItem('token')
+    setToken(token || '')
+    ;(async ()=>{
+      try {
+        if (token) {
+          const u = await me()
+          setUser(u)
+          await bootData()
+          connectSocket()
+        } else {
+          resetState()
+        }
+      } catch(e){
         // Reset state on auth failure and log for debugging
         resetState()
       } finally {
