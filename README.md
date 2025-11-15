@@ -33,6 +33,10 @@ make demo
 ./prism/prismsh.js spawn cecilia
 ```
 
+## GitHub Automation Manual
+
+For a visual, emoji-driven overview of how humans 🧍 and agents 🤖 should work inside this repo—including branching rules, PR flow, CI expectations, and onboarding steps—see [`docs/github_automation_manual_emoji.md`](docs/github_automation_manual_emoji.md).
+
 ## Architecture
 
 ### Core Components
