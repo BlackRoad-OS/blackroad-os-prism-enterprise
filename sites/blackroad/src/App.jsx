@@ -33,6 +33,14 @@ import BeltramiTorusLab from "./pages/BeltramiTorusLab.jsx";
 import BezierBSplineLab from "./pages/BezierBSplineLab.jsx";
 import BezierShadedSurfaceLab from "./pages/BezierShadedSurfaceLab.jsx";
 import BezierSurfaceLab from "./pages/BezierSurfaceLab.jsx";
+import Agents from "./pages/Agents.jsx";
+import AStarLab from "./pages/AStarLab.jsx";
+import AutoDiffLab from "./pages/AutoDiffLab.jsx";
+import Backroad from "./pages/Backroad.jsx";
+import BezierBSplineLab from "./pages/BezierBSplineLab.jsx";
+import BezierShadedSurfaceLab from "./pages/BezierShadedSurfaceLab.jsx";
+import BezierSurfaceLab from "./pages/BezierSurfaceLab.jsx";
+import BeltramiTorusLab from "./pages/BeltramiTorusLab.jsx";
 import BifurcationLab from "./pages/BifurcationLab.jsx";
 import BlueNoiseTSPLab from "./pages/BlueNoiseTSPLab.jsx";
 import BrushfirePathLab from "./pages/BrushfirePathLab.jsx";
@@ -62,6 +70,8 @@ import ContinuedFractionsLab from "./pages/ContinuedFractionsLab.jsx";
 import CreatorLightpath from "./pages/CreatorLightpath.jsx";
 import DLALab from "./pages/DLALab.jsx";
 import Desktop from "./pages/Desktop.jsx";
+import Desktop from "./pages/Desktop.jsx";
+import DLALab from "./pages/DLALab.jsx";
 import DrumWaveLab from "./pages/DrumWaveLab.jsx";
 import Editor from "./pages/Editor.jsx";
 import EigenmapsLab from "./pages/EigenmapsLab.jsx";
@@ -108,6 +118,8 @@ import RiemannMappingToy from "./pages/RiemannMappingToy.jsx";
 import RRTSmoothLab from "./pages/RRTSmoothLab.jsx";
 import PenroseToyLab from "./pages/PenroseToyLab.jsx";
 import PendulumLab from "./pages/PendulumLab.jsx";
+import PendulumLab from "./pages/PendulumLab.jsx";
+import PenroseToyLab from "./pages/PenroseToyLab.jsx";
 import PoissonBlendLab from "./pages/PoissonBlendLab.jsx";
 import PoissonBoltzmannLab from "./pages/PoissonBoltzmannLab.jsx";
 import PoissonDiskLab from "./pages/PoissonDiskLab.jsx";
@@ -128,6 +140,12 @@ import SpectralPoissonLab from "./pages/SpectralPoissonLab.jsx";
 import StableFluidsLab from "./pages/StableFluidsLab.jsx";
 import TSPLab from "./pages/TSPLab.jsx";
 import VoronoiLloydLab from "./pages/VoronoiLloydLab.jsx";
+import SpectralPoissonLab from "./pages/SpectralPoissonLab.jsx";
+import StableFluidsLab from "./pages/StableFluidsLab.jsx";
+import StatusPage from "./pages/StatusPage.jsx";
+import Subscribe from "./pages/Subscribe.jsx";
+import Terminal from "./pages/Terminal.jsx";
+import TSPLab from "./pages/TSPLab.jsx";
 import VorticityStreamLab from "./pages/VorticityStreamLab.jsx";
 import WaveletLab from "./pages/WaveletLab.jsx";
 
@@ -320,34 +338,68 @@ const QUICK_LINKS = [
   ...FEATURE_ROUTES,
   { path: "quantum-consciousness", label: "Quantum Consciousness", component: QuantumConsciousness }
   { path: "status", label: "Status", component: StatusPage },
+const CORE_ROUTES = [
+  { path: "chat", component: Chat },
+  { path: "canvas", component: Canvas },
+  { path: "editor", component: Editor },
+  { path: "roadview", component: RoadView },
+  { path: "terminal", component: Terminal },
+  { path: "backroad", component: Backroad },
+  { path: "agents", component: Agents },
+  { path: "subscribe", component: Subscribe },
+  { path: "creator-lightpath", component: CreatorLightpath },
+  { path: "lucidia", component: Lucidia },
+  { path: "math", component: InfinityMath },
+  { path: "status", component: StatusPage },
 ];
 
 const LAB_ROUTES = [
-  { path: "ot", component: OptimalTransportLab },
-  { path: "bifurcate", component: BifurcationLab },
-  { path: "cfrac", component: ContinuedFractionsLab },
-  { path: "qjulia", component: QuatJuliaLab },
-  { path: "fluids", component: StableFluidsLab },
   { path: "autodiff", component: AutoDiffLab },
-  { path: "conformal", component: ConformalGridLab },
-  { path: "eikonal", component: EikonalLab },
-  { path: "poisson2", component: PoissonDiskLab },
-  { path: "lsys", component: LSystemLab },
-  { path: "minimal", component: MinimalSurfaceLab },
-  { path: "eigenmaps", component: EigenmapsLab },
-  { path: "blend", component: PoissonBlendLab },
-  { path: "nbody", component: NBodyLab },
-  { path: "wavelet", component: WaveletLab },
-  { path: "pb", component: PoissonBoltzmannLab },
-  { path: "ridge", component: RidgeRegressionLab },
-  { path: "kpca", component: KernelPCALab },
-  { path: "brushfire", component: BrushfirePathLab },
-  { path: "blue-tsp", component: BlueNoiseTSPLab },
+  { path: "astar", component: AStarLab },
+  { path: "bary", component: ComplexBarycentricLab },
+  { path: "bezier3d", component: BezierSurfaceLab },
   { path: "bezier-lit", component: BezierShadedSurfaceLab },
+  { path: "beltrami", component: BeltramiTorusLab },
+  { path: "bifurcate", component: BifurcationLab },
+  { path: "blend", component: PoissonBlendLab },
+  { path: "blue-tsp", component: BlueNoiseTSPLab },
+  { path: "brushfire", component: BrushfirePathLab },
+  { path: "cfrac", component: ContinuedFractionsLab },
+  { path: "cluster2", component: ClusteringCompareLab },
+  { path: "conformal", component: ConformalGridLab },
+  { path: "curves", component: BezierBSplineLab },
+  { path: "dla", component: DLALab },
+  { path: "drum", component: DrumWaveLab },
+  { path: "eigenmaps", component: EigenmapsLab },
+  { path: "eikonal", component: EikonalLab },
+  { path: "ellipsoid", component: EllipsoidGeodesicLab },
+  { path: "epicycles", component: FourierPainterLab },
+  { path: "fluids", component: StableFluidsLab },
+  { path: "fmm-tree", component: FastMarchTreeLab },
+  { path: "gs-gallery", component: GrayScottGalleryLab },
+  { path: "hilbert", component: HilbertMortonLab },
+  { path: "hungarian", component: HungarianLab },
   { path: "kf-2d", component: Kalman2DTrackerLab },
-  { path: "vorticity", component: VorticityStreamLab },
+  { path: "implicit", component: MarchingSquaresLab },
   { path: "ising", component: Ising2DLab },
-  { path: "pca", component: PCALab },
+  { path: "kpca", component: KernelPCALab },
+  { path: "lsys", component: LSystemLab },
+  { path: "maxcut", component: IsingMaxCutLab },
+  { path: "maxflow", component: MaxFlowLab },
+  { path: "minimal", component: MinimalSurfaceLab },
+  { path: "nbody", component: NBodyLab },
+  { path: "ot", component: OptimalTransportLab },
+  { path: "pb", component: PoissonBoltzmannLab },
+  { path: "pendulum", component: PendulumLab },
+  { path: "penrose", component: PenroseToyLab },
+  { path: "plane3d", component: RansacPlane3DLab },
+  { path: "poisson", component: SpectralPoissonLab },
+  { path: "poisson2", component: PoissonDiskLab },
+  { path: "pzoo", component: PowerJuliaLab },
+  { path: "qc-egg", component: QuasiConformalEggLab },
+  { path: "qjulia", component: QuatJuliaLab },
+  { path: "ridge", component: RidgeRegressionLab },
+  { path: "rrtstar", component: RRTStarLab },
   { path: "rsa", component: RSAToyLab },
   { path: "maxflow", component: MaxFlowLab },
   { path: "bezier3d", component: BezierSurfaceLab },
@@ -377,6 +429,11 @@ const LAB_ROUTES = [
   { path: "tsp", component: TSPLab },
   { path: "gs-gallery", component: GrayScottGalleryLab },
   { path: "plane3d", component: RansacPlane3DLab },
+  { path: "sir", component: SIRLab },
+  { path: "spec", component: SpectralClusteringLab },
+  { path: "tsp", component: TSPLab },
+  { path: "vorticity", component: VorticityStreamLab },
+  { path: "wavelet", component: WaveletLab }
 ];
 
 const NAV_LINKS = [
@@ -550,6 +607,7 @@ function useApiHealth() {
     };
   }, []);
 
+
   return state;
 }
 
@@ -641,6 +699,8 @@ function LegacyApp({session}){
     : canAccessAtlas
       ? <Atlas sessionRole={role}/>
       : <Navigate to="/" replace />;
+  const allRoutes = [...CORE_ROUTES, ...LAB_ROUTES];
+
   return (
     <div className="min-h-screen grid gap-4 p-4 md:grid-cols-[240px_1fr]">
       <aside className="sidebar rounded-xl bg-slate-900/60 p-4">
@@ -746,6 +806,9 @@ function LegacyApp({session}){
               </NavLink>
             );
           })}
+          <NavLink className="nav-link" to="/quantum-consciousness">
+            Quantum Consciousness
+          </NavLink>
         </nav>
         <div className="mt-6 text-xs text-neutral-400">
           <StatusPill />
@@ -799,6 +862,7 @@ function LegacyApp({session}){
               <Route key={path} path={path} element={<Component />} />
             ))}
             {Object.entries(LAB_ROUTE_COMPONENTS).map(([path, Component]) => (
+            {allRoutes.map(({ path, component: Component }) => (
               <Route key={path} path={path} element={<Component />} />
             ))}
             <Route path="codex/:slug" element={<CodexPromptPage />} />

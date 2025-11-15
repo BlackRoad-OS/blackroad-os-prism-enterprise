@@ -27,12 +27,19 @@ function Card({ title, metaphor, color, delay }) {
   useEffect(() => {
     const timeout = window.setTimeout(() => setShow(true), delay);
     return () => window.clearTimeout(timeout);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(true), delay);
+    return () => clearTimeout(timer);
   }, [delay]);
 
   return (
     <div
       className={`rounded-lg border-2 p-4 transition-all duration-700 ${
         show ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+      className={`p-4 rounded-lg border-2 transition-all duration-700 ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       }`}
       style={{ borderColor: color }}
     >
@@ -47,6 +54,38 @@ export default function QuantumConsciousness() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [topicLog, setTopicLog] = useState("");
+  const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [lastUpdated, setLastUpdated] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const topics = ["reasoning", "memory", "symbolic"];
+      const lines = [];
+      for (const topic of topics) {
+        try {
+          const response = await fetch(`/api/quantum/${topic}`);
+          if (!response.ok) {
+            throw new Error(`Request failed: ${response.status}`);
+          }
+          const payload = await response.json();
+          lines.push(`${topic.toUpperCase()}: ${payload.summary ?? "—"}`);
+        } catch (err) {
+          console.error("quantum-topic", err);
+          lines.push(`${topic.toUpperCase()}: unavailable`);
+        }
+      }
+      if (!cancelled) {
+        setTopicLog(lines.join("\n"));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const fetchNotes = useCallback(async (signal) => {
     setLoading(true);
@@ -58,6 +97,13 @@ export default function QuantumConsciousness() {
         throw new Error(`Request failed: ${response.status}`);
       }
 
+      const response = await fetch("/api/quantum", {
+        cache: "no-store",
+        signal,
+      });
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
       const payload = await response.json();
       if (!Array.isArray(payload.topics)) {
         throw new Error("Invalid payload");
@@ -67,6 +113,7 @@ export default function QuantumConsciousness() {
         return;
       }
 
+      if (signal?.aborted) return;
       setNotes(payload.topics);
       setLastUpdated(new Date());
     } catch (err) {
@@ -90,6 +137,7 @@ export default function QuantumConsciousness() {
   }, [fetchNotes]);
 
   const researchLog = useMemo(() => {
+  const renderedNotes = useMemo(() => {
     if (error) return `⚠️ ${error}`;
     if (loading) return "Loading research notes...";
     if (!notes.length) return "No research notes available yet.";
@@ -99,6 +147,7 @@ export default function QuantumConsciousness() {
       .join("\n");
   }, [error, loading, notes]);
 
+  const timestamp = useMemo(() => new Date().toISOString(), []);
   const lastSynced = useMemo(() => {
     if (!lastUpdated) return "—";
     try {
@@ -138,6 +187,33 @@ export default function QuantumConsciousness() {
         ))}
       </section>
 
+      <section className="grid md:grid-cols-3 gap-4 w-full max-w-5xl">
+        <Card
+          title="Reasoning"
+          metaphor="Superposition lets minds hold multiple thoughts at once for quantum parallelism."
+          color="#FF4FD8"
+          delay={0}
+        />
+        <Card
+          title="Memory"
+          metaphor="Entangled quantum RAM could bind experiences across vast memory webs."
+          color="#0096FF"
+          delay={150}
+        />
+        <Card
+          title="Symbolic Processing"
+          metaphor="Interference patterns refine symbolic chains, amplifying the meaningful paths."
+          color="#FDBA2D"
+          delay={300}
+        />
+      </section>
+
+      <section className="w-full max-w-5xl">
+        <div className="bg-black text-green-400 font-mono p-4 rounded-md h-48 overflow-auto">
+          <pre>{topicLog || "Loading quantum system status..."}</pre>
+        </div>
+      </section>
+
       <section className="w-full max-w-5xl space-y-3">
         <div className="flex items-center justify-between text-sm opacity-70">
           <span>Research console</span>
@@ -145,6 +221,8 @@ export default function QuantumConsciousness() {
         </div>
         <div className="h-56 overflow-auto rounded-md bg-black p-4 font-mono text-green-400">
           <pre>{researchLog}</pre>
+        <div className="bg-black text-green-400 font-mono p-4 rounded-md h-56 overflow-auto">
+          <pre>{loading ? "Loading research notes..." : renderedNotes}</pre>
         </div>
         <div className="flex justify-end">
           <button
@@ -153,6 +231,10 @@ export default function QuantumConsciousness() {
             disabled={loading}
             className={`rounded-md border border-white/20 px-4 py-2 text-sm transition ${
               loading ? "cursor-not-allowed opacity-60" : "hover:bg-white/10"
+            onClick={() => fetchNotes()}
+            disabled={loading}
+            className={`px-4 py-2 rounded-md border border-white/20 transition ${
+              loading ? "opacity-60 cursor-not-allowed" : "hover:bg-white/10"
             }`}
           >
             {loading ? "Syncing" : "Refresh"}

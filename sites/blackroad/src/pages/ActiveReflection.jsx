@@ -11,15 +11,22 @@ function createBaseline(prompts) {
 }
 
 function normalizeFromStorage(raw, prompts) {
-  const fallback = createBaseline(prompts);
   if (!raw) {
-    return fallback;
+    return createBaseline(prompts);
   }
 
   try {
     const parsed = JSON.parse(raw);
     const answers = Array.isArray(parsed?.answers) ? parsed.answers : parsed;
     const checks = Array.isArray(parsed?.checks) ? parsed.checks : [];
+    if (Array.isArray(parsed)) {
+      return {
+        answers: prompts.map((_, index) => parsed[index] ?? ""),
+        checks: prompts.map(() => false),
+        notes: "",
+      };
+    }
+
     return {
       answers: prompts.map((_, index) => answers?.[index] ?? ""),
       checks: prompts.map((_, index) => checks?.[index] ?? false),
@@ -27,7 +34,7 @@ function normalizeFromStorage(raw, prompts) {
     };
   } catch (error) {
     console.warn("Failed to parse ActiveReflection storage", error);
-    return fallback;
+    return createBaseline(prompts);
   }
 }
 
