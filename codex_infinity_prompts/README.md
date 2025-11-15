@@ -7,6 +7,7 @@ A lightweight prompt renderer for shipping consistent, parameterized briefs to I
 - `render.py` — tiny CLI that turns Markdown templates into filled prompts.
 - `example.sh` — renders two ready-to-paste prompts into `out/`.
 - `templates/` — reusable Markdown prompt blueprints with `{{variables}}`.
+- `templates/BLACKROAD_CODEX_METAVERSE_ENGINEER.md` — static Codex system prompt for the BlackRoad Metaverse Engineer role (render it via `blackroad_codex_engineer`).
 
 ## Quick start
 
@@ -56,3 +57,11 @@ python3 render.py jetson_agent --show-vars --strict --out /tmp/dry-run
 3. Drop the Markdown prompt into your coding model to bootstrap agent plans.
 
 Feel free to fork the templates or wire the CLI into your own orchestration scripts.
+
+## Quick render for Codex Metaverse Engineer
+
+```bash
+python3 render.py blackroad_codex_engineer --out out/CODEX_METAVERSE_ENGINEER.md
+```
+
+The template has no placeholders, so the renderer outputs the canonical prompt exactly as written — perfect for pasting directly into Codex Infinity sessions.

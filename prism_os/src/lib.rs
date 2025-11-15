@@ -8,33 +8,32 @@ use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 #[cfg(target_arch = "wasm32")]
+use js_sys::{Object, Reflect};
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::closure::Closure;
+#[cfg(target_arch = "wasm32")]
 use wasm_bindgen::{prelude::*, JsCast};
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen_futures::JsFuture;
 #[cfg(target_arch = "wasm32")]
 use web_sys::{IdbDatabase, IdbOpenDbRequest, IdbTransactionMode};
-#[cfg(target_arch = "wasm32")]
-use js_sys::{Object, Reflect};
-#[cfg(target_arch = "wasm32")]
-use wasm_bindgen::closure::Closure;
 
 /// In-memory representation of an agent managed by PrismOS.
 pub struct Agent {
-    pub name: &'static str,
+    pub name: String,
     pub state: Vec<u8>,
 }
 
 /// Serialized snapshot of an agent's state.
 #[derive(Clone)]
 pub struct AgentSnapshot {
-    pub agent_name: &'static str,
+    pub agent_name: String,
     pub state_data: Vec<u8>,
     pub timestamp: u64,
 }
 
 /// Global table of all snapshots held by the kernel.
-pub static SNAPSHOT_TABLE: Lazy<Mutex<Vec<AgentSnapshot>>> =
-    Lazy::new(|| Mutex::new(Vec::new()));
+pub static SNAPSHOT_TABLE: Lazy<Mutex<Vec<AgentSnapshot>>> = Lazy::new(|| Mutex::new(Vec::new()));
 
 /// Minimal error type for kernel operations.
 #[derive(Debug)]
@@ -60,7 +59,7 @@ fn current_timestamp() -> u64 {
 pub fn snapshot_agent(agent: &Agent) -> Result<AgentSnapshot, PrismError> {
     // In lieu of a bump allocator, simply clone the state buffer.
     let snapshot = AgentSnapshot {
-        agent_name: agent.name,
+        agent_name: agent.name.clone(),
         state_data: agent.state.clone(),
         timestamp: current_timestamp(),
     };
@@ -87,7 +86,7 @@ fn snapshot_file(agent: &str, ts: u64) -> PathBuf {
 
 /// Persist a snapshot to the /prism/snapshots VFS.
 pub fn persist_snapshot(snapshot: &AgentSnapshot) -> Result<PathBuf, PrismError> {
-    let path = snapshot_file(snapshot.agent_name, snapshot.timestamp);
+    let path = snapshot_file(&snapshot.agent_name, snapshot.timestamp);
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }
@@ -109,13 +108,31 @@ async fn store_snapshot_metadata(snapshot: &AgentSnapshot) {
                 upgrade.forget();
                 if let Ok(db_val) = JsFuture::from(open_req).await {
                     let db: IdbDatabase = db_val.unchecked_into();
-                    if let Ok(tx) = db.transaction_with_str_and_mode("snapshots", IdbTransactionMode::Readwrite) {
+                    if let Ok(tx) =
+                        db.transaction_with_str_and_mode("snapshots", IdbTransactionMode::Readwrite)
+                    {
                         if let Ok(store) = tx.object_store("snapshots") {
                             let meta = Object::new();
-                            let _ = Reflect::set(&meta, &JsValue::from_str("agent"), &JsValue::from_str(snapshot.agent_name));
-                            let _ = Reflect::set(&meta, &JsValue::from_str("timestamp"), &JsValue::from_f64(snapshot.timestamp as f64));
-                            let _ = Reflect::set(&meta, &JsValue::from_str("size"), &JsValue::from_f64(snapshot.state_data.len() as f64));
-                            let key = JsValue::from_str(&format!("{}-{}", snapshot.agent_name, snapshot.timestamp));
+                            let _ = Reflect::set(
+                                &meta,
+                                &JsValue::from_str("agent"),
+                                &JsValue::from_str(snapshot.agent_name.as_str()),
+                            );
+                            let _ = Reflect::set(
+                                &meta,
+                                &JsValue::from_str("timestamp"),
+                                &JsValue::from_f64(snapshot.timestamp as f64),
+                            );
+                            let _ = Reflect::set(
+                                &meta,
+                                &JsValue::from_str("size"),
+                                &JsValue::from_f64(snapshot.state_data.len() as f64),
+                            );
+                            let key = JsValue::from_str(&format!(
+                                "{}-{}",
+                                snapshot.agent_name.as_str(),
+                                snapshot.timestamp
+                            ));
                             let _ = store.put_with_key(&meta, &key);
                         }
                         let _ = JsFuture::from(tx.done()).await;
@@ -129,7 +146,10 @@ async fn store_snapshot_metadata(snapshot: &AgentSnapshot) {
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 pub async fn snapshotAgent(name: String, state: js_sys::Uint8Array) -> Result<JsValue, JsValue> {
-    let agent = Agent { name: Box::leak(name.clone().into_boxed_str()), state: state.to_vec() };
+    let agent = Agent {
+        name: name.clone(),
+        state: state.to_vec(),
+    };
     let snap = snapshot_agent(&agent).map_err(|e| JsValue::from_str(&format!("{:?}", e)))?;
     let _ = persist_snapshot(&snap);
     store_snapshot_metadata(&snap).await;
@@ -139,7 +159,10 @@ pub async fn snapshotAgent(name: String, state: js_sys::Uint8Array) -> Result<Js
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 pub async fn rollbackAgent(name: String, id: u64) -> Result<js_sys::Uint8Array, JsValue> {
-    let mut agent = Agent { name: Box::leak(name.into_boxed_str()), state: Vec::new() };
+    let mut agent = Agent {
+        name,
+        state: Vec::new(),
+    };
     cmd_rollback(&mut agent, id).map_err(|e| JsValue::from_str(&format!("{:?}", e)))?;
     Ok(js_sys::Uint8Array::from(agent.state.as_slice()))
 }
@@ -153,9 +176,7 @@ pub fn read_snapshot_metadata(path: &Path) -> Result<String, PrismError> {
             .and_then(|p| p.file_name())
             .and_then(|n| n.to_str())
             .unwrap_or("unknown"),
-        path.file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap_or("0"),
+        path.file_stem().and_then(|s| s.to_str()).unwrap_or("0"),
         data.len()
     ))
 }
@@ -175,7 +196,7 @@ pub fn cmd_list(agent_name: &str) -> Vec<AgentSnapshot> {
         .lock()
         .unwrap()
         .iter()
-        .filter(|s| s.agent_name == agent_name)
+        .filter(|s| s.agent_name.as_str() == agent_name)
         .cloned()
         .collect()
 }
@@ -185,7 +206,7 @@ pub fn cmd_rollback(agent: &mut Agent, id: u64) -> Result<(), PrismError> {
     let table = SNAPSHOT_TABLE.lock().unwrap();
     if let Some(s) = table
         .iter()
-        .find(|s| s.agent_name == agent.name && s.timestamp == id)
+        .find(|s| s.agent_name.as_str() == agent.name.as_str() && s.timestamp == id)
     {
         rollback_agent(agent, s)
     } else {
@@ -206,7 +227,7 @@ pub fn autosnapshot(agent: &Agent) {
 pub fn crash_snapshot(agent: &Agent) {
     if let Ok(mut snap) = snapshot_agent(agent) {
         snap.timestamp = current_timestamp();
-        let path = agent_dir(agent.name).join(format!("crash-{}.snap", snap.timestamp));
+        let path = agent_dir(agent.name.as_str()).join(format!("crash-{}.snap", snap.timestamp));
         if let Some(parent) = path.parent() {
             let _ = fs::create_dir_all(parent);
         }
@@ -220,7 +241,10 @@ mod tests {
 
     #[test]
     fn snapshot_and_rollback() {
-        let mut agent = Agent { name: "echo", state: b"before".to_vec() };
+        let mut agent = Agent {
+            name: "echo".to_string(),
+            state: b"before".to_vec(),
+        };
         let snap = snapshot_agent(&agent).unwrap();
         agent.state = b"after".to_vec();
         rollback_agent(&mut agent, &snap).unwrap();
@@ -229,9 +253,12 @@ mod tests {
 
     #[test]
     fn crash_creates_file() {
-        let agent = Agent { name: "echo", state: b"msg".to_vec() };
+        let agent = Agent {
+            name: "echo".to_string(),
+            state: b"msg".to_vec(),
+        };
         crash_snapshot(&agent);
-        let dir = agent_dir(agent.name);
+        let dir = agent_dir(agent.name.as_str());
         // ensure at least one crash file exists
         let paths: Vec<_> = fs::read_dir(&dir)
             .unwrap()
@@ -240,6 +267,6 @@ mod tests {
             .collect();
         assert!(paths.iter().any(|p| p.to_string_lossy().contains("crash-")));
         // cleanup
-        let _ = fs::remove_dir_all(agent_dir(agent.name));
+        let _ = fs::remove_dir_all(agent_dir(agent.name.as_str()));
     }
 }

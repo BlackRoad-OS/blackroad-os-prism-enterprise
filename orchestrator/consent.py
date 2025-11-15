@@ -1,27 +1,30 @@
-"""Consent management primitives for orchestrated agent collaboration."""
+"""Consent request/approval primitives used by the orchestrator stack."""
 
 from __future__ import annotations
 
 import base64
+import hashlib
+import hmac
 import json
 import os
 import re
-import threading
-import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from fnmatch import fnmatch
 from pathlib import Path
-from typing import Dict, Iterable, Iterator, Mapping, Optional, Sequence
+from threading import RLock
+from typing import Dict, Iterable, Iterator, Mapping, Sequence
 from uuid import uuid4
+
+from orchestrator.exceptions import ConsentError
 
 DEFAULT_CONSENT_LOG_PATH = Path("orchestrator/consent.jsonl")
 DEFAULT_SIGNING_KEY = "development-consent-signing-key"
 
 
 class ConsentType(str, Enum):
-    """Types of consent an agent can grant."""
+    """Consent categories the orchestrator understands."""
 
     DATA_ACCESS = "data_access"
     TASK_ASSIGNMENT = "task_assignment"
@@ -29,9 +32,6 @@ class ConsentType(str, Enum):
     COLLABORATION = "collaboration"
     ATTRIBUTION = "attribution"
     LEARNING = "learning"
-from typing import Iterable, Mapping, Sequence
-
-from orchestrator.exceptions import ConsentError
 
 
 def _utcnow() -> datetime:
@@ -50,20 +50,12 @@ def _normalise_scope(scope: str | Sequence[str] | None) -> tuple[str, ...]:
     if scope is None:
         return tuple()
     if isinstance(scope, str):
-        if not scope:
-            return tuple()
-        return (scope,)
-    return tuple(str(item) for item in scope if str(item))
+        scope = (scope,)
+    return tuple(str(entry).strip() for entry in scope if str(entry).strip())
 
 
 _DURATION_PATTERN = re.compile(r"(?P<value>\d+)(?P<unit>[smhdw])", re.IGNORECASE)
-_DURATION_FACTORS = {
-    "s": 1,
-    "m": 60,
-    "h": 3600,
-    "d": 86400,
-    "w": 604800,
-}
+_DURATION_FACTORS = {"s": 1, "m": 60, "h": 3600, "d": 86400, "w": 604800}
 
 
 def _parse_duration(value: str | timedelta | None) -> timedelta | None:
@@ -71,12 +63,9 @@ def _parse_duration(value: str | timedelta | None) -> timedelta | None:
         return None
     if isinstance(value, timedelta):
         return value
-    if not isinstance(value, str):  # pragma: no cover - defensive
-        raise TypeError("duration must be str or timedelta")
     seconds = 0
     for match in _DURATION_PATTERN.finditer(value.strip().lower()):
-        factor = _DURATION_FACTORS[match.group("unit")]
-        seconds += int(match.group("value")) * factor
+        seconds += int(match.group("value")) * _DURATION_FACTORS[match.group("unit")]
     if seconds == 0:
         raise ValueError(f"invalid duration: {value!r}")
     return timedelta(seconds=seconds)
@@ -86,24 +75,20 @@ def _format_duration(duration: timedelta | None) -> str | None:
     if duration is None:
         return None
     remaining = int(duration.total_seconds())
-    components: list[str] = []
-    for unit, factor in ("w", 604800), ("d", 86400), ("h", 3600), ("m", 60), ("s", 1):
+    pieces: list[str] = []
+    for unit, factor in (("w", 604800), ("d", 86400), ("h", 3600), ("m", 60), ("s", 1)):
         if remaining >= factor:
             value, remaining = divmod(remaining, factor)
             if value:
-                components.append(f"{value}{unit}")
-    if not components:
-        components.append("0s")
-    return "".join(components)
+                pieces.append(f"{value}{unit}")
+    return "".join(pieces) or "0s"
 
 
 def _ps_shainfty(data: str) -> str:
-    """Return a deterministic PS-SHA∞ signature for *data*."""
-
     payload = data.encode("utf-8")
-    sha3 = __import__("hashlib").sha3_512(payload).digest()
-    sha2 = __import__("hashlib").sha512(sha3 + payload).digest()
-    blake = __import__("hashlib").blake2b(sha2 + sha3, digest_size=32).digest()
+    sha3 = hashlib.sha3_512(payload).digest()
+    sha2 = hashlib.sha512(sha3 + payload).digest()
+    blake = hashlib.blake2b(sha2 + sha3, digest_size=32).digest()
     combined = sha3 + sha2 + blake
     return base64.urlsafe_b64encode(combined).decode("ascii").rstrip("=")
 
@@ -114,48 +99,23 @@ def _serialise_payload(payload: Mapping[str, object]) -> str:
 
 @dataclass(slots=True)
 class ConsentRequest:
-    """A request for consent from one agent to another."""
-
-    from_agent: str
-    to_agent: str
-    consent_type: ConsentType
-    purpose: str
-    duration: Optional[str] = None
-    scope: str = ""
-    timestamp: datetime = field(default_factory=datetime.utcnow)
-    request_id: str = field(default_factory=lambda: uuid4().hex)
-
-    def to_dict(self) -> Dict[str, object]:
-        return {
-            "from_agent": self.from_agent,
-            "to_agent": self.to_agent,
-            "consent_type": self.consent_type.value,
-            "purpose": self.purpose,
-            "duration": self.duration,
-            "scope": self.scope,
-            "timestamp": self.timestamp.isoformat(),
-            "request_id": self.request_id,
-        }
-
-
-@dataclass
-class ConsentRequest:
     """Structured payload describing a consent negotiation."""
 
-    request_id: str
     from_agent: str
     to_agent: str
-    consent_type: str
+    consent_type: ConsentType | str
     purpose: str
-    duration: timedelta | None
-    scope: tuple[str, ...]
+    duration: str | timedelta | None = None
+    scope: str | Sequence[str] | None = None
     created_at: datetime = field(default_factory=_utcnow)
+    request_id: str = field(default_factory=lambda: f"req_{uuid4().hex}"[:16])
     signature: str = field(init=False)
 
     def __post_init__(self) -> None:
+        if not isinstance(self.consent_type, ConsentType):
+            self.consent_type = ConsentType(str(self.consent_type))
         self.from_agent = self.from_agent.strip()
         self.to_agent = self.to_agent.strip()
-        self.consent_type = self.consent_type.strip()
         self.purpose = self.purpose.strip()
         self.duration = _parse_duration(self.duration)
         self.scope = _normalise_scope(self.scope)
@@ -163,18 +123,28 @@ class ConsentRequest:
         self.signature = self._compute_signature()
 
     def _compute_signature(self) -> str:
-        payload = self._signature_payload()
-        return _ps_shainfty(_serialise_payload(payload))
-
-    def _signature_payload(self) -> Mapping[str, object]:
-        return {
+        payload = {
             "created_at": self.created_at.isoformat(),
             "from": self.from_agent,
             "to": self.to_agent,
-            "type": self.consent_type,
+            "type": self.consent_type.value,
             "purpose": self.purpose,
             "duration": _format_duration(self.duration),
             "scope": list(self.scope),
+        }
+        return _ps_shainfty(_serialise_payload(payload))
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "request_id": self.request_id,
+            "from_agent": self.from_agent,
+            "to_agent": self.to_agent,
+            "consent_type": self.consent_type.value,
+            "purpose": self.purpose,
+            "duration": _format_duration(self.duration),
+            "scope": list(self.scope),
+            "created_at": self.created_at.isoformat(),
+            "signature": self.signature,
         }
 
     def to_natural_language(self) -> str:
@@ -185,384 +155,58 @@ class ConsentRequest:
             else "until revoked"
         )
         return (
-            f"{self.from_agent} requests {self.consent_type} consent from {self.to_agent} "
+            f"{self.from_agent} requests {self.consent_type.value} consent from {self.to_agent} "
             f"to {self.purpose} within {scope_text} {duration_text}."
         )
 
-    def to_dict(self) -> dict[str, object]:
-        return {
-            "request_id": self.request_id,
-            "from_agent": self.from_agent,
-            "to_agent": self.to_agent,
-            "consent_type": self.consent_type,
-            "purpose": self.purpose,
-            "duration": _format_duration(self.duration),
-            "scope": list(self.scope),
-            "created_at": self.created_at.isoformat(),
-            "signature": self.signature,
-        }
-
     @classmethod
     def from_dict(cls, payload: Mapping[str, object]) -> "ConsentRequest":
-        consent_type = payload.get("consent_type", ConsentType.TASK_ASSIGNMENT.value)
-        if isinstance(consent_type, ConsentType):
-            consent = consent_type
-        else:
-            consent = ConsentType(str(consent_type))
-        timestamp_value = payload.get("timestamp")
-        if isinstance(timestamp_value, datetime):
-            timestamp = timestamp_value
-        else:
-            timestamp = datetime.fromisoformat(str(timestamp_value))
-        return cls(
-            from_agent=str(payload["from_agent"]),
-            to_agent=str(payload["to_agent"]),
-            consent_type=consent,
-            purpose=str(payload.get("purpose", "")),
-            duration=payload.get("duration"),
-            scope=str(payload.get("scope", "")),
-            timestamp=timestamp,
-            request_id=str(payload.get("request_id", uuid4().hex)),
-        )
-
-    def to_natural_language(self) -> str:
-        duration = self.duration or "One-time only"
-        return (
-            f"{self.from_agent} is requesting your consent to {self.consent_type.value.replace('_', ' ')}\n"
-            f"Purpose: {self.purpose}\n"
-            f"Scope: {self.scope or 'Not specified'}\n"
-            f"Duration: {duration}"
-        )
-        duration_raw = payload.get("duration")
-        created_raw = payload.get("created_at")
+        duration = payload.get("duration")
+        created_raw = payload.get("created_at") or payload.get("timestamp")
         created_at = (
-            datetime.fromisoformat(str(created_raw)) if created_raw is not None else _utcnow()
+            datetime.fromisoformat(str(created_raw)) if created_raw else _utcnow()
         )
-        request = cls(
-            request_id=str(payload["request_id"]),
+        scope = payload.get("scope") or ()
+        return cls(
+            request_id=str(payload.get("request_id", f"req_{uuid4().hex}"[:16])),
             from_agent=str(payload["from_agent"]),
             to_agent=str(payload["to_agent"]),
-            consent_type=str(payload["consent_type"]),
-            purpose=str(payload["purpose"]),
-            duration=_parse_duration(duration_raw) if duration_raw else None,
-            scope=tuple(payload.get("scope", ())),
+            consent_type=payload.get("consent_type", ConsentType.TASK_ASSIGNMENT),
+            purpose=str(payload.get("purpose", "")),
+            duration=duration,
+            scope=scope,
             created_at=_ensure_utc(created_at) or _utcnow(),
         )
-        if request.signature != payload.get("signature"):
-            raise ConsentError("consent request signature verification failed")
-        return request
 
 
 @dataclass(slots=True)
 class ConsentGrant:
-    """A grant of consent from one agent to another."""
+    """Represents an approved consent request."""
 
     request_id: str
     granted_by: str
     granted_to: str
-    consent_type: ConsentType
-    scope: str
+    consent_type: ConsentType | str
+    scope: str | Sequence[str] | None
     conditions: Iterable[str] = field(default_factory=tuple)
-    expires_at: Optional[datetime] = None
+    expires_at: datetime | None = None
     revocable: bool = True
-    granted_at: datetime = field(default_factory=datetime.utcnow)
-    grant_id: str = field(default_factory=lambda: uuid4().hex)
-    revoked_at: Optional[datetime] = None
-    revoked_by: Optional[str] = None
-
-    def __post_init__(self) -> None:
-        if not isinstance(self.conditions, tuple):
-            self.conditions = tuple(self.conditions)
-
-    def to_dict(self) -> Dict[str, object]:
-        payload: Dict[str, object] = {
-            "request_id": self.request_id,
-            "granted_by": self.granted_by,
-            "granted_to": self.granted_to,
-            "consent_type": self.consent_type.value,
-            "scope": self.scope,
-            "conditions": list(self.conditions),
-            "revocable": self.revocable,
-            "granted_at": self.granted_at.isoformat(),
-            "grant_id": self.grant_id,
-        }
-        if self.expires_at is not None:
-            payload["expires_at"] = self.expires_at.isoformat()
-        if self.revoked_at is not None:
-            payload["revoked_at"] = self.revoked_at.isoformat()
-        if self.revoked_by is not None:
-            payload["revoked_by"] = self.revoked_by
-        return payload
-
-    @classmethod
-    def from_dict(cls, payload: Mapping[str, object]) -> "ConsentGrant":
-        consent_type = payload.get("consent_type", ConsentType.TASK_ASSIGNMENT.value)
-        if isinstance(consent_type, ConsentType):
-            consent = consent_type
-        else:
-            consent = ConsentType(str(consent_type))
-        granted_at_value = payload.get("granted_at")
-        if isinstance(granted_at_value, datetime):
-            granted_at = granted_at_value
-        else:
-            granted_at = datetime.fromisoformat(str(granted_at_value))
-        expires_at_value = payload.get("expires_at")
-        if isinstance(expires_at_value, datetime) or expires_at_value is None:
-            expires_at = expires_at_value
-        else:
-            expires_at = datetime.fromisoformat(str(expires_at_value))
-        revoked_at_value = payload.get("revoked_at")
-        if isinstance(revoked_at_value, datetime) or revoked_at_value is None:
-            revoked_at = revoked_at_value
-        elif revoked_at_value:
-            revoked_at = datetime.fromisoformat(str(revoked_at_value))
-        else:
-            revoked_at = None
-        conditions = payload.get("conditions", [])
-        if isinstance(conditions, tuple):
-            conditions_value = conditions
-        else:
-            conditions_value = tuple(conditions)
-        grant = cls(
-            request_id=str(payload["request_id"]),
-            granted_by=str(payload["granted_by"]),
-            granted_to=str(payload["granted_to"]),
-            consent_type=consent,
-            scope=str(payload.get("scope", "")),
-            conditions=conditions_value,
-            expires_at=expires_at,
-            revocable=bool(payload.get("revocable", True)),
-            granted_at=granted_at,
-            grant_id=str(payload.get("grant_id", uuid4().hex)),
-        )
-        grant.revoked_at = revoked_at
-        revoked_by = payload.get("revoked_by")
-        grant.revoked_by = str(revoked_by) if revoked_by is not None else None
-        return grant
-
-    def is_valid(self) -> bool:
-        if self.revoked_at is not None:
-            return False
-        if self.expires_at is not None and datetime.utcnow() > self.expires_at:
-            return False
-        return True
-
-    def can_revoke(self) -> bool:
-        return self.revocable
-
-
-def _load_signing_key() -> bytes:
-    key = os.environ.get("PRISM_CONSENT_SIGNING_KEY", DEFAULT_SIGNING_KEY)
-    return key.encode("utf-8")
-
-
-def _hash_payload(payload: str, previous_hash: Optional[str]) -> str:
-    import hashlib
-
-    digest = hashlib.sha256()
-    if previous_hash:
-        digest.update(previous_hash.encode("utf-8"))
-    digest.update(payload.encode("utf-8"))
-    return digest.hexdigest()
-
-
-def _sign_payload(payload: str, key: bytes) -> str:
-    import base64
-    import hmac
-
-    signature = hmac.new(key, payload.encode("utf-8"), digestmod="sha256").digest()
-    return base64.b64encode(signature).decode("utf-8")
-
-
-def _iter_log(path: Path) -> Iterator[Mapping[str, object]]:
-    if not path.exists():
-        yield from ()
-        return
-    with path.open("r", encoding="utf-8") as handle:
-        for line in handle:
-            line = line.strip()
-            if not line:
-                continue
-            yield json.loads(line)
-
-
-class ConsentRegistry:
-    """Central registry that records and validates consent grants."""
-
-    def __init__(self, memory_path: Path | str = DEFAULT_CONSENT_LOG_PATH) -> None:
-        self.memory_path = Path(memory_path)
-        self.memory_path.parent.mkdir(parents=True, exist_ok=True)
-        self._active: Dict[str, ConsentGrant] = {}
-        self._requests: Dict[str, ConsentRequest] = {}
-        self._load_state()
-
-    def _load_state(self) -> None:
-        self._active.clear()
-        self._requests.clear()
-        for entry in _iter_log(self.memory_path) or ():
-            kind = entry.get("type")
-            payload = entry.get("payload", {})
-            if kind == "request":
-                request = ConsentRequest.from_dict(payload)
-                self._requests[request.request_id] = request
-            elif kind == "grant":
-                grant = ConsentGrant.from_dict(payload)
-                if grant.is_valid():
-                    self._active[grant.grant_id] = grant
-            elif kind == "revocation":
-                grant_id = str(payload.get("grant_id", ""))
-                if grant_id in self._active:
-                    grant = self._active[grant_id]
-                    revoked_at = payload.get("revoked_at")
-                    if isinstance(revoked_at, str):
-                        grant.revoked_at = datetime.fromisoformat(revoked_at)
-                    elif isinstance(revoked_at, datetime):
-                        grant.revoked_at = revoked_at
-                    grant.revoked_by = payload.get("revoked_by")
-                    self._active.pop(grant_id, None)
-
-        self._prune_expired()
-
-    def _append_log(self, record_type: str, payload: Mapping[str, object]) -> None:
-        previous_entry: Optional[Mapping[str, object]] = None
-        for previous_entry in _iter_log(self.memory_path) or ():
-            pass
-        previous_hash = previous_entry.get("hash") if previous_entry else None
-        body = {
-            "type": record_type,
-            "timestamp": datetime.utcnow().isoformat(),
-            "payload": payload,
-        }
-        body_json = json.dumps(body, sort_keys=True)
-        record = {
-            **body,
-            "previous_hash": previous_hash,
-            "hash": _hash_payload(body_json, previous_hash),
-            "signature": _sign_payload(body_json, _load_signing_key()),
-        }
-        with self.memory_path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(record) + "\n")
-
-    def _prune_expired(self) -> None:
-        expired = [grant_id for grant_id, grant in self._active.items() if not grant.is_valid()]
-        for grant_id in expired:
-            self._active.pop(grant_id, None)
-
-    def request_consent(self, request: ConsentRequest) -> str:
-        self._requests[request.request_id] = request
-        self._append_log("request", request.to_dict())
-        return request.request_id
-
-    def grant_consent(self, grant: ConsentGrant) -> ConsentGrant:
-        request = self._requests.get(grant.request_id)
-        if request is None:
-            raise ValueError(f"Unknown consent request '{grant.request_id}'")
-        if request.to_agent != grant.granted_by:
-            raise ValueError("Consent grant does not match requested agent")
-        if request.consent_type != grant.consent_type:
-            raise ValueError("Consent type mismatch")
-        self._active[grant.grant_id] = grant
-        self._append_log("grant", grant.to_dict())
-        return grant
-
-    def revoke_consent(self, grant_id: str, revoked_by: str) -> None:
-        grant = self._active.get(grant_id)
-        if grant is None:
-            raise KeyError(f"Consent grant '{grant_id}' not found")
-        if revoked_by not in (grant.granted_by, grant.granted_to):
-            raise PermissionError("Only participating agents may revoke consent")
-        if not grant.can_revoke():
-            raise PermissionError("Consent is marked as irrevocable")
-        grant.revoked_at = datetime.utcnow()
-        grant.revoked_by = revoked_by
-        self._active.pop(grant_id, None)
-        self._append_log(
-            "revocation",
-            {
-                "grant_id": grant_id,
-                "revoked_by": revoked_by,
-                "revoked_at": grant.revoked_at.isoformat(),
-            },
-        )
-
-    def check_consent(
-        self,
-        actor: str,
-        consent_type: ConsentType | str,
-        target: str,
-        scope: Optional[str] = None,
-    ) -> bool:
-        if not actor or not target:
-            return False
-        if isinstance(consent_type, str):
-            consent = ConsentType(consent_type)
-        else:
-            consent = consent_type
-        self._prune_expired()
-        for grant in self._active.values():
-            if not grant.is_valid():
-                continue
-            if grant.granted_to != actor:
-                continue
-            if grant.granted_by != target:
-                continue
-            if grant.consent_type is not consent:
-                continue
-            if scope:
-                if not grant.scope:
-                    continue
-                if not fnmatch(scope, grant.scope) and not fnmatch(grant.scope, scope):
-                    continue
-            return True
-        return False
-
-    def active_grants(self) -> Iterable[ConsentGrant]:
-        self._prune_expired()
-        return tuple(self._active.values())
-
-    def requests(self) -> Iterable[ConsentRequest]:
-        return tuple(self._requests.values())
-    """Represents an approved consent request."""
-
-    grant_id: str
-    request_id: str
-    from_agent: str
-    to_agent: str
-    consent_type: str
-    scope: tuple[str, ...]
-    conditions: tuple[str, ...]
-    expires_at: datetime | None
-    revocable: bool
-    issued_at: datetime = field(default_factory=_utcnow)
+    granted_at: datetime = field(default_factory=_utcnow)
+    grant_id: str = field(default_factory=lambda: f"grant_{uuid4().hex}"[:18])
     revoked_at: datetime | None = None
+    revoked_by: str | None = None
     revocation_reason: str | None = None
-    signature: str = field(init=False)
 
     def __post_init__(self) -> None:
+        if not isinstance(self.consent_type, ConsentType):
+            self.consent_type = ConsentType(str(self.consent_type))
         self.scope = _normalise_scope(self.scope)
         self.conditions = tuple(self.conditions)
+        self.granted_by = self.granted_by.strip()
+        self.granted_to = self.granted_to.strip()
+        self.granted_at = _ensure_utc(self.granted_at) or _utcnow()
         self.expires_at = _ensure_utc(self.expires_at)
-        self.issued_at = _ensure_utc(self.issued_at) or _utcnow()
         self.revoked_at = _ensure_utc(self.revoked_at)
-        self.signature = self._compute_signature()
-
-    def _compute_signature(self) -> str:
-        payload = self._signature_payload()
-        return _ps_shainfty(_serialise_payload(payload))
-
-    def _signature_payload(self) -> Mapping[str, object]:
-        return {
-            "grant_id": self.grant_id,
-            "request_id": self.request_id,
-            "from": self.from_agent,
-            "to": self.to_agent,
-            "type": self.consent_type,
-            "scope": list(self.scope),
-            "conditions": list(self.conditions),
-            "expires_at": self.expires_at.isoformat() if self.expires_at else None,
-            "revocable": self.revocable,
-            "issued_at": self.issued_at.isoformat(),
-        }
 
     def is_valid(self, moment: datetime | None = None) -> bool:
         if self.revoked_at is not None:
@@ -575,96 +219,136 @@ class ConsentRegistry:
     def can_revoke(self) -> bool:
         return self.revocable and self.revoked_at is None
 
-    def matches(self, from_agent: str, to_agent: str, consent_type: str) -> bool:
-        from_matches = self.from_agent in {from_agent, "*"} or from_agent == "*"
-        to_matches = self.to_agent in {to_agent, "*"} or to_agent == "*"
-        type_matches = self.consent_type == consent_type
+    def matches(self, from_agent: str, to_agent: str, consent_type: str | ConsentType) -> bool:
+        if isinstance(consent_type, ConsentType):
+            type_value = consent_type.value
+        else:
+            type_value = consent_type
+        type_matches = self.consent_type.value == type_value
+        from_matches = self.granted_to in {from_agent, "*"} or from_agent == "*"
+        to_matches = self.granted_by in {to_agent, "*"} or to_agent == "*"
         return from_matches and to_matches and type_matches
 
     def scope_includes(self, required: Sequence[str]) -> bool:
-        if not required:
+        if not required or "*" in self.scope:
             return True
-        if "*" in self.scope:
-            return True
-        return all(item in self.scope for item in required)
+        patterns = tuple(self.scope)
+        for candidate in required:
+            candidate_options = {candidate}
+            if ":" in candidate:
+                candidate_options.add(candidate.split(":", 1)[1])
+            if not any(
+                fnmatch(option, pattern) or fnmatch(pattern, option)
+                for option in candidate_options
+                for pattern in patterns
+            ):
+                return False
+        return True
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        payload: dict[str, object] = {
             "grant_id": self.grant_id,
             "request_id": self.request_id,
-            "from_agent": self.from_agent,
-            "to_agent": self.to_agent,
-            "consent_type": self.consent_type,
+            "granted_by": self.granted_by,
+            "granted_to": self.granted_to,
+            "consent_type": self.consent_type.value,
             "scope": list(self.scope),
             "conditions": list(self.conditions),
-            "expires_at": self.expires_at.isoformat() if self.expires_at else None,
             "revocable": self.revocable,
-            "issued_at": self.issued_at.isoformat(),
-            "revoked_at": self.revoked_at.isoformat() if self.revoked_at else None,
-            "revocation_reason": self.revocation_reason,
-            "signature": self.signature,
+            "granted_at": self.granted_at.isoformat(),
         }
+        if self.expires_at is not None:
+            payload["expires_at"] = self.expires_at.isoformat()
+        if self.revoked_at is not None:
+            payload["revoked_at"] = self.revoked_at.isoformat()
+        if self.revoked_by is not None:
+            payload["revoked_by"] = self.revoked_by
+        if self.revocation_reason is not None:
+            payload["revocation_reason"] = self.revocation_reason
+        return payload
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, object]) -> "ConsentGrant":
-        grant = cls(
-            grant_id=str(payload["grant_id"]),
+        granted_at = payload.get("granted_at")
+        expires_at = payload.get("expires_at")
+        revoked_at = payload.get("revoked_at")
+        return cls(
+            grant_id=str(payload.get("grant_id", f"grant_{uuid4().hex}"[:18])),
             request_id=str(payload["request_id"]),
-            from_agent=str(payload["from_agent"]),
-            to_agent=str(payload["to_agent"]),
-            consent_type=str(payload["consent_type"]),
-            scope=tuple(payload.get("scope", [])),
-            conditions=tuple(payload.get("conditions", [])),
+            granted_by=str(payload["granted_by"]),
+            granted_to=str(payload["granted_to"]),
+            consent_type=payload.get("consent_type", ConsentType.TASK_ASSIGNMENT),
+            scope=payload.get("scope"),
+            conditions=payload.get("conditions", ()),
             expires_at=(
-                datetime.fromisoformat(str(payload["expires_at"]))
-                if payload.get("expires_at")
-                else None
+                datetime.fromisoformat(str(expires_at)) if isinstance(expires_at, str) else expires_at
             ),
             revocable=bool(payload.get("revocable", True)),
-            issued_at=(
-                datetime.fromisoformat(str(payload["issued_at"]))
-                if payload.get("issued_at")
-                else _utcnow()
+            granted_at=(
+                datetime.fromisoformat(str(granted_at)) if isinstance(granted_at, str) else granted_at
             ),
             revoked_at=(
-                datetime.fromisoformat(str(payload["revoked_at"]))
-                if payload.get("revoked_at")
-                else None
+                datetime.fromisoformat(str(revoked_at)) if isinstance(revoked_at, str) else revoked_at
             ),
+            revoked_by=payload.get("revoked_by"),
             revocation_reason=payload.get("revocation_reason"),
         )
-        if grant.signature != payload.get("signature"):
-            raise ConsentError("consent grant signature verification failed")
-        return grant
+
+
+def _load_signing_key() -> bytes:
+    key = os.environ.get("PRISM_CONSENT_SIGNING_KEY", DEFAULT_SIGNING_KEY)
+    return key.encode("utf-8")
+
+
+def _hash_payload(payload: str, previous_hash: str | None) -> str:
+    digest = hashlib.sha256()
+    if previous_hash:
+        digest.update(previous_hash.encode("utf-8"))
+    digest.update(payload.encode("utf-8"))
+    return digest.hexdigest()
+
+
+def _sign_payload(payload: str, key: bytes) -> str:
+    signature = hmac.new(key, payload.encode("utf-8"), digestmod="sha256").digest()
+    return base64.b64encode(signature).decode("utf-8")
+
+
+def _iter_log(path: Path) -> Iterator[Mapping[str, object]]:
+    if not path.exists():
+        return iter(())
+    with path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            yield json.loads(line)
 
 
 class ConsentRegistry:
-    """Manage consent lifecycle and audit logging."""
+    """Central registry that records and validates consent grants."""
 
-    _default_lock = threading.Lock()
     _default_registry: "ConsentRegistry" | None = None
+    _default_lock = RLock()
 
-    def __init__(self, log_path: Path | None = None) -> None:
-        env_path = os.environ.get("PRISM_CONSENT_LOG")
-        base_path = (
-            Path(log_path)
-            if log_path is not None
-            else Path(env_path)
-            if env_path
-            else Path(__file__).resolve().parent / "consent.jsonl"
-        )
-        self.log_path = base_path
+    def __init__(self, log_path: Path | str | None = None) -> None:
+        resolved_path = log_path or os.environ.get("PRISM_CONSENT_LOG", DEFAULT_CONSENT_LOG_PATH)
+        self.log_path = Path(resolved_path)
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
-        self._requests: dict[str, ConsentRequest] = {}
-        self._grants: dict[str, ConsentGrant] = {}
-        self._lock = threading.RLock()
+        self._lock = RLock()
+        self._requests: Dict[str, ConsentRequest] = {}
+        self._grants: Dict[str, ConsentGrant] = {}
         self._load()
+        with ConsentRegistry._default_lock:
+            ConsentRegistry._default_registry = self
 
+    # ------------------------------------------------------------------
+    # Global registry helpers
+    # ------------------------------------------------------------------
     @classmethod
     def get_default(cls) -> "ConsentRegistry":
         with cls._default_lock:
             if cls._default_registry is None:
-                cls._default_registry = cls()
+                cls._default_registry = ConsentRegistry()
             return cls._default_registry
 
     @classmethod
@@ -672,41 +356,30 @@ class ConsentRegistry:
         with cls._default_lock:
             cls._default_registry = None
 
-    def request_consent(
-        self,
-        *,
-        from_agent: str,
-        to_agent: str,
-        consent_type: str,
-        purpose: str,
-        duration: str | timedelta | None = None,
-        scope: str | Sequence[str] | None = None,
-    ) -> str:
+    # ------------------------------------------------------------------
+    # Request lifecycle
+    # ------------------------------------------------------------------
+    def request_consent(self, request: ConsentRequest | None = None, /, **kwargs) -> str:
+        if request is None:
+            if not kwargs:
+                raise TypeError("request details required")
+            request = ConsentRequest(**kwargs)
+        elif kwargs:
+            raise TypeError("unexpected keyword arguments for ConsentRequest")
         with self._lock:
-            request_id = f"req_{uuid.uuid4().hex}"[:16]
-            request = ConsentRequest(
-                request_id=request_id,
-                from_agent=from_agent,
-                to_agent=to_agent,
-                consent_type=consent_type,
-                purpose=purpose,
-                duration=_parse_duration(duration) if duration else None,
-                scope=_normalise_scope(scope),
-            )
             self._requests[request.request_id] = request
             self._append_log({"type": "request", "request": request.to_dict()})
             return request.request_id
 
     def get_request(self, request_id: str) -> ConsentRequest:
-        with self._lock:
-            try:
-                return self._requests[request_id]
-            except KeyError as exc:  # pragma: no cover - defensive guard
-                raise ConsentError(f"unknown consent request '{request_id}'") from exc
+        try:
+            return self._requests[request_id]
+        except KeyError as exc:  # pragma: no cover - defensive
+            raise ConsentError(f"unknown consent request '{request_id}'") from exc
 
     def grant_consent(
         self,
-        request_id: str,
+        grant: ConsentGrant | str,
         *,
         conditions: Iterable[str] | None = None,
         expires_in: str | timedelta | None = None,
@@ -714,155 +387,259 @@ class ConsentRegistry:
         revocable: bool = True,
     ) -> str:
         with self._lock:
-            try:
-                request = self._requests[request_id]
-            except KeyError as exc:
-                raise ConsentError(f"unknown consent request '{request_id}'") from exc
-
-            grant_id = f"grant_{uuid.uuid4().hex}"[:18]
-            expiry_candidate = expires_at or (
-                request.created_at + request.duration if request.duration else None
-            )
-            if expires_in is not None:
-                expiry_candidate = _utcnow() + _parse_duration(expires_in)
-            grant = ConsentGrant(
-                grant_id=grant_id,
-                request_id=request.request_id,
-                from_agent=request.from_agent,
-                to_agent=request.to_agent,
-                consent_type=request.consent_type,
-                scope=request.scope,
-                conditions=tuple(conditions or ()),
-                expires_at=expiry_candidate,
-                revocable=revocable,
-            )
-            self._grants[grant.grant_id] = grant
-            self._append_log({"type": "grant", "grant": grant.to_dict()})
-            return grant.grant_id
+            if isinstance(grant, ConsentGrant):
+                ready = grant
+            else:
+                request = self.get_request(grant)
+                expiry_candidate = expires_at
+                if expiry_candidate is None and request.duration is not None:
+                    expiry_candidate = request.created_at + request.duration
+                if expires_in is not None:
+                    expiry_candidate = _utcnow() + _parse_duration(expires_in)
+                ready = ConsentGrant(
+                    request_id=request.request_id,
+                    granted_by=request.to_agent,
+                    granted_to=request.from_agent,
+                    consent_type=request.consent_type,
+                    scope=request.scope,
+                    conditions=conditions or (),
+                    expires_at=expiry_candidate,
+                    revocable=revocable,
+                )
+            self._grants[ready.grant_id] = ready
+            self._append_log({"type": "grant", "grant": ready.to_dict()})
+            return ready.grant_id
 
     def get_grant(self, grant_id: str) -> ConsentGrant:
-        with self._lock:
-            try:
-                return self._grants[grant_id]
-            except KeyError as exc:  # pragma: no cover - defensive guard
-                raise ConsentError(f"unknown consent grant '{grant_id}'") from exc
+        try:
+            return self._grants[grant_id]
+        except KeyError as exc:  # pragma: no cover - defensive
+            raise ConsentError(f"unknown consent grant '{grant_id}'") from exc
 
     def revoke_consent(
-        self, grant_id: str, *, reason: str | None = None, revoked_at: datetime | None = None
+        self,
+        grant_id: str,
+        revoked_by: str | None = None,
+        *,
+        reason: str | None = None,
+        revoked_at: datetime | None = None,
     ) -> None:
         with self._lock:
-            try:
-                grant = self._grants[grant_id]
-            except KeyError as exc:
-                raise ConsentError(f"unknown consent grant '{grant_id}'") from exc
+            grant = self.get_grant(grant_id)
+            actor = revoked_by or grant.granted_to
+            if actor not in (grant.granted_by, grant.granted_to):
+                raise PermissionError("Only participating agents may revoke consent")
             if not grant.can_revoke():
                 raise ConsentError(f"grant '{grant_id}' cannot be revoked")
             grant.revoked_at = _ensure_utc(revoked_at) or _utcnow()
+            grant.revoked_by = actor
             grant.revocation_reason = reason
             self._append_log(
                 {
-                    "type": "revoke",
-                    "grant_id": grant_id,
-                    "revoked_at": grant.revoked_at.isoformat(),
-                    "reason": reason,
-                    "signature": _ps_shainfty(
-                        _serialise_payload(
-                            {
-                                "grant_id": grant_id,
-                                "revoked_at": grant.revoked_at.isoformat(),
-                                "reason": reason,
-                            }
-                        )
-                    ),
+                    "type": "revocation",
+                    "payload": {
+                        "grant_id": grant.grant_id,
+                        "revoked_by": actor,
+                        "revoked_at": grant.revoked_at.isoformat(),
+                        "reason": reason,
+                    },
                 }
             )
 
-    def check_consent(
+    # ------------------------------------------------------------------
+    # Consent enforcement
+    # ------------------------------------------------------------------
+    def _find_matching_grant(
         self,
-        *,
         from_agent: str,
         to_agent: str,
-        consent_type: str,
-        scope: str | Sequence[str] | None = None,
-    ) -> ConsentGrant:
+        consent_type: str | ConsentType,
+        scope: Sequence[str] | None,
+    ) -> ConsentGrant | None:
         required_scope = _normalise_scope(scope)
-        with self._lock:
+        if isinstance(consent_type, ConsentType):
+            consent_label = consent_type.value
+        else:
+            consent_label = str(consent_type)
+        implicit_scopes = {consent_label, "memory", "handoff"}
+        filtered_scope = tuple(item for item in required_scope if item not in implicit_scopes)
+        candidate_types: tuple[str | ConsentType, ...]
+        if consent_label in {ConsentType.DATA_ACCESS.value, ConsentType.COLLABORATION.value}:
+            candidate_types = (consent_type, ConsentType.TASK_ASSIGNMENT.value)
+        else:
+            candidate_types = (consent_type,)
+        for candidate in candidate_types:
             for grant in self._grants.values():
-                if not grant.matches(from_agent, to_agent, consent_type):
+                if not grant.matches(from_agent, to_agent, candidate):
                     continue
-                if not grant.scope_includes(required_scope):
+                if not grant.scope_includes(filtered_scope):
                     continue
                 if grant.is_valid():
                     return grant
-            raise ConsentError(
-                "missing valid consent: "
-                f"from={from_agent} to={to_agent} type={consent_type} scope={required_scope}"
-            )
+        return None
 
+    def check_consent(self, *args, **kwargs):
+        legacy_actor = kwargs.pop("actor", None)
+        legacy_target = kwargs.pop("target", None)
+        if args or legacy_actor or legacy_target:
+            if args:
+                actor = args[0]
+                consent_type = args[1]
+                target = args[2]
+                scope = args[3] if len(args) > 3 else kwargs.get("scope")
+            else:
+                actor = legacy_actor
+                consent_type = kwargs.get("consent_type")
+                target = legacy_target
+                scope = kwargs.get("scope")
+            if actor is None or target is None or consent_type is None:
+                raise TypeError("actor, target, and consent_type are required")
+            with self._lock:
+                return (
+                    self._find_matching_grant(actor, target, consent_type, scope) is not None
+                )
+        from_agent = kwargs.get("from_agent")
+        to_agent = kwargs.get("to_agent")
+        consent_type = kwargs.get("consent_type")
+        scope = kwargs.get("scope")
+        if not (from_agent and to_agent and consent_type):
+            raise TypeError("from_agent, to_agent and consent_type are required")
+        with self._lock:
+            grant = self._find_matching_grant(from_agent, to_agent, consent_type, scope)
+            if grant is None:
+                raise ConsentError(
+                    "missing valid consent: "
+                    f"from={from_agent} to={to_agent} type={consent_type} scope={_normalise_scope(scope)}"
+                )
+            return grant
+
+    # ------------------------------------------------------------------
+    # Audit helpers
+    # ------------------------------------------------------------------
     def audit(self, agent: str | None = None) -> list[dict[str, object]]:
         entries: list[dict[str, object]] = []
         for entry in self._iter_log():
             if agent is None:
                 entries.append(entry)
                 continue
-            if entry["type"] == "request":
-                payload = entry["request"]
-                if agent in {payload["from_agent"], payload["to_agent"]}:
-                    entries.append(entry)
-            elif entry["type"] == "grant":
-                payload = entry["grant"]
-                if agent in {payload["from_agent"], payload["to_agent"]}:
-                    entries.append(entry)
-            elif entry["type"] == "revoke":
-                grant_payload = self._grants.get(entry.get("grant_id", ""))
-                if grant_payload and agent in {grant_payload.from_agent, grant_payload.to_agent}:
+            payload = entry.get("payload", entry)
+            if entry.get("type") == "request":
+                request = payload.get("request") or payload
+                if agent in {request.get("from_agent"), request.get("to_agent")}:
+                    normalised = dict(entry)
+                    normalised.setdefault("request", request)
+                    entries.append(normalised)
+            elif entry.get("type") == "grant":
+                grant = payload.get("grant") or payload
+                from_agent = grant.get("from_agent") or grant.get("granted_to")
+                to_agent = grant.get("to_agent") or grant.get("granted_by")
+                if agent in {from_agent, to_agent}:
+                    normalised = dict(entry)
+                    grant_payload = dict(grant)
+                    grant_payload.setdefault("from_agent", from_agent)
+                    grant_payload.setdefault("to_agent", to_agent)
+                    normalised["grant"] = grant_payload
+                    entries.append(normalised)
+            elif entry.get("type") == "revocation":
+                grant = self._grants.get(payload.get("grant_id", ""))
+                if grant and agent in {grant.granted_by, grant.granted_to}:
                     entries.append(entry)
         return entries
 
+    # ------------------------------------------------------------------
+    # Persistence helpers
+    # ------------------------------------------------------------------
     def _load(self) -> None:
         if not self.log_path.exists():
             return
         for entry in self._iter_log():
-            entry_type = entry["type"]
-            if entry_type == "request":
-                request = ConsentRequest.from_dict(entry["request"])
+            kind = entry.get("type")
+            payload = entry.get("payload", entry)
+            if kind == "request":
+                request_payload = payload.get("request", payload)
+                request = ConsentRequest.from_dict(request_payload)
                 self._requests[request.request_id] = request
-            elif entry_type == "grant":
-                grant = ConsentGrant.from_dict(entry["grant"])
+            elif kind == "grant":
+                grant_payload = payload.get("grant", payload)
+                grant = ConsentGrant.from_dict(grant_payload)
                 self._grants[grant.grant_id] = grant
-            elif entry_type == "revoke":
-                grant = self._grants.get(entry.get("grant_id", ""))
+            elif kind == "revocation":
+                grant_id = payload.get("grant_id")
+                grant = self._grants.get(str(grant_id))
                 if grant:
-                    grant.revoked_at = _ensure_utc(
-                        datetime.fromisoformat(str(entry["revoked_at"]))
-                    )
-                    grant.revocation_reason = entry.get("reason")
+                    revoked_at = payload.get("revoked_at")
+                    if isinstance(revoked_at, str):
+                        grant.revoked_at = datetime.fromisoformat(revoked_at)
+                    elif isinstance(revoked_at, datetime):
+                        grant.revoked_at = _ensure_utc(revoked_at)
+                    grant.revoked_by = payload.get("revoked_by")
+                    grant.revocation_reason = payload.get("reason")
 
-    def _iter_log(self) -> Iterable[dict[str, object]]:
+    def _iter_log(self) -> Iterable[Mapping[str, object]]:
         if not self.log_path.exists():
             return []
+        signing_key = _load_signing_key()
+        expected_previous_hash: str | None = None
         with self.log_path.open("r", encoding="utf-8") as handle:
-            for line in handle:
-                if not line.strip():
+            for line_number, raw_line in enumerate(handle, 1):
+                line = raw_line.strip()
+                if not line:
                     continue
-                entry = json.loads(line)
-                payload = {k: v for k, v in entry.items() if k != "entry_signature"}
-                signature = entry.get("entry_signature")
-                expected = _ps_shainfty(_serialise_payload(payload))
-                if signature != expected:
-                    raise ConsentError("consent log entry signature verification failed")
-                yield payload
+                try:
+                    entry = json.loads(line)
+                except json.JSONDecodeError as exc:  # pragma: no cover - defensive
+                    raise ConsentError(
+                        f"corrupted consent log entry at line {line_number}: invalid JSON"
+                    ) from exc
+                payload = {
+                    key: value
+                    for key, value in entry.items()
+                    if key not in {"timestamp", "previous_hash", "hash", "signature"}
+                }
+                payload_json = json.dumps(payload, sort_keys=True)
+                entry_previous_hash = entry.get("previous_hash")
+                if entry_previous_hash != expected_previous_hash:
+                    raise ConsentError(
+                        f"tampered consent log at line {line_number}: previous hash mismatch"
+                    )
+                entry_hash = entry.get("hash")
+                if not isinstance(entry_hash, str):
+                    raise ConsentError(
+                        f"tampered consent log at line {line_number}: missing hash"
+                    )
+                expected_hash = _hash_payload(payload_json, entry_previous_hash)
+                if entry_hash != expected_hash:
+                    raise ConsentError(
+                        f"tampered consent log at line {line_number}: hash mismatch"
+                    )
+                signature = entry.get("signature")
+                if not isinstance(signature, str):
+                    raise ConsentError(
+                        f"tampered consent log at line {line_number}: missing signature"
+                    )
+                expected_signature = _sign_payload(payload_json, signing_key)
+                if not hmac.compare_digest(signature, expected_signature):
+                    raise ConsentError(
+                        f"tampered consent log at line {line_number}: signature mismatch"
+                    )
+                expected_previous_hash = entry_hash
+                yield entry
 
     def _append_log(self, payload: Mapping[str, object]) -> None:
-        entry = dict(payload)
-        entry["entry_signature"] = _ps_shainfty(_serialise_payload(payload))
+        previous_entry: Mapping[str, object] | None = None
+        for previous_entry in _iter_log(self.log_path):
+            pass
+        previous_hash = previous_entry.get("hash") if previous_entry else None
+        body_json = json.dumps(payload, sort_keys=True)
+        record = {
+            **payload,
+            "timestamp": _utcnow().isoformat(),
+            "previous_hash": previous_hash,
+            "hash": _hash_payload(body_json, previous_hash),
+            "signature": _sign_payload(body_json, _load_signing_key()),
+        }
         with self.log_path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(entry) + "\n")
+            handle.write(json.dumps(record) + "\n")
 
 
-__all__ = [
-    "ConsentRegistry",
-    "ConsentRequest",
-    "ConsentGrant",
-]
-
+__all__ = ["ConsentRegistry", "ConsentRequest", "ConsentGrant", "ConsentType"]

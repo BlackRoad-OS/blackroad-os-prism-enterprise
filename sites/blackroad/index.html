@@ -928,6 +928,23 @@ footer{
     <div class="gradient-orb orb-3"></div>
     <div class="grid-overlay"></div>
   </div>
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container nav" id="nav">
+        <a href="#" class="brand" aria-label="BlackRoad.io Home">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>BlackRoad<span class="muted">.io</span></span>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#features">Features</a>
+          <a href="#docs">Docs</a>
+          <a href="#portal">Portal</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#subscribe-section">Subscribe</a>
+        </nav>
 
   <!-- Header -->
   <header class="header">
@@ -1331,6 +1348,23 @@ const client = <span class="text-brand-blue">new</span> Client({
             <div>
               <h2 class="text-2xl font-semibold text-white">Simple, transparent options</h2>
               <p class="text-sm text-slate-400">Every plan includes multi-agent ops, RoadView, and wallet infrastructure.</p>
+              <ul style="margin: 0; padding-left: 1.25rem; display: grid; gap: var(--s-3); color: var(--text-2)">
+                <li>Spin up collaborative IDEs, notebooks, and agent orchestration pipelines.</li>
+                <li>Stream high-fidelity Unity scenes and physics sims directly in the portal.</li>
+                <li>Bridge production deployments with API, terminal, and canvas interfaces.</li>
+              </ul>
+              <div style="display: flex; gap: var(--s-4); flex-wrap: wrap">
+                <a
+                  class="btn btn-primary"
+                  href="https://blackroad.io"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Launch blackroad.io
+                </a>
+                <a class="btn btn-secondary" href="/portal.html">View co-coding portal map</a>
+                <a class="btn btn-secondary" href="/scenes">Browse simulation catalog</a>
+              </div>
             </div>
             <span class="rounded-full border border-white/10 px-3 py-1 text-xs uppercase tracking-wide text-slate-300">Monthly &amp; annual pricing</span>
           </div>
@@ -1517,4 +1551,52 @@ const client = <span class="text-brand-blue">new</span> Client({
     </div>
   </footer>
 </body>
+    </footer>
+
+    <div id="root"></div>
+    <script>
+      // Mobile nav toggle
+      (function () {
+        const nav = document.getElementById('nav');
+        const toggle = document.querySelector('[data-nav-toggle]');
+        if (toggle) {
+          toggle.addEventListener('click', function () {
+            const open = nav.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', String(open));
+          });
+        }
+        // Year
+        document.getElementById('year').textContent = new Date().getFullYear();
+      })();
+    </script>
+    <script>
+      const routes = {
+        '/': 'Welcome to BlackRoad.io — site is LIVE via GitHub Pages.',
+        '/login': 'Login placeholder (static).',
+        '/chat': 'Chat placeholder (local-only LLM to be wired later).',
+        '/memories': 'Memories placeholder.',
+        '/coding': 'Coding portal placeholder.',
+        '/backend': 'Backend portal placeholder.'
+      };
+
+      function route() {
+        const path = location.pathname.replace(/\/+$/, '') || '/';
+        const view = document.getElementById('view');
+        if (view) view.textContent = routes[path] || '404 — routed to SPA root. Use header links.';
+      }
+      window.addEventListener('popstate', route);
+
+      document.addEventListener('DOMContentLoaded', () => {
+        route();
+        const form = document.getElementById('subscribe-form');
+        if (!form) return;
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const msgEl = document.getElementById('sub-msg');
+          msgEl.textContent = 'Subscribe temporarily offline';
+          form.reset();
+        });
+      });
+    </script>
+  </body>
 </html>

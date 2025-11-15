@@ -36,11 +36,45 @@ _BASE_CONSENT_SCOPES = {"outline:read", "outline:write"}
 DEFAULT_CONSENT_SCOPES = frozenset(
     _BASE_CONSENT_SCOPES.union(_OPERATION_SCOPE_MAP.values())
 )
+"""Simple auto novel agent example with game creation abilities."""
+"""Simple auto novel agent example with game creation abilities.
+
+This module defines :class:`AutoNovelAgent`, a minimal agent capable of
+deploying itself, creating weapon‑free games, and now generating tiny novels
+for demonstration purposes.
+"""Simple auto novel agent example with game creation abilities.
+
+This module defines :class:`AutoNovelAgent`, a tiny demonstration agent that can
+deploy itself, create weapon‑free games in supported engines, and draft novel
+outlines.
+"""
+
+from dataclasses import dataclass
+from datetime import datetime
+from typing import ClassVar
+
+
+@dataclass(frozen=True, slots=True)
+class GameRecord:
+    """Record describing a game created by :class:`AutoNovelAgent`."""
+
+    engine: str
+    created_at: datetime
+    message: str
+from dataclasses import dataclass, field
+from typing import Final, List
+
+
+DEFAULT_SUPPORTED_ENGINES: Final[tuple[str, ...]] = ("unity", "unreal")
+from typing import ClassVar
 
 
 @dataclass
 class AutoNovelAgent:
     """A small agent that can build games and craft stories."""
+    """A toy agent that can deploy itself, create simple games, and write novels."""
+    """A toy agent that can deploy itself and create simple games or stories."""
+    """A toy agent that can deploy itself, create simple games and novels."""
 
     name: str = "AutoNovelAgent"
     gamma: float = 1.0
@@ -54,6 +88,8 @@ class AutoNovelAgent:
         )
     )
     _created_games: list[str] = field(default_factory=list, init=False, repr=False)
+    SUPPORTED_ENGINES: ClassVar[set[str]] = {"unity", "unreal"}
+    games: list[GameRecord] = field(default_factory=list)
 
     SAMPLE_SNIPPETS: ClassVar[dict[str, str]] = {
         "python": "def solve():\n    # TODO: Implement addition\n    pass\n",
@@ -68,6 +104,9 @@ class AutoNovelAgent:
     }
     OPERATION_SCOPE_MAP: ClassVar[dict[str, str]] = dict(_OPERATION_SCOPE_MAP)
     LEAST_PRIVILEGE_SCOPES: ClassVar[set[str]] = set(DEFAULT_CONSENT_SCOPES)
+    supported_engines: set[str] = field(
+        default_factory=lambda: set(DEFAULT_SUPPORTED_ENGINES)
+    )
 
     def __post_init__(self) -> None:
         if self.gamma <= 0:
@@ -116,6 +155,10 @@ class AutoNovelAgent:
         """Return a sorted snapshot of supported engines."""
 
         return sorted(self.supported_engines)
+        Args:
+            engine: Name of the engine to verify.
+        """
+        return engine.lower() in self.supported_engines
 
     def add_supported_engine(self, engine: str) -> None:
         """Register a new game engine."""
@@ -125,6 +168,26 @@ class AutoNovelAgent:
 
     def remove_supported_engine(self, engine: str) -> None:
         """Remove an engine from the supported set."""
+        Args:
+            engine: Name of the engine to add.
+        """
+        self.supported_engines.add(engine.lower())
+
+    def remove_supported_engine(self, engine: str) -> None:
+        """Remove an engine from the supported list.
+
+        Engines are matched in a case-insensitive manner.
+
+        Args:
+            engine: Name of the engine to remove.
+
+        Raises:
+            ValueError: If the engine is not currently supported.
+        """
+        normalized = engine.lower()
+        if normalized not in self.supported_engines:
+            raise ValueError(f"{engine} is not a supported engine.")
+        self.supported_engines.remove(normalized)
 
         self._require_scope("remove_supported_engine")
         normalized = self._normalize_engine(engine)
@@ -147,12 +210,33 @@ class AutoNovelAgent:
         self._require_scope("create_game")
         normalized = self._normalize_engine(engine)
         if normalized not in self.supported_engines:
+        Args:
+            engine: Game engine to use.
+            include_weapons: If True, raise a ``ValueError`` because weapons are not
+                allowed.
+        """
+        engine_lower = engine.lower()
+        if not self.supports_engine(engine_lower):
             supported = ", ".join(sorted(self.supported_engines))
             raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
+        if engine_lower not in self.SUPPORTED_ENGINES:
+            supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
+            raise ValueError(
+                f"Unsupported engine '{engine}'. Choose one of: {supported}."
+            )
         if include_weapons:
             raise ValueError("Weapons are not allowed in generated games.")
         message = f"Creating a {normalized.capitalize()} game without weapons..."
         self._created_games.append(normalized)
+        message = f"Creating a {engine_lower.capitalize()} game without weapons..."
+        print(message)
+        self.games.append(
+            GameRecord(
+                engine=engine_lower,
+                created_at=datetime.utcnow(),
+                message=message,
+            )
+        )
         return message
 
     def generate_story_series(
@@ -212,9 +296,117 @@ class AutoNovelAgent:
         title_clean = title.strip() or "Untitled"
         return [f"Chapter {index}: TBD" for index in range(1, chapters + 1)]
 
+    def generate_storyline(self, protagonist: str, setting: str) -> str:
+        """Generate a simple storyline for a given protagonist and setting.
+        """Remove a game engine if it is currently supported.
+
+        Args:
+            engine: Name of the engine to remove.
+        """
+        self.SUPPORTED_ENGINES.discard(engine.lower())
+
+    def list_supported_engines(self) -> list[str]:
+    def list_supported_engines(self) -> List[str]:
+    def list_supported_engines(self) -> list[str]:
+        """Return a list of supported game engines."""
+        return sorted(self.supported_engines)
+
+    def generate_story(self, theme: str, protagonist: str = "An adventurer") -> str:
+        """Generate a short themed story.
+
+        Args:
+            protagonist: Name of the main character.
+            setting: Location where the story takes place.
+
+        Returns:
+            A short storyline sentence.
+        """
+        return (
+            f"{protagonist} embarks on an adventure in {setting}, "
+            "discovering the true meaning of courage."
+            A short story string.
+
+        Raises:
+            ValueError: If ``theme`` is empty or only whitespace.
+            TypeError: If ``theme`` or ``protagonist`` are not strings.
+        """
+        if not isinstance(theme, str):
+            raise TypeError("Theme must be provided as a string.")
+        if not isinstance(protagonist, str):
+            raise TypeError("Protagonist must be provided as a string.")
+
+        normalized_theme = theme.strip()
+        if not normalized_theme:
+            raise ValueError("Theme must be a non-empty string.")
+        normalized_protagonist = protagonist.strip() or "An unnamed protagonist"
+        return (
+            f"{normalized_protagonist} set out on a {normalized_theme} journey, discovering "
+            f"wonders along the way."
+        )
+    def generate_novel(self, title: str, chapters: int = 1) -> List[str]:
+        """Generate a lightweight novel outline.
+
+        Args:
+            title: Title for the novel.
+            chapters: Number of chapters to create.
+
+        Returns:
+            A list of chapter strings forming the novel outline.
+        """
+        if chapters < 1:
+            raise ValueError("`chapters` must be at least 1")
+        outline = []
+        for i in range(1, chapters + 1):
+            outline.append(f"Chapter {i}: {title} — part {i}")
+        return outline
+    def list_created_games(self) -> list[GameRecord]:
+        """Return a copy of the games created by the agent."""
+        return list(self.games)
+
+    def write_novel(self, title: str, protagonist: str) -> str:
+        """Generate a minimal novel blurb.
+
+        Args:
+            title: Title of the story to generate.
+            protagonist: Main character of the story.
+
+        Returns:
+            A short string describing the novel.
+        """
+        return f"{title} is a thrilling tale about {protagonist}."
+
+    def generate_outline(self, topic: str, chapters: int = 3) -> List[str]:
+        """Generate a simple chapter outline for a novel topic.
+
+        Args:
+            topic: Main theme for the novel.
+            chapters: Number of chapters to produce. Must be positive.
+
+        Returns:
+            A list of chapter titles.
+
+        Raises:
+            ValueError: If ``chapters`` is less than 1.
+        """
+        if chapters < 1:
+            raise ValueError("chapters must be at least 1")
+        return [f"Chapter {i + 1}: {topic} Part {i + 1}" for i in range(chapters)]
+
 
 __all__ = [
     "AutoNovelAgent",
     "DEFAULT_CONSENT_SCOPES",
     "DEFAULT_SUPPORTED_ENGINES",
 ]
+if __name__ == "__main__":
+    agent = AutoNovelAgent()
+    agent.deploy()
+    agent.create_game("unity")
+    print(agent.generate_storyline("Ada", "a digital forest"))
+    for line in agent.generate_novel("The Journey", chapters=2):
+        print(line)
+    for record in agent.list_created_games():
+        print(record)
+    print(agent.write_novel("Journey", "Alice"))
+    for title in agent.generate_outline("Space Adventure", chapters=2):
+        print(title)

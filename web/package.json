@@ -1,0 +1,24 @@
+{
+  "name": "blackroad-websites",
+  "version": "1.0.0",
+  "description": "BlackRoad website ecosystem with retro-futuristic design",
+  "scripts": {
+    "serve": "python3 -m http.server 8080",
+    "dev": "python3 -m http.server 8080",
+    "start": "python3 -m http.server 8080"
+  },
+  "keywords": [
+    "blackroad",
+    "ai",
+    "quantum",
+    "design-system",
+    "retro-futuristic"
+  ],
+  "author": "BlackRoad Technologies, Inc.",
+  "license": "MIT",
+  "devDependencies": {},
+  "files": [
+    "*.html",
+    "assets/*"
+  ]
+}

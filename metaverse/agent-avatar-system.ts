@@ -7,6 +7,21 @@
 
 import { Vector3, Quaternion, Color } from 'three';
 
+const FALLBACK_MAX_CONCURRENT_AGENTS = 1200;
+
+const DEFAULT_MAX_CONCURRENT_AGENTS = (() => {
+  const parsed = Number(process.env.MAX_CONCURRENT_AGENTS);
+  if (Number.isFinite(parsed) && parsed > 0) {
+    return parsed;
+  }
+  return FALLBACK_MAX_CONCURRENT_AGENTS;
+})();
+
+export interface AgentAvatarManagerOptions {
+  maxConcurrentAgents?: number;
+  logger?: Pick<typeof console, 'log' | 'warn' | 'error'>;
+}
+
 // ==================== Types ====================
 
 export type ClusterId =
@@ -165,10 +180,25 @@ export class AgentAvatarManager {
   private avatars: Map<string, AgentAvatar> = new Map();
   private formations: Map<string, Set<string>> = new Map();
   private zoneAgentCounts: Map<string, number> = new Map();
-  private maxConcurrentAgents = 150;
+  private maxConcurrentAgents: number;
+  private logger: Pick<typeof console, 'log' | 'warn' | 'error'>;
 
-  constructor() {
+  constructor(options: AgentAvatarManagerOptions = {}) {
+    this.maxConcurrentAgents = options.maxConcurrentAgents ?? DEFAULT_MAX_CONCURRENT_AGENTS;
+    this.logger = options.logger ?? console;
     this.initializeZoneCounts();
+  }
+
+  setMaxConcurrentAgents(max: number): void {
+    if (!Number.isFinite(max) || max <= 0) {
+      throw new Error('maxConcurrentAgents must be a positive number');
+    }
+
+    if (max < this.avatars.size) {
+      throw new Error('Cannot set maxConcurrentAgents below current active agents');
+    }
+
+    this.maxConcurrentAgents = max;
   }
 
   private initializeZoneCounts(): void {
@@ -228,7 +258,7 @@ export class AgentAvatarManager {
     this.avatars.set(request.agentId, avatar);
     this.zoneAgentCounts.set(zone, (this.zoneAgentCounts.get(zone) || 0) + 1);
 
-    console.log(`[AgentAvatarManager] Spawned agent ${request.agentId} in zone ${zone}`);
+    this.logger.log(`[AgentAvatarManager] Spawned agent ${request.agentId} in zone ${zone}`);
     return avatar;
   }
 
@@ -256,7 +286,7 @@ export class AgentAvatarManager {
       this.zoneAgentCounts.set(newZone,
         (this.zoneAgentCounts.get(newZone) || 0) + 1);
       avatar.currentZone = newZone;
-      console.log(`[AgentAvatarManager] Agent ${agentId} moved to zone ${newZone}`);
+      this.logger.log(`[AgentAvatarManager] Agent ${agentId} moved to zone ${newZone}`);
     }
   }
 
@@ -278,7 +308,7 @@ export class AgentAvatarManager {
     }
 
     this.avatars.delete(agentId);
-    console.log(`[AgentAvatarManager] Despawned agent ${agentId}`);
+    this.logger.log(`[AgentAvatarManager] Despawned agent ${agentId}`);
   }
 
   /**
@@ -302,7 +332,7 @@ export class AgentAvatarManager {
     });
 
     this.formations.set(formationId, new Set(agentIds));
-    console.log(`[AgentAvatarManager] Created ${formationType} formation with ${agentIds.length} agents`);
+    this.logger.log(`[AgentAvatarManager] Created ${formationType} formation with ${agentIds.length} agents`);
 
     return formationId;
   }

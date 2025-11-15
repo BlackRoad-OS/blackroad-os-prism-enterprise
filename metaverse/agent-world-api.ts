@@ -9,19 +9,44 @@ import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer } from 'http';
 import jwt from 'jsonwebtoken';
+import path from 'path';
+import { readFile } from 'fs/promises';
 import {
   avatarManager,
-  AgentProfile,
   SpawnRequest,
   FormationType,
-  AgentTransform
+  AgentTransform,
+  ClusterId
 } from './agent-avatar-system';
+import {
+  getAgentRoster,
+  summarizeRoster,
+  toSpawnRequest
+} from './agent-roster';
 
 // ==================== Configuration ====================
 
+const DEFAULT_AUTO_SPAWN_LIMIT = 25;
+
 const CONFIG = {
-  port: process.env.METAVERSE_API_PORT || 8080,
-  wsPort: process.env.METAVERSE_WS_PORT || 8081,
+  port: parseInt(process.env.METAVERSE_API_PORT || '8080', 10),
+  wsPort: parseInt(process.env.METAVERSE_WS_PORT || '8081', 10),
+function numberFromEnv(value: string | undefined, fallback: number): number {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  if (Number.isFinite(parsed)) {
+    return parsed;
+  }
+
+  return fallback;
+}
+
+const CONFIG = {
+  port: numberFromEnv(process.env.METAVERSE_API_PORT, 8080),
+  wsPort: numberFromEnv(process.env.METAVERSE_WS_PORT, 8081),
   jwtSecret: process.env.JWT_SECRET || 'blackroad-prism-console-secret',
   jwtIssuer: 'blackroad-prism-console',
   tickRate: 30, // Hz for state sync
@@ -31,6 +56,146 @@ const CONFIG = {
     interact: { max: 50, window: 1000 }  // 50 per second
   }
 };
+
+type CovenantRegistryEntry = {
+  agent_id: string;
+  display_name?: string;
+  cluster?: string;
+  role?: string;
+  capabilities?: string[];
+  languageAbility?: AgentProfile['languageAbility'];
+  covenant?: {
+    tags?: string[];
+  };
+};
+
+type CovenantRegistry = {
+  entries?: CovenantRegistryEntry[];
+};
+
+const CLUSTER_ID_LOOKUP: readonly ClusterId[] = [
+  'athenaeum',
+  'lucidia',
+  'blackroad',
+  'eidos',
+  'mycelia',
+  'soma',
+  'aurum',
+  'aether',
+  'parallax',
+  'continuum'
+] as const;
+
+function isClusterId(value: string): value is ClusterId {
+  return (CLUSTER_ID_LOOKUP as readonly string[]).includes(value);
+}
+
+function normalizeClusterId(cluster?: string): ClusterId {
+  const normalized = cluster?.trim().toLowerCase();
+  if (normalized && isClusterId(normalized)) {
+    return normalized;
+  }
+  return 'continuum';
+}
+
+function deriveCapabilities(entry: CovenantRegistryEntry): string[] {
+  if (Array.isArray(entry.capabilities) && entry.capabilities.length > 0) {
+    return entry.capabilities;
+  }
+
+  if (Array.isArray(entry.covenant?.tags) && entry.covenant?.tags.length > 0) {
+    return entry.covenant.tags;
+  }
+
+  if (entry.role) {
+    return [entry.role];
+  }
+
+  return [];
+}
+
+function buildAgentProfile(entry: CovenantRegistryEntry): AgentProfile {
+  const displayName = entry.display_name?.trim() || entry.agent_id.replace(/[-_]/g, ' ');
+
+  return {
+    agentId: entry.agent_id,
+    clusterId: normalizeClusterId(entry.cluster),
+    name: displayName,
+    role: entry.role || 'Agent',
+    capabilities: deriveCapabilities(entry),
+    languageAbility: entry.languageAbility || 'core'
+  };
+}
+
+async function loadCovenantRegistry(): Promise<CovenantRegistry> {
+  const customPath = process.env.COVENANT_REGISTRY_PATH;
+  const candidatePaths = [
+    customPath,
+    path.resolve(__dirname, '../agents/covenant_registry.json'),
+    path.resolve(__dirname, '../../agents/covenant_registry.json'),
+    path.resolve(process.cwd(), 'agents/covenant_registry.json')
+  ].filter(Boolean) as string[];
+
+  let lastError: unknown;
+  for (const candidate of candidatePaths) {
+    try {
+      const fileContents = await readFile(candidate, 'utf-8');
+      console.log(`[Metaverse API] Loaded covenant registry from ${candidate}`);
+      return JSON.parse(fileContents) as CovenantRegistry;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError ?? new Error('Unable to locate covenant registry file');
+}
+
+async function autoSpawnAgentsFromRegistry(entries: CovenantRegistryEntry[]): Promise<number> {
+  if (!Array.isArray(entries) || entries.length === 0) {
+    return 0;
+  }
+
+  const stats = avatarManager.getStats();
+  const totalCapacity = stats.maxConcurrentAgents;
+  let capacityRemaining = Math.max(totalCapacity - stats.totalAgents, 0);
+
+  if (capacityRemaining <= 0) {
+    console.warn('[Metaverse API] Cannot auto-spawn agents: capacity already reached');
+    return 0;
+  }
+
+  const spawnCandidates = entries.filter(entry => Boolean(entry.agent_id));
+
+  let spawned = 0;
+  for (const entry of spawnCandidates) {
+    if (capacityRemaining <= 0) {
+      break;
+    }
+
+    const spawnRequest: SpawnRequest = {
+      agentId: entry.agent_id,
+      profile: buildAgentProfile(entry)
+    };
+
+    try {
+      await avatarManager.spawnAgent(spawnRequest);
+      spawned += 1;
+      capacityRemaining -= 1;
+
+      if (spawned % 100 === 0) {
+        console.log(`[Metaverse API] Auto-spawned ${spawned} agents so far (${stats.totalAgents + spawned}/${totalCapacity})`);
+      }
+    } catch (err) {
+      console.warn(`[Metaverse API] Unable to auto-spawn agent ${entry.agent_id}: ${(err as Error).message}`);
+    }
+  }
+
+  if (capacityRemaining === 0 && spawned < spawnCandidates.length) {
+    console.warn('[Metaverse API] Auto-spawn halted after reaching max capacity. Increase MAX_CONCURRENT_AGENTS to bring more agents online.');
+  }
+
+  return spawned;
+}
 
 // ==================== Rate Limiting ====================
 
@@ -421,20 +586,50 @@ export async function integrateWithAgentSwarm() {
 
   console.log('[Metaverse API] Integrating with agent swarm...');
 
-  // Load agent profiles from covenant registry
   try {
+    const roster = getAgentRoster();
+    console.log(`[Metaverse API] ${summarizeRoster()}`);
     // Dynamic import to avoid circular dependencies
     const covenantRegistry = await import('../agents/covenant_registry.json');
 
-    console.log(`[Metaverse API] Found ${covenantRegistry.default.agents?.length || 0} agents in covenant registry`);
+    console.log(`[Metaverse API] Found ${(covenantRegistry.default as any).entries?.length || 0} agents in covenant registry`);
 
-    // Auto-spawn agents if configured
     if (process.env.AUTO_SPAWN_AGENTS === 'true') {
-      console.log('[Metaverse API] Auto-spawning agents...');
-      // Implementation for auto-spawning
+      const configuredLimit = Number(process.env.AUTO_SPAWN_LIMIT ?? DEFAULT_AUTO_SPAWN_LIMIT);
+      const normalizedLimit = Number.isFinite(configuredLimit) && configuredLimit > 0
+        ? Math.floor(configuredLimit)
+        : DEFAULT_AUTO_SPAWN_LIMIT;
+      const safeLimit = Math.min(normalizedLimit, roster.length);
+      let spawned = 0;
+
+      console.log(`[Metaverse API] Auto-spawning up to ${safeLimit} agents for metaverse warm-up...`);
+
+      for (const agent of roster.slice(0, safeLimit)) {
+        try {
+          await avatarManager.spawnAgent(toSpawnRequest(agent));
+          spawned += 1;
+        } catch (error) {
+          console.error(`[Metaverse API] Failed to auto-spawn ${agent.id}:`, error);
+        }
+      }
+
+      console.log(`[Metaverse API] Auto-spawned ${spawned} agent(s) into the metaverse.`);
+    const registry = await loadCovenantRegistry();
+    const entryCount = registry.entries?.length || 0;
+
+    console.log(`[Metaverse API] Found ${entryCount} agents in covenant registry`);
+
+    const shouldAutoSpawn = (process.env.AUTO_SPAWN_AGENTS || '').toLowerCase() === 'true';
+
+    if (shouldAutoSpawn && entryCount > 0) {
+      console.log('[Metaverse API] Auto-spawning covenant registry agents...');
+      const spawned = await autoSpawnAgentsFromRegistry(registry.entries || []);
+      console.log(`[Metaverse API] Auto-spawned ${spawned} agents into the metaverse`);
+    } else if (!shouldAutoSpawn) {
+      console.log('[Metaverse API] AUTO_SPAWN_AGENTS disabled; skipping auto-spawn.');
     }
   } catch (err) {
-    console.error('[Metaverse API] Could not load covenant registry:', err);
+    console.error('[Metaverse API] Could not load metaverse roster:', err);
   }
 }
 

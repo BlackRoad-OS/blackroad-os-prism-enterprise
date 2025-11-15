@@ -19,4 +19,23 @@ Attempts to restore the previous state using
 `/srv/blackroad-backups/rollback_latest.sh` when available, otherwise
 falls back to `git revert`.
 
+## merge_ready_prs.py
+Reads `merge_plan.json`, inspects each `state: open` entry via the GitHub
+API, and merges the pull request when it is clean, non-draft, and carries
+the required label (defaults to `ready-to-merge`).
+
+Usage:
+
+```bash
+export GITHUB_TOKEN=ghp_***
+python srv/ops/merge-queue/merge_ready_prs.py \
+  --repo blackroad-ai/blackroad-prism-console \
+  --method squash \
+  --label ready-to-merge
+```
+
+Flags such as `--dry-run`, `--max`, and `--skip-label-check` make it easy
+to preview the queue, land a subset, or temporarily bypass label
+requirements.
+
 _Last updated on 2025-09-11_

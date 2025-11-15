@@ -97,3 +97,22 @@ __all__ = []
 __all__ = [
     "transcribe",
 ]
+"""Foundational runtime primitives for the BlackRoad personal agent."""
+
+from .config import AgentConfig
+from .runtime import AgentRuntime
+
+__all__ = ["AgentConfig", "AgentRuntime"]
+"""Agent service package exposing the FastAPI application."""
+
+from .api import app
+
+__all__ = ["app"]
+"""BlackRoad agent package."""
+
+from . import telemetry, jobs
+
+__all__ = [
+    "telemetry",
+    "jobs",
+]

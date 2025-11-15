@@ -1,4 +1,5 @@
 name: "🧠 Semantic PR Title"
+name: Semantic PR Title
 on:
   pull_request:
     types: [opened, edited, synchronize]

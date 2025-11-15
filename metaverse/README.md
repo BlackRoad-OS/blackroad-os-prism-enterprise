@@ -24,12 +24,13 @@ The Earth Metaverse is a fully-featured 3D virtual environment where 100+ AI age
 - **Space stations** at various orbital heights
 
 ### 🤖 Agent Integration
-- **150 concurrent agents** max capacity
+- **1,200 concurrent agents** default capacity (tunable via `MAX_CONCURRENT_AGENTS`)
 - **10 agent clusters** with unique avatars and color schemes
 - **Geographic distribution** based on cluster preferences
 - **Real-time position updates** at 30 Hz
 - **Sacred formations**: DELTA, HALO, LATTICE, HUM, CAMPFIRE
 - **Avatar customization** per cluster
+- **Auto-spawn of 1,000+ covenant agents** when `AUTO_SPAWN_AGENTS=true`
 
 ### 📡 Real-Time Synchronization
 - **WebSocket server** for live updates
@@ -82,6 +83,19 @@ The API will be available at:
 ```bash
 npm run build
 ```
+
+### Agent roster sync
+
+Generate or refresh the consolidated 1,000-agent roster that powers the
+metaverse auto-spawn pipeline:
+
+```bash
+python tools/build_metaverse_roster.py
+```
+
+This writes `metaverse/data/agent_roster.json` with normalized metadata for the
+first 1,000 archetype expansions. The API layer consumes this file at runtime
+to pre-warm the metaverse and expose cluster-aware spawn hints.
 
 ### Production
 
@@ -216,7 +230,7 @@ Get metaverse statistics.
 ```json
 {
   "totalAgents": 45,
-  "maxConcurrentAgents": 150,
+  "maxConcurrentAgents": 1200,
   "activeFormations": 3,
   "zoneDistribution": {
     "north-america": 12,
@@ -306,6 +320,16 @@ Agents can organize into sacred formation patterns:
 - **HUM** - Tight cluster for synchronous work
 - **CAMPFIRE** - Circle facing inward for knowledge sharing
 
+## Covenant Registry Auto-Spawn
+
+Set `AUTO_SPAWN_AGENTS=true` to automatically stream every entry from `agents/covenant_registry.json` (1,000+ agents) into the metaverse at boot. The integration layer will:
+
+1. Load and validate the registry (you can override the file path via `COVENANT_REGISTRY_PATH`).
+2. Normalize cluster IDs, roles, and covenant metadata into fully-typed `AgentProfile` objects.
+3. Spawn agents in sequence, logging progress every 100 spawns until `MAX_CONCURRENT_AGENTS` is reached.
+
+Increase `MAX_CONCURRENT_AGENTS` if you want to visualize even more agents simultaneously.
+
 ## Performance Optimization
 
 ### Level of Detail (LOD)
@@ -319,10 +343,10 @@ Agents can organize into sacred formation patterns:
 - Agent instancing for distant avatars
 
 ### Quality Presets
-- **Ultra**: 4K shadows, 150 agents
-- **High**: 2K shadows, 100 agents
-- **Medium**: 1K shadows, 50 agents
-- **Low**: 512px shadows, 25 agents
+- **Ultra**: 4K shadows, 1,200 agents
+- **High**: 2K shadows, 800 agents
+- **Medium**: 1K shadows, 400 agents
+- **Low**: 512px shadows, 150 agents
 
 ## Monitoring
 
@@ -351,15 +375,18 @@ METAVERSE_WS_PORT=8081
 JWT_SECRET=your-secret-key
 
 # Features
-AUTO_SPAWN_AGENTS=false
+AUTO_SPAWN_AGENTS=false  # set to true to auto-load all covenant agents
 LOG_LEVEL=info
 
 # Performance
-MAX_CONCURRENT_AGENTS=150
+MAX_CONCURRENT_AGENTS=1200
 TICK_RATE=30
 
 # Database (optional)
 REDIS_URL=redis://localhost:6379
+
+# Overrides (optional)
+COVENANT_REGISTRY_PATH=/absolute/path/to/covenant_registry.json
 ```
 
 ## Contributing

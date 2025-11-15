@@ -12,3 +12,10 @@ spec:
           env:
             - name: LOG_LEVEL
               value: INFO
+          resources:
+            limits:
+              cpu: "750m"
+              memory: "768Mi"
+            requests:
+              cpu: "375m"
+              memory: "384Mi"

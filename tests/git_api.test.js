@@ -1,10 +1,14 @@
-process.env.SESSION_SECRET = 'test-secret';
+process.env.SESSION_SECRET = 'test-secret'; // pragma: allowlist secret
 process.env.INTERNAL_TOKEN = 'x';
 process.env.ALLOW_ORIGINS = 'https://example.com';
 process.env.GIT_REPO_PATH = process.cwd();
+process.env.MINT_PK = '0x' + '1'.repeat(64);
+process.env.CLAIMREG_ADDR = '0x' + '2'.repeat(40);
 
 const request = require('supertest');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
+// Shared helper that logs in and returns authentication cookies for requests.
+const { getAuthCookie } = require('./helpers/auth');
 
 describe('Git API', () => {
   afterAll((done) => {
@@ -14,11 +18,13 @@ describe('Git API', () => {
   it('returns git health info', async () => {
     const login = await request(app)
       .post('/api/login')
-      .send({ username: 'root', password: 'Codex2025' });
+      .send({ username: 'root', password: 'Codex2025' }); // pragma: allowlist secret
     const cookie = login.headers['set-cookie'];
+    const cookie = await getAuthCookie(app);
     const res = await request(app)
       .get('/api/git/health')
       .set('Cookie', cookie);
+    const res = await request(app).get('/api/git/health').set('Cookie', cookie);
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
     expect(typeof res.body.repoPath).toBe('string');
@@ -28,16 +34,30 @@ describe('Git API', () => {
   it('returns git status info', async () => {
     const login = await request(app)
       .post('/api/login')
-      .send({ username: 'root', password: 'Codex2025' });
+      .send({ username: 'root', password: 'Codex2025' }); // pragma: allowlist secret
     const cookie = login.headers['set-cookie'];
+    const cookie = await getAuthCookie(app);
     const res = await request(app)
       .get('/api/git/status')
       .set('Cookie', cookie);
+    const res = await request(app).get('/api/git/status').set('Cookie', cookie);
     expect(res.status).toBe(200);
+    expect(typeof res.body.ok).toBe('boolean');
+    expect(res.body.ok).toBe(!res.body.isDirty);
     expect(res.body.ok).toBe(true);
     expect(typeof res.body.branch).toBe('string');
     expect(typeof res.body.shortHash).toBe('string');
     expect(typeof res.body.ahead).toBe('number');
     expect(typeof res.body.behind).toBe('number');
+      .send({ username: 'root', password: 'Codex2025' });
+    const cookie = login.headers['set-cookie'];
+    const res = await request(app).get('/api/git/status').set('Cookie', cookie);
+    expect(res.status).toBe(200);
+    expect(typeof res.body.branch).toBe('string');
+    expect(res.body.counts).toBeDefined();
+    expect(res.body.counts).toHaveProperty('staged');
+    expect(res.body.counts).toHaveProperty('unstaged');
+    expect(res.body.counts).toHaveProperty('untracked');
+    expect(typeof res.body.isDirty).toBe('boolean');
   });
 });

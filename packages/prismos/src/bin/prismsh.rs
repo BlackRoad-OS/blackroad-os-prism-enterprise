@@ -27,7 +27,7 @@ fn main() {
         }
         Commands::Restart { agent } => {
             let mut a = Agent {
-                name: Box::leak(agent.into_boxed_str()),
+                name: agent,
                 state: AgentState::Stopped,
                 entrypoint: || {},
             };

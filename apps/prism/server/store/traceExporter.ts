@@ -1,4 +1,5 @@
 import { PrismSpan } from "../../packages/prism-core/src";
+import { getTraceRetentionConfig, TraceRetentionConfig } from "../config/retention";
 
 type TraceRecord = {
   traceId: string;
@@ -7,58 +8,216 @@ type TraceRecord = {
   endedAt?: string;
 };
 
+interface StoredTrace {
+  record: TraceRecord;
+  receivedAt: number; // timestamp in ms
+}
+
 type TraceTreeNode = PrismSpan & { durationMs?: number; children: TraceTreeNode[] };
 
 type TraceQuery = {
   limit?: number;
+  offset?: number;
+  traceId?: string;
+  startTimeAfter?: string; // ISO timestamp
+  startTimeBefore?: string; // ISO timestamp
+};
+
+type PaginatedResult<T> = {
+  data: T[];
+  total: number;
+  offset: number;
+  limit: number;
+  hasMore: boolean;
 };
 
 class InMemoryTraceExporter {
-  private traces = new Map<string, TraceRecord>();
+  private traces = new Map<string, StoredTrace>();
+  private pruneTimer: NodeJS.Timeout | null = null;
+  private config: TraceRetentionConfig;
+
+  constructor(config?: Partial<TraceRetentionConfig>) {
+    this.config = { ...getTraceRetentionConfig(), ...config };
+    this.startPruning();
+  }
+
+  private startPruning() {
+    if (this.config.maxAgeMs === 0 || this.config.pruneIntervalMs === 0) {
+      return; // Pruning disabled
+    }
+
+    this.pruneTimer = setInterval(() => {
+      this.pruneByAge();
+    }, this.config.pruneIntervalMs);
+
+    // Allow Node to exit even if timer is active
+    if (this.pruneTimer.unref) {
+      this.pruneTimer.unref();
+    }
+  }
+
+  private pruneByAge() {
+    if (this.config.maxAgeMs === 0) return;
+
+    const now = Date.now();
+    const cutoff = now - this.config.maxAgeMs;
+    const originalSize = this.traces.size;
+
+    for (const [traceId, stored] of this.traces.entries()) {
+      if (stored.receivedAt < cutoff) {
+        this.traces.delete(traceId);
+      }
+    }
+
+    const pruned = originalSize - this.traces.size;
+    if (pruned > 0) {
+      // Optional: emit metric or log
+      // console.log(`Pruned ${pruned} traces older than ${this.config.maxAgeMs}ms`);
+    }
+  }
+
+  private enforceMaxTraces() {
+    if (this.config.maxTraces === 0) return;
+
+    if (this.traces.size > this.config.maxTraces) {
+      // Sort by receivedAt and keep only the most recent
+      const sorted = Array.from(this.traces.entries()).sort(
+        (a, b) => a[1].receivedAt - b[1].receivedAt
+      );
+
+      const excess = this.traces.size - this.config.maxTraces;
+      for (let i = 0; i < excess; i++) {
+        this.traces.delete(sorted[i][0]);
+      }
+    }
+  }
 
   ingest(traceId: string, spans: PrismSpan[]): TraceRecord {
     const normalized = spans.map((span) => normalizeSpan(span));
     const existing = this.traces.get(traceId);
-    const merged = existing ? mergeSpans(existing.spans, normalized) : normalized;
+    const merged = existing ? mergeSpans(existing.record.spans, normalized) : normalized;
     const sorted = merged.slice().sort((a, b) => a.startTs.localeCompare(b.startTs));
     const startedAt = sorted[0]?.startTs ?? new Date().toISOString();
     const endedAt = sorted.reduce<string | undefined>((latest, span) => {
       if (!span.endTs) return latest;
       if (!latest || span.endTs > latest) return span.endTs;
       return latest;
-    }, existing?.endedAt);
+    }, existing?.record.endedAt);
     const record: TraceRecord = {
       traceId,
       spans: sorted,
       startedAt,
       endedAt,
     };
-    this.traces.set(traceId, record);
+
+    const stored: StoredTrace = {
+      record,
+      receivedAt: existing?.receivedAt ?? Date.now(),
+    };
+
+    this.traces.set(traceId, stored);
+    this.enforceMaxTraces();
     return cloneRecord(record);
   }
 
   list(query: TraceQuery = {}): TraceRecord[] {
-    const { limit } = query;
-    const records = Array.from(this.traces.values())
-      .slice()
-      .sort((a, b) => b.startedAt.localeCompare(a.startedAt))
-      .map(cloneRecord);
-    return typeof limit === "number" ? records.slice(0, limit) : records;
+    const { limit, offset = 0, traceId, startTimeAfter, startTimeBefore } = query;
+
+    let records = Array.from(this.traces.values()).map((stored) => stored.record);
+
+    // Apply filters
+    if (traceId) {
+      records = records.filter((r) => r.traceId === traceId);
+    }
+    if (startTimeAfter) {
+      records = records.filter((r) => r.startedAt >= startTimeAfter);
+    }
+    if (startTimeBefore) {
+      records = records.filter((r) => r.startedAt <= startTimeBefore);
+    }
+
+    // Sort by most recent first
+    records.sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+
+    // Apply pagination
+    const sliced = records.slice(offset, limit ? offset + limit : undefined);
+
+    return sliced.map(cloneRecord);
+  }
+
+  listPaginated(query: TraceQuery = {}): PaginatedResult<TraceRecord> {
+    const { limit = 20, offset = 0, traceId, startTimeAfter, startTimeBefore } = query;
+
+    let records = Array.from(this.traces.values()).map((stored) => stored.record);
+
+    // Apply filters
+    if (traceId) {
+      records = records.filter((r) => r.traceId === traceId);
+    }
+    if (startTimeAfter) {
+      records = records.filter((r) => r.startedAt >= startTimeAfter);
+    }
+    if (startTimeBefore) {
+      records = records.filter((r) => r.startedAt <= startTimeBefore);
+    }
+
+    // Sort by most recent first
+    records.sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+
+    const total = records.length;
+    const sliced = records.slice(offset, offset + limit);
+    const hasMore = offset + limit < total;
+
+    return {
+      data: sliced.map(cloneRecord),
+      total,
+      offset,
+      limit,
+      hasMore,
+    };
   }
 
   get(traceId: string): TraceRecord | undefined {
-    const record = this.traces.get(traceId);
-    return record ? cloneRecord(record) : undefined;
+    const stored = this.traces.get(traceId);
+    return stored ? cloneRecord(stored.record) : undefined;
   }
 
   toTree(traceId: string): TraceTreeNode[] {
-    const record = this.traces.get(traceId);
-    if (!record) return [];
-    return buildTree(record.spans).map(cloneNode);
+    const stored = this.traces.get(traceId);
+    if (!stored) return [];
+    return buildTree(stored.record.spans).map(cloneNode);
+  }
+
+  size(): number {
+    return this.traces.size;
   }
 
   reset() {
     this.traces.clear();
+  }
+
+  /**
+   * Manually trigger age-based pruning
+   */
+  prune() {
+    this.pruneByAge();
+  }
+
+  /**
+   * Get current retention configuration
+   */
+  getConfig(): Readonly<TraceRetentionConfig> {
+    return { ...this.config };
+  }
+
+  /**
+   * Stop pruning timer (useful for testing and cleanup)
+   */
+  destroy() {
+    if (this.pruneTimer) {
+      clearInterval(this.pruneTimer);
+      this.pruneTimer = null;
+    }
   }
 }
 

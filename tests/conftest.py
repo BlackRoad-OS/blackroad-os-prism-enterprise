@@ -5,8 +5,23 @@ from __future__ import annotations
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Sequence
+import sys
+
+from pathlib import Path
+import sys
 
 import pytest
+
+
+# Ensure project root is on sys.path when tests are executed directly via pytest or
+# when individual modules are invoked as scripts (e.g. ``python tests/...``).
+# This mirrors the behavior of installing the package but keeps the test suite
+# lightweight for local development and CI runs.
+# Ensure the project root is importable even when pytest is executed via the
+# Pyenv shim (which sets ``sys.path[0]`` to the interpreter bin directory).
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 if TYPE_CHECKING:  # pragma: no cover - import-time typing only
     from bots import build_registry as BuildRegistryFunc

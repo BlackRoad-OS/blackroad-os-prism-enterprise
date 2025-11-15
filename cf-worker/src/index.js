@@ -212,7 +212,7 @@ async function checkAdmin(req, env) {
   if (!sig) return false;
   return timingSafeEqual(sig, secret);
   const sig = req.headers.get('X-Admin-HMAC') || req.headers.get('x-admin-hmac');
-  const secret = env.ADMIN_HMAC || '';
-  return timingSafeEqual(sig || '', secret);
+  if (!sig) return false;
+  return timingSafeEqual(sig, secret);
 }
 function timingSafeEqual(a,b){ if (a.length !== b.length) return false; let out=0; for (let i=0;i<a.length;i++) out |= a.charCodeAt(i)^b.charCodeAt(i); return out===0; }

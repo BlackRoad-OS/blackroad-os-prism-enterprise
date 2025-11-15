@@ -192,6 +192,8 @@ def discover_target():
 
 __all__ = ["app"]
 from fastapi import FastAPI, HTTPException
+import os
+from fastapi import Depends, FastAPI, Header, HTTPException, status
 from pydantic import BaseModel
 import uvicorn
 from agent import telemetry, jobs
@@ -341,6 +343,8 @@ async def ws_flash(websocket: WebSocket) -> None:
     finally:
         await websocket.close()
 from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 
 from agent import models
 """FastAPI surface for agent utilities."""
@@ -355,6 +359,24 @@ from fastapi import FastAPI, File, UploadFile
 from agent import transcribe
 
 app = FastAPI(title="BlackRoad Agent API")
+
+_DASHBOARD_PATH = Path(__file__).resolve().parent.parent / "dashboard.html"
+
+
+def _load_dashboard() -> str:
+    """Load the dashboard HTML from disk."""
+
+    try:
+        return _DASHBOARD_PATH.read_text(encoding="utf-8")
+    except OSError as exc:  # pragma: no cover - protects startup failures
+        raise HTTPException(status_code=500, detail="dashboard unavailable") from exc
+
+
+@app.get("/", response_class=HTMLResponse)
+def dashboard() -> str:
+    """Serve the static dashboard UI."""
+
+    return _load_dashboard()
 
 
 @app.get("/models")
@@ -726,3 +748,117 @@ async def transcribe_audio(file: UploadFile = File(...)) -> dict[str, str]:
         tmp_path.unlink(missing_ok=True)
 
     return {"text": text}
+"""FastAPI endpoints for streaming local model tokens to the dashboard."""
+
+from __future__ import annotations
+
+import asyncio
+import contextlib
+
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.responses import JSONResponse
+
+from . import models
+
+app = FastAPI(title="BlackRoad Local Models")
+
+
+@app.get("/models")
+async def get_models() -> JSONResponse:
+    """Return the available local models."""
+
+    return JSONResponse({"models": models.list_local_models()})
+
+
+@app.websocket("/ws/model")
+async def ws_model(ws: WebSocket) -> None:
+    """Stream llama.cpp output over the websocket connection."""
+
+    await ws.accept()
+    try:
+        message = await ws.receive_json()
+        model = message.get("model")
+        prompt = message.get("prompt", "")
+        try:
+            n_predict = int(message.get("n", 128))
+        except (TypeError, ValueError):
+            n_predict = 128
+
+        if not model:
+            await ws.send_text("[error] model path missing")
+            await ws.send_text("[[BLACKROAD_MODEL_DONE]]")
+            return
+
+        loop = asyncio.get_running_loop()
+        done_event = asyncio.Event()
+
+        def stream_tokens() -> None:
+            try:
+                for token in models.run_llama_stream(
+                    model, prompt, n_predict=n_predict
+                ):
+                    send_future = asyncio.run_coroutine_threadsafe(
+                        ws.send_text(token), loop
+                    )
+                    try:
+                        send_future.result()
+                    except WebSocketDisconnect:
+                        break
+            except Exception as stream_exc:  # pragma: no cover - defensive in thread
+                asyncio.run_coroutine_threadsafe(
+                    ws.send_text(f"[error] {stream_exc}"), loop
+                ).result()
+            finally:
+                asyncio.run_coroutine_threadsafe(
+                    ws.send_text("[[BLACKROAD_MODEL_DONE]]"), loop
+                ).result()
+                loop.call_soon_threadsafe(done_event.set)
+
+        await asyncio.gather(asyncio.to_thread(stream_tokens), done_event.wait())
+    except WebSocketDisconnect:
+        return
+    except Exception as exc:  # pragma: no cover - defensive; websocket lifecycle
+        await ws.send_text(f"[error] {exc}")
+        await ws.send_text("[[BLACKROAD_MODEL_DONE]]")
+    finally:
+        with contextlib.suppress(RuntimeError):
+            await ws.close()
+JETSON_HOST = os.getenv("JETSON_HOST", "jetson.local")
+JETSON_USER = os.getenv("JETSON_USER", "jetson")
+AUTH_TOKEN = os.getenv("AGENT_AUTH_TOKEN")
+
+if not AUTH_TOKEN:
+    raise RuntimeError("AGENT_AUTH_TOKEN environment variable must be set for the API service")
+
+
+def require_bearer_token(authorization: str = Header(default="")):
+    scheme, _, token = authorization.partition(" ")
+    if scheme.lower() != "bearer" or token != AUTH_TOKEN:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+class JobRequest(BaseModel):
+    command: str
+
+
+@app.get("/status")
+def status(_: None = Depends(require_bearer_token)):
+    return {
+        "target": {"host": JETSON_HOST, "user": JETSON_USER},
+        "pi": telemetry.collect_local(),
+        "jetson": telemetry.collect_remote(JETSON_HOST, JETSON_USER),
+    }
+
+
+@app.post("/run")
+def run_job(req: JobRequest, _: None = Depends(require_bearer_token)):
+    jobs.run_remote(JETSON_HOST, req.command, JETSON_USER)
+    return {"ok": True, "command": req.command}
+
+
+def main():
+    uvicorn.run(app, host="0.0.0.0", port=8080)

@@ -23,6 +23,11 @@ jobs:
 
       - name: Configure bot git author
         run: |
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref }}
+      - run: |
           git config user.name  "${{ secrets.BOT_USER || 'blackroad-bot' }}"
           git config user.email "${{ secrets.BOT_USER || 'blackroad-bot' }}@users.noreply.github.com"
 
@@ -31,6 +36,7 @@ jobs:
         run: .github/tools/autoheal.sh
       - name: Push fixes (if any)
         if: steps.heal.outputs.committed == '1'
+      - if: steps.heal.outputs.committed == '1'
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |

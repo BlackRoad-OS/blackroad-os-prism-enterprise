@@ -163,7 +163,7 @@ async function pushAutosave(path){
   }
 }
 
-function detectLanguage(p){
+function detectLanguage(p) {
   if (p.endsWith('.ts')) return 'typescript';
   if (p.endsWith('.js')) return 'javascript';
   if (p.endsWith('.json')) return 'json';

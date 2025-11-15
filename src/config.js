@@ -1,4 +1,3 @@
-// FILE: /srv/blackroad-api/src/config.js
 'use strict';
 
 const path = require('path');

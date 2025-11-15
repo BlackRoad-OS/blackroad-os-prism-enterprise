@@ -11,9 +11,10 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 - ensures 3D toolkit registered
 
 ART_DIR = Path(__file__).resolve().parents[2] / "artifacts"
-ART_DIR.mkdir(parents=True, exist_ok=True)
+LEGACY_ART_DIR = Path(__file__).resolve().parents[2] / "modules" / "qlm_lab" / "artifacts"
 ROOT_ART_DIR = Path(__file__).resolve().parents[4] / "artifacts"
-ROOT_ART_DIR.mkdir(parents=True, exist_ok=True)
+for path in (ART_DIR, LEGACY_ART_DIR, ROOT_ART_DIR):
+    path.mkdir(parents=True, exist_ok=True)
 
 __all__ = ["hist", "bloch", "ascii_circuit"]
 
@@ -21,6 +22,19 @@ __all__ = ["hist", "bloch", "ascii_circuit"]
 def _prepare_path(fname: str) -> Path:
     ART_DIR.mkdir(parents=True, exist_ok=True)
     return ART_DIR / fname
+
+
+def _mirror_artifacts(path: Path) -> None:
+    """Copy ``path`` into the legacy and repo-level artifact directories."""
+
+    for target_dir in (LEGACY_ART_DIR, ROOT_ART_DIR):
+        if path.parent == target_dir:
+            continue
+        try:
+            target = target_dir / path.name
+            shutil.copy2(path, target)
+        except Exception:  # pragma: no cover - best effort mirroring
+            pass
 
 
 def hist(probs: Dict[str, float], fname: str = "hist.png") -> str:
@@ -35,11 +49,7 @@ def hist(probs: Dict[str, float], fname: str = "hist.png") -> str:
     plt.title("Distribution")
     fig.savefig(path, dpi=160, bbox_inches="tight")
     plt.close(fig)
-    root_path = ROOT_ART_DIR / fname
-    try:
-        shutil.copy2(path, root_path)
-    except Exception:  # pragma: no cover - best effort mirroring
-        pass
+    _mirror_artifacts(path)
     return str(path)
 
 
@@ -64,11 +74,7 @@ def bloch(point: Iterable[float], fname: str = "bloch_q0.png") -> str:
     ax.set_box_aspect([1, 1, 1])
     fig.savefig(path, dpi=160, bbox_inches="tight")
     plt.close(fig)
-    root_path = ROOT_ART_DIR / fname
-    try:
-        shutil.copy2(path, root_path)
-    except Exception:  # pragma: no cover - best effort mirroring
-        pass
+    _mirror_artifacts(path)
     return str(path)
 
 

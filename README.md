@@ -333,6 +333,7 @@ Comprehensive documentation available in `docs/`:
 - [SECURITY.md](./SECURITY.md) - Security practices
 - [AGENT_WORKBOARD.md](./AGENT_WORKBOARD.md) - Agent development
 - [README-OPS.md](./README-OPS.md) - Operations guide
+- [BLACKROAD_CORPORATE_ORG_V1.md](./docs/BLACKROAD_CORPORATE_ORG_V1.md) - Full corporate org structure
 
 ## License
 

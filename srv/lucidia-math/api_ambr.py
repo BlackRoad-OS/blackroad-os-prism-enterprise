@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import sys
 import uuid
@@ -182,8 +183,13 @@ class PhaseDerivativeRequest(BaseModel):
     auto_resolve: bool = Field(True, alias="auto_resolve")
 
 
-def _error(status_code: int, code: str, hint: str) -> None:
-    raise HTTPException(status_code=status_code, detail={"error_code": code, "hint": hint})
+def _error(
+    status_code: int, code: str, hint: str, *, fields: Optional[List[str]] = None
+) -> None:
+    detail: Dict[str, Any] = {"error_code": code, "hint": hint}
+    if fields:
+        detail["fields"] = fields
+    raise HTTPException(status_code=status_code, detail=detail)
 
 
 def _record_run(
@@ -607,35 +613,63 @@ async def transport_endpoint(body: TransportRequest) -> Dict[str, Any]:
 async def phase_derivative_endpoint(body: PhaseDerivativeRequest) -> Dict[str, Any]:
     payload = body.model_dump(by_alias=False, exclude_none=True)
     auto = bool(payload.pop("auto_resolve", True))
+    provided_fields = set(payload)
     context = SERVER_CONTEXT
     if auto:
         resolved, missing, why = resolve_coherence_inputs(ctx=context, **payload)
-        if missing:
+        invalid = sorted(name for name in missing if name in provided_fields)
+        if invalid:
             AMBR_ERRORS.labels(kind="dphi").inc()
             _error(
                 status.HTTP_422_UNPROCESSABLE_ENTITY,
-                "missing_parameters",
-                f"Unresolvable fields: {', '.join(sorted(missing))}",
+                "invalid_parameters",
+                f"Non-finite values for: {', '.join(invalid)}",
+                fields=[{"field": name, "reason": why.get(name, "non_finite")} for name in invalid],
             )
-        derivative = float(phase_derivative(**resolved))
-        context.last_phi_x = resolved["phi_x"]
-        context.last_phi_y = resolved["phi_y"]
+        derivative_inputs = {name: resolved[name] for name in STRICT_PHASE_FIELDS}
+        auto_non_finite = [key for key, value in derivative_inputs.items() if not math.isfinite(value)]
+        if auto_non_finite:
+            AMBR_ERRORS.labels(kind="dphi").inc()
+            sorted_non_finite = sorted(auto_non_finite)
+            _error(
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                "invalid_parameters",
+                f"Non-finite values for: {', '.join(sorted_non_finite)}",
+                fields=[{"field": name, "reason": "non_finite"} for name in sorted_non_finite],
+            )
+        derivative = float(phase_derivative(**derivative_inputs))
+        context.last_phi_x = derivative_inputs["phi_x"]
+        context.last_phi_y = derivative_inputs["phi_y"]
         AMBR_RUNS.labels(kind="dphi").inc()
+        filtered_why = {key: value for key, value in why.items() if key not in provided_fields}
         return {
             "dphi_dt": derivative,
-            "resolved": resolved,
-            "why": why,
+            "resolved": derivative_inputs,
+            "why": filtered_why,
             "mode": "auto",
+            "inferred": sorted(missing),
         }
     missing = [field for field in STRICT_PHASE_FIELDS if field not in payload]
     if missing:
         AMBR_ERRORS.labels(kind="dphi").inc()
+        sorted_missing = sorted(missing)
         _error(
             status.HTTP_422_UNPROCESSABLE_ENTITY,
             "missing_parameters",
-            f"Missing fields: {', '.join(sorted(missing))}",
+            f"Missing fields: {', '.join(sorted_missing)}",
+            fields=[{"field": name, "reason": "missing"} for name in sorted_missing],
         )
     resolved = {name: float(payload[name]) for name in STRICT_PHASE_FIELDS}
+    non_finite = [key for key, value in resolved.items() if not math.isfinite(value)]
+    if non_finite:
+        AMBR_ERRORS.labels(kind="dphi").inc()
+        sorted_invalid = sorted(non_finite)
+        _error(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "invalid_parameters",
+            f"Non-finite values for: {', '.join(sorted_invalid)}",
+            fields=[{"field": name, "reason": "non_finite"} for name in sorted_invalid],
+        )
     derivative = float(phase_derivative(**resolved))
     context.last_phi_x = resolved["phi_x"]
     context.last_phi_y = resolved["phi_y"]

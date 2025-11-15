@@ -107,6 +107,7 @@ function Tiling({tiles, scale0}){
             strokeLinecap="round"
           />
         );
+        return <polyline key={i} points={pts} fill="none" stroke="currentColor" strokeWidth="1.5"/>;
       })}
     </svg>
   );
