@@ -101,5 +101,7 @@ def parse_numeric_prefix(text: str) -> float:
     except Exception:  # noqa: BLE001 - literal_eval may raise ValueError, SyntaxError, RecursionError, MemoryError, etc.
         # Non-numeric, malformed, or pathological prefixes fall through to the
         # default below.
+    except (ValueError, SyntaxError):
+        # Raised when the leading segment isn't a valid Python literal
         pass
     return 1.0

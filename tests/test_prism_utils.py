@@ -34,6 +34,9 @@ def test_parse_numeric_prefix_valid():
     assert parse_numeric_prefix("-1.5e-2 extra") == -0.015
     assert parse_numeric_prefix(".5E+3 stuff") == 500.0
     assert parse_numeric_prefix("6.02E23 molecules") == 6.02e23
+    assert parse_numeric_prefix(" -7, stuff") == -7.0
+    assert parse_numeric_prefix("1e3") == 1000.0
+    assert parse_numeric_prefix(" 4 ") == 4.0
 
 
 def test_parse_numeric_prefix_invalid():
