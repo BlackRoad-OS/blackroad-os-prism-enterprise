@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import argparse
+import json
 import logging
 import subprocess
 from dataclasses import dataclass, field
@@ -39,6 +41,72 @@ class CleanupResult:
     local_deleted: bool
     remote_deleted: bool
     skipped: bool = False
+class CleanupSummary:
+    """Structured view of branch deletion results."""
+
+    results: Dict[str, bool]
+
+    def __post_init__(self) -> None:
+        # Ensure an immutable snapshot even if the original dict is mutated later.
+        object.__setattr__(self, "results", dict(self.results))
+
+    @property
+    def deleted(self) -> List[str]:
+        """Return branches successfully deleted locally and remotely."""
+
+        return [branch for branch, succeeded in self.results.items() if succeeded]
+
+    @property
+    def failed(self) -> List[str]:
+        """Return branches that failed to delete."""
+
+        return [branch for branch, succeeded in self.results.items() if not succeeded]
+
+    @property
+    def deleted_count(self) -> int:
+        """Number of branches removed."""
+
+        return len(self.deleted)
+
+    @property
+    def failed_count(self) -> int:
+        """Number of branches that could not be removed."""
+
+        return len(self.failed)
+
+    @property
+    def total(self) -> int:
+        """Total branches processed."""
+
+        return len(self.results)
+
+    def has_failures(self) -> bool:
+        """Return True when any branch failed to delete."""
+
+        return self.failed_count > 0
+
+    def exit_code(self) -> int:
+        """Return exit code reflecting whether any deletions failed."""
+
+        return 0 if not self.has_failures() else 1
+
+    def to_dict(self, include_results: bool = True) -> Dict[str, object]:
+        """Serialize the summary to a dictionary."""
+
+        # Work from a fresh snapshot so callers cannot mutate the internal state.
+        results_snapshot = dict(self.results)
+
+        payload: Dict[str, object] = {
+            "deleted": list(self.deleted),
+            "failed": list(self.failed),
+            "deleted_count": self.deleted_count,
+            "failed_count": self.failed_count,
+            "total": self.total,
+            "exit_code": self.exit_code(),
+        }
+        if include_results:
+            payload["results"] = results_snapshot
+        return payload
 
 
 @dataclass
@@ -96,6 +164,17 @@ class CleanupBot:
             LOGGER.error("Failed to list merged branches", exc_info=exc)
             raise RuntimeError("Could not list merged branches") from exc
 
+        Returns:
+            List of merged branch names excluding ``base`` and ``HEAD``.
+        """
+        result = subprocess.run(
+            ["git", "branch", "--merged", base],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        # Extract branch names from the command output while ignoring
+        # the base branch and "HEAD" references.
         branches: List[str] = []
         for line in result.stdout.splitlines():
             name = line.strip().lstrip("*").strip()
@@ -218,6 +297,23 @@ class CleanupBot:
         """Delete a local branch."""
 
         return self._run_git("branch", "-D", branch)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--base",
+        default="main",
+        help="Base branch to compare against",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show commands without executing them",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output a machine-readable JSON summary in addition to log messages",
+    )
+    args = parser.parse_args(argv)
 
     def _delete_remote_branch(self, branch: str) -> tuple[bool, str | None]:
         """Delete a remote branch from ``origin``."""
@@ -226,6 +322,32 @@ class CleanupBot:
 
     def cleanup(self) -> List[BranchCleanupResult]:
         """Remove the configured branches locally and remotely."""
+    bot = CleanupBot.from_merged(base=args.base, dry_run=args.dry_run)
+    results = bot.cleanup()
+
+    if not results:
+        logging.info("No merged branches to clean up.")
+        return 0
+
+    summary = CleanupSummary(results)
+
+    for branch in summary.deleted:
+        logging.info("%s: deleted", branch)
+
+    for branch in summary.failed:
+        logging.warning("%s: failed", branch)
+
+    logging.info(
+        "Summary: %d deleted, %d failed (total: %d)",
+        summary.deleted_count,
+        summary.failed_count,
+        summary.total,
+    )
+
+    if args.json:
+        print(json.dumps(summary.to_dict(), indent=2))
+
+    return summary.exit_code()
 
         results: List[BranchCleanupResult] = []
         for branch in self.branches:
