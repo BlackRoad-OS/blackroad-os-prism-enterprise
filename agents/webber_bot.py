@@ -31,6 +31,28 @@ class WebberBot:
 
     root_dir: str = field(default_factory=lambda: os.getcwd())
 
+    def _run_prettier(self, file_path: str) -> None:
+        """Run Prettier on ``file_path``, raising an error on failure."""
+        try:
+            subprocess.run(
+                ["prettier", "--write", file_path],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except FileNotFoundError as exc:
+            raise RuntimeError(
+                "Prettier executable not found. Ensure Prettier is installed and on PATH."
+            ) from exc
+        except subprocess.CalledProcessError as exc:
+            stderr = (exc.stderr or "").strip()
+            stdout = (exc.stdout or "").strip()
+            details = "\n".join(part for part in (stdout, stderr) if part)
+            message = f"Prettier failed for {file_path}"
+            if details:
+                message = f"{message}:\n{details}"
+            raise RuntimeError(message) from exc
+
     def format_html(self, file_path: str) -> None:
         """Format HTML file using Prettier (if installed)."""
         subprocess.run(["prettier", "--write", file_path], check=True)
@@ -42,6 +64,16 @@ class WebberBot:
     def format_js(self, file_path: str) -> None:
         """Format JS file using Prettier."""
         subprocess.run(["prettier", "--write", file_path], check=True)
+        """Format an HTML file using Prettier."""
+        self._run_prettier(file_path)
+
+    def format_css(self, file_path: str) -> None:
+        """Format a CSS file using Prettier."""
+        self._run_prettier(file_path)
+
+    def format_js(self, file_path: str) -> None:
+        """Format a JavaScript file using Prettier."""
+        self._run_prettier(file_path)
 
     def validate_json(self, file_path: str) -> bool:
         """Validate JSON file syntax."""
