@@ -30,12 +30,27 @@ if client is None:
 
 client, api_key = PRISM_APP["create_client"]()
 
+from prism_utils import parse_numeric_prefix
+
+"""Streamlit app for the BlackRoad Prism Generator with GPT and voice input."""
+
+st.set_page_config(layout="wide")
+st.title("BlackRoad Prism Generator with GPT + Voice Console")
+
+# Configure OpenAI client
+_api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=_api_key) if _api_key else None
+if client is None:
+    st.warning("OpenAI API key not set. Set OPENAI_API_KEY to enable responses.")
+
+
 st.set_page_config(**PRISM_APP["page_config"])
 st.title(PRISM_APP["metadata"]["title"])
 @st.cache_resource
 def get_whisper_model():
     """Load and cache the Whisper model so repeated runs stay responsive."""
 
+    """Load and cache the Whisper model."""
     return whisper.load_model("base")
 
 
@@ -60,6 +75,22 @@ if not api_key:
     st.warning("OpenAI API key not set; responses will be unavailable.")
 
 st.markdown(PRISM_APP["metadata"]["instructions"])
+    """Transcribe an uploaded audio file using Whisper."""
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(uploaded_file.read())
+        tmp_path = tmp.name
+    try:
+        model = get_whisper_model()
+        result = model.transcribe(tmp_path)
+    finally:
+        try:
+            os.remove(tmp_path)
+        except OSError:
+            pass
+    return result["text"]
+
+
+# Initialize chat history
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
         {
@@ -79,6 +110,7 @@ audio_file = st.file_uploader("Upload your voice (mp3 or wav)", type=["mp3", "wa
 user_input = ""
 if audio_file is not None:
     user_input = PRISM_APP["transcribe_audio"](audio_file)
+if audio_file is not None:
     user_input = transcribe_audio(audio_file)
     st.markdown(f"**You said:** {user_input}")
 else:
@@ -115,6 +147,7 @@ if user_input:
         plt.savefig(buf, format="png", bbox_inches="tight", pad_inches=0)
         buf.seek(0)
         st.image(buf, caption="Holographic projection based on your prompt")
+        st.image(buf)
         plt.close(fig)
 
 st.markdown("---")
