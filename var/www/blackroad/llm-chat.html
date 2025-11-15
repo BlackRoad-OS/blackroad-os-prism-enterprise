@@ -121,6 +121,8 @@ async function fallback(body,original){
       headers:{'content-type':'application/json'},
       body:JSON.stringify(payload)
     });
+    const fullBody={...body,stream:false};
+    const r=await fetch('/api/llm/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(fullBody)});
     const j=await r.json();
     addMessage('assistant',j.choices[0].message.content);
   }catch(e){addMessage('assistant',original);}

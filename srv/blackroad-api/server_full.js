@@ -21,6 +21,16 @@ const cookieSession = require('cookie-session');
 const { randomUUID } = require('crypto');
 const { body, validationResult } = require('express-validator');
 
+const { body, validationResult } = require('express-validator');
+const { createDatabase } = require('./lib/sqlite');
+const { Server: SocketIOServer } = require('socket.io');
+const { exec } = require('child_process');
+const { randomUUID } = require('crypto');
+const Stripe = require('stripe');
+const { verifyToken } = require('./lib/verify');
+const notify = require('./lib/notify');
+const logger = require('./lib/log');
+const attachLlmRoutes = require('./routes/admin_llm');
 const gitRouter = require('./routes/git');
 
 // Custom environment variable loader replaces the standard 'dotenv' package.
@@ -66,6 +76,24 @@ const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS.split(',')
   .filter(Boolean);
 const WEB_ROOT = process.env.WEB_ROOT || path.join(__dirname, '../../var/www/blackroad');
 const NODE_ENV = process.env.NODE_ENV || 'development';
+const safeAttach = (label, attachFn) => {
+  try {
+    attachFn();
+  } catch (err) {
+    console.warn(`[bootstrap] ${label} module disabled: ${err.message}`);
+  }
+};
+
+// --- App & server
+const app = express();
+require('./modules/jsonEnvelope')(app);
+require('./modules/requestGuard')(app);
+const server = http.createServer(app);
+const io = new SocketIOServer(server, {
+  path: '/socket.io',
+  serveClient: false,
+  cors: { origin: false }, // same-origin via Nginx
+});
 
 const app = express();
 app.set('trust proxy', 1);
@@ -119,6 +147,12 @@ function addJob(type, payload, runner) {
   next();
 });
 
+require('./modules/love_math')({ app });
+safeAttach('jobs', () => require('./modules/jobs')({ app }));
+safeAttach('memory', () => require('./modules/memory')({ app }));
+require('./modules/brain_chat')({ app });
+// --- Middleware
+app.disable('x-powered-by');
 app.use(helmet());
 app.use(
   helmet.hsts({
@@ -209,6 +243,17 @@ app.use(
 app.get('/health', (_req, res) => {
   res.json({ ok: true, service: 'blackroad-api', ts: new Date().toISOString() });
 });
+app.use((req, _res, next) => {
+  const bearer = req.get('authorization');
+  const headerToken =
+    req.get('x-internal-token') ||
+    (typeof bearer === 'string' ? bearer.replace(/^Bearer\s+/i, '') : '');
+  if (headerToken && verifyToken(headerToken, INTERNAL_TOKEN)) {
+    req.internal = true;
+  }
+  next();
+});
+
 // --- Homepage
 app.get('/', (_, res) => {
   res.sendFile(path.join(WEB_ROOT, 'index.html'));
@@ -223,6 +268,22 @@ app.get('/healthz', sendHealth);
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, service: 'blackroad-api', ts: new Date().toISOString() });
+// --- Health
+app.head('/api/health', (_, res) => res.status(200).end());
+app.get('/api/health', async (_req, res) => {
+  let llm = false;
+  try {
+    const r = await fetch('http://127.0.0.1:8000/health');
+    llm = r.ok;
+  } catch (err) {
+    logger.warn({ event: 'health_llm_check_failed', error: err.message });
+  }
+  res.json({
+    ok: true,
+    version: '1.0.0',
+    uptime: process.uptime(),
+    services: { api: true, llm },
+  });
 });
 
 function requireAuth(req, res, next) {
@@ -283,6 +344,31 @@ app.use((err, req, res, _next) => {
 });
 
 const server = http.createServer(app);
+  logger.info({
+    event: 'stripe_webhook_received',
+    type: event?.type || 'unknown',
+  });
+  res.json({ received: true });
+});
+
+// --- SQLite bootstrap
+const db = createDatabase(DB_PATH);
+db.pragma('journal_mode = WAL');
+db.pragma('synchronous = NORMAL');
+
+const TABLES = ['projects', 'agents', 'datasets', 'models', 'integrations'];
+for (const t of TABLES) {
+  db.prepare(
+    `
+    CREATE TABLE IF NOT EXISTS ${t} (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      meta JSON
+    )
+  `
+  ).run();
+}
 
 function start(port = PORT) {
   if (!server.listening) {
@@ -296,6 +382,325 @@ if (process.env.JEST_WORKER_ID) {
 } else if (require.main === module) {
   start();
 }
+function createRow(t, name, meta = null) {
+  const stmt = db.prepare(
+    `INSERT INTO ${t} (name, updated_at, meta) VALUES (?, datetime('now'), ?)`
+  );
+  const info = stmt.run(name, meta ? JSON.stringify(meta) : null);
+  return info.lastInsertRowid;
+}
+function updateRow(t, id, name, meta = null) {
+  const stmt = db.prepare(
+    `UPDATE ${t} SET name = COALESCE(?, name), meta = COALESCE(?, meta), updated_at = datetime('now') WHERE id = ?`
+  );
+  stmt.run(name ?? null, meta ? JSON.stringify(meta) : null, id);
+}
+function deleteRow(t, id) {
+  db.prepare(`DELETE FROM ${t} WHERE id = ?`).run(id);
+}
+function validKind(kind) {
+  return TABLES.includes(kind);
+}
+
+// --- CRUD routes (guard with auth once you’re ready)
+app.get('/api/:kind', requireAuth, (req, res) => {
+  const { kind } = req.params;
+  if (!validKind(kind)) return res.status(404).json({ error: 'unknown_kind' });
+  try {
+    res.json(listRows(kind));
+  } catch (e) {
+    res.status(500).json({ error: 'db_list_failed', detail: String(e) });
+  }
+});
+app.post('/api/:kind', requireAuth, (req, res) => {
+  const { kind } = req.params;
+  const { name, meta } = req.body || {};
+  if (!validKind(kind)) return res.status(404).json({ error: 'unknown_kind' });
+  if (!name) return res.status(400).json({ error: 'name_required' });
+  try {
+    const id = createRow(kind, name, meta);
+    res.json({ ok: true, id });
+  } catch (e) {
+    res.status(500).json({ error: 'db_create_failed', detail: String(e) });
+  }
+});
+app.post('/api/:kind/:id', requireAuth, (req, res) => {
+  const { kind, id } = req.params;
+  const { name, meta } = req.body || {};
+  if (!validKind(kind)) return res.status(404).json({ error: 'unknown_kind' });
+  try {
+    updateRow(kind, Number(id), name, meta);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'db_update_failed', detail: String(e) });
+  }
+});
+app.delete('/api/:kind/:id', requireAuth, (req, res) => {
+  const { kind, id } = req.params;
+  if (!validKind(kind)) return res.status(404).json({ error: 'unknown_kind' });
+  try {
+    deleteRow(kind, Number(id));
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'db_delete_failed', detail: String(e) });
+  }
+});
+
+// --- Subscribe & connectors
+const VALID_PLANS = ['free', 'builder', 'guardian'];
+const VALID_CYCLES = ['monthly', 'annual'];
+
+app.get('/api/connectors/status', (req, res) => {
+  const stripe = !!(
+    process.env.STRIPE_PUBLIC_KEY &&
+    process.env.STRIPE_SECRET &&
+    process.env.STRIPE_WEBHOOK_SECRET
+  );
+  const mail = !!process.env.MAIL_PROVIDER;
+  const sheets = !!(
+    process.env.GSHEETS_SA_JSON || process.env.SHEETS_CONNECTOR_TOKEN
+  );
+  const calendar = !!(
+    process.env.GOOGLE_CALENDAR_CREDENTIALS || process.env.ICS_URL
+  );
+  const discord = !!process.env.DISCORD_INVITE;
+  const webhooks = stripe; // placeholder
+  res.json({ stripe, mail, sheets, calendar, discord, webhooks });
+});
+
+// Basic health endpoint exposing provider mode
+app.get('/api/subscribe/health', (_req, res) => {
+  const mode =
+    process.env.SUBSCRIBE_MODE ||
+    (process.env.STRIPE_SECRET
+      ? 'stripe'
+      : process.env.GUMROAD_TOKEN
+        ? 'gumroad'
+        : 'local');
+  let providerReady = false;
+  if (mode === 'stripe') providerReady = !!process.env.STRIPE_SECRET;
+  else if (mode === 'gumroad') providerReady = !!process.env.GUMROAD_TOKEN;
+  else providerReady = true;
+  res.json({ ok: true, mode, providerReady });
+});
+
+app.post('/api/subscribe/checkout', (req, res) => {
+  const { plan, cycle } = req.body || {};
+  if (!VALID_PLANS.includes(plan) || !VALID_CYCLES.includes(cycle)) {
+    return res.status(400).json({ error: 'invalid_input' });
+  }
+  if (!process.env.STRIPE_SECRET) {
+    return res.status(409).json({ mode: 'invoice' });
+  }
+  // Stripe integration would go here
+  res.json({ url: 'https://stripe.example/checkout' });
+});
+
+app.post('/api/subscribe/invoice-intent', (req, res) => {
+  const { plan, cycle, email, name, company } = req.body || {};
+  if (!email || !VALID_PLANS.includes(plan) || !VALID_CYCLES.includes(cycle)) {
+    return res.status(400).json({ error: 'invalid_input' });
+  }
+  let sub = db.prepare('SELECT id FROM subscribers WHERE email = ?').get(email);
+  let subscriberId = sub ? sub.id : randomUUID();
+  if (!sub) {
+    db.prepare(
+      'INSERT INTO subscribers (id, email, name, company, created_at, source) VALUES (?, ?, ?, ?, datetime("now"), ?)'
+    ).run(subscriberId, email, name || null, company || null, 'invoice');
+  }
+  const subscriptionId = randomUUID();
+  db.prepare(
+    'INSERT INTO subscriptions (id, subscriber_id, plan, cycle, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, datetime("now"), datetime("now"))'
+  ).run(subscriptionId, subscriberId, plan, cycle, 'pending_invoice');
+  res.json({ ok: true, next: '/subscribe/thanks' });
+});
+
+app.get('/api/subscribe/status', (req, res) => {
+  const { email } = req.query || {};
+  if (!email) return res.status(400).json({ error: 'email_required' });
+  const row = db
+    .prepare(
+      'SELECT s.plan, s.cycle, s.status FROM subscribers sub JOIN subscriptions s ON sub.id = s.subscriber_id WHERE sub.email = ? ORDER BY datetime(s.created_at) DESC LIMIT 1'
+    )
+    .get(email);
+  res.json(row || { status: 'none' });
+});
+
+// --- Billing: plans
+app.get('/api/subscribe/plans', requireAuth, (_req, res) => {
+  try {
+    const rows = db
+      .prepare(
+        'SELECT id, name, monthly_price_cents, yearly_price_cents, features, is_active FROM plans WHERE is_active = 1'
+      )
+      .all();
+    for (const r of rows) {
+      try {
+        r.features = JSON.parse(r.features);
+      } catch {
+        r.features = [];
+      }
+    }
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ error: 'db_plans_failed', detail: String(e) });
+  }
+});
+
+// --- LLM bridge (/api/llm/chat)
+// Forwards body to FastAPI (LLM_URL) and streams raw text back to the client.
+app.post('/api/llm/chat', requireAuth, async (req, res) => {
+  try {
+    const upstream = await fetch(LLM_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body || {}),
+    });
+
+    // Stream if possible
+    if (upstream.ok && upstream.body) {
+      res.status(200);
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Transfer-Encoding', 'chunked');
+
+      const reader = upstream.body.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        // passthrough raw bytes (FastAPI may send plain text or SSE-like chunks)
+        res.write(Buffer.from(value));
+      }
+      return res.end();
+    }
+
+    // Non-stream fallback
+    const txt = await upstream.text().catch(() => '');
+    // try to unwrap {text: "..."}
+    let out = txt;
+    try {
+      const j = JSON.parse(txt);
+      if (j && typeof j.text === 'string') out = j.text;
+    } catch (err) {
+      logger.debug({ event: 'llm_fallback_parse_failed', error: err.message });
+    }
+    res
+      .status(upstream.ok ? 200 : upstream.status)
+      .type('text/plain')
+      .send(out || '(no content)');
+  } catch (err) {
+    logger.error({ event: 'llm_stream_proxy_failed', error: err.message });
+    res.status(502).type('text/plain').send('(llm upstream error)');
+  }
+});
+
+attachLlmRoutes(app);
+
+// --- Optional shell exec (disabled by default)
+app.post('/api/exec', requireAuth, (req, res) => {
+  if (!ALLOW_SHELL) return res.status(403).json({ error: 'exec_disabled' });
+  const cmd = ((req.body && req.body.cmd) || '').trim();
+  if (!cmd) return res.status(400).json({ error: 'cmd_required' });
+  exec(cmd, { timeout: 20000 }, (err, stdout, stderr) => {
+    if (err)
+      return res
+        .status(500)
+        .json({ error: 'exec_failed', detail: String(err), stderr });
+    res.json({ out: stdout, stderr });
+  });
+});
+
+const logConnectorStatusError = (connector, err) => {
+  logger.warn({
+    event: 'connector_status_check_failed',
+    connector,
+    error: err.message,
+  });
+};
+
+app.get('/api/connectors/status', async (_req, res) => {
+  const status = {
+    slack: false,
+    airtable: false,
+    linear: false,
+    salesforce: false,
+  };
+  try {
+    if (process.env.SLACK_WEBHOOK_URL) {
+      await notify.slack('status check');
+      status.slack = true;
+    }
+  } catch (err) {
+    logConnectorStatusError('slack', err);
+  }
+  try {
+    if (process.env.AIRTABLE_API_KEY) status.airtable = true;
+  } catch (err) {
+    logConnectorStatusError('airtable', err);
+  }
+  try {
+    if (process.env.LINEAR_API_KEY) status.linear = true;
+  } catch (err) {
+    logConnectorStatusError('linear', err);
+  }
+  try {
+    if (process.env.SF_USERNAME) status.salesforce = true;
+  } catch (err) {
+    logConnectorStatusError('salesforce', err);
+  }
+  res.json(status);
+});
+
+// --- Quantum AI summaries
+app.get('/api/quantum/:topic', (req, res) => {
+  const { topic } = req.params;
+  const row = db
+    .prepare('SELECT summary FROM quantum_ai WHERE topic = ?')
+    .get(topic);
+  if (!row) return res.status(404).json({ error: 'not_found' });
+  res.json({ topic, summary: row.summary });
+});
+
+// --- Actions (stubs)
+app.post('/api/actions/mint', requireAuth, (req, res) => {
+  // TODO: integrate wallet; for now echo a stub tx id
+  res.json({
+    ok: true,
+    minted: Number(req.body?.amount || 1),
+    tx: 'rc_' + Math.random().toString(36).slice(2, 10),
+  });
+});
+
+require('./modules/yjs_callback')({ app });
+require('./modules/trust_curvature')({ app });
+require('./modules/truth_diff')({ app });
+
+// --- Socket.IO presence (metrics)
+io.on('connection', (socket) => {
+  socket.emit('hello', { ok: true, t: Date.now() });
+});
+setInterval(() => {
+  const total = os.totalmem(),
+    free = os.freemem();
+  const payload = {
+    t: Date.now(),
+    load: os.loadavg()[0],
+    mem: { total, free, used: total - free, pct: 1 - free / total },
+    cpuCount: os.cpus()?.length || 1,
+    host: os.hostname(),
+  };
+  io.emit('metrics', payload);
+}, 2000);
+
+// --- Start
+server.listen(PORT, () => {
+  console.log(
+    `[blackroad-api] listening on ${PORT} (db: ${DB_PATH}, llm: ${LLM_URL}, shell: ${ALLOW_SHELL})`
+  );
+});
+
+// --- Safety
+process.on('unhandledRejection', (e) => console.error('UNHANDLED', e));
+process.on('uncaughtException', (e) => console.error('UNCAUGHT', e));
 
 module.exports = { app, server, start, INTERNAL_TOKEN, ALLOW_ORIGINS };
 module.exports = { app, server, loginLimiter };
