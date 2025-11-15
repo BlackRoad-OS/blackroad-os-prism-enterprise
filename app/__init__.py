@@ -319,3 +319,4 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
+"""Application package exposing FastAPI routes."""

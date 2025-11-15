@@ -20,6 +20,10 @@ from __future__ import annotations
 
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
+"""Lightweight helpers for Condor model execution used in tests."""
+
+from __future__ import annotations
+
 import ast
 import importlib.util
 import sys
@@ -39,6 +43,12 @@ try:  # Condor itself may not be installed in all environments
     import condor  # type: ignore  # noqa: F401
 except Exception:  # pragma: no cover - Condor may be absent
     condor = None  # type: ignore
+try:  # pragma: no cover - optional dependency in CI
+    import numpy as np  # type: ignore
+except Exception:  # pragma: no cover
+    np = None  # type: ignore
+
+condor = None  # placeholder for the real library at runtime
 
 CONDOR_PACKAGE_PREFIX = "condor"
 
@@ -88,12 +98,30 @@ def validate_model_source(py_text: str) -> None:
     rejected. The intent is to catch obvious misuse before executing code in a
     sandbox.
     """
+FORBIDDEN_NAMES = {"open", "os", "sys", "subprocess", "socket", "eval", "exec"}
+
+
+def _normalise(value: Any) -> Any:
+    if is_dataclass(value):
+        return {k: _normalise(v) for k, v in asdict(value).items()}
+    if np is not None and isinstance(value, np.ndarray):  # pragma: no cover - optional
+        return value.tolist()
+    if isinstance(value, dict):
+        return {k: _normalise(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple, set)):
+        return [_normalise(v) for v in value]
+    return value
+
+
+def validate_model_source(py_text: str) -> None:
+    """Perform a tiny security audit over ``py_text``."""
+
     tree = ast.parse(py_text)
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
                 if alias.name.split(".")[0] not in ALLOWED_IMPORTS:
-                    raise ValueError(f"import of '{alias.name}' is not allowed")
+                    raise ValueError(f"Disallowed import: {alias.name}")
         elif isinstance(node, ast.ImportFrom):
             if (node.module or "").split(".")[0] not in ALLOWED_IMPORTS:
                 raise ValueError(f"from '{node.module}' import is not allowed")
@@ -108,16 +136,24 @@ def validate_model_source(py_text: str) -> None:
         if token in py_text:
             raise ValueError(f"forbidden token found: {token}")
 
+            root = (node.module or "").split(".")[0]
+            if root not in ALLOWED_IMPORTS:
+                raise ValueError(f"Disallowed import: {node.module}")
+        elif isinstance(node, ast.Name) and node.id in FORBIDDEN_NAMES:
+            raise ValueError(f"Forbidden name: {node.id}")
 
-def _load_module_from_source(source: str, module_name: str) -> ModuleType:
-    """Load a module from source text in an isolated temporary directory."""
+    for forbidden in FORBIDDEN_NAMES:
+        if forbidden in py_text:
+            raise ValueError(f"Forbidden token found: {forbidden}")
 
+
+def _load_module(py_text: str, module_name: str) -> ModuleType:
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / f"{module_name}.py"
-        path.write_text(source, encoding="utf-8")
+        path.write_text(py_text, encoding="utf-8")
         spec = importlib.util.spec_from_file_location(module_name, path)
         if spec is None or spec.loader is None:  # pragma: no cover - defensive
-            raise ImportError("Could not create import spec for model")
+            raise ImportError("Unable to create import spec")
         module = importlib.util.module_from_spec(spec)
         sys.modules[module_name] = module
         spec.loader.exec_module(module)
@@ -131,6 +167,11 @@ def load_model_from_source(py_text: str, class_name: str) -> Type[Any]:
     module = _load_module_from_source(py_text, "user_model")
     return getattr(module, class_name)
 
+    """Validate ``py_text`` and return ``class_name`` from it."""
+
+    validate_model_source(py_text)
+    module = _load_module(py_text, "condor_user_model")
+    return getattr(module, class_name)
 
 def solve_algebraic(model_cls: Type[Any], **params: Any) -> Any:
     """Instantiate ``model_cls`` and call its ``solve`` method.
@@ -164,6 +205,9 @@ def solve_algebraic(model_cls: Type[Any], **params: Any) -> Dict[str, Any]:
     model = model_cls(**params)
     result = model.solve() if hasattr(model, "solve") else model
     return _dataclass_to_dict(result)
+    model = model_cls(**params)
+    result = model.solve() if hasattr(model, "solve") else model
+    return _normalise(result)
 
 
 def simulate_ode(
@@ -192,6 +236,16 @@ def simulate_ode(
     else:  # pragma: no cover - dummy fallback
         result = {}
     return _dataclass_to_dict(result)
+    params: Dict[str, Any],
+    *,
+    events: Any | None = None,
+    modes: Any | None = None,
+) -> Dict[str, Any]:
+    model = model_cls(**params)
+    if not hasattr(model, "simulate"):
+        raise RuntimeError("Model does not implement simulate()")
+    result = model.simulate(t_final, initial, events=events, modes=modes)
+    return _normalise(result)
 
 
 def optimize(
@@ -223,3 +277,18 @@ __all__ = [
 ]
     result = problem.solve(initial_guess=initial_guess, bounds=bounds, options=options)
     return _dataclass_to_dict(result)
+    problem = problem_cls()
+    if not hasattr(problem, "solve"):
+        raise RuntimeError("Problem does not implement solve()")
+    result = problem.solve(initial_guess, bounds=bounds, options=options)
+    return _normalise(result)
+
+
+__all__ = [
+    "condor",
+    "validate_model_source",
+    "load_model_from_source",
+    "solve_algebraic",
+    "simulate_ode",
+    "optimize",
+]

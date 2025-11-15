@@ -32,6 +32,15 @@ class BranchCleanupResult:
         return self.local_deleted and self.remote_deleted
 
 
+@dataclass(frozen=True, slots=True)
+class CleanupResult:
+    """Result of attempting to delete a branch."""
+
+    local_deleted: bool
+    remote_deleted: bool
+    skipped: bool = False
+
+
 @dataclass
 class CleanupBot:
     """Delete local and remote Git branches once work is merged."""
@@ -156,14 +165,27 @@ class CleanupBot:
             True if the branch was deleted both locally and remotely, False otherwise.
         """
         success = True
+    def _execute(self, *cmd: str) -> bool:
+        """Execute a command and return ``True`` when it succeeds."""
         try:
-            self._run("git", "branch", "-D", branch)
-            self._run("git", "push", "origin", "--delete", branch)
-            return True
+            self._run(*cmd)
         except CalledProcessError:
             return False
+        return True
+
+    def delete_branch(self, branch: str) -> CleanupResult:
+        """Delete a branch locally and remotely."""
+        if self.dry_run:
+            print(f"Would delete branch '{branch}' locally and remotely")
+            return CleanupResult(local_deleted=False, remote_deleted=False, skipped=True)
+        local_deleted = self._execute("git", "branch", "-D", branch)
+        remote_deleted = False
+        if local_deleted:
+            remote_deleted = self._execute("git", "push", "origin", "--delete", branch)
+        return CleanupResult(local_deleted=local_deleted, remote_deleted=remote_deleted)
 
     def cleanup(self) -> None:
+    def cleanup(self) -> dict[str, CleanupResult]:
         """Remove the configured branches locally and remotely.
             self._run_git("branch", "-D", branch)
         except CalledProcessError:
@@ -219,6 +241,11 @@ class CleanupBot:
                 print(f"Would delete branch '{branch}' locally and remotely")
                 results[branch] = True
                 continue
+        Returns:
+            Mapping of branch names to deletion results.
+        """
+        results: dict[str, CleanupResult] = {}
+        for branch in self.branches:
             results[branch] = self.delete_branch(branch)
             local_deleted, local_error = self._delete_local_branch(branch)
             if not local_deleted and local_error:

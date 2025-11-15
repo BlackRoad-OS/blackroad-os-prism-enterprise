@@ -45,7 +45,17 @@ for demonstration purposes.
 """
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import ClassVar
+
+
+@dataclass(frozen=True, slots=True)
+class GameRecord:
+    """Record describing a game created by :class:`AutoNovelAgent`."""
+
+    engine: str
+    created_at: datetime
+    message: str
 
 
 @dataclass
@@ -65,6 +75,8 @@ class AutoNovelAgent:
         )
     )
     _created_games: list[str] = field(default_factory=list, init=False, repr=False)
+    SUPPORTED_ENGINES: ClassVar[set[str]] = {"unity", "unreal"}
+    games: list[GameRecord] = field(default_factory=list)
 
     SAMPLE_SNIPPETS: ClassVar[dict[str, str]] = {
         "python": "def solve():\n    # TODO: Implement addition\n    pass\n",
@@ -164,6 +176,15 @@ class AutoNovelAgent:
             raise ValueError("Weapons are not allowed in generated games.")
         message = f"Creating a {normalized.capitalize()} game without weapons..."
         self._created_games.append(normalized)
+        message = f"Creating a {engine_lower.capitalize()} game without weapons..."
+        print(message)
+        self.games.append(
+            GameRecord(
+                engine=engine_lower,
+                created_at=datetime.utcnow(),
+                message=message,
+            )
+        )
         return message
 
     def generate_story_series(
@@ -284,6 +305,9 @@ class AutoNovelAgent:
         for i in range(1, chapters + 1):
             outline.append(f"Chapter {i}: {title} — part {i}")
         return outline
+    def list_created_games(self) -> list[GameRecord]:
+        """Return a copy of the games created by the agent."""
+        return list(self.games)
 
 
 __all__ = [
@@ -298,3 +322,5 @@ if __name__ == "__main__":
     print(agent.generate_storyline("Ada", "a digital forest"))
     for line in agent.generate_novel("The Journey", chapters=2):
         print(line)
+    for record in agent.list_created_games():
+        print(record)
