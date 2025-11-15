@@ -23,6 +23,14 @@ can drop in without rewriting the entire workflow.
 | 033 | The Wholeness Rule          | People remain whole; balance is built into Lucidia.         |
 | 041 | The Restraint Principle     | Restraint on data, models, features, and kill switches.     |
 | 055 | Generative Care Frameworks  | Signal loops and rituals that propagate care inventions.    |
+| ID  | Title                  | Description                                     |
+| --- | ---------------------- | ----------------------------------------------- |
+| 001 | The First Principle    | Lucidia exists to protect and empower everyone. |
+| 003 | The Workflow Circle    | Work runs in visible capture → adjust loops.    |
+| 004 | The Autonomy Manifest  | Data autonomy through consent, export, and wipe. |
+| 022 | The Security Spine     | Security backbone with layered zero-trust defenses. |
+| 043 | The Equity Oath        | Fairness, access, and inclusion are systemic.   |
+| 047 | The Transparency of Emotion | Emotion is acknowledged with honesty, tone awareness, and care. |
 
 ## BlackRoad Pipeline
 
