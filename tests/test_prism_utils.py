@@ -1,5 +1,6 @@
 """Tests for ``parse_numeric_prefix``."""
 """Tests for :mod:`prism_utils`."""
+import ast
 
 import pytest
 
@@ -37,3 +38,12 @@ def test_parse_numeric_prefix_valid(text: str, expected: float) -> None:
 def test_parse_numeric_prefix_invalid(text: str) -> None:
     """Fall back to ``1.0`` when parsing fails."""
     assert parse_numeric_prefix(text) == 1.0
+
+
+@pytest.mark.parametrize("exc", [RecursionError, MemoryError])
+def test_parse_numeric_prefix_other_errors(monkeypatch, exc):
+    def bad_eval(_):
+        raise exc()
+
+    monkeypatch.setattr(ast, "literal_eval", bad_eval)
+    assert parse_numeric_prefix("2") == 1.0
