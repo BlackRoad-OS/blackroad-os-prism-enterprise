@@ -79,6 +79,155 @@ export async function updateAgentMetadata(agentId, payload) {
   return data.agent;
 }
 
+// =============================================================================
+// MARKETPLACE API
+// =============================================================================
+
+// Seller
+export async function registerAsSeller(payload) {
+  return post('/api/marketplace/seller/register', payload);
+}
+
+export async function getSellerProfile(sellerId) {
+  return get(`/api/marketplace/sellers/${sellerId}`);
+}
+
+export async function updateSellerProfile(payload) {
+  return post('/api/marketplace/seller/profile', payload);
+}
+
+export async function getSellerAnalytics() {
+  return get('/api/marketplace/seller/analytics');
+}
+
+// Listings
+export async function createListing(payload) {
+  return post('/api/marketplace/listings', payload);
+}
+
+export async function getMyListings() {
+  const data = await get('/api/marketplace/listings');
+  return data.listings;
+}
+
+export async function getListing(listingId) {
+  return get(`/api/marketplace/listings/${listingId}`);
+}
+
+export async function updateListing(listingId, payload) {
+  return patch(`/api/marketplace/listings/${listingId}`, payload);
+}
+
+export async function deleteListing(listingId) {
+  return del(`/api/marketplace/listings/${listingId}`);
+}
+
+export async function publishListing(listingId) {
+  return post(`/api/marketplace/listings/${listingId}/publish`);
+}
+
+// Browse & Search
+export async function browseMarketplace(params) {
+  const queryString = new URLSearchParams(params).toString();
+  return get(`/api/marketplace/browse?${queryString}`);
+}
+
+export async function searchMarketplace(query, params = {}) {
+  const queryString = new URLSearchParams({ q: query, ...params }).toString();
+  return get(`/api/marketplace/search?${queryString}`);
+}
+
+export async function getCategories() {
+  const data = await get('/api/marketplace/categories');
+  return data.categories;
+}
+
+export async function getTrendingListings(limit = 10) {
+  const data = await get(`/api/marketplace/trending?limit=${limit}`);
+  return data.listings;
+}
+
+export async function getFeaturedListings(limit = 6) {
+  const data = await get(`/api/marketplace/featured?limit=${limit}`);
+  return data.listings;
+}
+
+// Orders
+export async function createOrder(payload) {
+  return post('/api/marketplace/orders', payload);
+}
+
+export async function getOrder(orderId) {
+  return get(`/api/marketplace/orders/${orderId}`);
+}
+
+export async function getMyOrders(type = 'purchases') {
+  const data = await get(`/api/marketplace/orders?type=${type}`);
+  return data.orders;
+}
+
+export async function confirmOrder(orderId, payload) {
+  return post(`/api/marketplace/orders/${orderId}/confirm`, payload);
+}
+
+export async function downloadAsset(orderId) {
+  return get(`/api/marketplace/orders/${orderId}/download`);
+}
+
+// Reviews
+export async function postReview(payload) {
+  return post('/api/marketplace/reviews', payload);
+}
+
+export async function getListingReviews(listingId, params = {}) {
+  const queryString = new URLSearchParams(params).toString();
+  return get(`/api/marketplace/listings/${listingId}/reviews?${queryString}`);
+}
+
+// Favorites
+export async function addToFavorites(listingId) {
+  return post('/api/marketplace/favorites', { listingId });
+}
+
+export async function removeFromFavorites(listingId) {
+  return del(`/api/marketplace/favorites/${listingId}`);
+}
+
+export async function getMyFavorites() {
+  const data = await get('/api/marketplace/favorites');
+  return data.favorites;
+}
+
+// File Uploads
+export async function uploadThumbnail(listingId, base64Data, filename) {
+  return post(`/api/marketplace/listings/${listingId}/upload/thumbnail`, {
+    base64Data,
+    filename
+  });
+}
+
+export async function uploadAsset(listingId, base64Data, filename, fileSize) {
+  return post(`/api/marketplace/listings/${listingId}/upload/asset`, {
+    base64Data,
+    filename,
+    fileSize
+  });
+}
+
+export async function uploadPreview3D(listingId, sceneData, filename) {
+  return post(`/api/marketplace/listings/${listingId}/upload/preview3d`, {
+    sceneData,
+    filename
+  });
+}
+
+export async function uploadSellerAvatar(base64Data, filename) {
+  return post('/api/marketplace/seller/upload/avatar', {
+    base64Data,
+    filename
+  });
+}
+
 export async function revertAgentRegistration(agentId) {
   return post(`/api/agents/${agentId}/revert`);
 }
