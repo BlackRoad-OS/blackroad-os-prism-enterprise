@@ -68,6 +68,9 @@ def parse_numeric_prefix(text: str) -> float:
     accepts inputs like ``"2, something"``. Non-numeric or invalid values
     would raise ``ValueError`` or ``SyntaxError``, but these are suppressed
     and result in a default return of ``1.0``.
+    :func:`ast.literal_eval`. If that token is missing, not numeric, or causes
+    ``literal_eval`` to raise (e.g. ``RecursionError`` from extreme nesting),
+    the function returns ``1.0`` instead of propagating the exception.
     """
     match = _NUMERIC_PREFIX_RE.match(text)
     if not match:
@@ -83,3 +86,8 @@ def parse_numeric_prefix(text: str) -> float:
     except Exception:
         return 1.0
     return float(value) if isinstance(value, (int, float)) else 1.0
+    except Exception:  # noqa: BLE001 - literal_eval may raise ValueError, SyntaxError, RecursionError, MemoryError, etc.
+        # Non-numeric, malformed, or pathological prefixes fall through to the
+        # default below.
+        pass
+    return 1.0
