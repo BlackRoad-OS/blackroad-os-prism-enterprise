@@ -18,6 +18,7 @@ describe('Git API', () => {
       .post('/api/login')
       .send({ username: 'root', password: 'Codex2025' });
     const cookie = login.headers['set-cookie'];
+    const cookie = await getAuthCookie(app);
     const res = await request(app)
       .get('/api/git/health')
       .set('Cookie', cookie);
@@ -32,6 +33,7 @@ describe('Git API', () => {
       .post('/api/login')
       .send({ username: 'root', password: 'Codex2025' });
     const cookie = login.headers['set-cookie'];
+    const cookie = await getAuthCookie(app);
     const res = await request(app)
       .get('/api/git/status')
       .set('Cookie', cookie);

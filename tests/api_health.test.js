@@ -38,10 +38,7 @@ describe('API security and health', () => {
   });
 
   it('returns default entitlements for logged-in user', async () => {
-    const login = await request(app)
-      .post('/api/login')
-      .send({ username: 'root', password: 'Codex2025' });
-    const cookie = login.headers['set-cookie'];
+    const cookie = await getAuthCookie(app);
     const res = await request(app)
       .get('/api/billing/entitlements/me')
       .set('Cookie', cookie);
