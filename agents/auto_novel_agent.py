@@ -36,6 +36,10 @@ _BASE_CONSENT_SCOPES = {"outline:read", "outline:write"}
 DEFAULT_CONSENT_SCOPES = frozenset(
     _BASE_CONSENT_SCOPES.union(_OPERATION_SCOPE_MAP.values())
 )
+"""Simple auto novel agent example with game creation abilities."""
+
+from dataclasses import dataclass
+from typing import ClassVar
 
 
 @dataclass
@@ -214,6 +218,19 @@ class AutoNovelAgent:
 
     def generate_storyline(self, protagonist: str, setting: str) -> str:
         """Generate a simple storyline for a given protagonist and setting.
+        """Remove a game engine if it is currently supported.
+
+        Args:
+            engine: Name of the engine to remove.
+        """
+        self.SUPPORTED_ENGINES.discard(engine.lower())
+
+    def list_supported_engines(self) -> list[str]:
+        """Return a list of supported game engines."""
+        return sorted(self.SUPPORTED_ENGINES)
+
+    def generate_story(self, theme: str, protagonist: str = "An adventurer") -> str:
+        """Generate a short themed story.
 
         Args:
             protagonist: Name of the main character.
@@ -225,6 +242,24 @@ class AutoNovelAgent:
         return (
             f"{protagonist} embarks on an adventure in {setting}, "
             "discovering the true meaning of courage."
+            A short story string.
+
+        Raises:
+            ValueError: If ``theme`` is empty or only whitespace.
+            TypeError: If ``theme`` or ``protagonist`` are not strings.
+        """
+        if not isinstance(theme, str):
+            raise TypeError("Theme must be provided as a string.")
+        if not isinstance(protagonist, str):
+            raise TypeError("Protagonist must be provided as a string.")
+
+        normalized_theme = theme.strip()
+        if not normalized_theme:
+            raise ValueError("Theme must be a non-empty string.")
+        normalized_protagonist = protagonist.strip() or "An unnamed protagonist"
+        return (
+            f"{normalized_protagonist} set out on a {normalized_theme} journey, discovering "
+            f"wonders along the way."
         )
 
 
