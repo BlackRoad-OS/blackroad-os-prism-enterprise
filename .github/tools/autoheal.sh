@@ -7,6 +7,7 @@ changed=false
 # Convenient helper to add files and mark the repo as changed
 add() {
   git add -- "$@"
+  git add "$@"
   changed=true
 }
 
@@ -91,8 +92,20 @@ add package.json || true
 
 # Step 3: Install tools and apply formatting/lint fixes (best effort)
 # Step 2: install tools and apply formatting/lint fixes (best effort)
+add package.json || true
+
+[ -f .prettierrc.json ] || {
+  echo '{ "printWidth": 100, "singleQuote": true, "trailingComma": "es5" }' > .prettierrc.json
+  add .prettierrc.json
+}
+
+[ -f eslint.config.js ] || {
+  echo 'export default [];' > eslint.config.js
+  add eslint.config.js
+}
+
 npm i -D prettier eslint eslint-config-prettier >/dev/null 2>&1 || true
-npx --yes prettier -w .  >/dev/null 2>&1 || true
+npx --yes prettier -w . >/dev/null 2>&1 || true
 npx --yes eslint . --ext .js,.mjs,.cjs --fix >/dev/null 2>&1 || true
 
 # Step 4: Stage any changes produced by formatters or linters
@@ -105,6 +118,13 @@ git diff --quiet || { git add -A && changed=true; }
 # Step 4: Commit if any files changed
 if $changed; then
   git commit -m "chore(auto-heal): baseline configs + prettier/eslint --fix" || true
+git diff --quiet || {
+  git add -A
+  changed=true
+}
+
+if $changed; then
+  git commit -m "chore(auto-heal): baseline + prettier/eslint --fix" || true
   echo "committed=1" >> "$GITHUB_OUTPUT"
 else
   echo "committed=0" >> "$GITHUB_OUTPUT"
