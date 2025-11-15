@@ -52,7 +52,7 @@ _NUMERIC_PREFIX_RE = re.compile(
 
 
 def parse_numeric_prefix(text: str) -> float:
-    """Return the leading numeric value in ``text`` or ``1.0`` if not found.
+    """Return the leading numeric value in ``text`` or 1.0 if none exists.
 
     The function extracts an optional sign and numeric token—supporting
     integers, decimals, and scientific notation—at the start of ``text`` using
@@ -71,6 +71,9 @@ def parse_numeric_prefix(text: str) -> float:
     :func:`ast.literal_eval`. If that token is missing, not numeric, or causes
     ``literal_eval`` to raise (e.g. ``RecursionError`` from extreme nesting),
     the function returns ``1.0`` instead of propagating the exception.
+    The prefix is parsed with ``ast.literal_eval`` for safety and accepts
+    inputs such as ``"2, something"``. Non-numeric or invalid values fall back
+    to 1.0.
     """
     match = _NUMERIC_PREFIX_RE.match(text)
     if not match:
