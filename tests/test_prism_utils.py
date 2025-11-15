@@ -13,6 +13,7 @@ when the input does not start with a parseable number.
 """Tests for :mod:`prism_utils`."""
 
 import pytest
+"""Tests for :func:`prism_utils.parse_numeric_prefix`."""
 
 from prism_utils import parse_numeric_prefix
 
