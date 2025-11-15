@@ -57,6 +57,28 @@ module.exports = [
       globals: nodeGlobals,
     },
     rules: nodeRules,
+    ignores: [
+      ".github/**",
+      ".tools/**",
+      "apps/**",
+      "backend/**",
+      "build/**",
+      "connectors.js",
+      "design/**",
+      "dist/**",
+      "frontend/**",
+      "modules/**",
+      "node_modules/**",
+      "packages/**",
+      "public/vendor/**",
+      "scripts/**",
+      "services/**",
+      "sites/**",
+      "src/**",
+      "srv/**",
+      "tools/**",
+      "var/**"
+    ]
   },
   {
     files: ['srv/blackroad-api/**/*.js', 'tests/**/*.js'],
