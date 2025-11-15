@@ -515,7 +515,11 @@ function Window({ id, title, layout, setLayout, children }) {
         })
       }
     >
-      <div className="flex flex-col h-full bg-white border shadow-lg">
+      <div
+        className="flex flex-col h-full bg-white border shadow-lg"
+        role="dialog"
+        aria-labelledby={`${id}-title`}
+      >
         <div className="flex items-center justify-between bg-neutral-800 text-white px-2 py-1 cursor-move">
           <span className="text-sm flex items-center gap-1">
             <span className="text-green-400">●</span>
@@ -530,6 +534,10 @@ function Window({ id, title, layout, setLayout, children }) {
               ●
             </span>
             {title}
+            <span className="text-green-400" aria-hidden="true">
+              ●
+            </span>
+            <span id={`${id}-title`}>{title}</span>
           </span>
           <div className="space-x-1">
             <button type="button" aria-label="minimize" onClick={() => update({ open: false })}>
