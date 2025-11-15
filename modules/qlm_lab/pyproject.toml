@@ -29,6 +29,26 @@ dev = [
 ]
 qiskit = ["qiskit", "qiskit-aer", "qiskit-ibm-runtime"]
 viz = ["matplotlib"]
+dependencies = [
+    "fastapi>=0.110",
+    "matplotlib",
+    "numpy",
+    "pyyaml",
+    "sympy",
+]
+
+[project.optional-dependencies]
+qiskit = [
+    "qiskit",
+    "qiskit-aer",
+]
+viz = [
+    "matplotlib",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
 
 [project.urls]
 Homepage = "https://example.com/quantum-lab"
