@@ -45,6 +45,7 @@ function segIntersectsRect(a,b, R){ // axis-aligned rectangle R={x,y,w,h}
   return t0<=t1 && t1>=0 && t0<=1;
 }
 function collision(a,b, obstacles){ for(const R of obstacles){ if(segIntersectsRect(a,b,R)) return true; } return false; }
+import { distance as dist, segmentHitsAnyRect as collision } from "../labs/rrtGeometry.js";
 
 export default function RRTStarLab(){
   const [W,H] = [640, 400];
