@@ -56,6 +56,11 @@ class GameRecord:
     engine: str
     created_at: datetime
     message: str
+from dataclasses import dataclass, field
+from typing import Final, List
+
+
+DEFAULT_SUPPORTED_ENGINES: Final[tuple[str, ...]] = ("unity", "unreal")
 
 
 @dataclass
@@ -91,6 +96,9 @@ class AutoNovelAgent:
     }
     OPERATION_SCOPE_MAP: ClassVar[dict[str, str]] = dict(_OPERATION_SCOPE_MAP)
     LEAST_PRIVILEGE_SCOPES: ClassVar[set[str]] = set(DEFAULT_CONSENT_SCOPES)
+    supported_engines: set[str] = field(
+        default_factory=lambda: set(DEFAULT_SUPPORTED_ENGINES)
+    )
 
     def __post_init__(self) -> None:
         if self.gamma <= 0:
@@ -139,6 +147,10 @@ class AutoNovelAgent:
         """Return a sorted snapshot of supported engines."""
 
         return sorted(self.supported_engines)
+        Args:
+            engine: Name of the engine to verify.
+        """
+        return engine.lower() in self.supported_engines
 
     def add_supported_engine(self, engine: str) -> None:
         """Register a new game engine."""
@@ -148,6 +160,26 @@ class AutoNovelAgent:
 
     def remove_supported_engine(self, engine: str) -> None:
         """Remove an engine from the supported set."""
+        Args:
+            engine: Name of the engine to add.
+        """
+        self.supported_engines.add(engine.lower())
+
+    def remove_supported_engine(self, engine: str) -> None:
+        """Remove an engine from the supported list.
+
+        Engines are matched in a case-insensitive manner.
+
+        Args:
+            engine: Name of the engine to remove.
+
+        Raises:
+            ValueError: If the engine is not currently supported.
+        """
+        normalized = engine.lower()
+        if normalized not in self.supported_engines:
+            raise ValueError(f"{engine} is not a supported engine.")
+        self.supported_engines.remove(normalized)
 
         self._require_scope("remove_supported_engine")
         normalized = self._normalize_engine(engine)
@@ -170,6 +202,13 @@ class AutoNovelAgent:
         self._require_scope("create_game")
         normalized = self._normalize_engine(engine)
         if normalized not in self.supported_engines:
+        Args:
+            engine: Game engine to use.
+            include_weapons: If True, raise a ``ValueError`` because weapons are not
+                allowed.
+        """
+        engine_lower = engine.lower()
+        if not self.supports_engine(engine_lower):
             supported = ", ".join(sorted(self.supported_engines))
             raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
         if include_weapons:
@@ -254,8 +293,9 @@ class AutoNovelAgent:
         self.SUPPORTED_ENGINES.discard(engine.lower())
 
     def list_supported_engines(self) -> list[str]:
+    def list_supported_engines(self) -> List[str]:
         """Return a list of supported game engines."""
-        return sorted(self.SUPPORTED_ENGINES)
+        return sorted(self.supported_engines)
 
     def generate_story(self, theme: str, protagonist: str = "An adventurer") -> str:
         """Generate a short themed story.

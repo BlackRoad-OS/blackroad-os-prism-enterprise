@@ -1,4 +1,5 @@
 """Tests for the :mod:`agents.auto_novel_agent` module."""
+import pytest
 
 from agents.auto_novel_agent import AutoNovelAgent
 
@@ -21,3 +22,26 @@ def test_list_supported_engines_sorted() -> None:
     agent = AutoNovelAgent()
 
     assert agent.list_supported_engines() == ["unity", "unreal"]
+    with pytest.raises(ValueError):
+        agent.create_game("godot")
+    agent.add_supported_engine("Godot")
+    assert "godot" in agent.list_supported_engines()
+    agent.create_game("godot")
+
+
+def test_remove_supported_engine_disables_creation():
+    agent = AutoNovelAgent()
+    agent.add_supported_engine("godot")
+    agent.remove_supported_engine("Godot")
+    with pytest.raises(ValueError):
+        agent.create_game("godot")
+
+
+def test_supported_engines_are_isolated_per_instance():
+    first = AutoNovelAgent()
+    second = AutoNovelAgent()
+
+    first.add_supported_engine("godot")
+
+    assert "godot" in first.list_supported_engines()
+    assert "godot" not in second.list_supported_engines()

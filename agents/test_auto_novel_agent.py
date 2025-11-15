@@ -106,6 +106,9 @@ def test_create_game_requires_engine_name(agent: AutoNovelAgent) -> None:
 def test_remove_supported_engine(agent: AutoNovelAgent) -> None:
     """Removing an engine makes it unavailable for future games."""
 
+
+def test_remove_supported_engine():
+    agent = AutoNovelAgent()
     agent.add_supported_engine("godot")
     assert agent.supports_engine("godot")
     agent.remove_supported_engine("GoDoT")
@@ -218,3 +221,21 @@ def test_generate_story_defaults_to_placeholder_protagonist():
     agent = AutoNovelAgent()
     story = agent.generate_story("mystical", "   ")
     assert story.startswith("An unnamed protagonist set out on a mystical journey")
+    with pytest.raises(ValueError):
+        agent.create_game("godot")
+
+
+def test_remove_supported_engine_errors_on_missing():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError):
+        agent.remove_supported_engine("godot")
+
+
+def test_supported_engines_are_instance_specific():
+    agent_one = AutoNovelAgent()
+    agent_two = AutoNovelAgent()
+
+    agent_one.add_supported_engine("godot")
+
+    assert agent_one.supports_engine("godot")
+    assert not agent_two.supports_engine("godot")
