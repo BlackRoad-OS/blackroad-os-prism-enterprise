@@ -25,5 +25,26 @@ module.exports = [
       },
     },
     rules: {},
+    ignores: [
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      ".github/**",
+      "public/vendor/**",
+      "var/**",
+      "backend/**",
+      "frontend/**",
+      "sites/**",
+      "src/**",
+      "srv/**",
+      "apps/**",
+      "packages/**",
+      ".tools/**",
+      "modules/**",
+      "scripts/**",
+      "services/**",
+      "design/**",
+      "connectors.js"
+    ]
   },
 ];
