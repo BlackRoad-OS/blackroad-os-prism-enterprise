@@ -83,11 +83,25 @@ def parse_numeric_prefix(text: str) -> float:
     The prefix is parsed with ``ast.literal_eval`` for safety and accepts
     inputs such as ``"2, something"``. Non-numeric or invalid values fall back
     to 1.0.
+    """Return the leading numeric value in ``text`` or ``1.0`` if parsing fails.
+
+    The prefix may include negatives or decimals. The function uses
+    :func:`ast.literal_eval` for safety instead of ``eval`` and evaluates the
+    substring before the first comma. Only ``ValueError`` and ``SyntaxError``
+    are suppressed. This covers empty strings, whitespace, non-numeric tokens,
+    or malformed expressions, and the default ``1.0`` is returned in those
+    cases.
     """
     match = _NUMERIC_PREFIX_RE.match(text)
     if not match:
         return 1.0
     try:
+        # Evaluate only the portion before the first comma to ignore any
+        # trailing text (for example, "2, rest"). ``ast.literal_eval`` is
+        # intentionally used instead of ``eval`` because it restricts the
+        # permitted syntax to Python literals, preventing arbitrary code
+        # execution while still accepting ints, floats, and their negative
+        # forms.
         value = ast.literal_eval(text.split(",", maxsplit=1)[0].strip())
         if isinstance(value, (int, float)):
             return float(value)
@@ -103,6 +117,11 @@ def parse_numeric_prefix(text: str) -> float:
         # default below.
     except (ValueError, SyntaxError):
         # Raised when the leading segment isn't a valid Python literal
+        # Non-numeric literals—such as strings, malformed expressions, or
+        # whitespace (which becomes an empty string after ``strip`` and raises
+        # ``SyntaxError`` from ``ast.literal_eval``)—raise
+        # ``ValueError``/``SyntaxError`` and fall through to the default of
+        # ``1.0``.
         pass
 import re
 
