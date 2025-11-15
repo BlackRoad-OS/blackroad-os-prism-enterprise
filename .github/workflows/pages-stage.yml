@@ -36,7 +36,10 @@ jobs:
           printf '{"ok":true,"service":"blackroad","version":"0.1.0","proof":"%s"}' "$PROOF" > health.json
           cp health.json health/index.json || true
           sed -i "s|%%PROOF%%|$PROOF|g" index.html || true
+<<<<<<< main
       # Stage build is archived only; skip DNS update and health checks
+=======
+>>>>>>> origin/codex/fix-comments-3pwv4s
       - name: Upload stage build artifact
         uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4
         with:
