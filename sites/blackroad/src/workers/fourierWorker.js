@@ -1,4 +1,5 @@
 /* eslint-env worker */
+<<<<<<< HEAD
 /* global self, postMessage */
 self.onmessage = e => {
   const {N, ap, param} = e.data;
@@ -45,6 +46,8 @@ function dft2(A){
   return B;
 }
 <<<<<<< HEAD
+=======
+>>>>>>> 418c5b315ed97e0c5577d58ec8e24f31e4aaf5a3
 /* global addEventListener, postMessage */
 import { dft2 } from "../lib/fourier.js";
 
@@ -54,5 +57,8 @@ addEventListener("message", ({ data }) => {
   const F = dft2(A);
   postMessage({ id, F });
 });
+<<<<<<< HEAD
 =======
 >>>>>>> 8496122f646c8fa9b56e1b806ab892d53ebe819e
+=======
+>>>>>>> 418c5b315ed97e0c5577d58ec8e24f31e4aaf5a3
