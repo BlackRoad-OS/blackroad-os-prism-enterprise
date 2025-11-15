@@ -9,7 +9,8 @@ const router = express.Router();
 
 const REPO_PATH = process.env.GIT_REPO_PATH || process.cwd();
 const REMOTE_NAME = process.env.GIT_REMOTE_NAME || 'origin';
-const ALLOW_GIT_ACTIONS = String(process.env.ALLOW_GIT_ACTIONS || 'false').toLowerCase() === 'true';
+const ALLOW_GIT_ACTIONS =
+  String(process.env.ALLOW_GIT_ACTIONS || 'false').toLowerCase() === 'true';
 
 async function runGit(args) {
   const { stdout } = await execFileAsync('git', args, { cwd: REPO_PATH });
@@ -66,8 +67,16 @@ router.get('/status', async (_req, res) => {
 
     const shortHash = await runGit(['rev-parse', '--short', 'HEAD']);
 
+    const isDirty = staged > 0 || unstaged > 0 || untracked > 0;
+    const ok = !isDirty;
+    const shortHash = (
+      await runGit(['rev-parse', '--short', 'HEAD'])
+    ).stdout.trim();
+    const lastCommitMsg = (
+      await runGit(['log', '-1', '--pretty=%s'])
+    ).stdout.trim();
     res.json({
-      ok: true,
+      ok,
       branch,
       ahead,
       behind,
