@@ -46,6 +46,7 @@ async function list(){
   const r=await fetch('/api/lenses'); const arr=await r.json();
   const listEl=document.getElementById('list');
   listEl.innerHTML='';
+  listEl.textContent='';
   arr.forEach(x=>{
     const li=document.createElement('li');
     const b=document.createElement('b');
@@ -67,6 +68,17 @@ async function list(){
     opt.value=x.lens_id;
     opt.textContent=x.label||x.lens_id;
     selEl.appendChild(opt);
+    li.append(` λ=${x.lambda} seeds=${Object.keys(x.seeds).length}`);
+    listEl.appendChild(li);
+  });
+  const sel=document.getElementById('sel');
+  sel.textContent='';
+  arr.forEach(x=>{
+    const opt=document.createElement('option');
+    // set both value and text via DOM APIs to avoid HTML injection
+    opt.value=x.lens_id;
+    opt.textContent=x.lens_id;
+    sel.appendChild(opt);
   });
 }
 async function load(){
@@ -74,6 +86,8 @@ async function load(){
   const r=await fetch('/api/truth/feed:lens?lid='+encodeURIComponent(lid)); const arr=await r.json();
   const feedEl=document.getElementById('feed');
   feedEl.innerHTML='';
+  const feed=document.getElementById('feed');
+  feed.textContent='';
   arr.forEach(x=>{
     const li=document.createElement('li');
     const b=document.createElement('b');
@@ -86,6 +100,9 @@ async function load(){
     li.appendChild(document.createElement('br'));
     li.append(`score=${x.score.toFixed(3)} love=${(x.love*100|0)}% trust=${(x.trust*100|0)}%`);
     feedEl.appendChild(li);
+    // append text via DOM APIs so untrusted scores stay plain text
+    li.append(`score=${x.score.toFixed(3)} love=${(x.love*100|0)}% trust=${(x.trust*100|0)}%`);
+    feed.appendChild(li);
   });
 }
 list();
