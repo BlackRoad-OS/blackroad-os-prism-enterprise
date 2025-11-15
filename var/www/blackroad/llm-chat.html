@@ -455,6 +455,7 @@ document.getElementById('sendBtn').onclick=send;
 
       let convo = [];
       let controller = null; // AbortController for streaming
+      let streamBuffer = ''; // buffer for partial streaming data
 
       function addMsg(role, text) {
         const div = document.createElement('div');
@@ -561,6 +562,37 @@ document.getElementById('sendBtn').onclick=send;
               // plain chunk
               pre.textContent += line;
             }
+      function parseAndAppend(pre, chunk) {
+        // Accept raw text, SSE "data: ...", or NDJSON lines
+        streamBuffer += chunk;
+        const lines = streamBuffer.split(/\r?\n/);
+        streamBuffer = lines.pop();
+        for (const line of lines) {
+          if (!line) continue;
+          if (line.startsWith('data:')) {
+            const payload = line.slice(5).trim();
+            if (!payload || payload === '[DONE]') continue;
+            let printed = false;
+            try {
+              const j = JSON.parse(payload);
+              const candidates = [
+                j?.delta,
+                j?.text,
+                j?.response,
+                j?.message?.content,
+                j?.choices?.[0]?.delta?.content,
+                j?.choices?.[0]?.message?.content,
+                j?.choices?.[0]?.text,
+              ].filter(Boolean);
+              if (candidates.length) {
+                pre.textContent += candidates[0];
+                printed = true;
+              }
+            } catch {}
+            if (!printed) pre.textContent += payload;
+          } else {
+            // plain chunk
+            pre.textContent += line;
           }
           messagesEl.scrollTop = messagesEl.scrollHeight;
         };
@@ -577,6 +609,7 @@ document.getElementById('sendBtn').onclick=send;
         // Stream
         controller = new AbortController();
         const append = createParser(botPre);
+        streamBuffer = '';
         streamDot.classList.add('ok');
         try {
           const r = await fetch('/api/llm/chat', {
@@ -597,6 +630,7 @@ document.getElementById('sendBtn').onclick=send;
             if (value) append(decoder.decode(value, { stream: true }));
           }
           append('\n');
+          if (streamBuffer) parseAndAppend(botPre, '\n');
         } catch (e) {
           botPre.textContent += `\n[stream error] ${String(e)}`;
         } finally {
