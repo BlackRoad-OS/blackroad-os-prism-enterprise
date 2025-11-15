@@ -42,6 +42,11 @@ DEFAULT_CONSENT_SCOPES = frozenset(
 This module defines :class:`AutoNovelAgent`, a minimal agent capable of
 deploying itself, creating weapon‑free games, and now generating tiny novels
 for demonstration purposes.
+"""Simple auto novel agent example with game creation abilities.
+
+This module defines :class:`AutoNovelAgent`, a tiny demonstration agent that can
+deploy itself, create weapon‑free games in supported engines, and draft novel
+outlines.
 """
 
 from dataclasses import dataclass
@@ -69,6 +74,7 @@ class AutoNovelAgent:
     """A small agent that can build games and craft stories."""
     """A toy agent that can deploy itself, create simple games, and write novels."""
     """A toy agent that can deploy itself and create simple games or stories."""
+    """A toy agent that can deploy itself, create simple games and novels."""
 
     name: str = "AutoNovelAgent"
     gamma: float = 1.0
@@ -369,6 +375,23 @@ class AutoNovelAgent:
         """
         return f"{title} is a thrilling tale about {protagonist}."
 
+    def generate_outline(self, topic: str, chapters: int = 3) -> List[str]:
+        """Generate a simple chapter outline for a novel topic.
+
+        Args:
+            topic: Main theme for the novel.
+            chapters: Number of chapters to produce. Must be positive.
+
+        Returns:
+            A list of chapter titles.
+
+        Raises:
+            ValueError: If ``chapters`` is less than 1.
+        """
+        if chapters < 1:
+            raise ValueError("chapters must be at least 1")
+        return [f"Chapter {i + 1}: {topic} Part {i + 1}" for i in range(chapters)]
+
 
 __all__ = [
     "AutoNovelAgent",
@@ -385,3 +408,5 @@ if __name__ == "__main__":
     for record in agent.list_created_games():
         print(record)
     print(agent.write_novel("Journey", "Alice"))
+    for title in agent.generate_outline("Space Adventure", chapters=2):
+        print(title)
