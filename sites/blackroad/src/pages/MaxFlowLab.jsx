@@ -277,6 +277,18 @@ const Graph = forwardRef(function Graph(
     }
     return sequence;
   }, [lastAugIndex, nodes.length, result]);
+const Graph = forwardRef(function Graph({nodes, edges, C, result, lastAug, onEdgeClick}, ref){
+  const W=800,H=400, pad=20;
+  const augEdges = useMemo(()=>{
+    if(lastAug==null || !result?.paths?.length) return [];
+    const idx = Math.min(lastAug, result.paths.length-1);
+    const {par} = result.paths[idx] || {};
+    if(!par) return [];
+    const list=[];
+    let v=nodes.length-1;
+    while(par[v]!==-2 && par[v]!==-1){ list.push([par[v], v]); v=par[v]; }
+    return list.map(e=> e.join("->"));
+  },[result,lastAug,nodes.length]);
 
   return (
     <section className="rounded-lg border border-white/10 bg-white/5 p-3">
