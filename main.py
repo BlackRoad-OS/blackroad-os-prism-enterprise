@@ -4,6 +4,7 @@ from __future__ import annotations
 """Streamlit console for the BlackRoad Prism holographic assistant."""
 
 from __future__ import annotations
+"""Streamlit app for the BlackRoad Prism Generator with GPT and voice input."""
 
 import io
 import os
