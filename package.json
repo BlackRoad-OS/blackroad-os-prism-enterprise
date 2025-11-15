@@ -123,5 +123,10 @@
     "nodemon": "^3.0.2"
     "husky": "^9.1.6",
     "lint-staged": "^15.2.10"
+    "dev": "npm run dev --workspace frontend",
+    "build": "npm run build --workspace frontend",
+    "preview": "npm run preview --workspace frontend",
+    "test": "npm run test --workspace frontend",
+    "postinstall": "npm install --prefix frontend"
   }
 }
