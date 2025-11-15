@@ -10,6 +10,9 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Iterable, Optional, Sequence
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional
 
 import requests
 
@@ -68,6 +71,11 @@ class AutomatedPullRequestManager:
                 "preparing a draft PR."
             )
             return None
+        """Check whether the repository has uncommitted changes."""
+        result = subprocess.run(
+            ["git", "status", "--porcelain"], capture_output=True, text=True, check=False
+        )
+        return bool(result.stdout.strip())
 
         commit_msg = subprocess.run(
             ["git", "log", "-1", "--pretty=%s"],
@@ -554,6 +562,18 @@ class AutomatedPullRequestManager:
             self.log(f"Enabled auto-merge for PR #{pr_number}")
         except requests.RequestException as exc:
             self.log(f"Failed to enable auto-merge for PR #{pr_number}: {exc}")
+    def apply_comment_fixes(self) -> None:
+        """Execute the CODEx comment fixer script to update code comments."""
+        repo_root = Path(__file__).resolve().parents[1]
+        try:
+            subprocess.run(
+                ["node", ".github/tools/codex-apply.js", ".github/prompts/codex-fix-comments.md"],
+                check=True,
+                cwd=repo_root,
+            )
+            self.log("Applied comment fixes")
+        except (OSError, subprocess.CalledProcessError) as exc:
+            self.log(f"Failed to apply comment fixes: {exc}")
 
     def _get_pr_node_id(self, pr_number: int) -> Optional[str]:
         if not self.token:
