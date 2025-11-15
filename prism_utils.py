@@ -45,6 +45,10 @@ import ast
 import re
 
 _NUMERIC_PREFIX_RE = re.compile(r"^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)")
+# Match optional sign, integer/decimal part, and optional exponent.
+_NUMERIC_PREFIX_RE = re.compile(
+    r"^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)(?![eE])"
+)
 
 
 def parse_numeric_prefix(text: str) -> float:
@@ -55,6 +59,11 @@ def parse_numeric_prefix(text: str) -> float:
     a regular expression. The extracted token is parsed with
     :func:`ast.literal_eval` for safety. If the token cannot be parsed or is
     absent, ``1.0`` is returned.
+    The function extracts an optional sign and numeric token at the start of
+    ``text`` using a regular expression. Tokens may include decimal mantissas
+    and scientific-notation exponents (``1e-3`` or ``.5E+2``). The extracted
+    token is parsed with :func:`ast.literal_eval` for safety. If the token
+    cannot be parsed or is absent, ``1.0`` is returned.
     """
     match = _NUMERIC_PREFIX_RE.match(text)
     if not match:
