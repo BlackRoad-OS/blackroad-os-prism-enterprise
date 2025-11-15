@@ -49,6 +49,8 @@ import LucidiaDemo from './pages/LucidiaDemo.jsx'
 import Marketplace from './pages/Marketplace.jsx'
 import MarketplaceDetail from './pages/MarketplaceDetail.jsx'
 import SellerDashboard from './pages/SellerDashboard.jsx'
+import MyPurchases from './pages/MyPurchases.jsx'
+import MarketplaceAdmin from './pages/MarketplaceAdmin.jsx'
 import Login from './components/Login.jsx'
 import RoadCoin from './components/RoadCoin.jsx'
 import { Activity, User, LayoutGrid, HeartPulse, Shield, ShieldCheck, Cpu, Brain, FunctionSquare, Wallet, Rocket, BookOpen, GraduationCap, Sparkles, Music3, GitCommit, Settings, Atom, Stethoscope, Store } from 'lucide-react'
@@ -353,6 +355,8 @@ export default function App(){
               <Route path="/marketplace/listing/:id" element={<MarketplaceDetail />} />
               <Route path="/marketplace/dashboard" element={<SellerDashboard />} />
               <Route path="/marketplace/sell" element={<SellerDashboard />} />
+              <Route path="/marketplace/purchases" element={<MyPurchases />} />
+              <Route path="/marketplace/admin" element={<MarketplaceAdmin />} />
               <Route path="/music" element={<Section><MusicStudio /></Section>} />
               <Route path="/sonic" element={<Section><MusicApp /></Section>} />
               <Route path="/novelty" element={<Section><Novelty /></Section>} />

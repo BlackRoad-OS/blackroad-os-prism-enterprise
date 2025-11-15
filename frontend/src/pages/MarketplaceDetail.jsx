@@ -5,10 +5,13 @@ import {
   getSellerProfile,
   getListingReviews,
   createOrder,
+  confirmOrder,
   addToFavorites,
   removeFromFavorites,
   postReview
 } from '../api';
+import RealityEngineViewer from '../components/RealityEngineViewer';
+import StripeCheckout from '../components/StripeCheckout';
 
 export default function MarketplaceDetail() {
   const { id } = useParams();
@@ -19,8 +22,10 @@ export default function MarketplaceDetail() {
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
   const [selectedLicense, setSelectedLicense] = useState('personal');
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [currentOrder, setCurrentOrder] = useState(null);
 
   useEffect(() => {
     loadListingDetails();
@@ -44,30 +49,51 @@ export default function MarketplaceDetail() {
   }
 
   async function handlePurchase() {
-    if (!listing) return;
+    if (!listing || purchasing) return;
 
-    if (purchasing) return;
     setPurchasing(true);
 
     try {
-      // Create order
+      // Create order in backend
       const orderData = await createOrder({
         listingId: listing.id,
         licenseType: selectedLicense
       });
 
-      // In production, redirect to Stripe checkout
-      // For now, mock the purchase flow
-      alert(`Purchase initiated! Order ID: ${orderData.order.id}\n\nIn production, you would be redirected to Stripe checkout.`);
+      // Store order for checkout
+      setCurrentOrder(orderData.order);
 
-      // Navigate to purchases page
-      navigate('/marketplace/purchases');
+      // Show Stripe checkout modal
+      setShowCheckout(true);
     } catch (err) {
       console.error('Purchase failed:', err);
       alert(err.response?.data?.error || 'Purchase failed');
     } finally {
       setPurchasing(false);
     }
+  }
+
+  async function handlePaymentSuccess(paymentData) {
+    try {
+      // Confirm order with payment intent ID
+      await confirmOrder(currentOrder.id, {
+        paymentIntentId: paymentData.paymentIntentId
+      });
+
+      setShowCheckout(false);
+      alert('Purchase successful! 🎉\n\nYou can now download your asset from My Purchases.');
+
+      // Navigate to purchases page
+      navigate('/marketplace/purchases');
+    } catch (err) {
+      console.error('Order confirmation failed:', err);
+      alert('Payment succeeded but order confirmation failed. Please contact support.');
+    }
+  }
+
+  function handlePaymentCancel() {
+    setShowCheckout(false);
+    setCurrentOrder(null);
   }
 
   async function toggleFavorite() {
@@ -154,13 +180,7 @@ export default function MarketplaceDetail() {
               {/* Thumbnail/3D Preview */}
               <div className="relative aspect-video bg-gray-900">
                 {listing.preview_3d_url ? (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-6xl mb-4">🎮</div>
-                      <p className="text-gray-400">3D Preview (Reality Engine)</p>
-                      <p className="text-gray-500 text-sm mt-2">Interactive 3D viewer would load here</p>
-                    </div>
-                  </div>
+                  <RealityEngineViewer sceneUrl={listing.preview_3d_url} className="w-full h-full" />
                 ) : listing.thumbnail_url ? (
                   <img
                     src={listing.thumbnail_url}
@@ -398,6 +418,25 @@ export default function MarketplaceDetail() {
           </div>
         </div>
       </div>
+
+      {/* Stripe Checkout Modal */}
+      {showCheckout && currentOrder && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="max-w-md w-full">
+            <StripeCheckout
+              amount={getLicensePrice(listing.price_cents, selectedLicense)}
+              currency="usd"
+              onSuccess={handlePaymentSuccess}
+              onCancel={handlePaymentCancel}
+              metadata={{
+                orderId: currentOrder.id,
+                listingId: listing.id,
+                licenseType: selectedLicense
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
