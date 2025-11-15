@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -75,24 +76,36 @@ class WebberBot:
     def format_html(self, file_path: str) -> None:
         """Format an HTML file using Prettier."""
         self._run_prettier(file_path)
+    def _run_prettier(self, file_path: str) -> bool:
+        """Run prettier on ``file_path`` and raise on failure."""
+        try:
+            subprocess.run(["prettier", "--write", file_path], check=True)
+        except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+            raise RuntimeError(f"Prettier failed for {file_path}: {exc}") from exc
+        return True
 
-    def format_css(self, file_path: str) -> None:
+    def format_html(self, file_path: str) -> bool:
+        """Format an HTML file using Prettier."""
+        return self._run_prettier(file_path)
+
+    def format_css(self, file_path: str) -> bool:
         """Format a CSS file using Prettier."""
         self._run_prettier(file_path)
+        return self._run_prettier(file_path)
 
-    def format_js(self, file_path: str) -> None:
+    def format_js(self, file_path: str) -> bool:
         """Format a JavaScript file using Prettier."""
         self._run_prettier(file_path)
+        return self._run_prettier(file_path)
 
     def validate_json(self, file_path: str) -> bool:
-        """Validate a JSON file and notify on failure."""
+        """Validate a JSON file, raising on failure."""
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 json.load(f)
-            return True
         except Exception as exc:  # pylint: disable=broad-except
-            self.notify(f"JSON validation failed for {file_path}: {exc}")
-            return False
+            raise ValueError(f"JSON validation failed for {file_path}: {exc}") from exc
+        return True
 
     def bulk_edit_html(self, search: str, replace: str) -> None:
         """Replace ``search`` with ``replace`` in all HTML files under ``root_dir``."""
@@ -149,9 +162,28 @@ if __name__ == "__main__":
             self.notification_bot.send(message)
         print(message)
 
+    def _suffix_handlers(self) -> dict[str, Callable[[str], bool]]:
+        """Return mapping of file suffixes to handler methods."""
+        return {
+            ".html": self.format_html,
+            ".css": self.format_css,
+            ".js": self.format_js,
+            ".json": self.validate_json,
+        }
+
     def run_on_pr(self, files: list[str]) -> None:
         """Process ``files`` based on their extension."""
+        handlers = self._suffix_handlers()
         for file_path in files:
+            handler = None
+            for suffix, suffix_handler in handlers.items():
+                if file_path.endswith(suffix):
+                    handler = suffix_handler
+                    break
+
+            if handler is None:
+                continue
+
             try:
                 processed = False
                 if file_path.endswith(".html"):
@@ -168,8 +200,16 @@ if __name__ == "__main__":
 
                 if processed:
                     self.notify(f"Processed {file_path} successfully")
+                result = handler(file_path)
             except Exception as exc:  # pylint: disable=broad-except
                 self.notify(f"Error processing {file_path}: {exc}")
+                continue
+
+            if result is False:
+                self.notify(f"Processing failed for {file_path}")
+                continue
+
+            self.notify(f"Processed {file_path} successfully")
 
 
 if __name__ == "__main__":
