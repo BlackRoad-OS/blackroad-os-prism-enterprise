@@ -22,6 +22,13 @@ describe('API security and health', () => {
   });
 
   it('returns security headers on /api/health', async () => {
+  it('responds to /healthz', async () => {
+    const res = await request(app).get('/healthz');
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
+  });
+
+  it('responds to /api/health with security headers', async () => {
     const res = await request(app)
       .get('/api/health')
       .set('Origin', 'https://example.com');
