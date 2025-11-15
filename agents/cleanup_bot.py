@@ -119,6 +119,13 @@ class CleanupBot:
     Args:
         branches: Branch names to delete.
         dry_run: If True, print commands instead of executing them.
+    Parameters
+    ----------
+    branches:
+        A list of branch names to remove.
+    dry_run:
+        When ``True`` the bot only prints the operations it would perform
+        without issuing git commands.
     """
     """Delete local and remote branches after merges."""
 
@@ -189,17 +196,11 @@ class CleanupBot:
 
         return cls(branches=cls.merged_branches(base), dry_run=dry_run)
     def _run_git(self, *args: str) -> subprocess.CompletedProcess:
-        """Execute a git command and return its result.
+        """Run ``git`` with the provided arguments.
 
-        Parameters
-        ----------
-        *args:
-            Additional arguments passed directly to ``git``.
-
-        Returns
-        -------
-        subprocess.CompletedProcess
-            The completed process instance with captured output.
+        Returns the :class:`subprocess.CompletedProcess` for callers that need
+        access to ``stdout`` or ``stderr``. The underlying ``CalledProcessError``
+        is allowed to propagate so the caller can decide how to handle failures.
         """
         return subprocess.run(["git", *args], check=True, capture_output=True, text=True)
 
@@ -242,6 +243,12 @@ class CleanupBot:
 
         Returns:
             True if the branch was deleted both locally and remotely, False otherwise.
+        """Delete ``branch`` locally and remotely when possible.
+
+        The method keeps attempting both deletions even if the first fails and
+        prints a short message for each unsuccessful step. A ``True`` return
+        value means both attempts succeeded, while ``False`` indicates at least
+        one failure.
         """
         success = True
     def _execute(self, *cmd: str) -> bool:
@@ -350,6 +357,14 @@ class CleanupBot:
     return summary.exit_code()
 
         results: List[BranchCleanupResult] = []
+        """Attempt to remove each configured branch and report the outcome.
+
+        The returned mapping stores ``True`` when both local and remote
+        deletions succeed. When ``dry_run`` is enabled every branch is mapped to
+        ``True`` to reflect that the deletions would be attempted without
+        modifying the repository.
+        """
+        results: Dict[str, bool] = {}
         for branch in self.branches:
             try:
                 self._run("git", "branch", "-D", branch)
