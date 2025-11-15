@@ -1,6 +1,7 @@
 {
   "name": "blackroad-prism-console",
   "workspaceFolder": "/workspace",
+  "name": "BlackRoad DevX",
   "build": {
     "dockerfile": "Dockerfile"
   },
@@ -24,6 +25,9 @@
     },
     "ghcr.io/devcontainers/features/redis:1": {
       "version": "7"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
     },
     "ghcr.io/devcontainers/features/aws-cli:1": {},
     "ghcr.io/devcontainers/features/terraform:1": {
@@ -58,6 +62,9 @@
   ],
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "updateContentCommand": "echo '✅ Dev container ready'",
+    "ghcr.io/devcontainers/features/aws-ssm-session-manager:1": {}
+  },
+  "postCreateCommand": "npm install -g commitlint @commitlint/config-conventional && pip install --user pre-commit",
   "customizations": {
     "vscode": {
       "settings": {
@@ -90,5 +97,19 @@
         "ms-vscode.makefile-tools"
       ]
     }
+        "terraform.codelens.enabled": true,
+        "editor.formatOnSave": true
+      },
+      "extensions": [
+        "HashiCorp.terraform",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-python.python"
+      ]
+    }
+  },
+  "remoteUser": "vscode",
+  "containerEnv": {
+    "AWS_REGION": "us-east-1"
   }
 }
