@@ -29,12 +29,20 @@ function segIntersectsRect(a,b, R){ // axis-aligned rectangle R={x,y,w,h}
   return entersWithinSegment || segmentSpansRectangle;
     if(p[i]===0){ if(q[i]<0) return false; }
     else {
+    if(p[i]===0){
+      if(q[i]<0) return false;
+    } else {
       const r=q[i]/p[i];
-      if(p[i]<0){ if(r>t1) return false; if(r>t0) t0=r; }
-      else { if(r<t0) return false; if(r<t1) t1=r; }
+      if(p[i]<0){
+        if(r>t1) return false;
+        if(r>t0) t0=r;
+      } else {
+        if(r<t0) return false;
+        if(r<t1) t1=r;
+      }
     }
   }
-  return t0<=t1;
+  return t0<=t1 && t1>=0 && t0<=1;
 }
 function collision(a,b, obstacles){ for(const R of obstacles){ if(segIntersectsRect(a,b,R)) return true; } return false; }
 
