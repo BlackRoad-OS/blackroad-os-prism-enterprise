@@ -928,6 +928,23 @@ footer{
     <div class="gradient-orb orb-3"></div>
     <div class="grid-overlay"></div>
   </div>
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container nav" id="nav">
+        <a href="#" class="brand" aria-label="BlackRoad.io Home">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>BlackRoad<span class="muted">.io</span></span>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#features">Features</a>
+          <a href="#docs">Docs</a>
+          <a href="#portal">Portal</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#subscribe-section">Subscribe</a>
+        </nav>
 
   <!-- Header -->
   <header class="header">
@@ -1534,4 +1551,52 @@ const client = <span class="text-brand-blue">new</span> Client({
     </div>
   </footer>
 </body>
+    </footer>
+
+    <div id="root"></div>
+    <script>
+      // Mobile nav toggle
+      (function () {
+        const nav = document.getElementById('nav');
+        const toggle = document.querySelector('[data-nav-toggle]');
+        if (toggle) {
+          toggle.addEventListener('click', function () {
+            const open = nav.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', String(open));
+          });
+        }
+        // Year
+        document.getElementById('year').textContent = new Date().getFullYear();
+      })();
+    </script>
+    <script>
+      const routes = {
+        '/': 'Welcome to BlackRoad.io — site is LIVE via GitHub Pages.',
+        '/login': 'Login placeholder (static).',
+        '/chat': 'Chat placeholder (local-only LLM to be wired later).',
+        '/memories': 'Memories placeholder.',
+        '/coding': 'Coding portal placeholder.',
+        '/backend': 'Backend portal placeholder.'
+      };
+
+      function route() {
+        const path = location.pathname.replace(/\/+$/, '') || '/';
+        const view = document.getElementById('view');
+        if (view) view.textContent = routes[path] || '404 — routed to SPA root. Use header links.';
+      }
+      window.addEventListener('popstate', route);
+
+      document.addEventListener('DOMContentLoaded', () => {
+        route();
+        const form = document.getElementById('subscribe-form');
+        if (!form) return;
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const msgEl = document.getElementById('sub-msg');
+          msgEl.textContent = 'Subscribe temporarily offline';
+          form.reset();
+        });
+      });
+    </script>
+  </body>
 </html>
