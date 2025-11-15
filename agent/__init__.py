@@ -103,3 +103,8 @@ from .config import AgentConfig
 from .runtime import AgentRuntime
 
 __all__ = ["AgentConfig", "AgentRuntime"]
+"""Agent service package exposing the FastAPI application."""
+
+from .api import app
+
+__all__ = ["app"]
