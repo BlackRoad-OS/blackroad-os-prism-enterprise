@@ -847,6 +847,24 @@ document.getElementById('sendBtn').onclick=send;
             const isEvent =
               ct.includes('text/event-stream') ||
               ct.includes('application/x-ndjson');
+            const processDataLine = (line) => {
+              const trimmed = (line || '').trim();
+              if (!trimmed || !trimmed.startsWith('data:')) return false;
+              const payload = trimmed.slice(5).trim();
+              if (!payload || payload === '[DONE]') {
+                return payload === '[DONE]';
+              }
+              try {
+                const data = JSON.parse(payload);
+                if (data.delta) {
+                  bot += data.delta;
+                  last.innerHTML = '<div class="pill">assistant</div>' + bot;
+                }
+                return !!data.done;
+              } catch (err) {
+                return false;
+              }
+            };
             let buf = '';
             while (true) {
               const { value, done } = await reader.read();
@@ -865,6 +883,7 @@ document.getElementById('sendBtn').onclick=send;
                     last.innerHTML = '<div class="pill">assistant</div>' + bot;
                   }
                   if (data.done) {
+                  if (processDataLine(lines[i])) {
                     finished = true;
                     break;
                   }
@@ -881,6 +900,7 @@ document.getElementById('sendBtn').onclick=send;
                           '<div class="pill">assistant</div>' + bot;
                       }
                     }
+                    processDataLine(buf);
                   }
                   return;
                 }
@@ -898,6 +918,7 @@ document.getElementById('sendBtn').onclick=send;
                   last.innerHTML = '<div class="pill">assistant</div>' + bot;
                 }
               }
+              processDataLine(buf);
             }
           } catch (e) {
             return fallback(body, text);
