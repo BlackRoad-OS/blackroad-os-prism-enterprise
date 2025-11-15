@@ -2,16 +2,25 @@
   "name": "@lucidia/core",
   "version": "0.0.1",
   "description": "Core domain types, validators, crypto helpers, and the FeeForge billing engine for BlackRoad Finance.",
+  "name": "@blackroad/compliance-core",
+  "version": "0.1.0",
+  "private": true,
   "type": "module",
-  "license": "Apache-2.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./policies": {
+      "import": "./dist/policies/index.js",
+      "types": "./dist/policies/index.d.ts"
+    }
+  },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "clean": "rimraf dist"
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run"
   },
   "dependencies": {
     "decimal.js": "^10.4.3",
@@ -23,5 +32,11 @@
     "rimraf": "^6.0.1",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"
+    "zod": "^3.23.8",
+    "@blackroad/compliance-db": "workspace:*",
+    "@blackroad/compliance-archival": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "~5.5.4"
   }
 }

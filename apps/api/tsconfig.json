@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
@@ -13,4 +13,8 @@
   },
   "include": ["src", "tests", "../attest"],
   "exclude": ["dist"]
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src"]
 }

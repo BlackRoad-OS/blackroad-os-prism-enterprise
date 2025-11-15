@@ -93,5 +93,30 @@
   "devDependencies": {
     "tsx": "^4.7.0",
     "typescript": "^5.4.0"
+  "name": "@blackroad/compliance-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/server.js",
+  "types": "dist/server.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "fastify": "^4.28.1",
+    "@fastify/jwt": "^7.2.1",
+    "@fastify/swagger": "^8.14.0",
+    "@fastify/swagger-ui": "^3.0.0",
+    "zod": "^3.23.8",
+    "@blackroad/compliance-db": "workspace:*",
+    "@blackroad/compliance-core": "workspace:*",
+    "@blackroad/compliance-reviewers": "workspace:*",
+    "@blackroad/compliance-archival": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "~5.5.4"
   }
 }
