@@ -13,7 +13,7 @@ from fastapi import FastAPI
 
 from .config import Settings, get_settings
 from .instrumentation import configure_tracing, instrument_fastapi
-from .logging import configure_logging, get_logger
+from .structured_logging import configure_logging, get_logger
 from .metrics import metrics
 from .routes import router as health_router
 
@@ -21,7 +21,7 @@ logger = get_logger(__name__)
 
 
 @asynccontextmanager
-def lifespan(app: FastAPI) -> AsyncIterator[None]:
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.start_time = time.monotonic()
     app.state.shutdown_event = asyncio.Event()
     logger.info("startup")

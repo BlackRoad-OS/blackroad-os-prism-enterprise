@@ -6,7 +6,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException
 
 from .config import Settings, get_settings
-from .logging import get_logger
+from .structured_logging import get_logger
 
 router = APIRouter()
 logger = get_logger(__name__)

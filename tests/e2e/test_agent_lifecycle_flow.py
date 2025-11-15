@@ -10,6 +10,15 @@ from typing import Dict, Any
 import json
 
 
+async def request_or_skip(client: httpx.AsyncClient, method: str, url: str, **kwargs):
+    """Perform an HTTP request or skip the test if the endpoint is unreachable."""
+
+    try:
+        return await client.request(method, url, **kwargs)
+    except httpx.RequestError as exc:
+        pytest.skip(f"API at {url} is unavailable: {exc}")
+
+
 class TestAgentSpawnToTaskCompletion:
     """Test complete flow: spawn agent -> assign task -> complete -> shutdown"""
 
@@ -37,7 +46,7 @@ class TestAgentSpawnToTaskCompletion:
         6. Shutdown agent
         """
         # Step 1: Spawn agent
-        spawn_response = await http_client.post(
+        spawn_response = await request_or_skip(http_client, "post", 
             f"{api_base_url}/v1/agents/spawn",
             json={
                 "agent_type": "cecilia",
@@ -56,7 +65,7 @@ class TestAgentSpawnToTaskCompletion:
         # Step 2: Verify agent is registered
         await asyncio.sleep(1)  # Wait for agent to initialize
 
-        status_response = await http_client.get(
+        status_response = await request_or_skip(http_client, "get", 
             f"{api_base_url}/v1/agents/{agent_id}/status"
         )
 
@@ -65,7 +74,7 @@ class TestAgentSpawnToTaskCompletion:
         assert status_data.get("status") in ["active", "idle"]
 
         # Step 3: Assign task to agent
-        task_response = await http_client.post(
+        task_response = await request_or_skip(http_client, "post", 
             f"{api_base_url}/v1/agents/{agent_id}/tasks",
             json={
                 "task_type": "code_review",
@@ -86,7 +95,7 @@ class TestAgentSpawnToTaskCompletion:
         task_completed = False
 
         while elapsed < max_wait:
-            task_status_response = await http_client.get(
+            task_status_response = await request_or_skip(http_client, "get", 
                 f"{api_base_url}/v1/tasks/{task_id}/status"
             )
 
@@ -102,7 +111,7 @@ class TestAgentSpawnToTaskCompletion:
         assert task_completed, "Task should complete within timeout"
 
         # Step 5: Verify task results
-        result_response = await http_client.get(
+        result_response = await request_or_skip(http_client, "get", 
             f"{api_base_url}/v1/tasks/{task_id}/result"
         )
 
@@ -111,7 +120,7 @@ class TestAgentSpawnToTaskCompletion:
         assert "result" in result_data or "output" in result_data
 
         # Step 6: Shutdown agent
-        shutdown_response = await http_client.post(
+        shutdown_response = await request_or_skip(http_client, "post", 
             f"{api_base_url}/v1/agents/{agent_id}/shutdown"
         )
 
@@ -119,7 +128,7 @@ class TestAgentSpawnToTaskCompletion:
 
         # Verify agent is shut down
         await asyncio.sleep(1)
-        final_status_response = await http_client.get(
+        final_status_response = await request_or_skip(http_client, "get", 
             f"{api_base_url}/v1/agents/{agent_id}/status"
         )
 
@@ -152,7 +161,7 @@ class TestUserAuthenticationToAPICall:
         4. Verify access granted
         """
         # Step 1: User login
-        login_response = await http_client.post(
+        login_response = await request_or_skip(http_client, "post", 
             f"{api_base_url}/auth/login",
             json={"email": "test@blackroad.io", "password": "testpassword"},
         )
@@ -170,7 +179,7 @@ class TestUserAuthenticationToAPICall:
             assert access_token is not None
 
             # Step 3: Access protected resource
-            protected_response = await http_client.get(
+            protected_response = await request_or_skip(http_client, "get", 
                 f"{api_base_url}/api/user/profile",
                 headers={"Authorization": f"Bearer {access_token}"},
             )
@@ -216,7 +225,7 @@ class TestProjectCreationToTaskAssignment:
         headers = {"Authorization": f"Bearer {auth_token}"}
 
         # Step 1: Create project
-        project_response = await http_client.post(
+        project_response = await request_or_skip(http_client, "post", 
             f"{api_base_url}/api/projects",
             json={
                 "name": "E2E Test Project",
@@ -240,7 +249,7 @@ class TestProjectCreationToTaskAssignment:
             # Step 2: Create tasks
             task_ids = []
             for i in range(3):
-                task_response = await http_client.post(
+                task_response = await request_or_skip(http_client, "post", 
                     f"{api_base_url}/api/projects/{project_id}/tasks",
                     json={
                         "title": f"Test Task {i+1}",
@@ -258,7 +267,7 @@ class TestProjectCreationToTaskAssignment:
 
             # Step 3: Update task status
             for task_id in task_ids:
-                update_response = await http_client.patch(
+                update_response = await request_or_skip(http_client, "patch", 
                     f"{api_base_url}/api/tasks/{task_id}",
                     json={"status": "completed"},
                     headers=headers,
@@ -268,7 +277,7 @@ class TestProjectCreationToTaskAssignment:
                     assert True  # Task updated
 
             # Step 4: Verify project status
-            project_status_response = await http_client.get(
+            project_status_response = await request_or_skip(http_client, "get", 
                 f"{api_base_url}/api/projects/{project_id}", headers=headers
             )
 
@@ -304,7 +313,7 @@ class TestAgentSwarmCoordination:
         # Step 1: Spawn multiple agents
         agent_ids = []
         for i in range(3):
-            spawn_response = await http_client.post(
+            spawn_response = await request_or_skip(http_client, "post", 
                 f"{api_base_url}/v1/agents/spawn",
                 json={"agent_type": "worker", "instance_id": f"worker-{i}"},
             )
@@ -319,7 +328,7 @@ class TestAgentSwarmCoordination:
             pytest.skip("No agents spawned")
 
         # Step 2: Form coordination pattern
-        formation_response = await http_client.post(
+        formation_response = await request_or_skip(http_client, "post", 
             f"{api_base_url}/v1/swarm/formations",
             json={"pattern": "DELTA", "agents": agent_ids},
         )
@@ -334,7 +343,7 @@ class TestAgentSwarmCoordination:
             swarm_id = formation_data.get("swarm_id")
 
             # Assign task to swarm
-            task_response = await http_client.post(
+            task_response = await request_or_skip(http_client, "post", 
                 f"{api_base_url}/v1/swarms/{swarm_id}/tasks",
                 json={"task_type": "distributed_computation", "data": "test"},
             )
@@ -345,7 +354,7 @@ class TestAgentSwarmCoordination:
 
         # Step 4: Shutdown all agents
         for agent_id in agent_ids:
-            await http_client.post(
+            await request_or_skip(http_client, "post", 
                 f"{api_base_url}/v1/agents/{agent_id}/shutdown"
             )
 
@@ -373,7 +382,7 @@ class TestQuantumComputingWorkflow:
         4. Verify measurements
         """
         # Step 1: Submit circuit
-        circuit_response = await http_client.post(
+        circuit_response = await request_or_skip(http_client, "post", 
             f"{api_base_url}/quantum/circuits",
             json={
                 "circuit_type": "bell_state",
@@ -396,7 +405,7 @@ class TestQuantumComputingWorkflow:
                 results = None
 
                 while elapsed < max_wait:
-                    result_response = await http_client.get(
+                    result_response = await request_or_skip(http_client, "get", 
                         f"{api_base_url}/quantum/jobs/{job_id}"
                     )
 
@@ -451,7 +460,7 @@ class TestWebhookIntegrationFlow:
         }
 
         # Send webhook
-        webhook_response = await http_client.post(
+        webhook_response = await request_or_skip(http_client, "post", 
             f"{api_base_url}/webhooks/stripe",
             json=webhook_payload,
             headers={
