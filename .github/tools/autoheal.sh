@@ -27,10 +27,11 @@ git_add() { git add "$@" && changed=true; }
 
 # Step 1: Ensure package.json exists with basic npm scripts
 # Track whether auto-heal made modifications
+# Track whether auto-heal modified files
 changed=false
 git_add() { git add "$@" && changed=true; }
 
-# Step 0: ensure package.json exists with basic npm scripts
+# Step 1: Ensure package.json exists with basic npm scripts
 if [ ! -f package.json ]; then
   npm init -y >/dev/null 2>&1 || true
   git_add package.json
@@ -101,7 +102,7 @@ git diff --quiet || { git add -A && changed=true; }
 # Stage any changes produced by formatters or linters
 git diff --quiet || { git add -A && changed=true; }
 
-# Step 3: commit if any files changed
+# Step 4: Commit if any files changed
 if $changed; then
   git commit -m "chore(auto-heal): baseline configs + prettier/eslint --fix" || true
   echo "committed=1" >> "$GITHUB_OUTPUT"
