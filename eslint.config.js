@@ -1,3 +1,4 @@
+/* eslint-env node */
 const js = require('@eslint/js');
 
 const nodeGlobals = {
@@ -17,6 +18,7 @@ const nodeRules = {
 };
 
 module.exports = [
+  { ignores: ['node_modules', '_trash'] },
   js.configs.recommended,
   {
     files: [
@@ -35,6 +37,10 @@ module.exports = [
   },
   {
     files: ['srv/blackroad-api/**/*.js', 'tests/**/*.test.js'],
+      'srv/blackroad-api/routes/git.js',
+      'tests/api_health.test.js',
+      'tests/git_api.test.js',
+    ],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'commonjs',

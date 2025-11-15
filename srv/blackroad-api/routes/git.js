@@ -31,6 +31,7 @@ router.get('/health', async (_req, res) => {
       remoteUrl = out.stdout.trim();
     } catch {
       // Ignore if the remote is not configured
+      /* ignore missing remote */
     }
     res.json({
       ok: true,
