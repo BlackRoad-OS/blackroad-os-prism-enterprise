@@ -79,6 +79,31 @@ app.use((req, res, next) => {
     });
     if (process.env.LOG_LEVEL !== 'silent') {
       console.info(logLine);
+// Partner relay for mTLS-authenticated teammates
+require('./modules/partner_relay_mtls')({ app });
+require('./modules/projects')({ app });
+require('./modules/pr_proxy')({ app });
+require('./modules/patentnet')({ app });
+require('./modules/truth_pubsub')({ app });
+
+const emitter = new EventEmitter();
+const jobs = new Map();
+let jobSeq = 0;
+
+function addJob(type, payload, runner) {
+  const id = String(++jobSeq);
+  const job = { id, type, payload, status: 'queued', created: Date.now(), logs: [] };
+  jobs.set(id, job);
+  process.nextTick(async () => {
+    job.status = 'running';
+    try {
+      await runner(id, payload);
+      job.status = 'success';
+    } catch (e) {
+      job.status = 'failed';
+      job.error = String(e);
+    } finally {
+      emitter.emit(id, null);
     }
   });
   next();
