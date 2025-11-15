@@ -1,5 +1,19 @@
+# <!-- FILE: .gitattributes -->
 * text=auto eol=lf
 *.sh text eol=lf
 *.md diff=markdown
 *.{js,jsx,ts,tsx} linguist-language=JavaScript
-
+*.py text eol=lf
+*.db binary
+# Treat unencrypted env files as binary so Git won’t diff them
+.env* -text
+# Ensure encrypted env files are treated as binary blobs
+.env.enc binary
+*.svg text
+*.json text
+*.yaml text
+*.yml text
+*.md text
+*.csv text
+*.ndjson text
+*.pgm text

@@ -1,18 +1,27 @@
+"""Tests for the :mod:`agents.auto_novel_agent` module."""
 import pytest
 
 from agents.auto_novel_agent import AutoNovelAgent
 
 
-@pytest.fixture(autouse=True)
-def reset_engines():
-    """Ensure tests do not leak engine changes to each other."""
-    AutoNovelAgent.SUPPORTED_ENGINES = {"unity", "unreal"}
-    yield
-    AutoNovelAgent.SUPPORTED_ENGINES = {"unity", "unreal"}
-
-
-def test_add_supported_engine_enables_creation():
+def test_generate_storyline_returns_expected_sentence() -> None:
+    """AutoNovelAgent should build a deterministic storyline."""
     agent = AutoNovelAgent()
+
+    storyline = agent.generate_storyline("Ada", "a digital forest")
+
+    assert (
+        storyline
+        == "Ada embarks on an adventure in a digital forest, "
+        "discovering the true meaning of courage."
+    )
+
+
+def test_list_supported_engines_sorted() -> None:
+    """The supported engines list should be sorted alphabetically."""
+    agent = AutoNovelAgent()
+
+    assert agent.list_supported_engines() == ["unity", "unreal"]
     with pytest.raises(ValueError):
         agent.create_game("godot")
     agent.add_supported_engine("Godot")
@@ -20,8 +29,19 @@ def test_add_supported_engine_enables_creation():
     agent.create_game("godot")
 
 
-def test_remove_supported_engine_blocks_creation():
+def test_remove_supported_engine_disables_creation():
     agent = AutoNovelAgent()
-    agent.remove_supported_engine("unity")
+    agent.add_supported_engine("godot")
+    agent.remove_supported_engine("Godot")
     with pytest.raises(ValueError):
-        agent.create_game("unity")
+        agent.create_game("godot")
+
+
+def test_supported_engines_are_isolated_per_instance():
+    first = AutoNovelAgent()
+    second = AutoNovelAgent()
+
+    first.add_supported_engine("godot")
+
+    assert "godot" in first.list_supported_engines()
+    assert "godot" not in second.list_supported_engines()

@@ -1,10 +1,10 @@
-// FILE: /srv/blackroad-api/src/db.js
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const Database = require('better-sqlite3');
+const { log } = require('./logger');
 const { DB_PATH, ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_NAME } = require('./config');
 
 // Ensure directory exists
@@ -13,6 +13,29 @@ try {
 } catch {}
 
 const db = new Database(DB_PATH);
+
+// Optional SQL trace logger for debugging
+if (process.env.SQL_DEBUG) {
+  const origExec = db.exec.bind(db);
+  db.exec = function (sql) {
+    log('[sql][exec]', sql);
+    return origExec(sql);
+  };
+
+  const origPrepare = db.prepare.bind(db);
+  db.prepare = function (sql) {
+    const stmt = origPrepare(sql);
+    const methods = ['run', 'get', 'all', 'iterate'];
+    methods.forEach(method => {
+      const orig = stmt[method].bind(stmt);
+      stmt[method] = function (...params) {
+        log(`[sql][${method}]`, sql, params);
+        return orig(...params);
+      };
+    });
+    return stmt;
+  };
+}
 
 // Pragmas for safety/performance
 db.pragma('journal_mode = WAL');
@@ -32,6 +55,11 @@ db.exec(`
   );
 `);
 
+function isIgnorableMigrationError(err) {
+  const message = String(err?.message || err || '');
+  return /duplicate column name/i.test(message) || /already exists/i.test(message);
+}
+
 const applied = new Set(db.prepare('SELECT filename FROM schema_migrations').all().map(r => r.filename));
 
 const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith('.sql')).sort();
@@ -39,6 +67,25 @@ for (const file of files) {
   if (!applied.has(file)) {
     const full = path.join(migrationsDir, file);
     const sql = fs.readFileSync(full, 'utf-8');
+    const hasManualTransaction = /\bBEGIN\b/i.test(sql);
+
+    if (hasManualTransaction) {
+      try {
+        db.exec(sql);
+        db.prepare('INSERT INTO schema_migrations (filename) VALUES (?)').run(file);
+        console.log(`[db] applied migration ${file}`);
+      } catch (e) {
+        if (isIgnorableMigrationError(e)) {
+          db.prepare('INSERT INTO schema_migrations (filename) VALUES (?)').run(file);
+          console.warn(`[db] skipped migration ${file}: ${e.message}`);
+        } else {
+          console.error(`[db] migration ${file} failed:`, e);
+          throw e;
+        }
+      }
+      continue;
+    }
+
     db.exec('BEGIN');
     try {
       db.exec(sql);
@@ -46,6 +93,12 @@ for (const file of files) {
       db.exec('COMMIT');
       console.log(`[db] applied migration ${file}`);
     } catch (e) {
+      if (isIgnorableMigrationError(e)) {
+        db.exec('ROLLBACK');
+        db.prepare('INSERT INTO schema_migrations (filename) VALUES (?)').run(file);
+        console.warn(`[db] skipped migration ${file}: ${e.message}`);
+        continue;
+      }
       db.exec('ROLLBACK');
       console.error(`[db] migration ${file} failed:`, e);
       throw e;

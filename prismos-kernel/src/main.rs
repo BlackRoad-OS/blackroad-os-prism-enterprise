@@ -1,6 +1,8 @@
 #![no_std]
 #![no_main]
 
+use core::fmt::Write;
+use core::panic::PanicInfo;
 use core::panic::PanicInfo;
 use core::fmt::Write;
 use spin::Mutex;
@@ -20,6 +22,8 @@ macro_rules! serial_println {
 }
 
 pub mod serial {
+    use super::SERIAL1;
+    use core::fmt::{self, Write};
     use core::fmt::{self, Write};
     use super::SERIAL1;
 
@@ -33,7 +37,7 @@ pub mod serial {
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     serial_init();
-    serial_println!("PrismOS Cadillac Kernel Booting…");
+    serial_println!("PrismOS Lucidia Kernel Booting…");
     loop {}
 }
 

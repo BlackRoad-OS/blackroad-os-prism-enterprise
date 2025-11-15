@@ -1,8 +1,34 @@
-FILE: Dockerfile
+# --- base: python + node ---
+FROM mcr.microsoft.com/devcontainers/python:3.14 as base
+FROM mcr.microsoft.com/devcontainers/python:3.11 as base
+# Includes Debian, git, curl, common build tools
 
-Multi-stage, Node 18 Alpine
+# Node 20 (via NodeSource)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+  && apt-get install -y nodejs \
+  && npm -v && node -v
 
-FROM node:18-alpine AS builder
+# Poetry optional (not used by default) & jq for scripts
+RUN apt-get update && apt-get install -y jq && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+COPY pyproject.toml ./
+RUN pip install -U pip && pip install -e . || true
+
+# --- website deps ---
+FROM base as webdeps
+COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
+# Choose your PM; default to npm if lock missing
+RUN if [ -f package-lock.json ]; then npm ci; \
+    elif [ -f yarn.lock ]; then npm i -g yarn && yarn --frozen-lockfile; \
+    elif [ -f pnpm-lock.yaml ]; then npm i -g pnpm && pnpm i --frozen-lockfile; \
+    else npm init -y; fi
+
+# --- runtime ---
+FROM base as runtime
+# Multi-stage, Node 22 Alpine
+
+FROM node:25-alpine AS builder
 WORKDIR /app
 RUN apk add --no-cache python3 make g++
 COPY package*.json ./ 2>/dev/null || true
@@ -10,9 +36,9 @@ RUN [ -f package.json ] && npm ci || true
 COPY . .
 
 # If you have a build step, enable: RUN npm run build
-If you have a build step, enable: RUN npm run build
+# If you have a build step, enable: RUN npm run build
 
-FROM node:18-alpine AS production
+FROM node:25-alpine AS production
 WORKDIR /app
 RUN addgroup -g 1001 -S nodejs && adduser -S lucidia -u 1001
 ENV NODE_ENV=production PORT=8000
@@ -21,11 +47,11 @@ USER lucidia
 EXPOSE 8000
 
 # Adjust entrypoint if your app uses a server wrapper
-Adjust entrypoint if your app uses a server wrapper
+# Adjust entrypoint if your app uses a server wrapper
 
 CMD ["node", "src/comprehensive-lucidia-system.js"]
 # Multi-stage SPA builder
-FROM node:22-alpine AS build
+FROM node:25-alpine AS build
 WORKDIR /app
 COPY sites/blackroad ./sites/blackroad
 RUN cd sites/blackroad && npm ci || npm i --package-lock-only && npm run build
@@ -110,12 +136,87 @@ RUN apk add --no-cache \
 
 COPY package*.json ./
 RUN npm install
+
+WORKDIR /workspace
+COPY pyproject.toml ./
+RUN pip install -U pip && pip install -e . || true
+
+# --- website deps ---
+FROM base as webdeps
+COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
+# Choose your PM; default to npm if lock missing
+RUN if [ -f package-lock.json ]; then npm ci; \
+    elif [ -f yarn.lock ]; then npm i -g yarn && yarn --frozen-lockfile; \
+    elif [ -f pnpm-lock.yaml ]; then npm i -g pnpm && pnpm i --frozen-lockfile; \
+    else npm init -y; fi
+
+# --- runtime ---
+FROM base as runtime
 COPY . .
+# Install Python test deps
+RUN pip install -U pytest jsonschema
+# Install web deps by copying from webdeps if present
+COPY --from=webdeps /workspace/node_modules /workspace/node_modules
 
-RUN addgroup -S nodejs -g 1001 \
-  && adduser -S -G nodejs -u 1001 -h /home/lucidia lucidia \
-  && chown -R lucidia:nodejs /app
+# Build site (optional; dev server uses on-demand build)
+RUN npm run build --if-present || true
 
-USER lucidia
-EXPOSE 8000
-CMD ["npm", "run", "dev"]
+EXPOSE 3000
+CMD ["bash", "-lc", "echo 'Dev container ready. Use: npm run dev (website) | pytest | brc ...'"]
+FROM python:3.14-slim AS builder
+WORKDIR /app
+COPY dist/wheels /wheels
+RUN python -m venv /venv \
+    && /venv/bin/pip install --no-index --find-links /wheels blackroad-prism-console
+
+FROM python:3.14-slim
+WORKDIR /app
+COPY --from=builder /venv /venv
+COPY dist/SBOM.spdx.json dist/SBOM.spdx.json
+LABEL org.opencontainers.image.revision="unknown" \
+      org.opencontainers.image.version="0.1.0" \
+      sbom="/app/dist/SBOM.spdx.json"
+ENV PATH=/venv/bin:$PATH
+CMD ["python", "-m", "cli.console", "--help"]
+FROM python:3.14 as builder
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+FROM python:3.14-slim
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+WORKDIR /app
+COPY --from=builder /usr/local /usr/local
+COPY . /app
+RUN useradd -m appuser
+USER appuser
+ENTRYPOINT ["python", "-m", "cli.console"]
+# syntax=docker/dockerfile:1
+
+FROM node:25-alpine AS base
+# common build dependencies
+RUN apk add --no-cache python3 make g++ curl
+
+# ----- Backend stage -----
+FROM base AS backend
+WORKDIR /srv/blackroad-api
+COPY backend/package*.json ./
+RUN npm ci --omit=dev
+COPY backend ./
+COPY server_full.js ./
+ENV NODE_ENV=production
+EXPOSE 4000
+CMD ["node", "server_full.js"]
+
+# ----- Frontend stage -----
+FROM base AS frontend
+WORKDIR /var/www/blackroad
+COPY frontend/package*.json ./
+RUN npm ci
+COPY frontend ./
+RUN npm run build
+ENV NODE_ENV=production
+EXPOSE 5173
+CMD ["npx", "vite", "preview", "--host", "0.0.0.0", "--port", "5173"]
+

@@ -1,0 +1,21 @@
+name: Deploy Prod
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Block if protections relaxed
+        run: |
+          set -e
+          strict=$(gh api repos/${{ github.repository }}/branches/main/protection --jq '.required_status_checks.strict' || echo false)
+          admins=$(gh api repos/${{ github.repository }}/branches/main/protection --jq '.enforce_admins.enabled' || echo false)
+          if [ "$strict" != "true" ] || [ "$admins" != "true" ]; then
+            echo "❌ Protections relaxed. Aborting prod deploy."
+            exit 1
+          fi
+      - name: Deploy
+        run: |
+          echo "Ship to prod here (k8s/ecs/fly) only when protections are strict"

@@ -1,14 +1,33 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/sites/blackroad"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "npm"
-    directory: "/services/api"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "github-actions"
+  - package-ecosystem: npm
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: weekly
+    labels:
+      - dependencies
+      - npm
+  - package-ecosystem: npm
+    directory: "/apps/api"
+    schedule: { interval: weekly }
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule: { interval: weekly }
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "npm"
+    directory: "/prism/server"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "npm"
+    directory: "/prism/apps/web"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "daily"

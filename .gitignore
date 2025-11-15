@@ -1,49 +1,90 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.env
+.venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
 # Sensitive SSH keys
 sshprivate.sh
 publicssh.sh
 
 # Node
 node_modules/
+
+# Project artifacts
+artifacts/*
+!artifacts/.gitkeep
+!artifacts/agents/
+!artifacts/agents/identities.jsonl
+!artifacts/agents/
+!artifacts/agents/identities.jsonl
+dist/
+coverage/
+reports/
+
+# Logs and local data
+*.log
+# Exclude Node.js dependencies everywhere
+**/node_modules/
 dist/
 .cache/
+# Ignore environment files for the health sidecar service
+services/health-sidecar/.env
 .env
+!tools/tools-adapter/.env
+workers/unity/downloads/
+artifacts.sha256
+public/artifacts.sha256
 
+# Local data
+srv/blackroad-api/blackroad.db
+_trash/
+
+# Secrets
+secrets/
+config/dev_signing_key.txt
 # Logs
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
+# Deployment logs written by CLI tooling or remote runners
+blackroad_deploy.log*
+logs/blackroad_deploy.log*
+**/blackroad_deploy.log*
 
 # OS
 .DS_Store
 Thumbs.db
 
 # Artifacts
-artifacts/
 coverage/
+tests/_codex_autogen/
+.tmp/
+*.out.md
+services/quantum_lab/*.db
 
 # Project-specific
 repos/
 runtime/
 __pycache__/
 codex/runtime/
-
-!opt/blackroad/tdb/.env
-node_modules/
-node_modules/
-**/node_modules/
-node_modules/
-services/health-sidecar/node_modules/
-services/health-sidecar/.env
-<<<<<<< Updated upstream
-<<<<<<< bbb
-=======
-node_modules/
-/benchmarks/
-**/node_modules/
 benchmarks/
+*.egg-info/
+
+
+# Python build artifacts
+**/*.egg-info/
+
 # Lucidia artifacts
 secrets/*
 datasets/
+!agents/codex/24-storyteller/datasets/
+!agents/codex/24-storyteller/datasets/*.json
 models/
 checkpoints/
 outputs/
@@ -52,11 +93,8 @@ rag/index/meta.json
 *.enc
 !secrets/README.md
 !secrets/*.env.example
+
 # Codex CI kit
-/tests/_codex_autogen/
-.tmp/
-*.out.md
-# Codex artifacts
 tests/_codex_autogen/
 .tmp/
 *.out.md
@@ -65,20 +103,57 @@ tests/_codex_autogen/
 !lucidia/modules/random_fields/datasets/
 !lucidia/modules/random_fields/datasets/*.py
 lucidia/modules/random_fields/datasets/__pycache__/
-# Codex CI artifacts
-tests/_codex_autogen/
-.tmp/
-*.out.md
 services/quantum_lab/*.db
-node_modules/
+!lucidia/modules/random_fields/datasets/
+!lucidia/modules/random_fields/datasets/*.py
+lucidia/modules/random_fields/datasets/__pycache__/
+
+# Environment
 !opt/blackroad/tdb/.env
-node_modules/
-!opt/blackroad/tdb/.env
->>>>>>> Stashed changes
-=======
-node_modules/
-services/*/node_modules/
->>>>>>> origin/codex/add-calm-chatops-with-ollama-helpers
+
 # Rust build artifacts
-target/
+# Rust build artifacts (covered by the single recursive `**/target/` glob)
 **/target/
+*.db
+*.sqlite
+program/board.json
+orchestrator/tasks.json
+orchestrator/metrics.jsonl
+orchestrator/schedule.log.jsonl
+
+# Never commit SSH private keys
+id_ed25519
+id_ed25519.pem
+id_rsa
+*.pem
+*.key
+ssh-*
+
+# Text-only policy: block binary artefacts
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.pdf
+*.zip
+*.tar.gz
+*.npz
+*.npy
+# Time machine artifacts
+/data/kpis/latest.json
+/data/timemachine/index.json
+/data/aiops/actions.jsonl
+/pulses/
+*.pkl
+*.parquet
+*.feather
+*.mp4
+*.mov
+*.wav
+*.ogg
+output/**
+artifacts/**
+!artifacts/agents/
+!artifacts/agents/**
+*.tsbuildinfo

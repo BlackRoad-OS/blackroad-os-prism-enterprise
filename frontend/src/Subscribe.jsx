@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { me } from './api';
 import {
+  fetchPlans,
   fetchConfig,
   fetchStatus,
   startCheckout,
   openPortal,
-  fetchPlans,
+  startConnector,
+  revokeConnector,
+  fetchOnboardingSlots,
+  bookOnboarding,
 } from './subscribeApi';
-import { fetchConfig, fetchStatus, startCheckout, openPortal, startConnector, revokeConnector, fetchOnboardingSlots, bookOnboarding } from './subscribeApi';
 
 const PLANS = [
   { id: 'starter', name: 'Starter', price: { month: 0, year: 0 }, features: ['Community access', 'Limited features'] },

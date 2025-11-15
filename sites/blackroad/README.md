@@ -18,14 +18,23 @@ npm run build   # outputs to sites/blackroad/dist
 
 npm run preview # http://localhost:5174
 
+## Testing
+
+npm test           # runs Playwright smoke + regression suite (starts local dev server automatically)
+npm run e2e        # alias for the same Playwright test runner
+
 ## Deployment
 
 GitHub Pages builds and deploys `dist` on every push to `main` via `.github/workflows/site-build.yml`.
 Pages URL: https://blackroad.io
 
-To switch to Vercel or Cloudflare Pages, add the respective project tokens as repository
-secrets and enable the `pr-preview-vercel.yml` or `pr-preview-cloudflare.yml` workflows.
-Production is served by the repository’s NGINX/Caddy configs; GitHub Pages hosts the static assets.
+Vercel previews are available out of the box: add `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and
+`VERCEL_PROJECT_ID` repository secrets and the `PR Preview — Vercel` workflow will deploy PRs
+automatically. The same deployment path powers `/deploy-preview [env]` via ChatOps for manual
+rebuilds or targeted aliases. Production is served by the repository’s NGINX/Caddy configs; GitHub
+Pages hosts the static assets.
 
 ⸻
 
+
+_Last updated on 2025-09-11_

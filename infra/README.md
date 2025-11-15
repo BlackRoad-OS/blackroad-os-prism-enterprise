@@ -1,15 +1,31 @@
-# Infrastructure Skeleton
+# Lucidia Auto-Box Infrastructure Notes
 
-This directory contains an initial skeleton for provisioning a self-hosted Lucidia stack on
-BlackRoad-controlled infrastructure. The layout uses Ansible playbooks to configure a
-highly-available k3s cluster backed by Longhorn for storage and MinIO for object
-hosting. All playbooks are currently placeholders awaiting implementation.
+This folder will store infrastructure-as-code definitions and secrets templates once the prototype evolves past local development. Early intentions:
 
-## Structure
-- `bootstrap.sh` – convenience script to run the full Ansible bootstrap.
-- `ansible/` – Ansible inventory, playbooks, and roles.
-  - `playbooks/` – entry points for each major component.
-  - `roles/` – component roles with placeholder tasks.
+- Maintain separate environments for local, staging, and production with explicit consent gating.
+- Provide feature flags for PQC cipher selection and auto-mode availability.
+- Document one-click purge workflows that revoke storage and key material simultaneously.
 
-Customize `ansible/inventory.ini` with hostnames or IPs for your environment before
-running the bootstrap script.
+## Environment manifests
+
+Environment descriptors live under [`infra/environments`](./environments). They summarise the runtime footprint for each target (`preview`, `staging`, and `production`) so automation and responders have a single source of truth.
+
+Each manifest captures ownership, regions, deployments, dependencies, and rollout policy. Tooling in `ops/` and CI workflows can ingest these YAML files to select the right Terraform workspace, Fly.io app, or ECS service before applying changes. When adding new infrastructure, update the corresponding manifest so release runbooks, dashboards, and pipelines stay aligned.
+---
+
+## Environment manifests
+
+Canonical environment definitions live in `infra/environments/blackroad.yaml`. The
+manifest enumerates preview, staging, and production footprints with their respective
+providers, deployment workflows, and observability hooks. Treat the file as the source
+of truth for automation:
+
+- Preview entries are consumed by the Terraform stack in `infra/preview-env/` and the
+  corresponding GitHub Actions workflow.
+- Staging and production definitions align with Fly.io and AWS ECS deploy jobs,
+  including the image tags those pipelines should promote.
+- Secrets and observability blocks document which stores and telemetry backends each
+  environment expects so runbooks can call out required integrations.
+
+Update the manifest when infrastructure configuration changes and reference it from
+new runbooks so release operators know which environment characteristics to verify.

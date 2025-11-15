@@ -1,0 +1,26 @@
+# .github/workflows/autobuilder.yml
+name: autobuilder
+on:
+  schedule:
+    - cron: "23 2 * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          ref: ${{ github.ref }}
+      - name: Generate micro-fixes
+        run: |
+          node tools/autobuilder/make_fixes.js --index data/timemachine/index.json
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "autobuilder: perf+docs micro-fixes"
+          title: "Autobuilder: perf+docs micro-fixes"
+          labels: "autogen,canary:5%,low-risk"
+          branch: "autobuilder/${{ github.run_id }}"

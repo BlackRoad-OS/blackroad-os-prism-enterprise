@@ -1,169 +1,160 @@
-"""Trinary logic with classical and Ψ′ operators.
-
-The module defines a small trinary logic system with values ``{-1, 0, 1}``.
-Classical operators (:func:`t_and`, :func:`t_or`, :func:`t_not`,
-:func:`t_xor`) as well as whimsical Ψ′ operators
-(:func:`psi_merge`, :func:`psi_fold`, :func:`psi_collapse`) are provided.
-
-The :func:`generate_truth_tables` helper exports truth tables for all
-operators into JSON and NetworkX graph formats.  The data is written to an
-``output/logic`` directory relative to the repository root.
-"""
+"""Truth table utilities and boolean expression parsing."""
 
 from __future__ import annotations
 
+import ast
 import itertools
-import json
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import Callable, Dict, Iterable, Tuple
+from typing import Dict, Iterable, List, Sequence
 
-import networkx as nx
-import numpy as np
+from .storage import ensure_domain, write_json
 
-TRI_VALUES = (-1, 0, 1)
-
-
-def t_and(a: int, b: int) -> int:
-    """Trinary logical AND defined as the minimum of the operands."""
-
-    return int(min(a, b))
+DOMAIN = "logic"
 
 
-def t_or(a: int, b: int) -> int:
-    """Trinary logical OR defined as the maximum of the operands."""
-
-    return int(max(a, b))
-
-
-def t_not(a: int) -> int:
-    """Trinary logical NOT implemented as negation."""
-
-    return int(-a)
+@dataclass(slots=True)
+class TruthTableRow:
+    assignment: Dict[str, bool]
+    result: bool
 
 
-def t_xor(a: int, b: int) -> int:
-    """Trinary XOR implemented as the product of ``a`` and ``-b``."""
+@dataclass(slots=True)
+class TruthTable:
+    variables: Sequence[str]
+    rows: List[TruthTableRow]
+    expression: str | None = None
 
-    return int(a * -b)
-
-
-def psi_merge(a: int, b: int) -> int:
-    """Ψ′ paradox merge operator.
-
-    Returns ``0`` when the operands agree and ``1`` otherwise.  The value ``-1``
-    is treated as a contradiction state and therefore always yields ``1`` when
-    paired with any other value.
-    """
-
-    if a == b and a != -1:
-        return 0
-    return 1
-
-
-def psi_fold(a: int, b: int) -> int:
-    """Ψ′ infinite fold operator represented as multiplication."""
-
-    return int(a * b)
+    def to_serialisable(self) -> Dict[str, object]:
+        return {
+            "variables": list(self.variables),
+            "expression": self.expression,
+            "rows": [
+                {
+                    "assignment": row.assignment,
+                    "result": row.result,
+                }
+                for row in self.rows
+            ],
+        }
 
 
-def psi_collapse(a: int) -> int:
-    """Ψ′ collapse operator that maps any value to ``0``."""
-
-    return 0
+def _timestamp() -> str:
+    return datetime.utcnow().strftime("%Y%m%dT%H%M%S%f")
 
 
-BINARY_OPERATORS: Dict[str, Callable[[int, int], int]] = {
-    "AND": t_and,
-    "OR": t_or,
-    "XOR": t_xor,
-    "⊕": psi_merge,
-    "⊗": psi_fold,
-}
+class BooleanEvaluator(ast.NodeVisitor):
+    """Evaluate a safe boolean expression against an assignment."""
 
-UNARY_OPERATORS: Dict[str, Callable[[int], int]] = {
-    "NOT": t_not,
-    "↯": psi_collapse,
-}
+    def __init__(self, assignment: Dict[str, bool]):
+        self.assignment = assignment
 
+    def visit_Name(self, node: ast.Name) -> bool:  # noqa: N802
+        if node.id not in self.assignment:
+            raise ValueError(f"Unknown symbol '{node.id}' in expression")
+        return bool(self.assignment[node.id])
 
-def _truth_table(
-    op: Callable[..., int],
-    values: Iterable[int],
-    unary: bool = False,
-) -> Dict[Tuple[int, int] | Tuple[int], int]:
-    """Return the truth table for ``op`` over ``values``."""
+    def visit_Constant(self, node: ast.Constant) -> bool:  # noqa: N802
+        if isinstance(node.value, bool):
+            return bool(node.value)
+        raise ValueError("Only boolean constants are permitted")
 
-    table: Dict[Tuple[int, int] | Tuple[int], int] = {}
-    if unary:
-        for a in values:
-            table[(a,)] = op(a)
-    else:
-        for a, b in itertools.product(values, repeat=2):
-            table[(a, b)] = op(a, b)
-    return table
+    def visit_UnaryOp(self, node: ast.UnaryOp) -> bool:  # noqa: N802
+        operand = self.visit(node.operand)
+        if isinstance(node.op, (ast.Not, ast.Invert)):
+            return not operand
+        raise ValueError("Unsupported unary operator")
 
+    def visit_BoolOp(self, node: ast.BoolOp) -> bool:  # noqa: N802
+        values = [self.visit(value) for value in node.values]
+        if isinstance(node.op, ast.And):
+            return all(values)
+        if isinstance(node.op, ast.Or):
+            return any(values)
+        raise ValueError("Unsupported boolean operator")
 
-def generate_truth_tables(output_dir: Path | str = Path("output/logic")) -> Dict[str, dict]:
-    """Generate truth tables for all operators and write them to ``output_dir``.
+    def visit_BinOp(self, node: ast.BinOp) -> bool:  # noqa: N802
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        if isinstance(node.op, (ast.BitAnd, ast.And)):
+            return left and right
+        if isinstance(node.op, (ast.BitOr, ast.Or)):
+            return left or right
+        if isinstance(node.op, ast.BitXor):
+            return bool(left) ^ bool(right)
+        raise ValueError("Unsupported binary operator")
 
-    The function creates three artefacts:
+    def visit_Compare(self, node: ast.Compare) -> bool:  # noqa: N802
+        if len(node.ops) != 1 or len(node.comparators) != 1:
+            raise ValueError("Only single comparisons are supported")
+        left = self.visit(node.left)
+        right = self.visit(node.comparators[0])
+        op = node.ops[0]
+        if isinstance(op, ast.Eq):
+            return left == right
+        if isinstance(op, ast.NotEq):
+            return left != right
+        raise ValueError("Unsupported comparison operator")
 
-    * ``truth_tables.json`` – JSON serialisation of all tables.
-    * ``matrices.npy`` – NumPy array with each table represented as a matrix.
-    * ``logic.gexf`` – A NetworkX graph describing value transitions.
-    """
-
-    out = Path(output_dir)
-    out.mkdir(parents=True, exist_ok=True)
-
-    tables: Dict[str, dict] = {}
-    matrices: Dict[str, np.ndarray] = {}
-    graph = nx.DiGraph()
-
-    for name, op in BINARY_OPERATORS.items():
-        table = _truth_table(op, TRI_VALUES)
-        tables[name] = {f"{a},{b}": res for (a, b), res in table.items()}
-        matrices[name] = np.array(
-            [[op(a, b) for b in TRI_VALUES] for a in TRI_VALUES], dtype=int
-        )
-        for (a, b), res in table.items():
-            graph.add_edge(f"{a},{b}", str(res))
-
-    for name, op in UNARY_OPERATORS.items():
-        table = _truth_table(op, TRI_VALUES, unary=True)
-        tables[name] = {f"{a}": res for (a,), res in table.items()}
-        matrices[name] = np.array([[op(a) for a in TRI_VALUES]], dtype=int)
-        for (a,), res in table.items():
-            graph.add_edge(f"{a}", str(res))
-
-    with (out / "truth_tables.json").open("w", encoding="utf8") as fh:
-        json.dump(tables, fh, indent=2)
-    np.save(out / "matrices.npy", matrices)
-    nx.write_gexf(graph, out / "logic.gexf")
-
-    return tables
+    def generic_visit(self, node: ast.AST) -> bool:  # noqa: N802
+        raise ValueError(f"Unsupported expression element: {type(node).__name__}")
 
 
-def demo() -> Dict[str, dict]:
-    """Run :func:`generate_truth_tables` and return the produced tables."""
-
-    return generate_truth_tables()
-"""Basic logic utilities for Infinity Math."""
-from pathlib import Path
-import json
-
-OUTPUT_DIR = Path(__file__).resolve().parent / "output" / "logic"
-
-
-def truth_table(a: bool, b: bool) -> dict:
-    """Return a simple truth table row for AND/OR."""
-    return {"a": a, "b": b, "and": a and b, "or": a or b}
+def _parse_expression(expression: str) -> ast.Expression:
+    try:
+        parsed = ast.parse(expression, mode="eval")
+    except SyntaxError as exc:  # pragma: no cover - direct re-raise with hint
+        raise ValueError(f"Invalid boolean expression: {exc.msg}") from exc
+    for node in ast.walk(parsed):
+        if isinstance(node, ast.Call):
+            raise ValueError("Function calls are not permitted in expressions")
+        if isinstance(node, ast.Attribute):
+            raise ValueError("Attributes are not permitted in expressions")
+    return parsed
 
 
-def save_example() -> Path:
-    """Generate a tiny truth table and save it as JSON."""
-    rows = [truth_table(a, b) for a in (False, True) for b in (False, True)]
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    out_file = OUTPUT_DIR / "truth_table.json"
-    out_file.write_text(json.dumps(rows, indent=2))
-    return out_file
+def _validate_variables(variables: Iterable[str]) -> List[str]:
+    normalised = []
+    for var in variables:
+        if not var or not var.isidentifier():
+            raise ValueError(f"Invalid variable name '{var}'")
+        if var in normalised:
+            raise ValueError(f"Duplicate variable '{var}'")
+        normalised.append(var)
+    if not normalised:
+        raise ValueError("At least one variable is required")
+    return normalised
+
+
+def generate_truth_table(variables: Sequence[str], expression: str | None = None) -> TruthTable:
+    vars_norm = _validate_variables(variables)
+    parsed_expr = _parse_expression(expression) if expression else None
+
+    rows: List[TruthTableRow] = []
+    for values in itertools.product([False, True], repeat=len(vars_norm)):
+        assignment = dict(zip(vars_norm, values))
+        result = False
+        if parsed_expr is not None:
+            evaluator = BooleanEvaluator(assignment)
+            result = evaluator.visit(parsed_expr.body)
+        rows.append(TruthTableRow(assignment=assignment, result=result))
+
+    return TruthTable(variables=vars_norm, rows=rows, expression=expression)
+
+
+def persist_truth_table(table: TruthTable) -> Path:
+    output_dir = ensure_domain(DOMAIN)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    file_path = output_dir / f"truth_table_{_timestamp()}.json"
+    write_json(file_path, table.to_serialisable())
+    return file_path
+
+
+def demo() -> Dict[str, object]:
+    table = generate_truth_table(["A", "B"], expression="A and not B")
+    path = persist_truth_table(table)
+    return {
+        "path": str(path),
+        "rows": table.to_serialisable()["rows"],
+    }

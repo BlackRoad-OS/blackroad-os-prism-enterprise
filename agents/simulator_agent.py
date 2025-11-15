@@ -1,17 +1,12 @@
-"""Agent for running Condor models in a controlled environment.
-
-The :class:`SimulatorAgent` wraps helper utilities from
-``lucidia.engines.condor_engine`` to execute small simulations and
-optimisations.  Results of recent runs are memoised to avoid
-recomputation.
-"""
+"""Simulator agent that wraps lucidia engine helpers with simple caching."""
 
 from __future__ import annotations
 
+import json
+import os
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from hashlib import sha256
-import json
-from collections import OrderedDict
 from typing import Any, Dict
 
 from lucidia.engines.condor_engine import (
@@ -21,12 +16,14 @@ from lucidia.engines.condor_engine import (
     solve_algebraic,
 )
 
-CACHE_SIZE = 5
+DEFAULT_CACHE_SIZE = 5
 
 
 def _hash_model(source: str, args: Dict[str, Any]) -> str:
     """Create a hash for caching based on source and arguments."""
-    return sha256((source + json.dumps(args, sort_keys=True)).encode()).hexdigest()
+
+    payload = json.dumps(args, sort_keys=True)
+    return sha256((source + payload).encode()).hexdigest()
 
 
 @dataclass
@@ -34,12 +31,16 @@ class SimulatorAgent:
     """Minimal simulator agent used in tests and local demos with an LRU cache."""
 
     cache: OrderedDict[str, Dict[str, Any]] = field(default_factory=OrderedDict)
+    cache_size: int = field(
+        default_factory=lambda: int(os.getenv("SIMULATOR_CACHE_SIZE", DEFAULT_CACHE_SIZE))
+    )
 
     def _memoise(self, key: str, value: Dict[str, Any]) -> None:
-        """Store ``value`` under ``key`` keeping cache within ``CACHE_SIZE``."""
+        """Store ``value`` under ``key`` keeping cache within ``cache_size``."""
+
         self.cache[key] = value
         self.cache.move_to_end(key)
-        if len(self.cache) > CACHE_SIZE:
+        while len(self.cache) > self.cache_size:
             self.cache.popitem(last=False)
 
     def run(
@@ -50,6 +51,7 @@ class SimulatorAgent:
         args: Dict[str, Any] | None = None,
     ) -> Dict[str, Any]:
         """Execute ``intent`` using the provided model source."""
+
         args = args or {}
         key = _hash_model(model_source, {"intent": intent, **args})
         if key in self.cache:
@@ -82,4 +84,4 @@ class SimulatorAgent:
 
 if __name__ == "__main__":
     agent = SimulatorAgent()
-    print("SimulatorAgent ready")
+    print(f"SimulatorAgent ready with cache size {agent.cache_size}")

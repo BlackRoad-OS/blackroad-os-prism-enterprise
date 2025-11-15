@@ -1,26 +1,13 @@
 ---
-name: "🐛 Bug report"
-about: Report a problem with BlackRoad
-labels: [bug]
+name: Bug report
+about: Report a bug
+labels: bug
 ---
 
-## Describe the bug
-A clear description of the issue.
+**Expected behavior**
 
-## To Reproduce
-Steps to reproduce:
-1.
-2.
+**Actual behavior**
 
-## Expected behavior
-What should have happened?
+**Steps to reproduce**
 
-## Screenshots / Logs
-If applicable, add screenshots or logs.
-
-## Environment
-- URL: (prod/dev)
-- Browser/OS:
-
-## Additional context
-Anything else?
+**Logs**

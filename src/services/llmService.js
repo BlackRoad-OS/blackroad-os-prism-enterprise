@@ -1,4 +1,3 @@
-// FILE: /srv/blackroad-api/src/services/llmService.js
 'use strict';
 
 const { LUCIDIA_LLM_URL } = require('../config');
@@ -15,7 +14,7 @@ async function chat(messages) {
       const json = await rsp.json();
       return { provider: 'lucidia-llm', ...json };
     }
-  } catch (e) {
+  } catch {
     // fall through to stub
   }
   // Fallback stub

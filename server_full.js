@@ -11,7 +11,6 @@ const cors = require('cors');
 const morgan = require('morgan');
 const cookieSession = require('cookie-session');
 const rateLimit = require('express-rate-limit');
-const connectors = require('./connectors');
 
 // Allow requiring .ts files as plain JS for lucidia brain modules
 require.extensions['.ts'] = require.extensions['.js'];
@@ -26,7 +25,9 @@ const {
   EVM_CHAIN_ID,
   ROADCHAIN_MAINNET_OK
 } = require('./src/config');
-const autohealService = require('./src/services/autohealService');
+  ROADVIEW_STORAGE
+} = require('./src/config');
+const subscribe = require('./src/routes/subscribe');
 
 // Ensure log dir exists
 if (LOG_DIR) {
@@ -80,10 +81,58 @@ const limiter = rateLimit({
   legacyHeaders: false
 });
 app.use(limiter);
-app.use('/connectors', connectors);
 
 // Initialize DB (auto-migrations on import)
 const db = require('./src/db');
+
+// Simple in-memory storage for resilience operations
+const snapshots = [];
+const snapshotLogs = [];
+const rollbackLogs = [];
+
+app.get('/api/snapshots', (req, res) => {
+  res.json({ snapshots });
+});
+
+app.post('/api/snapshots', (req, res) => {
+  const snap = {
+    id: String(Date.now()),
+    timestamp: new Date().toISOString(),
+    size: `${Math.floor(Math.random() * 100) + 1}MB`,
+    status: 'complete'
+  };
+  snapshots.push(snap);
+  snapshotLogs.push({ timestamp: snap.timestamp, action: 'snapshot', user: req.session?.userId || 'anon', result: 'ok', notes: '' });
+  res.json({ snapshot: snap });
+});
+
+app.get('/api/snapshots/:id/download', (req, res) => {
+  res.setHeader('Content-Disposition', `attachment; filename=snapshot-${req.params.id}.txt`);
+  res.send('snapshot data');
+});
+
+app.post('/api/rollback/:id', (req, res) => {
+  const snap = snapshots.find(s => s.id === req.params.id);
+  const log = { timestamp: new Date().toISOString(), action: 'rollback', user: req.session?.userId || 'anon' };
+  if (snap) {
+    log.result = 'success';
+    log.notes = '';
+    res.json({ status: 'success' });
+  } else {
+    log.result = 'fail';
+    log.notes = 'snapshot not found';
+    res.status(404).json({ status: 'fail' });
+  }
+  rollbackLogs.push(log);
+});
+
+app.get('/api/rollback/logs', (req, res) => {
+  res.json({ logs: rollbackLogs });
+});
+
+app.get('/api/snapshots/logs', (req, res) => {
+  res.json({ logs: snapshotLogs });
+});
 
 // SUBSCRIBE
 const subRouter = express.Router();
@@ -153,7 +202,7 @@ const DEFAULT_PLANS = [
   }
 ];
 
-function createCheckoutSession({ user, plan }) {
+function createCheckoutSession({ user: _user, plan: _plan }) {
   const paymentId = uuidv4();
   return {
     provider: SUB_PROVIDER,
@@ -161,6 +210,10 @@ function createCheckoutSession({ user, plan }) {
     checkout_url: `/subscribe/mock-pay?payment_id=${paymentId}`
   };
 }
+
+subRouter.get('/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
 
 subRouter.get('/plans', (_req, res) => {
   const rows = db
@@ -360,19 +413,21 @@ roadchainRouter.get('/net', (_req, res) => {
 });
 
 app.use('/api/roadchain', roadchainRouter);
+// ROADVIEW
+const ROADVIEW_PROJECTS_DIR = path.join(ROADVIEW_STORAGE, 'projects');
+try {
+  fs.mkdirSync(ROADVIEW_PROJECTS_DIR, { recursive: true });
+} catch (err) {
+  console.error(
+    `Failed to ensure RoadView projects directory at ${ROADVIEW_PROJECTS_DIR}`,
+    err
+  );
+}
+app.use(
+  '/files/roadview',
+  express.static(ROADVIEW_STORAGE, { index: false, fallthrough: false })
+);
 
-// Auto-Heal routes
-const autohealRouter = express.Router();
-autohealRouter.get('/events', (_req, res) => {
-  res.json({ events: autohealService.getEvents() });
-});
-autohealRouter.post('/escalations', (req, res) => {
-  const { note } = req.body || {};
-  if (!note) return res.status(400).json({ error: 'note required' });
-  const event = autohealService.appendEscalation(note);
-  res.json({ event });
-});
-app.use('/api/autoheal', autohealRouter);
 // Routes
 const apiRouter = require('./src/routes');
 app.use('/api', apiRouter);
@@ -389,12 +444,11 @@ if (process.env.ENABLE_LUCIDIA_BRAIN !== '0') {
 const server = http.createServer(app);
 const { setupSockets } = require('./src/socket');
 const io = setupSockets(server);
-autohealService.streamEvents(io);
 
 // LUCIDIA
 (function setupLucidia() {
   // --- LLM Provider
-  const SUB_LLM_PROVIDER = process.env.SUB_LLM_PROVIDER || 'mock';
+  const _subLlmProvider = process.env.SUB_LLM_PROVIDER || 'mock';
   const llmProvider = {
     async chat({ messages }) {
       // Simple mock provider that echoes the last user message.
@@ -718,9 +772,7 @@ autohealService.streamEvents(io);
       rc = db.prepare('SELECT IFNULL(SUM(amount),0) AS s FROM transactions WHERE created_at >= datetime("now", "-1 day")').get().s;
     } catch {}
     try {
-      contradictions = db
-        .prepare('SELECT COUNT(*) AS c FROM contradictions WHERE timestamp >= datetime("now", "-1 day")')
-        .get().c;
+      contradictions = db.prepare('SELECT COUNT(*) AS c FROM contradictions WHERE created_at >= datetime("now", "-1 day")').get().c;
     } catch {}
     try {
       latency = db.prepare('SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY latency_ms) AS p50 FROM api_metrics WHERE path = "/api/llm/chat" AND ts >= strftime("%s", "now") - 86400').get().p50 || 0;
@@ -803,10 +855,6 @@ autohealService.streamEvents(io);
   });
 })();
 
-if (require.main === module) {
-  server.listen(PORT, () => {
-    console.log(`[blackroad-api] listening on port ${PORT} (env: ${NODE_ENV})`);
-  });
-}
-
-module.exports = app;
+server.listen(PORT, () => {
+  console.log(`[blackroad-api] listening on port ${PORT} (env: ${NODE_ENV})`);
+});

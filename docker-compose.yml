@@ -1,254 +1,297 @@
-FILE: docker-compose.yml
-
 version: "3.9"
 
 services:
-version: '3.8'
-
-services:
-  # Main Lucidia Application (blackroad.io)
-  lucidia-blackroad:
+  api:
     build:
       context: .
-      dockerfile: Dockerfile
-      target: production
-    container_name: lucidia-blackroad
-    restart: unless-stopped
-    env_file: .env
+      dockerfile: docker/Dockerfile.api
+    env_file:
+      - .env
+    environment:
+      AI_CONSOLE_REDIS_URL: redis://redis:6379/0
+      AI_CONSOLE_API_URL: http://api:8000
     ports:
-      - "9000:8000"   # external:internal
-    volumes:
-      - lucidia-data:/app/data
-      - lucidia-logs:/app/logs
-    depends_on:
-      redis:
-        condition: service_healthy
-      mongo:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "node", "scripts/healthcheck.js"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 10
-
-  mongo:
-    image: mongo:7
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
-  postgres:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_DB: lucidia
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d lucidia"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
-volumes:
-  lucidia-data:
-  lucidia-logs:
-services:
-  web:
-    build: .
-    ports: ['8080:8080']
-    environment:
-      - VITE_SITE_URL=http://localhost:8080
-  yjs:
-    image: node:22-alpine
-    command: sh -c "npx y-websocket --port 1234"
-    ports: ['1234:1234']
-    ports:
-      - '9000:8000'
-    environment:
-      NODE_ENV: production
-      PORT: 8000
-      LUCIDIA_INSTANCE: blackroad
-      LUCIDIA_LOG_LEVEL: info
-      REDIS_URL: ${REDIS_URL}
-      MONGO_URL: ${MONGO_URL_BLACKROAD}
-      POSTGRES_URL: ${POSTGRES_URL_BLACKROAD}
-      JWT_SECRET: ${JWT_SECRET}
-    volumes:
-      - lucidia-blackroad-data:/app/data
-      - lucidia-blackroad-logs:/app/logs
-      - ./config/production.json:/app/config/production.json:ro
-    networks: [lucidia-network]
+      - "8000:8000"
     depends_on:
       - redis
-      - mongo
-      - postgres
-    healthcheck:
-      test: ['CMD', 'node', 'scripts/healthcheck.js']
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+    restart: unless-stopped
 
-  # Secondary Lucidia Application (blackroadinc.us)
-  lucidia-blackroadinc:
+  frontend:
     build:
       context: .
-      dockerfile: Dockerfile
-      target: production
-    container_name: lucidia-blackroadinc
-    restart: unless-stopped
-    ports:
-      - '8000:8000'
+      dockerfile: docker/Dockerfile.frontend
+    env_file:
+      - .env
     environment:
-      NODE_ENV: production
-      PORT: 8000
-      LUCIDIA_INSTANCE: blackroadinc
-      LUCIDIA_LOG_LEVEL: info
-      REDIS_URL: ${REDIS_URL}
-      MONGO_URL: ${MONGO_URL_BLACKROADINC}
-      POSTGRES_URL: ${POSTGRES_URL_BLACKROADINC}
-      JWT_SECRET: ${JWT_SECRET}
-    volumes:
-      - lucidia-blackroadinc-data:/app/data
-      - lucidia-blackroadinc-logs:/app/logs
-      - ./config/production.json:/app/config/production.json:ro
-    networks: [lucidia-network]
-    depends_on:
-      - redis
-      - mongo
-      - postgres
-    healthcheck:
-      test: ['CMD', 'node', 'scripts/healthcheck.js']
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-  # NGINX Reverse Proxy
-  nginx:
-    image: nginx:alpine
-    container_name: lucidia-nginx
-    restart: unless-stopped
+      AI_CONSOLE_API_URL: http://api:8000
+      NEXT_PUBLIC_GRAFANA_URL: ${NEXT_PUBLIC_GRAFANA_URL:-http://localhost:3001}
     ports:
-      - '80:80'
-      - '443:443'
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro # use conf.d includes
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-      - nginx-cache:/var/cache/nginx
-      - nginx-logs:/var/log/nginx
-    networks: [lucidia-network]
+      - "3000:3000"
     depends_on:
-      - lucidia-blackroad
-      - lucidia-blackroadinc
-    healthcheck:
-      test: ['CMD-SHELL', 'nginx -t -q || exit 1']
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # Redis (internal only)
-  redis:
-    image: redis:7-alpine
-    container_name: lucidia-redis
+      - api
     restart: unless-stopped
-    expose:
-      - '6379'
+
+  redis:
+    image: redis:7.4-alpine
+    ports:
+      - "6379:6379"
     volumes:
       - redis-data:/data
-      - ./config/redis.conf:/usr/local/etc/redis/redis.conf:ro
-    command: ['redis-server', '/usr/local/etc/redis/redis.conf']
-    networks: [lucidia-network]
-    healthcheck:
-      test: ['CMD-SHELL', 'redis-cli -a ${REDIS_PASSWORD} ping | grep PONG >/dev/null']
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # MongoDB (internal only)
-  mongo:
-    image: mongo:7
-    container_name: lucidia-mongo
     restart: unless-stopped
-    expose:
-      - '27017'
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: lucidia
-    volumes:
-      - mongo-data:/data/db
-      - mongo-config:/data/configdb
-      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-    networks: [lucidia-network]
-    healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          "mongosh --username ${MONGO_INITDB_ROOT_USERNAME} --password ${MONGO_INITDB_ROOT_PASSWORD} --quiet --eval 'db.adminCommand({ ping: 1 }).ok' | grep 1 >/dev/null",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
-  # PostgreSQL (internal only)
-  postgres:
-    image: postgres:15-alpine
-    container_name: lucidia-postgres
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alerts.yml:/etc/prometheus/alerts.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - api
+      - frontend
     restart: unless-stopped
-    expose:
-      - '5432'
-    environment:
-      POSTGRES_DB: lucidia
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      PGDATA: /var/lib/postgresql/data/pgdata
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-      - ./scripts/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    networks: [lucidia-network]
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres -d lucidia']
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
-networks:
-  lucidia-network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    environment:
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    ports:
+      - "9093:9093"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_AUTH_ANONYMOUS_ENABLED: 'true'
+      GF_AUTH_DISABLE_LOGIN_FORM: 'false'
+    depends_on:
+      - prometheus
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2.8
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - frontend
+      - api
+    restart: unless-stopped
 
 volumes:
-  lucidia-blackroad-data:
-  lucidia-blackroadinc-data:
-  lucidia-dev-data:
-  lucidia-blackroad-logs:
-  lucidia-blackroadinc-logs:
-  redis-data:
-  mongo-data:
-  mongo-config:
-  postgres-data:
-  prometheus-data:
   grafana-data:
-  elasticsearch-data:
-  nginx-cache:
-  nginx-logs:
+  redis-data:
+services:
+  app:
+    build: .
+    image: blackroad/prism-console:dev
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    ports:
+      - "3000:3000"
+    command: bash -lc "npm run dev --if-present || bash"
+
+  tests:
+    build: .
+    image: blackroad/prism-console:test
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    command: bash -lc "pytest -q"
+  blackroad-api:
+    build:
+      context: .
+      target: backend
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: production
+      BLACKROAD_DB_PATH: /srv/blackroad-api/data/blackroad.db
+    volumes:
+      - blackroad-db:/srv/blackroad-api/data
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  blackroad-ui:
+    build:
+      context: .
+      target: frontend
+    ports:
+      - "5173:5173"
+    environment:
+      NODE_ENV: production
+    depends_on:
+      blackroad-api:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Blackroad Services
+  backroad:
+    build: ./services/backroad
+    container_name: backroad
+    ports:
+      - "4100:4100"
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  co-coding-portal:
+    build: ./services/co-coding-portal
+    container_name: co-coding-portal
+    ports:
+      - "4200:4200"
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - LLM_GATEWAY_URL=http://llm-gateway:4002
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  roadview-enhanced:
+    build: ./services/roadview-enhanced
+    container_name: roadview-enhanced
+    ports:
+      - "4210:4210"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  roadcoin:
+    build: ./services/roadcoin
+    container_name: roadcoin
+    ports:
+      - "4220:4220"
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - AUTO_MINE=true
+    depends_on:
+      - redis
+      - roadchain
+    restart: unless-stopped
+
+  roadchain:
+    build: ./services/roadchain
+    container_name: roadchain
+    ports:
+      - "4221:4221"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  hr-talent-automation:
+    build: ./services/hr-talent-automation
+    container_name: hr-talent-automation
+    ports:
+      - "4300:4300"
+    environment:
+      - NODE_ENV=production
+      - LLM_GATEWAY_URL=http://llm-gateway:4002
+    restart: unless-stopped
+
+  finance-accounting-automation:
+    build: ./services/finance-accounting-automation
+    container_name: finance-accounting-automation
+    ports:
+      - "4301:4301"
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - LLM_GATEWAY_URL=http://llm-gateway:4002
+    depends_on:
+      - redis
+      - roadcoin
+    restart: unless-stopped
+
+  marketing-sales-automation:
+    build: ./services/marketing-sales-automation
+    container_name: marketing-sales-automation
+    ports:
+      - "4302:4302"
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - LLM_GATEWAY_URL=http://llm-gateway:4002
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  operations-supply-chain:
+    build: ./services/operations-supply-chain
+    container_name: operations-supply-chain
+    ports:
+      - "4303:4303"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  legal-compliance-automation:
+    build: ./services/legal-compliance-automation
+    container_name: legal-compliance-automation
+    ports:
+      - "4304:4304"
+    environment:
+      - NODE_ENV=production
+      - LLM_GATEWAY_URL=http://llm-gateway:4002
+    restart: unless-stopped
+
+  rd-innovation-lab:
+    build: ./services/rd-innovation-lab
+    container_name: rd-innovation-lab
+    ports:
+      - "4305:4305"
+    environment:
+      - NODE_ENV=production
+      - LLM_GATEWAY_URL=http://llm-gateway:4002
+    restart: unless-stopped
+
+  metaverse-campus:
+    build: ./services/metaverse-campus
+    container_name: metaverse-campus
+    ports:
+      - "4400:4400"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  city-portal:
+    build: ./services/city-portal
+    container_name: city-portal
+    ports:
+      - "4401:4401"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - metaverse-campus
+    restart: unless-stopped
+
+volumes:
+  blackroad-db:

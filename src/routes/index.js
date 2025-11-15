@@ -1,4 +1,3 @@
-// FILE: /srv/blackroad-api/src/routes/index.js
 'use strict';
 
 const express = require('express');
@@ -19,6 +18,7 @@ router.use('/commits', require('./commits'));
 router.use('/metrics', require('./metrics'));
 router.use('/llm', require('./llm'));
 router.use('/lucidia', require('./lucidia'));
+router.use('/pi', require('./pi'));
 router.use('/roadbook', require('./roadbook'));
 router.use('/deploy', require('./deploy'));
 router.use('/json', require('./json'));

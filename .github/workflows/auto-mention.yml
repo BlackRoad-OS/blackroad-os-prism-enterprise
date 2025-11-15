@@ -1,0 +1,160 @@
+name: Auto mention on PRs
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review, labeled]
+  workflow_dispatch:
+    inputs:
+      pull_number:
+        description: 'Pull request number to reroute'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  mention:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve pull request number
+        id: pr
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          result-encoding: string
+          pull-number: ${{ github.event.inputs.pull_number || '' }}
+          script: |
+            const provided = core.getInput('pull-number');
+            const number = provided || (context.payload?.pull_request?.number && String(context.payload.pull_request.number));
+            if (!number) {
+              throw new Error('A pull request number is required.');
+            }
+            return number;
+
+      - name: Load pull request metadata
+        id: pr_data
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          result-encoding: json
+          script: |
+            const number = Number(core.getInput('number'));
+            const { data } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: number,
+            });
+            return {
+              number: data.number,
+              draft: Boolean(data.draft),
+              labels: data.labels?.map(label => label.name) || [],
+            };
+          number: ${{ steps.pr.outputs.result }}
+
+      - name: Evaluate routing eligibility
+        id: eligibility
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          PR_DATA: ${{ steps.pr_data.outputs.result }}
+        with:
+          script: |
+            const data = JSON.parse(process.env.PR_DATA || '{}');
+            const skip = Boolean(data.draft) || (Array.isArray(data.labels) && data.labels.includes('no-mentions'));
+            core.setOutput('skip', skip ? 'true' : 'false');
+            if (skip) {
+              core.info('Skipping auto-mention because the pull request is draft or opted out.');
+            }
+
+      - name: Checkout default branch
+        if: steps.eligibility.outputs.skip != 'true'
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch || github.ref_name || 'main' }}
+
+      - name: Calculate mentions
+        if: steps.eligibility.outputs.skip != 'true'
+        id: mentions
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.result }}
+        with:
+          result-encoding: json
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const configPath = path.join(process.env.GITHUB_WORKSPACE, '.github/mention-routes.yml');
+            let configRaw = '';
+            try {
+              configRaw = fs.readFileSync(configPath, 'utf8').trim();
+            } catch (error) {
+              core.warning(`No mention routing config found at ${configPath}.`);
+              core.setOutput('mentions', '');
+              return { mentions: [] };
+            }
+
+            if (!configRaw) {
+              core.setOutput('mentions', '');
+              return { mentions: [] };
+            }
+
+            let config;
+            try {
+              config = JSON.parse(configRaw);
+            } catch (error) {
+              throw new Error('Failed to parse .github/mention-routes.yml. Ensure the file contains valid JSON.');
+            }
+
+            const routes = Array.isArray(config.routes) ? config.routes : [];
+            const always = Array.isArray(config.always) ? config.always : [];
+            const toMention = new Set(always.filter(Boolean));
+
+            const globToRegExp = (pattern) => {
+              let regex = pattern.replace(/[-/\\^$+?.()|[\]{}]/g, '\\$&');
+              regex = regex.replace(/\\\*\\\*/g, '::DOUBLE_STAR::');
+              regex = regex.replace(/\\\*/g, '[^/]*');
+              regex = regex.replace(/::DOUBLE_STAR::/g, '.*');
+              regex = regex.replace(/\\\?/g, '[^/]');
+              return new RegExp(`^${regex}$`);
+            };
+
+            const number = Number(core.getInput('pull-number'));
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: number,
+              per_page: 100,
+            });
+
+            for (const file of files) {
+              for (const route of routes) {
+                if (!route || !route.mention) continue;
+                const patterns = Array.isArray(route.patterns) ? route.patterns : [];
+                if (patterns.some(pattern => globToRegExp(pattern).test(file.filename))) {
+                  toMention.add(route.mention);
+                }
+              }
+            }
+
+            const mentions = Array.from(toMention).filter(Boolean);
+            core.setOutput('mentions', mentions.join(' '));
+            return { mentions };
+          pull-number: ${{ steps.pr.outputs.result }}
+
+      - name: Post mention comment
+        if: steps.eligibility.outputs.skip != 'true' && steps.mentions.outputs.mentions != ''
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const mentions = core.getInput('mentions');
+            const number = Number(core.getInput('number'));
+            const body = `🔔 Auto-mentions: ${mentions}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: number,
+              body,
+            });
+          mentions: ${{ steps.mentions.outputs.mentions }}
+          number: ${{ steps.pr.outputs.result }}

@@ -1,364 +1,356 @@
-# BlackRoad.io — Dependency & Ops Bundle
-Date: 2025-08-22
+# BlackRoad Prism Console
 
-This bundle is a **drop-in helper** to resolve “missing dependencies etc.” without requiring
-connector access. Push it into your working copy, then run one script on the server to scan
-your API, install missing npm packages, set up env defaults, and (optionally) boot a local
-LLM stub on port **8000** if none is running.
+A production-grade multi-agent AI platform featuring quantum computing capabilities, sacred geometry-based agent coordination, distributed intelligence orchestration, and comprehensive visualization tools.
 
-**What’s included**
-- `ops/install.sh` — one-shot setup for `/srv/blackroad-api` (or detected API path)
-- `tools/dep-scan.js` — scans JS/TS for `require()`/`import` usage and installs missing packages
-- `tools/verify-runtime.sh` — quick health checks (API on 4000, LLM on 8000)
-- `srv/blackroad-api/.env.example` — sample env for your Express API
-- `srv/blackroad-api/package.json.sample` — a safe starter if your API has no package.json
-- `srv/lucidia-llm/` — minimal FastAPI echo stub (only used if you don’t already run an LLM on 8000)
-- `srv/lucia-llm/` — same stub (duplicate dir name for compatibility with earlier scripts)
+## Overview
 
-> Nothing here overwrites your existing code. The scripts are defensive: they detect paths,
-> **merge** deps, and only generate files if missing.
+The BlackRoad Prism Console is a comprehensive ecosystem combining:
+- **100 Production-Ready AI Agents** with specialized capabilities
+- **Quantum Computing Lab** with simulators and hardware integration
+- **Agent Gateway API** for orchestrating distributed agent swarms
+- **Cecilia Memory System** for persistent context across interactions
+- **Multi-Agent Orchestration**: 1000+ agent swarm with sacred formation patterns (DELTA, HALO, LATTICE, HUM, CAMPFIRE)
+- **Distributed Intelligence**: Polyglot microservices architecture with 36+ services
+- **Sacred Geometry**: Mathematical foundations for agent coordination and coherence
+- **Real-time Collaboration**: Multi-protocol message bus (QLM, MQTT, Redis, REST)
+- **57+ Infrastructure Packages** for gateways, engines, and SDKs
+- **Multiple Web Applications** including Prism Console, agent catalog, and BlackRoad sites
 
----
+## Quick Start
 
-## Quick start
-**On your workstation**
-1) Unzip this at the **root of your working copy** (where your repo root lives).
-2) Commit and push.
-
-**On the server**
 ```bash
-cd /path/to/your/working/copy
-sudo bash ops/install.sh
-bash tools/verify-runtime.sh
+# Setup environment
+npm install
+make setup
+
+# Start Prism Console web interface
+npm run dev
+
+# Run quantum computing demos
+make demo
+
+# Launch agent via Prism Shell
+./prism/prismsh.js spawn cecilia
 ```
 
-- The installer will:
-  - Locate your API (prefers `./srv/blackroad-api`, then `/srv/blackroad-api`, else searches for `server_full.js`)
-  - Create `package.json` if missing and **auto-install** any missing npm packages it finds
-  - Create `.env` from the example if missing and generate strong secrets
-  - Ensure your SQLite file exists (defaults to `blackroad.db` inside the API dir if `DB_PATH` is not set)
-  - Check if `127.0.0.1:8000` is serving `/health`. If not, it prints a one-liner to launch the stub.
+## Architecture
 
----
+### Core Components
 
-## Notes & assumptions
-- Stack recorded in memory (Aug 2025): SPA on `/var/www/blackroad/index.html`, Express API on port **4000**
-  at `/srv/blackroad-api` with SQLite; LLM service on **127.0.0.1:8000**; NGINX proxies `/api` and `/ws`.
-- This bundle does **not** ship `node_modules/` (native builds vary by machine). Instead, it generates
-  and installs what’s actually needed by **scanning your sources**.
-- If your API already has `package.json`, nothing is overwritten; missing deps are added.
-- If you maintain your API directly under a different path, run the scanner manually, e.g.:
-  ```bash
-  node tools/dep-scan.js --dir /path/to/api --save
-  ```
+#### Prism Console (`apps/prism-console-web`)
+Next.js 14 web application for managing agents, viewing metrics, and orchestrating tasks.
 
-If anything looks off, run `bash tools/verify-runtime.sh` and share the output.
+#### Agent Swarm System (`agents/`)
 
-## Subscribe API
+The platform features a sophisticated agent swarm with:
 
-Environment variables for Stripe integration:
+- **100+ Production-Ready Agents**: Specialized capabilities for different domains
+- **Language Abilities Registry**: Maps agents to linguistic capabilities
+- **Swarm Orchestrator**: Intelligent task routing and coordination
+- **Formation Patterns**: Sacred geometric coordination patterns (DELTA, HALO, LATTICE, HUM, CAMPFIRE)
+- **Unified Message Bus**: Multi-protocol communication layer
 
-- `STRIPE_PUBLIC_KEY`
-- `STRIPE_SECRET_KEY`
-- `STRIPE_WEBHOOK_SECRET`
-- `STRIPE_PRICE_STARTER_MONTHLY`
-- `STRIPE_PRICE_PRO_MONTHLY`
-- `STRIPE_PRICE_INFINITY_MONTHLY`
-- `STRIPE_PRICE_STARTER_YEARLY`
-- `STRIPE_PRICE_PRO_YEARLY`
-- `STRIPE_PRICE_INFINITY_YEARLY`
-- `STRIPE_PORTAL_RETURN_URL` (optional)
+**Key Agents:**
+- **Cecilia** (`CECILIA-7C3E-SPECTRUM-9B4F`): Creative systems architect and infrastructure engineer
+- **Quantum Coder**: Quantum algorithm development and optimization
+- **Security Guardian**: Security auditing and vulnerability scanning
+- **Deployment Orchestrator**: CI/CD and infrastructure deployment
 
-Example calls:
+**Agent Archetypes (20 Clusters):**
+- **athenaeum** (knowledge management)
+- **aurum** (economic systems)
+- **blackroad** (platform core)
+- **continuum** (operations)
+- **eidos** (strategy)
+- **mycelia** (ecological systems)
+- **parallax** (storytelling)
+- **soma** (wellness)
+- **lucidia** (core intelligence)
+- And 11 more specialized clusters
 
+#### Gateway Packages (`packages/`)
+- `@blackroad/hjb-gateway`: Hamilton-Jacobi-Bellman optimization gateway
+- `@blackroad/media-gateway`: Media processing and streaming
+- `@blackroad/diffusion-gateway`: Stable Diffusion and image generation
+- `@blackroad/obs-gateway`: GraphQL subscriptions and observability
+- `@blackroad/correlation-engine`: Event correlation and pattern detection
+- `@blackroad/graph-engines`: Graph processing and analysis
+
+## Quantum Computing Features
+
+### Capabilities
+- **Simulators**: NumPy statevector simulation + Qiskit hardware wrappers
+- **Algorithms**: Bell states, Grover search, QFT, phase estimation
+- **Visualization**: Circuit diagrams, Bloch spheres, measurement histograms
+- **Hardware Integration**: IBM Quantum via `QISKIT_API_TOKEN`
+- **Pedagogical Notebooks**: Learning path for quantum computing
+- **CHSH Inequality Demonstrations**: Bell state analysis
+
+### Learning Path (Quantum Pedagogy)
+1. `notebooks/01_qubit_basics.ipynb` — Single qubits and Bloch sphere
+2. `notebooks/02_entanglement_bell.ipynb` — Bell states and CHSH violations
+3. `notebooks/03_qft_and_phase.ipynb` — Quantum Fourier transforms
+4. `notebooks/04_grover_vs_random.ipynb` — Grover's search algorithm
+5. `notebooks/05_noise_and_mitigation.ipynb` — Error handling and mitigation
+6. `notebooks/06_qiskit_hardware_roundtrip.ipynb` — IBM Quantum integration
+
+## Agent Development
+
+### Spawning Agents
 ```bash
-curl http://localhost:4000/api/subscribe/config
-curl -H "Cookie: brsid=..." http://localhost:4000/api/subscribe/status
-curl -X POST http://localhost:4000/api/subscribe/checkout \
+# Via Prism Shell
+./prism/prismsh.js spawn <agent-name>
+
+# Via Agent Gateway API
+curl -X POST http://localhost:3001/v1/agents/cecilia/tasks \
   -H "Content-Type: application/json" \
-  -d '{"planId":"pro","interval":"month"}'
-curl -H "Cookie: brsid=..." http://localhost:4000/api/subscribe/portal
-# Webhooks are received at /api/stripe/webhook and must include the Stripe signature header.
+  -d '{"task": "Analyze system architecture"}'
 ```
-## Unified Sync Pipeline
 
-Use `scripts/blackroad_sync.sh` to drive a chat-style deployment flow.
-Example:
+### Agent Manifests
+Each agent has a manifest at `agents/<agent-name>/manifest.json`:
 
+```json
+{
+  "name": "cecilia",
+  "version": "1.0.0",
+  "agent_id": "CECILIA-7C3E-SPECTRUM-9B4F",
+  "description": "Creative spectrum engineer",
+  "capabilities": [
+    "code_architecture",
+    "system_design",
+    "ui_creation",
+    "problem_solving"
+  ]
+}
+```
+
+## Development
+
+### Project Structure
+```
+blackroad-prism-console/
+├── agents/                 # 100 agent manifests and implementations
+├── apps/                   # Web applications
+│   ├── prism-console-web/  # Main console (Next.js 14)
+│   ├── prismweb/           # Alternative console interface
+│   └── ...                 # Additional web apps
+├── packages/               # 57+ infrastructure packages
+│   ├── hjb-gateway/
+│   ├── media-gateway/
+│   ├── correlation-engine/
+│   └── ...
+├── prism/                  # Prism Shell CLI
+├── notebooks/              # Quantum computing tutorials
+└── artifacts/              # Generated outputs
+```
+
+### Building
 ```bash
-./scripts/blackroad_sync.sh "Push latest to BlackRoad.io"
+# Build all packages
+npm run build
+
+# Run tests
+npm test
+
+# Type checking
+tsc --noEmit
 ```
 
-The script also understands:
-- "Refresh working copy and redeploy"
-- "Rebase branch and update site"
-- "Sync Salesforce -> Airtable -> Droplet"
-
-It pulls from GitHub, triggers connector webhooks, updates a Working Copy checkout, and
-executes a remote refresh command on the droplet.
-### BlackRoad Sync CLI
-`codex/tools/blackroad_sync.py` scaffolds a chat-friendly pipeline that mirrors
-commands like "Push latest to BlackRoad.io" or "Refresh working copy and
-redeploy".  Each sub-command currently logs the intended action:
-
-```bash
-python codex/tools/blackroad_sync.py push
-python codex/tools/blackroad_sync.py refresh
-python codex/tools/blackroad_sync.py rebase
-python codex/tools/blackroad_sync.py sync
-```
-
-Extend the script with real webhooks, Slack posts, or droplet deployments as
-needed.
-
----
-
-## Codex Deploy Flow
-
-`codex/jobs/blackroad-sync-deploy.sh` provides a chat-focused pipeline tying
-together git pushes, connector syncs, working-copy refreshes and server deploys.
-Typical usage:
-
-```bash
-# commit local changes, push and deploy to the droplet
-bash codex/jobs/blackroad-sync-deploy.sh push-latest "chore: update"
-
-# refresh the iOS Working Copy checkout and redeploy
-bash codex/jobs/blackroad-sync-deploy.sh refresh
-
-# rebase current branch onto origin/main then deploy
-bash codex/jobs/blackroad-sync-deploy.sh rebase-update
-
-# run Salesforce → Airtable → Droplet syncs
-bash codex/jobs/blackroad-sync-deploy.sh sync-connectors
-```
-
-It honours environment variables like `DROPLET_HOST`,
-`WORKING_COPY_PATH`, and `SLACK_WEBHOOK` for remote access and
-status notifications.
-
-# BlackRoad Prism Console
-
-This repository hosts experimental tooling and prototypes for BlackRoad.io.
-
-## CI/CD orchestrator
-
-`scripts/blackroad_ci.py` provides a scaffold for the end-to-end workflow
-connecting Codex, GitHub, external connectors and the deployment droplet. The
-script accepts natural language style commands and performs placeholder actions
-for now.
-
-Examples:
-
-```bash
-python scripts/blackroad_ci.py "Push latest to BlackRoad.io"
-python scripts/blackroad_ci.py "Refresh working copy and redeploy"
-python scripts/blackroad_ci.py "Rebase branch and update site"
-python scripts/blackroad_ci.py "Sync Salesforce -> Airtable -> Droplet"
-```
-
-Connector and deployment steps are stubs; configure environment variables and
-extend the script to interact with real services.
-# BlackRoad Prism Console
-
-This repository contains assorted utilities for the BlackRoad project.
-
-## Codex Pipeline Scaffold
-
-The `scripts/blackroad_pipeline.py` script offers a chat-oriented control
-surface that maps high level phrases to underlying actions. It currently
-wraps common Git operations and prints placeholders for connector sync,
-working copy refresh and droplet deployment.
-
-### Example
-
-```bash
-python scripts/blackroad_pipeline.py "Push latest to BlackRoad.io"
-```
-
-The phrases recognised by the controller can be listed by invoking the
-script with an unknown command.
-## Sync & Deploy
-## Codex Sync/Deploy
-
-An experimental control surface lives at `codex/tools/blackroad_pipeline.py`.
-It accepts chat-style commands and orchestrates a stubbed pipeline spanning
-GitHub commits, connector sync, Working Copy refresh, and droplet deployment.
-
-```bash
-python codex/tools/blackroad_pipeline.py "Push latest to BlackRoad.io" -m "chore: sync"
-```
-
-The script only logs each step today; extend the placeholders with real
-connectors, OAuth, and deployment hooks to enable end-to-end automation.
-
-Additional operational docs live in the [`docs/`](docs) folder.
-
-Use the `bin/blackroad-sync` script to push code and refresh the live site end to end.
-
-```bash
-# Push commits, trigger connector jobs, refresh the Working Copy, and redeploy the droplet
-bin/blackroad-sync push
-
-# Refresh deployment without new commits
-bin/blackroad-sync refresh
-
-# Rebase with main, push, and redeploy
-bin/blackroad-sync rebase
-```
-
-The script relies on environment variables like `DROPLET_HOST` and `WORKING_COPY_HOST` to reach remote hosts.
-
-Additional operational docs live in the [`docs/`](docs) folder.
-
-## Codex Sync Script
-
-The repository includes a minimal scaffold to experiment with the end-to-end
-flow described in the BlackRoad deployment docs. The helper accepts natural
-language commands and turns them into git/deploy operations.
-
-```bash
-python scripts/blackroad_sync.py "Push latest to BlackRoad.io"
-```
-
-Other examples:
-
-- `python scripts/blackroad_sync.py "Refresh working copy and redeploy"`
-- `python scripts/blackroad_sync.py "Rebase branch and update site"`
-- `python scripts/blackroad_sync.py "Sync Salesforce → Airtable → Droplet"`
-
-The script currently prints placeholder actions; extend the functions to hook
-into real connectors and infrastructure.
-
-## Bot Commands (ChatOps)
-
-- `/deploy blackroad <channel> [provider]` — deploy canary/beta/prod
-- `/rollback blackroad <channel> [steps] [provider]` — revert to earlier build
-- `/blog new "Title"` — scaffold blog post PR
-- `/promote prod` — open staging→prod PR
-- `/toggle <flag> on|off` — set feature flags in `.github/feature-flags.yml`
-- `/install all` — run universal installer
-- `/fix <freeform prompt>` — dispatch AI Fix with your prompt
-
-## Agents Overview
-
-- **Auto-Heal**: reacts to failing workflows and dispatches **AI Fix**.
-- **AI Fix**: runs Codex/LLM prompts, formats, builds, opens PRs.
-- **AI Sweeper**: nightly formatter/linter; opens PR if needed.
-- **Labeler/Stale/Lock**: repo hygiene.
-- **Auto-merge**: merges labeled PRs when checks pass.
-- **CodeQL/Snyk/Scorecard**: security analysis.
 ## Deployment
 
-Run the scaffolded end-to-end sync script to push local changes and deploy them
-to the live environment:
-
+### Docker
 ```bash
-python scripts/blackroad_sync.py
+# Build production image
+docker-compose -f docker-compose.prod.yml build
+
+# Start services
+docker-compose -f docker-compose.prod.yml up -d
 ```
 
-The script pushes to GitHub, fans out to connector webhooks, refreshes an iOS
-Working Copy checkout and issues a remote deploy on the droplet when configured
-via environment variables.
-
-Additional operational docs live in the [`docs/`](docs) folder.
-
-## Codex Pipeline
-
-This repo ships with a chat-first deployment helper at
-`codex/tools/blackroad_pipeline.py`. The script accepts plain‑English
-commands and orchestrates git pushes, connector stubs and droplet
-deploys in one flow:
-
+### Environment Variables
 ```bash
-python3 codex/tools/blackroad_pipeline.py "Push latest to BlackRoad.io"
-python3 codex/tools/blackroad_pipeline.py "Refresh working copy and redeploy"
+# Quantum hardware access
+QISKIT_API_TOKEN=your_token_here
+
+# Agent Gateway
+AGENT_GATEWAY_PORT=3001
+
+# Cecilia Memory API
+CECILIA_MEMORY_PORT=3000
 ```
 
-It relies on environment variables for remote hosts and tokens
-(`GIT_REMOTE`, `DROPLET_HOST`, `SLACK_WEBHOOK`).
-This scaffold is intentionally clean and compact so you can drop in your own logic fast.
-
-## Codex Deployment
-
-A helper script `scripts/blackroad_codex.sh` provides a chat-like interface for common deployment actions:
+**Running Quantum Demos:**
 
 ```bash
-scripts/blackroad_codex.sh push
-scripts/blackroad_codex.sh deploy
-scripts/blackroad_codex.sh refresh
-scripts/blackroad_codex.sh rebase
-scripts/blackroad_codex.sh sync
+make demo
 ```
 
-Set `REMOTE`, `BRANCH`, and `DROPLET_HOST` to customize targets. Provide `SLACK_WEBHOOK` to post updates.
-## BlackRoad Sync & Deploy
+This produces artifacts in `artifacts/`:
+- `bell_hist.png` — Bell state measurement distributions
+- `bloch_example.png` / `bloch_q0.png` — Bloch sphere visualizations
+- `grover_success.png` / `grover_curve.png` — Grover algorithm success rates
+- `lineage.jsonl` — Agent interaction logs
 
-Run `scripts/blackroad_sync.sh` to push the latest changes to GitHub and roll them out to the droplet. The script accepts natural language commands, for example:
+**Hardware Access:**
+
+Set the `QISKIT_API_TOKEN` environment variable to access IBM Quantum hardware. Without a token, the system defaults to Aer simulators and fake backends.
+
+For detailed quantum lab documentation, see [README-quantum-lab.md](./README-quantum-lab.md).
+
+### Microservices (36+)
+
+**Core Services:**
+- api, api-gateway, auth
+- prism-console-api, prism
+
+**LLM & AI:**
+- llm-gateway, llm-healthwatch
+- lucidia-cognitive-system, lucidia-api
+
+**Quantum & Scientific:**
+- quantum_copilot, quantum_lab
+- origin-qlm-bridge
+
+**Infrastructure:**
+- health-sidecar, error-logger
+- model-health, mock-issuer
+
+## Development
+
+### Prerequisites
+
+- Node.js >= 20
+- Python >= 3.10
+- Docker (for containerized services)
+
+### Setup
 
 ```bash
-scripts/blackroad_sync.sh "Push latest to BlackRoad.io"
-scripts/blackroad_sync.sh "Refresh working copy and redeploy"
+# Install dependencies
+make install
+npm install
+
+# Run tests
+make test
+npm test
+
+# Format code
+make format
+
+# Lint
+make lint
+
+# Type checking
+tsc --noEmit
 ```
 
-Set `WORKING_COPY_SSH`, `DROPLET_SSH`, and optionally `SLACK_WEBHOOK` environment variables before running. Logs are written to `blackroad_sync.log`.
-## Codex Sync & Deploy
+### Project Structure
 
-An initial scaffold for the end-to-end BlackRoad deployment flow lives in
-`scripts/blackroad_sync.py`. The helper currently exposes three
-subcommands:
+```
+blackroad-prism-console/
+├── agents/           # 100+ production-ready agents
+├── frontend/         # React + Vite SPA
+├── services/         # 36+ microservices
+├── apps/             # Multiple web applications
+│   ├── prism-console-web/
+│   ├── prismweb/
+│   └── ...
+├── packages/         # 57+ infrastructure packages
+│   ├── hjb-gateway/
+│   ├── media-gateway/
+│   └── ...
+├── prism/            # Prism Shell CLI
+├── notebooks/        # Quantum computing tutorials
+├── infra/            # Terraform, Kubernetes configs
+├── artifacts/        # Generated outputs
+├── tools/            # Utilities and tooling
+└── docs/             # Comprehensive documentation
+```
+
+## Deployment
+
+Multiple deployment options supported:
+
+- **Docker Compose**: `docker-compose -f docker-compose.prod.yml up`
+- **Fly.io**: `make deploy-fly`
+- **AWS ECS**: `make deploy-ecs`
+- **Kubernetes**: `kubectl apply -f infra/k8s/`
+
+See [README-DEPLOY.md](./README-DEPLOY.md) for detailed deployment instructions.
+
+## Sacred Geometry & Mathematics
+
+The platform includes sophisticated mathematical tools:
+
+- Magic square generation toolkit
+- Amundson ring coherence simulation
+- Projective depth solver
+- Cross-ratio calculations
+- Spectral gap analysis
+- Angle defect computations
+
+## Bot Family Demo
+
+The repository includes an in-memory message bus with cooperating bots demonstrating planning, execution, and artifact logging:
 
 ```bash
-# Push local commits to GitHub and trigger connector jobs
-python3 scripts/blackroad_sync.py push
-
-# Update an iOS Working Copy clone
-python3 scripts/blackroad_sync.py refresh-working-copy --path /path/to/clone
-
-# Pull latest code and restart services on the droplet
-python3 scripts/blackroad_sync.py deploy --host user@droplet
+python -m venv .venv && source .venv/bin/activate
+pip install -e .
+python orchestrator/run_demo.py
 ```
 
-The script only prints the operations it would perform, acting as a
-placeholder for future automation.
+This generates a Bell pair histogram at `artifacts/bell_hist.png` with lineage logging in `lineage.jsonl`.
+
+## Security & Policy
+
+The platform enforces policy-as-code constraints:
+
+- Network access disabled by default in quantum environments
+- Artifact size budgets enforced
+- All tool calls logged through lineage subsystem
+- mTLS between services (production)
+- Non-root container execution
+- Secret rotation policies (see SECURITY.md)
+
+## Monitoring & Observability
+
+- **Metrics**: Prometheus + Grafana
+- **Logging**: Structured JSON logging
+- **Tracing**: Distributed tracing support
+- **Health Checks**: `/healthz`, `/health.json`, `/api/version`
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development workflow, commit message style, and code review checklist.
+
+## Documentation
+
+Comprehensive documentation available in `docs/`:
+
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Deployment guide
+- [RUNBOOK.md](./RUNBOOK.md) - Operations runbook
+- [SECURITY.md](./SECURITY.md) - Security practices
+- [AGENT_WORKBOARD.md](./AGENT_WORKBOARD.md) - Agent development
+- [README-OPS.md](./README-OPS.md) - Operations guide
+- [BLACKROAD_CORPORATE_ORG_V1.md](./docs/BLACKROAD_CORPORATE_ORG_V1.md) - Full corporate org structure
+
+## License
+
+See [LICENSE](./LICENSE) for details.
+
+## Unsolved Problems
+
+See `quantum_lab/pedagogy/unsolved/` for mini-essays connecting demos to enduring mathematical challenges.
+
+## Support
+
+- **Documentation**: `docs/`
+- **Issues**: GitHub Issues
+- **Security**: See `SECURITY.md`
+
 ---
 
-## Codex Deploy Flow
-
-`codex/jobs/blackroad-sync-deploy.sh` provides a chat-focused pipeline tying
-together git pushes, connector syncs, working-copy refreshes and server deploys.
-Typical usage:
-
-```bash
-# commit local changes, push and deploy to the droplet
-bash codex/jobs/blackroad-sync-deploy.sh push-latest "chore: update"
-
-# refresh the iOS Working Copy checkout and redeploy
-bash codex/jobs/blackroad-sync-deploy.sh refresh
-
-# rebase current branch onto origin/main then deploy
-bash codex/jobs/blackroad-sync-deploy.sh rebase-update
-
-# run Salesforce → Airtable → Droplet syncs
-bash codex/jobs/blackroad-sync-deploy.sh sync-connectors
-```
-
-It honours environment variables like `DROPLET_HOST`,
-`WORKING_COPY_PATH`, and `SLACK_WEBHOOK` for remote access and
-status notifications.
-
-- **/geodesic**: Compute Fubini–Study distance `d_FS = arccos(|⟨ψ|φ⟩|)` and sample the **CP² geodesic** points between |ψ₀⟩ and |ψ₁⟩.
-
-## Codex Sync Helper
-
-Use `scripts/blackroad_sync.py` for chat-driven CI/CD tasks. It can commit and
-push changes, refresh a working copy, rebase branches, or stub out connector
-sync jobs.
-
-Examples:
-
-```bash
-scripts/blackroad_sync.py push -m "feat: update site"
-scripts/blackroad_sync.py refresh
-scripts/blackroad_sync.py sync-connectors
-```
+**Version**: 1.0.0
+**Last Updated**: 2025-11-10
+**Status**: Pre-production (hardening in progress)

@@ -1,41 +1,66 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
-DB_PATH=${DB_PATH:-/var/blackroad/blackroad.db}
-API_DIR=${API_DIR:-/srv/blackroad-api}
-LLM_DIR=${LLM_DIR:-/srv/lucidia-llm}
-MATH_DIR=${MATH_DIR:-/srv/lucidia-math}
+usage() {
+  cat <<USAGE
+Usage: $0 --env <preview|staging|production> --to-image <image>
+USAGE
+}
 
-BACKUP_BASE=${BACKUP_BASE:-/var/backups/prism}
-LOG_FILE=${ROLLBACK_LOG:-/var/log/prism-rollback.log}
+ENVIRONMENT=""
+TARGET_IMAGE=""
 
-if [ -n "${1:-}" ]; then
-  TS="$1"
-else
-  echo "Available snapshots:"
-  ls "$BACKUP_BASE"
-  read -p "Select snapshot: " TS
-fi
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --env)
+      ENVIRONMENT="$2"
+      shift 2
+      ;;
+    --to-image)
+      TARGET_IMAGE="$2"
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
 
-if [ "$TS" = "latest" ]; then
-  TS=$(find "$BACKUP_BASE" -mindepth 1 -maxdepth 1 -type d ! -name weekly | sort | tail -n 1)
-fi
-
-SNAP="$BACKUP_BASE/$TS"
-if [ ! -d "$SNAP" ]; then
-  echo "Snapshot not found: $TS" >&2
+if [[ -z "$ENVIRONMENT" || -z "$TARGET_IMAGE" ]]; then
+  echo "Both --env and --to-image are required" >&2
+  usage
   exit 1
 fi
 
-gzip -cd "$SNAP/blackroad.db.gz" > "$DB_PATH" 2>/dev/null || true
-rsync -a "$SNAP/api/" "$API_DIR/" 2>/dev/null || true
-rsync -a "$SNAP/llm/" "$LLM_DIR/" 2>/dev/null || true
-rsync -a "$SNAP/math/" "$MATH_DIR/" 2>/dev/null || true
-
-if command -v systemctl >/dev/null 2>&1; then
-  systemctl restart blackroad-api lucidia-llm lucidia-math || true
-  systemctl reload nginx || systemctl restart nginx || true
+case "$ENVIRONMENT" in
+  preview)
+    echo "Rolling back preview via Fly to image $TARGET_IMAGE"
+    flyctl deploy --app prism-console-preview --image "$TARGET_IMAGE" --yes
+    ;;
+  staging)
+    echo "Rolling back staging via ECS to image $TARGET_IMAGE"
+    aws ecs update-service \
+      --cluster prism-shared-staging \
+      --service prism-console-web \
+      --force-new-deployment \
+      --region us-east-1
+    ;;
+  production)
+    echo "Rolling back production via ECS to image $TARGET_IMAGE"
+    aws ecs update-service \
+      --cluster prism-shared-prod \
+      --service prism-console-web \
+      --force-new-deployment \
+      --region us-east-1
+    ;;
+  *)
+    echo "Unsupported environment: $ENVIRONMENT" >&2
+    exit 1
+    ;;
 fi
-
-mkdir -p "$(dirname "$LOG_FILE")"
-echo "$(date --iso-8601=seconds) rollback to $TS" >> "$LOG_FILE"

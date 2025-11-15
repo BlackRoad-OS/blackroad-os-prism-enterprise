@@ -2,5 +2,5 @@
   "name": "debugger",
   "version": "1.0.0",
   "description": "debugger elite coding agent",
-  "capabilities": ["ping", "analyze", "codegen"]
+  "capabilities": ["ping", "analyze", "codegen", "diagnose"]
 }
