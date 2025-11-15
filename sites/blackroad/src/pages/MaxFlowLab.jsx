@@ -208,6 +208,10 @@ export default function MaxFlowLab() {
     setResult(r);
     if(!r.paths.length) return setLastAug(null);
     const idx = lastAug==null ? 0 : Math.min(r.paths.length-1, lastAug+1);
+    const {paths} = r;
+    if(!paths.length){ setLastAug(null); return; }
+    setResult(r);
+    const idx = lastAug==null ? 0 : Math.min(paths.length-1, lastAug+1);
     setLastAug(idx);
   };
 
