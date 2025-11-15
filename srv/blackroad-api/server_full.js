@@ -85,6 +85,7 @@ require('./modules/projects')({ app });
 require('./modules/pr_proxy')({ app });
 require('./modules/patentnet')({ app });
 require('./modules/truth_pubsub')({ app });
+require('./modules/trust_graph')({ app });
 
 const emitter = new EventEmitter();
 const jobs = new Map();

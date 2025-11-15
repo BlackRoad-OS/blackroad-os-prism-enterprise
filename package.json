@@ -49,6 +49,7 @@
     "bs58": "^6.0.0",
     "json-canonicalize": "^2.0.0",
     "ipfs-http-client": "^60.0.1"
+    "yaml": "^2.5.0"
   },
   "devDependencies": {
     "@eslint/js": "^8.57.1",
