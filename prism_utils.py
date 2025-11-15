@@ -22,6 +22,13 @@ _NUMERIC_PREFIX = re.compile(r"^\s*([+-]?\d+(?:\.\d+)?)")
 def parse_numeric_prefix(text: str) -> float:
     """Extracts the leading decimal value from ``text``.
 
+    """Extract a leading decimal value from ``text``.
+
+    The regex ignores leading whitespace and accepts an optional ``+`` or ``-``
+    sign and an optional fractional part. If no valid number is found, ``1.0``
+    is returned. Inputs such as ``"-3.5 apples"`` or ``"2, rest"`` are
+    recognized; malformed values default to ``1.0``.
+    """
     match = _NUMERIC_PREFIX.match(text)
     if not match:
         return 1.0
