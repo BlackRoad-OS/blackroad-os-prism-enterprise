@@ -3,6 +3,51 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.0.0 (2025-11-15)
+
+
+### Features
+
+* add amundson bridge projection tile ([bc16498](https://github.com/blackboxprogramming/blackroad-prism-console/commit/bc164981c3dcac86b89007bcd0963535dd138a40))
+* Add comprehensive automated PR workflow system with dual cryptographic attestation ([8d2f818](https://github.com/blackboxprogramming/blackroad-prism-console/commit/8d2f818ff66e8511c90dbb67aab38579acad5a33))
+* Add comprehensive IP protection and corporate formation package ([6bfc49a](https://github.com/blackboxprogramming/blackroad-prism-console/commit/6bfc49a1c86c82ae5c8257a2dcf3eece7dce4874))
+* Add comprehensive personalities and identities to all agents ([47f3e85](https://github.com/blackboxprogramming/blackroad-prism-console/commit/47f3e8528c0494b3d8ef74b650be9c1c23eabbb0))
+* Add comprehensive SHA verification patent framework for Amundson equation set ([bb7fc8a](https://github.com/blackboxprogramming/blackroad-prism-console/commit/bb7fc8a8a5d0b9e0d2d6edaa0be2402354a7bea8))
+* add merge queue helper ([b4dd7b6](https://github.com/blackboxprogramming/blackroad-prism-console/commit/b4dd7b63951736904fef5eede9830b2f4b2ba1ea))
+* Add production-ready Earth Metaverse for agent swarm integration ([7cfcf5d](https://github.com/blackboxprogramming/blackroad-prism-console/commit/7cfcf5de71ed09e4c1d92e5e02d9fce0fceb5f88))
+* Build out comprehensive Blackroad service ecosystem ([cb86b7b](https://github.com/blackboxprogramming/blackroad-prism-console/commit/cb86b7ba83753d7775d1154dea325c60c10320f5))
+* clarify project status with agent births and deployments ([aacda7d](https://github.com/blackboxprogramming/blackroad-prism-console/commit/aacda7d15021165d927b2a8b48aa9fcc622b8e0e))
+* create beautiful production-ready websites for all 10 domains ([8dbc463](https://github.com/blackboxprogramming/blackroad-prism-console/commit/8dbc46387bdd790720d9f6fbe4e327439d7aaaa3))
+* Create metaverse of love and light with peaceful community systems ([367c85e](https://github.com/blackboxprogramming/blackroad-prism-console/commit/367c85ee20df5cdbc675aa5661f2996903f2cf0b))
+* Enhance patent anchoring system for continuous updates ([2e43f70](https://github.com/blackboxprogramming/blackroad-prism-console/commit/2e43f700351ccd662f0f4d9ef994f3939f037ec8))
+* enrich environment summaries ([f215d65](https://github.com/blackboxprogramming/blackroad-prism-console/commit/f215d658a4fe5f71f413e6aa6be7ec4be81b202d))
+* Establish cryptographic prior art disclosure for defensive publication ([9b11d82](https://github.com/blackboxprogramming/blackroad-prism-console/commit/9b11d8204bc198c5ddb7152ac68435efc273e75d))
+* implement comprehensive branch cleanup system at scale ([9dc3d4a](https://github.com/blackboxprogramming/blackroad-prism-console/commit/9dc3d4a88c11e1410c712a820dec155d403c251e))
+* implement production-grade scaffolded components ([930af92](https://github.com/blackboxprogramming/blackroad-prism-console/commit/930af923f03127e52cde9fe752ce54354c786792))
+* Production-ready deployment with 1000-agent ecosystem ([8949380](https://github.com/blackboxprogramming/blackroad-prism-console/commit/89493800c53d331285fcdd72b2f4d7ca1cee6427))
+* scaffold 100-agent production ecosystem with complete infrastructure ([225d56c](https://github.com/blackboxprogramming/blackroad-prism-console/commit/225d56cd3985dc884dc72736baaaf9d114752501))
+* scaffold metaverse agent roster ([1658b1e](https://github.com/blackboxprogramming/blackroad-prism-console/commit/1658b1ec210a69487d56551bfa947a478254eb84))
+* support json summaries in cleanup bot ([4d4d561](https://github.com/blackboxprogramming/blackroad-prism-console/commit/4d4d561a6368c8c7d7b534a6945a637ac21cff22))
+
+
+### Bug Fixes
+
+* align lucidia dev Monaco CDN with 0.52.2 ([01b3516](https://github.com/blackboxprogramming/blackroad-prism-console/commit/01b3516f0cd00307bf3f2247aec1afea574832a3))
+* allow remote cleanup when local branch missing ([cab69a1](https://github.com/blackboxprogramming/blackroad-prism-console/commit/cab69a1aa4b7782aad7d13c08168a0059290bcfc))
+* copy cleanup results in summary ([83858e3](https://github.com/blackboxprogramming/blackroad-prism-console/commit/83858e3ff4a9bd73f0406bc890d86cc17ed16da8))
+* normalize qlm lab pyproject metadata ([3d68016](https://github.com/blackboxprogramming/blackroad-prism-console/commit/3d6801622974256d4bc073aa31375a465e2e16e0))
+* normalize qlm-lab pyproject config ([b832fdf](https://github.com/blackboxprogramming/blackroad-prism-console/commit/b832fdf6ffa0758efe669be35907385f944ca5ab))
+* offload llama streaming to background thread ([37b6dd7](https://github.com/blackboxprogramming/blackroad-prism-console/commit/37b6dd7c2e12fb9b442ba1ac8a98406dc1d4d1b8))
+* parse scientific notation prefixes ([693ff8b](https://github.com/blackboxprogramming/blackroad-prism-console/commit/693ff8b5c94bbb8b74d822fccfe2435b89255f2d))
+* Repair Vercel deployment config and add cleanup tools ([2d93a8a](https://github.com/blackboxprogramming/blackroad-prism-console/commit/2d93a8acce2792c98561c125a55bede031c62709))
+* Replace all deprecated placeholders and stub implementations ([be12f20](https://github.com/blackboxprogramming/blackroad-prism-console/commit/be12f20b231f6c0de9878084ab666be08bd1ca9a))
+* restore backend integration flow ([eb43af4](https://github.com/blackboxprogramming/blackroad-prism-console/commit/eb43af462fe37dda9ce7b06fbec799454231737a))
+* restore workflow automation ([73a54e1](https://github.com/blackboxprogramming/blackroad-prism-console/commit/73a54e16267b5cadca9c9bf609969860619fbf8f))
+* return typed health response from lucidia root ([c612650](https://github.com/blackboxprogramming/blackroad-prism-console/commit/c6126505d812461501a060184ce3fdc9239dc48b))
+* stabilise codex pipeline utilities and optional deps ([01f8370](https://github.com/blackboxprogramming/blackroad-prism-console/commit/01f8370e141d17e8c7731be24b0bce0141f514b1))
+* tighten scientific notation parsing ([91a8aed](https://github.com/blackboxprogramming/blackroad-prism-console/commit/91a8aed47aa019bd553e8818a3d70a089e7ccbc7))
+* **webber_bot:** normalize handler return types ([2b81893](https://github.com/blackboxprogramming/blackroad-prism-console/commit/2b81893df9bacced07c452689f7746bf6ffe2cb0))
+
 ## [1.9.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.8.0...v1.9.0) (2025-10-13)
 All notable changes to this project will be documented in this file.
 
