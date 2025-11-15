@@ -123,6 +123,11 @@ async function fallback(body,original){
     });
     const fullBody={...body,stream:false};
     const r=await fetch('/api/llm/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(fullBody)});
+    const r=await fetch('/api/llm/chat',{
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({...body,stream:false})
+    });
     const j=await r.json();
     addMessage('assistant',j.choices[0].message.content);
   }catch(e){addMessage('assistant',original);}
