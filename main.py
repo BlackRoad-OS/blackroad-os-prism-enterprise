@@ -120,3 +120,11 @@ if user_input:
 st.markdown("---")
 st.markdown("**BlackRoad Prism Console** | Live UI Simulation")
 st.image("72BF9767-A2EE-4CB6-93F4-4D738108BC4B.png", caption="Live Console Interface")
+        placeholder = st.empty()
+        placeholder.write("Processing request...")
+        response = client.chat.completions.create(
+            model="gpt-4o-mini", messages=st.session_state.chat_history
+        )
+        reply = response.choices[0].message["content"]
+        st.session_state.chat_history.append({"role": "assistant", "content": reply})
+        placeholder.markdown(f"**AI:** {reply}")
