@@ -17,17 +17,40 @@ const nodeRules = {
   'no-empty': ['error', { allowEmptyCatch: true }],
 };
 
+const repoIgnores = [
+  'node_modules',
+  '_trash',
+  '.github/**',
+  'apps/**',
+  'backend/**',
+  'build/**',
+  'connectors.js',
+  'design/**',
+  'dist/**',
+  'frontend/**',
+  'modules/**',
+  'packages/**',
+  'public/vendor/**',
+  'scripts/**',
+  'services/**',
+  'sites/**',
+  'tools/**',
+  'var/**',
+];
+
 module.exports = [
-  { ignores: ['node_modules', '_trash'] },
+  { ignores: repoIgnores },
   js.configs.recommended,
   {
     files: [
+      'eslint.config.js',
+      'jest.config.js',
       'srv/blackroad-api/server_full.js',
+      'srv/blackroad-api/routes/git.js',
       'tests/api_health.test.js',
       'tests/git_api.test.js',
       'tests/helpers/auth.js',
     ],
-    files: ['eslint.config.js', 'jest.config.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'commonjs',
@@ -36,11 +59,7 @@ module.exports = [
     rules: nodeRules,
   },
   {
-    files: ['srv/blackroad-api/**/*.js', 'tests/**/*.test.js'],
-      'srv/blackroad-api/routes/git.js',
-      'tests/api_health.test.js',
-      'tests/git_api.test.js',
-    ],
+    files: ['srv/blackroad-api/**/*.js', 'tests/**/*.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'commonjs',
@@ -54,28 +73,6 @@ module.exports = [
         afterAll: 'readonly',
       },
     },
-    rules: {},
-    ignores: [
-      ".github/**",
-      "apps/**",
-      "backend/**",
-      "build/**",
-      "connectors.js",
-      "design/**",
-      "dist/**",
-      "frontend/**",
-      "modules/**",
-      "node_modules/**",
-      "packages/**",
-      "public/vendor/**",
-      "scripts/**",
-      "services/**",
-      "sites/**",
-      "src/**",
-      "srv/**",
-      "tools/**",
-      "var/**"
-    ]
     rules: nodeRules,
   },
 ];
