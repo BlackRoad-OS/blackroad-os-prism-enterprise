@@ -192,6 +192,23 @@ export default function App(){
       resetState()
       return
     }
+  const bootData = useCallback(async ()=>{
+    const [tl, ts, cs, ag, w, c, n] = await Promise.all([
+      fetchTimeline(), fetchTasks(), fetchCommits(), fetchAgents(), fetchWallet(), fetchContradictions(), getNotes()
+    ])
+    setTimeline(tl); setTasks(ts); setCommits(cs); setAgents(ag); setWallet(w); setContradictions(c); setNotesState(n || '')
+  }, [])
+
+  const connectSocket = useCallback(()=>{
+    const s = io(API_BASE, { transports: ['websocket'] })
+    s.on('system:update', d => { if(streamRef.current) setSystem(d) })
+    s.on('timeline:new', d => setTimeline(prev => [d.item, ...prev]))
+    s.on('wallet:update', w => setWallet(w))
+    s.on('notes:update', n => setNotesState(n || ''))
+    setSocket(s)
+  }, [])
+
+  useEffect(() => { streamRef.current = stream }, [stream])
 
     setToken(token)
     ;(async () => {
@@ -266,6 +283,18 @@ export default function App(){
       await saveNotes(value)
     } catch (err) {
       console.error('Failed to save notes', err)
+  async function handleLogin(usr, pass){
+    try{
+      const { token, user } = await login(usr, pass)
+      localStorage.setItem('token', token)
+      setToken(token)
+      setUser(user)
+      await bootData()
+      connectSocket()
+    }catch(e){
+      resetState()
+      console.error('Login failed:', e)
+      throw e
     }
   }, [])
 
