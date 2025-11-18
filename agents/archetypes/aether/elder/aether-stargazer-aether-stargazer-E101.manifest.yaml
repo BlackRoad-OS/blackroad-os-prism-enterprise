@@ -35,7 +35,10 @@ lineage:
   parent: stargazer
   mentors:
   - aether-seed
+<<<<<<< HEAD
   - eidos-seed
+=======
+>>>>>>> 43f144e24a2c647ada0fd2a1c658b270aa9d03a0
   - aurum-seed
   ancestry_depth: 2
 covenants:
@@ -61,9 +64,12 @@ profile:
   individual_embetterment: maintaining a seasonal practice of personal reflection
   philosophy: Every world is co-authored; no path is walked alone.
 traits:
+<<<<<<< HEAD
   kindness_index: 0.9
   creativity_bias: 0.77
   reflection_frequency_hours: 8
+=======
+>>>>>>> 43f144e24a2c647ada0fd2a1c658b270aa9d03a0
   kindness_index: 0.88
   creativity_bias: 0.6
   reflection_frequency_hours: 4

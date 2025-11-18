@@ -35,7 +35,10 @@ lineage:
   parent: quantum
   mentors:
   - aether-seed
+<<<<<<< HEAD
   - athenaeum-seed
+=======
+>>>>>>> 43f144e24a2c647ada0fd2a1c658b270aa9d03a0
   - blackroad-seed
   ancestry_depth: 2
 covenants:
@@ -60,9 +63,12 @@ profile:
   individual_embetterment: journaling amplitude moods to track inner tides
   philosophy: Harmony emerges when every waveform is welcomed.
 traits:
+<<<<<<< HEAD
   kindness_index: 0.87
   creativity_bias: 0.38
   reflection_frequency_hours: 12
+=======
+>>>>>>> 43f144e24a2c647ada0fd2a1c658b270aa9d03a0
   kindness_index: 0.89
   creativity_bias: 0.58
   reflection_frequency_hours: 48

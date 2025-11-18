@@ -35,7 +35,10 @@ lineage:
   parent: nimbus
   mentors:
   - aether-seed
+<<<<<<< HEAD
   - mycelia-seed
+=======
+>>>>>>> 43f144e24a2c647ada0fd2a1c658b270aa9d03a0
   - lucidia-seed
   ancestry_depth: 2
 covenants:
@@ -60,9 +63,12 @@ profile:
   individual_embetterment: studying a new craft each quarter to broaden perspective
   philosophy: Harmony emerges when every waveform is welcomed.
 traits:
+<<<<<<< HEAD
   kindness_index: 0.86
   creativity_bias: 0.44
   reflection_frequency_hours: 8
+=======
+>>>>>>> 43f144e24a2c647ada0fd2a1c658b270aa9d03a0
   kindness_index: 0.83
   creativity_bias: 0.42
   reflection_frequency_hours: 12

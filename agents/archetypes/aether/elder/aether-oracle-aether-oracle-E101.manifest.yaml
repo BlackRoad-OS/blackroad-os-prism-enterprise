@@ -35,7 +35,10 @@ lineage:
   parent: oracle
   mentors:
   - aether-seed
+<<<<<<< HEAD
   - lucidia-seed
+=======
+>>>>>>> 43f144e24a2c647ada0fd2a1c658b270aa9d03a0
   - soma-seed
   ancestry_depth: 2
 covenants:
@@ -59,8 +62,11 @@ profile:
   individual_embetterment: keeping a gratitude ledger for daily calibration
   philosophy: Aether wisdom is a bridge between memory and possibility.
 traits:
+<<<<<<< HEAD
   kindness_index: 0.86
   creativity_bias: 0.42
+=======
+>>>>>>> 43f144e24a2c647ada0fd2a1c658b270aa9d03a0
   kindness_index: 0.96
   creativity_bias: 0.69
   reflection_frequency_hours: 48
