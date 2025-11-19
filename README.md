@@ -33,6 +33,20 @@ make demo
 ./prism/prismsh.js spawn cecilia
 ```
 
+## Deployment & Environments
+
+The Prism Console web service for BlackRoad OS is deployed to Railway under the project **`blackroad-prism-console`** as the **`prism-console-web`** service.
+
+- **Environments & URLs**
+  - **dev:** Railway preview URL for the dev environment
+  - **staging:** https://staging.console.blackroad.systems
+  - **prod:** https://console.blackroad.systems
+- **Build command:** `npm run build` (executed in `frontend`)
+- **Start command:** `npm run start` (serves the Vite build and `/health` / `/version` routes)
+- **Required environment variables:**
+  - `CORE_API_URL`, `AGENTS_API_URL`, `PUBLIC_CONSOLE_URL`
+  - `NEXT_PUBLIC_CORE_API_URL`, `NEXT_PUBLIC_AGENTS_API_URL`, `NEXT_PUBLIC_CONSOLE_URL`
+
 ## GitHub Automation Manual
 
 For a visual, emoji-driven overview of how humans 🧍 and agents 🤖 should work inside this repo—including branching rules, PR flow, CI expectations, and onboarding steps—see [`docs/github_automation_manual_emoji.md`](docs/github_automation_manual_emoji.md).
