@@ -16,6 +16,7 @@ import {
   setNotes as saveNotes,
   action,
 } from './api'
+import config from './config.js'
 import Guardian from './Guardian.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import ApiHealthDashboard from './pages/ApiHealthDashboard.jsx'
@@ -151,7 +152,7 @@ export default function App(){
 
   const connectSocket = useCallback(() => {
     socketRef.current?.disconnect()
-    const target = API_BASE || undefined
+    const target = config.agentsApiUrl || config.coreApiUrl || undefined
     const socket = io(target, { transports: ['websocket'], withCredentials: true })
     socketRef.current = socket
 
@@ -192,24 +193,6 @@ export default function App(){
       resetState()
       return
     }
-  const bootData = useCallback(async ()=>{
-    const [tl, ts, cs, ag, w, c, n] = await Promise.all([
-      fetchTimeline(), fetchTasks(), fetchCommits(), fetchAgents(), fetchWallet(), fetchContradictions(), getNotes()
-    ])
-    setTimeline(tl); setTasks(ts); setCommits(cs); setAgents(ag); setWallet(w); setContradictions(c); setNotesState(n || '')
-  }, [])
-
-  const connectSocket = useCallback(()=>{
-    const s = io(API_BASE, { transports: ['websocket'] })
-    s.on('system:update', d => { if(streamRef.current) setSystem(d) })
-    s.on('timeline:new', d => setTimeline(prev => [d.item, ...prev]))
-    s.on('wallet:update', w => setWallet(w))
-    s.on('notes:update', n => setNotesState(n || ''))
-    setSocket(s)
-  }, [])
-
-  useEffect(() => { streamRef.current = stream }, [stream])
-
     setToken(token)
     ;(async () => {
       try {
@@ -219,38 +202,6 @@ export default function App(){
         connectSocket()
       } catch (err) {
         console.error('Failed to restore session', err)
-  // Restore auth token from local storage on load and reset when missing
-  useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (!token) {
-      // Clear any lingering state when no token exists
-      resetState()
-      return
-    }
-    setToken(token)
-    ;(async () => {
-      try {
-        const u = await me()
-        setUser(u)
-        await bootData()
-        connectSocket()
-      } catch (e) {
-  // Restore auth token from local storage on load and clear state if missing
-  useEffect(()=>{
-    const token = localStorage.getItem('token')
-    setToken(token || '')
-    ;(async ()=>{
-      try {
-        if (token) {
-          const u = await me()
-          setUser(u)
-          await bootData()
-          connectSocket()
-        } else {
-          resetState()
-        }
-      } catch(e){
-        // Reset state on auth failure and log for debugging
         resetState()
       } finally {
         setAuthChecked(true)
@@ -283,18 +234,6 @@ export default function App(){
       await saveNotes(value)
     } catch (err) {
       console.error('Failed to save notes', err)
-  async function handleLogin(usr, pass){
-    try{
-      const { token, user } = await login(usr, pass)
-      localStorage.setItem('token', token)
-      setToken(token)
-      setUser(user)
-      await bootData()
-      connectSocket()
-    }catch(e){
-      resetState()
-      console.error('Login failed:', e)
-      throw e
     }
   }, [])
 
