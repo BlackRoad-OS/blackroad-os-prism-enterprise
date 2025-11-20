@@ -31,6 +31,7 @@ can drop in without rewriting the entire workflow.
 | 022 | The Security Spine     | Security backbone with layered zero-trust defenses. |
 | 043 | The Equity Oath        | Fairness, access, and inclusion are systemic.   |
 | 047 | The Transparency of Emotion | Emotion is acknowledged with honesty, tone awareness, and care. |
+| 051 | The Transparency of Creation | Every artifact traces its origin and intent. |
 
 ## BlackRoad Pipeline
 
