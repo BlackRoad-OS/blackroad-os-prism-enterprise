@@ -47,9 +47,14 @@ import Homework from './pages/Homework.jsx'
 import Novelty from './pages/Novelty.jsx'
 import Nexus from './pages/Nexus.jsx'
 import LucidiaDemo from './pages/LucidiaDemo.jsx'
+import Marketplace from './pages/Marketplace.jsx'
+import MarketplaceDetail from './pages/MarketplaceDetail.jsx'
+import SellerDashboard from './pages/SellerDashboard.jsx'
+import MyPurchases from './pages/MyPurchases.jsx'
+import MarketplaceAdmin from './pages/MarketplaceAdmin.jsx'
 import Login from './components/Login.jsx'
 import RoadCoin from './components/RoadCoin.jsx'
-import { Activity, User, LayoutGrid, HeartPulse, Shield, ShieldCheck, Cpu, Brain, FunctionSquare, Wallet, Rocket, BookOpen, GraduationCap, Sparkles, Music3, GitCommit, Settings, Atom, Stethoscope } from 'lucide-react'
+import { Activity, User, LayoutGrid, HeartPulse, Shield, ShieldCheck, Cpu, Brain, FunctionSquare, Wallet, Rocket, BookOpen, GraduationCap, Sparkles, Music3, GitCommit, Settings, Atom, Stethoscope, Store } from 'lucide-react'
 
 const NAV_ITEMS = [
   { key: 'dashboard', to: '/dashboard', text: 'Dashboard', icon: <Activity size={18} />, match: path => path === '/' || path === '/dashboard' },
@@ -78,6 +83,7 @@ const NAV_ITEMS = [
   { key: 'git-console', to: '/git-console', text: 'Git Console', icon: <GitCommit size={18} /> },
   { key: 'control', to: '/control', text: 'Control Panel', icon: <Settings size={18} /> },
   { key: 'roadchain', to: '/roadchain', text: 'RoadChain', icon: <LayoutGrid size={18} /> },
+  { key: 'marketplace', to: '/marketplace', text: 'Marketplace', icon: <Store size={18} /> },
   { key: 'music', to: '/music', text: 'Music Studio', icon: <Music3 size={18} /> },
   { key: 'sonic', to: '/sonic', text: 'BlackRoad Sonic', icon: <Music3 size={18} /> },
   { key: 'novelty', to: '/novelty', text: 'Novelty Dashboard', icon: <Sparkles size={18} /> },
@@ -313,6 +319,12 @@ export default function App(){
               <Route path="/git-console" element={<Section><GitPage /></Section>} />
               <Route path="/control" element={<Section><ControlPanel /></Section>} />
               <Route path="/roadchain" element={<Section><RoadChain /></Section>} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/marketplace/listing/:id" element={<MarketplaceDetail />} />
+              <Route path="/marketplace/dashboard" element={<SellerDashboard />} />
+              <Route path="/marketplace/sell" element={<SellerDashboard />} />
+              <Route path="/marketplace/purchases" element={<MyPurchases />} />
+              <Route path="/marketplace/admin" element={<MarketplaceAdmin />} />
               <Route path="/music" element={<Section><MusicStudio /></Section>} />
               <Route path="/sonic" element={<Section><MusicApp /></Section>} />
               <Route path="/novelty" element={<Section><Novelty /></Section>} />

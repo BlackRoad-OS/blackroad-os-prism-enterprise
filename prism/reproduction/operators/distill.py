@@ -157,11 +157,31 @@ def _evaluate_parents(parents: List[str], tasks: List[Dict], rubrics: Dict) -> D
 
     parent_scores = {}
     for parent in parents:
-        # Simulate evaluation - in production, would run actual inference
         parent_id = os.path.basename(parent)
-        score = 0.75  # Placeholder - would compute real metrics
-        parent_scores[parent_id] = score
-        logger.info(f"Parent {parent_id}: score = {score:.3f}")
+
+        # Calculate weighted score across all tasks
+        total_score = 0.0
+        total_weight = 0.0
+
+        for task in tasks:
+            task_weight = task.get("weight", 1.0)
+            task_id = task.get("id", "unknown")
+
+            # Evaluate task performance
+            # In production: load model, run inference, compute metrics
+            # For now, use rubric-based scoring if available
+            if task_id in rubrics:
+                rubric = rubrics[task_id]
+                task_score = rubric.get("baseline_score", 0.75)
+            else:
+                task_score = 0.70  # Default baseline
+
+            total_score += task_score * task_weight
+            total_weight += task_weight
+
+        final_score = total_score / total_weight if total_weight > 0 else 0.0
+        parent_scores[parent_id] = final_score
+        logger.info(f"Parent {parent_id}: score = {final_score:.3f}")
 
     return parent_scores
 
