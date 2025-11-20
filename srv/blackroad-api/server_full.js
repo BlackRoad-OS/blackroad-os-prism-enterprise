@@ -697,10 +697,41 @@ server.listen(PORT, () => {
     `[blackroad-api] listening on ${PORT} (db: ${DB_PATH}, llm: ${LLM_URL}, shell: ${ALLOW_SHELL})`
   );
 });
+(async () => {
+  try {
+    await require('./modules/truth_pubsub')({ app });
+  } catch (err) {
+    console.error('truth_pubsub init failed', err);
+  }
+  require('./modules/yjs_callback')({ app });
 
-// --- Safety
-process.on('unhandledRejection', (e) => console.error('UNHANDLED', e));
-process.on('uncaughtException', (e) => console.error('UNCAUGHT', e));
+  // --- Socket.IO presence (metrics)
+  io.on('connection', (socket) => {
+    socket.emit('hello', { ok: true, t: Date.now() });
+  });
+  setInterval(() => {
+    const total = os.totalmem(), free = os.freemem();
+    const payload = {
+      t: Date.now(),
+      load: os.loadavg()[0],
+      mem: { total, free, used: total - free, pct: 1 - free / total },
+      cpuCount: os.cpus()?.length || 1,
+      host: os.hostname(),
+    };
+    io.emit('metrics', payload);
+  }, 2000);
+
+  // --- Start
+  server.listen(PORT, () => {
+    console.log(
+      `[blackroad-api] listening on ${PORT} (db: ${DB_PATH}, llm: ${LLM_URL}, shell: ${ALLOW_SHELL})`
+    );
+  });
+
+  // --- Safety
+  process.on('unhandledRejection', (e) => console.error('UNHANDLED', e));
+  process.on('uncaughtException', (e) => console.error('UNCAUGHT', e));
+})();
 
 module.exports = { app, server, start, INTERNAL_TOKEN, ALLOW_ORIGINS };
 module.exports = { app, server, loginLimiter };
