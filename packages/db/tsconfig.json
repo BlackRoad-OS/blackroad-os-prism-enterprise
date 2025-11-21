@@ -16,4 +16,10 @@
     "outDir": "dist"
   },
   "include": ["src"]
+  "extends": "../../tsconfig.clientos.json",
+  "compilerOptions": {
+    "outDir": "dist"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["dist"]
 }

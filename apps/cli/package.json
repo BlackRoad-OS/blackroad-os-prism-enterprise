@@ -47,5 +47,24 @@
   "devDependencies": {
     "tsx": "^4.19.0",
     "typescript": "~5.5.4"
+  "name": "blackroad-clientos",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "blackroad-clientos": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@blackroad/core": "workspace:*",
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.11",
+    "tsx": "^4.15.7",
+    "typescript": "^5.4.5"
   }
 }

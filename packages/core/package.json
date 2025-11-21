@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Core domain types, validators, crypto helpers, and the FeeForge billing engine for BlackRoad Finance.",
   "name": "@blackroad/compliance-core",
+  "name": "@blackroad/core",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -38,5 +39,25 @@
   },
   "devDependencies": {
     "typescript": "~5.5.4"
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@blackroad/db": "workspace:*",
+    "@blackroad/integrations": "workspace:*",
+    "@blackroad/policies": "workspace:*",
+    "@blackroad/worm": "workspace:*",
+    "bullmq": "^5.9.0",
+    "nanoid": "^5.0.7",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.11",
+    "rimraf": "^5.0.7",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
   }
 }

@@ -6,4 +6,10 @@
     "moduleResolution": "NodeNext"
   },
   "include": ["src", "tests"]
+  "extends": "../../tsconfig.clientos.json",
+  "compilerOptions": {
+    "outDir": "dist"
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["dist"]
 }

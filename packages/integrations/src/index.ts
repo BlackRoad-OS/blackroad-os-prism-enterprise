@@ -2,3 +2,8 @@ export * from "./custody.js";
 export * from "./payments.js";
 export * from "./pricing.js";
 export * from "./pdf.js";
+export * from "./sanctions.js";
+export * from "./address.js";
+export * from "./esign.js";
+export * from "./wallet.js";
+export * from "./custody.js";
