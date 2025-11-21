@@ -146,6 +146,15 @@ require('./modules/patentnet')({ app });
 require('./modules/truth_pubsub')({ app });
 require('./modules/trust_graph')({ app });
 
+// Truth quorum subscriber
+;(async () => {
+  try {
+    await require('./modules/truth_quorum')({ app });
+  } catch (e) {
+    console.error(e);
+  }
+})();
+
 const emitter = new EventEmitter();
 const jobs = new Map();
 let jobSeq = 0;

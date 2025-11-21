@@ -123,6 +123,11 @@
     "stripe": "^12.18.0",
     "ipfs-http-client": "^60.0.0",
     "json-canonicalize": "^1.0.4"
+    "ethers": "^6.10.0",
+    "bs58": "^5.0.0",
+    "json-canonicalize": "^1.0.4",
+    "ipfs-http-client": "^60.0.0",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@eslint/js": "^8.57.1",
