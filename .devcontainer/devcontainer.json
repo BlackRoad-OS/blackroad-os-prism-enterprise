@@ -101,6 +101,10 @@
         "editor.formatOnSave": true
       },
       "extensions": [
+        "terraform.codelens.enabled": true,
+        "editor.formatOnSave": true
+      },
+      "extensions": [
         "HashiCorp.terraform",
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
