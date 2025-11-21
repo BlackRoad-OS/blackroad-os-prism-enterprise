@@ -6,6 +6,7 @@ Provides :class:`CleanupBot` to delete local and remote branches after they
 have been merged. Supports a dry-run mode to preview actions without
 executing them.
 """
+"""Utility bot for cleaning up merged Git branches."""
 
 from __future__ import annotations
 
@@ -115,6 +116,10 @@ class CleanupSummary:
             payload["results"] = results_snapshot
         return payload
 
+from dataclasses import dataclass, field
+from subprocess import CalledProcessError, CompletedProcess, run
+from typing import Dict, Iterable, List, Sequence
+
 
 @dataclass
 class CleanupBot:
@@ -177,6 +182,7 @@ class CleanupBot:
             )
         except CalledProcessError as exc:  # pragma: no cover - command failure
             LOGGER.error("Failed to list merged branches", exc_info=exc)
+        except CalledProcessError as exc:  # pragma: no cover - defensive guard
             raise RuntimeError("Could not list merged branches") from exc
 
         Returns:
@@ -211,6 +217,16 @@ class CleanupBot:
         is allowed to propagate so the caller can decide how to handle failures.
         """
         return subprocess.run(["git", *args], check=True, capture_output=True, text=True)
+    def _run(self, *cmd: str) -> CompletedProcess | None:
+        """Execute ``cmd`` unless running in dry-run mode."""
+
+        if self.dry_run:
+            print(f"DRY-RUN: {' '.join(cmd)}")
+            return None
+        return run(cmd, check=True)
+
+    def _git(self, *args: str) -> CompletedProcess | None:
+        """Run a ``git`` command, respecting the dry-run flag."""
 
     def delete_branch(self, branch: str) -> bool:
         """Attempt to delete a branch locally and remotely.
@@ -285,8 +301,22 @@ class CleanupBot:
         except CalledProcessError:
             print(f"Failed to delete local branch '{branch}'")
             success = False
+    def delete_branch(self, branch: str) -> bool:
+        """Delete ``branch`` locally and on ``origin``."""
+
+        if self.dry_run:
+            self._git("branch", "-D", branch)
+            self._git("push", "origin", "--delete", branch)
+            return True
+
         try:
-            self._run_git("push", "origin", "--delete", branch)
+            self._git("branch", "-D", branch)
+        except CalledProcessError:
+            print(f"Failed to delete local branch '{branch}'")
+            return False
+
+        try:
+            self._git("push", "origin", "--delete", branch)
         except CalledProcessError:
             print(f"Failed to delete remote branch '{branch}'")
             success = False
@@ -296,6 +326,24 @@ class CleanupBot:
         """Attempt to remove the configured branches locally and remotely.
     def _run_git(self, *args: str) -> tuple[bool, str | None]:
         """Execute a git command while respecting dry-run mode."""
+            return False
+
+        return True
+
+    def cleanup(self) -> Dict[str, bool]:
+        """Delete all configured branches."""
+
+        results: Dict[str, bool] = {}
+        for branch in self._normalized_branches:
+            success = self.delete_branch(branch)
+            results[branch] = success
+        return results
+
+
+def cleanup(branches: Iterable[str], dry_run: bool = False) -> Dict[str, bool]:
+    """Convenience wrapper around :class:`CleanupBot`."""
+
+    return CleanupBot(branches=branches, dry_run=dry_run).cleanup()
 
         command = ["git", *args]
         if self.dry_run:
@@ -312,16 +360,22 @@ class CleanupBot:
         """Delete a local branch."""
 
         return self._run_git("branch", "-D", branch)
+def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "branches",
+        nargs="*",
+        help="Branch names to delete. If omitted, branches merged into --base are used.",
+    )
     parser.add_argument(
         "--base",
         default="main",
-        help="Base branch to compare against",
+        help="Base branch used to detect merged branches when none are provided.",
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Show commands without executing them",
+        help="Show commands without executing them.",
     )
     parser.add_argument(
         "--json",
@@ -487,3 +541,19 @@ class CleanupBot:
 
 
 __all__ = ["CleanupBot"]
+    return parser.parse_args(argv)
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """Entry point for the CleanupBot CLI."""
+
+    args = _parse_args(argv)
+    branches = args.branches if args.branches is not None else CleanupBot.merged_branches(args.base)
+    bot = CleanupBot(branches=branches, dry_run=args.dry_run)
+    results = bot.cleanup()
+    failures = [name for name, success in results.items() if not success]
+    return 0 if not failures else 1
+
+
+if __name__ == "__main__":  # pragma: no cover - CLI entrypoint
+    raise SystemExit(main())

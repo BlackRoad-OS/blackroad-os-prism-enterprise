@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from subprocess import CalledProcessError
 from typing import List
+"""Tests for :mod:`agents.cleanup_bot`."""
+
+from subprocess import CalledProcessError
 
 import pytest
 
@@ -24,6 +27,19 @@ class _CallRecorder:
         except StopIteration:
             return None
 
+
+
+def test_cleanup_bot_executes_git_commands(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The bot should execute git commands for each branch."""
+
+    bot = CleanupBot(["feature/new"], dry_run=False)
+    calls: list[tuple[str, ...]] = []
+
+    def fake_run(*cmd: str):
+        calls.append(cmd)
+        return None
+
+    monkeypatch.setattr(bot, "_run", fake_run)
 
 def test_delete_branch_success() -> None:
     """Successful branch deletion returns True."""
@@ -57,6 +73,17 @@ def test_cleanup_attempts_local_and_remote_deletions(capsys: pytest.CaptureFixtu
     bot._run = recorder  # type: ignore[assignment]
 
     bot.cleanup()
+    assert results == {"feature/new": True}
+    assert calls == [
+        ("git", "branch", "-D", "feature/new"),
+        ("git", "push", "origin", "--delete", "feature/new"),
+    ]
+
+
+def test_cleanup_bot_dry_run_prints_commands(capsys: pytest.CaptureFixture[str]) -> None:
+    """Dry-run mode should log delete commands without executing them."""
+
+    bot = CleanupBot(branches=["feature/awesome"], dry_run=True)
 
     assert recorder.calls == [
         ("git", "branch", "-D", "topic"),
@@ -78,6 +105,22 @@ def test_cleanup_reports_missing_branches(capsys: pytest.CaptureFixture[str]) ->
         if cmd[1] == "push":
             raise CalledProcessError(1, cmd)
         return None
+    assert results == {"feature/awesome": True}
+
+
+def test_cleanup_bot_cleanup_handles_failures(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """``CleanupBot`` should mark branches as failed when git commands error."""
+
+    bot = CleanupBot(branches=["bugfix/failure"], dry_run=False)
+    calls: list[tuple[str, ...]] = []
+
+    def failing_git(*args: str):
+        calls.append(args)
+        raise CalledProcessError(returncode=1, cmd=("git", *args))
+
+    monkeypatch.setattr(bot, "_git", failing_git)
 
     bot._run = failing_then_success  # type: ignore[assignment]
 
@@ -85,3 +128,7 @@ def test_cleanup_reports_missing_branches(capsys: pytest.CaptureFixture[str]) ->
     captured = capsys.readouterr()
     assert "Local branch 'topic' does not exist." in captured.out
     assert "Remote branch 'topic' does not exist." in captured.out
+    assert results == {"bugfix/failure": False}
+    captured = capsys.readouterr().out.strip().splitlines()
+    assert captured == ["Failed to delete local branch 'bugfix/failure'"]
+    assert calls == [("branch", "-D", "bugfix/failure")]
