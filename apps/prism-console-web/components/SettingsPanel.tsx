@@ -1,4 +1,4 @@
-import { useTelemetry } from '@/lib/telemetry';
+import { useTelemetry } from '~lib/telemetry';
 
 const toggles = [
   { id: 'alerts', label: 'Real-time alerts' },

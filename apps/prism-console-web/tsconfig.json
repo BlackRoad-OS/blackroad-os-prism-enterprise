@@ -1,20 +1,8 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/components/*": ["components/*"],
-      "@/features/*": ["features/*"],
-      "@/lib/*": ["lib/*"]
-    },
-    "types": ["vitest", "node"]
-  "compilerOptions": {
-    "target": "esnext",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
@@ -26,28 +14,17 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "types": [
-      "@types/node"
-    ],
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@/components/*": [
-        "./components/*"
-      ],
-      "@/hooks/*": [
-        "./hooks/*"
-      ],
-      "@/lib/*": [
-        "./lib/*"
-      ],
-      "@/types/*": [
-        "./types/*"
-      ],
-      "@/mocks/*": [
-        "./mocks/*"
-      ]
+      "~components/*": ["components/*"],
+      "~features/*": ["features/*"],
+      "~hooks/*": ["hooks/*"],
+      "~lib/*": ["lib/*"],
+      "~mocks/*": ["mocks/*"],
+      "~types/*": ["types/*"]
     },
+    "types": ["vitest", "node"],
     "plugins": [
       {
         "name": "next"
@@ -60,14 +37,4 @@
     "**/*.tsx"
   ],
   "exclude": ["node_modules"]
-    "**/*.tsx",
-    "**/*.cjs",
-    "**/*.mjs",
-    "**/*.cts",
-    "**/*.mts",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
 }

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { env } from '@/lib/env';
+import { env } from '~lib/env';
 
 export const metricSchema = z.object({
   id: z.string().uuid(),

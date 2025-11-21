@@ -1,6 +1,6 @@
 import dashboardMock from "../mocks/dashboard.json";
 import agentsMock from "../mocks/agents.json";
-import type { AgentRecord, DashboardOverview } from "@/types/dashboard";
+import type { AgentRecord, DashboardOverview } from "~types/dashboard";
 import { config } from "./config";
 
 async function fetchJson<T>(path: string): Promise<T> {

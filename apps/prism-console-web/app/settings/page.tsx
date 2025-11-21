@@ -1,5 +1,5 @@
-import { SettingsPanel } from '@/components/SettingsPanel';
-import { fetchDashboard } from '@/features/dashboard-api';
+import { SettingsPanel } from '~components/SettingsPanel';
+import { fetchDashboard } from '~features/dashboard-api';
 
 export const revalidate = 0;
 

@@ -1,4 +1,5 @@
 'use client';
+import { OverviewContent } from '~components/OverviewContent';
 
 import { useState, useEffect } from 'react';
 import { AgentCard } from '../components/agent-card';
@@ -14,6 +15,12 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showTaskSubmission, setShowTaskSubmission] = useState(false);
+import { AgentTable } from "~components/AgentTable";
+import { MetricCard } from "~components/MetricCard";
+import { ShortcutGrid } from "~components/ShortcutGrid";
+import { Skeleton } from "~components/Skeleton";
+import { useAgents } from "~hooks/useAgents";
+import { useDashboard } from "~hooks/useDashboard";
 
   useEffect(() => {
     loadAgents();

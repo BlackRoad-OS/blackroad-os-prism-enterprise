@@ -18,6 +18,14 @@
   "dependencies": {
     "@amundson/projections": "workspace:*",
     "@amundson/provenance": "workspace:*",
+    "test:coverage": "vitest run --coverage",
+    "type-check": "tsc --noEmit",
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build",
+    "e2e": "playwright test",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
     "@tanstack/react-query": "^5.59.16",
     "clsx": "^2.1.1",
     "lucide-react": "^0.460.0",
@@ -52,6 +60,8 @@
     "postcss": "^8.4.41",
     "prettier": "^3.3.3",
     "storybook": "^8.1.7",
+    "postcss": "^8.4.41",
+    "prettier": "^3.2.5",
     "tailwindcss": "^3.4.13",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",

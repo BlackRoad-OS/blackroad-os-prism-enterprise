@@ -5,6 +5,7 @@ packages:
   - "apps/docs-portal"
   - "services/*"
   - "packages/*"
+  - "apps/prism-console-web"
   - "packages/runbook-*"
   - "packages/runbook-types"
   - "lucidia/autobox/apps/*"
