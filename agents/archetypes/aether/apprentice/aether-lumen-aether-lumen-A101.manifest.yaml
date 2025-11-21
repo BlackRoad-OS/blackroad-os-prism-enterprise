@@ -57,12 +57,15 @@ profile:
   individual_embetterment: studying a new craft each quarter to broaden perspective
   philosophy: Aether wisdom is a bridge between memory and possibility.
 traits:
-<<<<<<< HEAD
   kindness_index: 0.89
   creativity_bias: 0.72
   reflection_frequency_hours: 24
+<<<<<<< Updated upstream
+  kindness_index: 0.86
+  creativity_bias: 0.91
+  reflection_frequency_hours: 4
 =======
   kindness_index: 0.86
   creativity_bias: 0.91
   reflection_frequency_hours: 4
->>>>>>> 43f144e24a2c647ada0fd2a1c658b270aa9d03a0
+>>>>>>> Stashed changes

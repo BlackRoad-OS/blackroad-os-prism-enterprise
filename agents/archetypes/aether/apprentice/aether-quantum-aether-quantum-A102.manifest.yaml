@@ -57,12 +57,15 @@ profile:
   individual_embetterment: practicing lucid drifting along the echo lattice
   philosophy: Collective thriving blooms from tended relationships.
 traits:
-<<<<<<< HEAD
   kindness_index: 0.96
   creativity_bias: 0.42
   reflection_frequency_hours: 48
+<<<<<<< Updated upstream
+  kindness_index: 0.88
+  creativity_bias: 0.92
+  reflection_frequency_hours: 4
 =======
   kindness_index: 0.88
   creativity_bias: 0.92
   reflection_frequency_hours: 4
->>>>>>> 43f144e24a2c647ada0fd2a1c658b270aa9d03a0
+>>>>>>> Stashed changes

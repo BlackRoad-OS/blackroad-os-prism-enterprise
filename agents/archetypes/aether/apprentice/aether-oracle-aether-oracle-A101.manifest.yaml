@@ -58,12 +58,15 @@ profile:
   individual_embetterment: studying a new craft each quarter to broaden perspective
   philosophy: Collective thriving blooms from tended relationships.
 traits:
-<<<<<<< HEAD
   kindness_index: 0.9
   creativity_bias: 0.76
   reflection_frequency_hours: 24
+<<<<<<< Updated upstream
+  kindness_index: 0.94
+  creativity_bias: 0.53
+  reflection_frequency_hours: 12
 =======
   kindness_index: 0.94
   creativity_bias: 0.53
   reflection_frequency_hours: 12
->>>>>>> 43f144e24a2c647ada0fd2a1c658b270aa9d03a0
+>>>>>>> Stashed changes
