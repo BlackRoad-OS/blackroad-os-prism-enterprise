@@ -8,6 +8,7 @@ SYSTEMD_SERVICE="blackroad-compose.service"
 KIOSK_SERVICE="blackroad-kiosk.service"
 STACK_NAME="blackroad"
 ENV_FILE="${DOCKER_DIR}/.env"
+ENV_WARNING_SHOWN=0
 
 usage() {
   cat <<USAGE
@@ -49,6 +50,9 @@ load_env() {
     # shellcheck disable=SC1090
     source "${ENV_FILE}"
     set +a
+  elif [[ ${ENV_WARNING_SHOWN} -eq 0 ]]; then
+    echo "Environment file not found at ${ENV_FILE}; continuing without overrides." >&2
+    ENV_WARNING_SHOWN=1
   fi
 }
 
@@ -274,6 +278,8 @@ cmd_metrics() {
 }
 
 main() {
+  load_env
+
   if [[ $# -lt 1 ]]; then
     usage
     exit 1
@@ -310,5 +316,4 @@ main() {
   esac
 }
 
-load_env
 main "$@"
