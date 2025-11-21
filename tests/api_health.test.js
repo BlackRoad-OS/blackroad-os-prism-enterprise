@@ -8,6 +8,7 @@ const request = require('supertest');
 const { app, server, loginLimiter } = require('../srv/blackroad-api/server_full.js');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
 // Login helper reused across tests to obtain authenticated cookies.
+// Helper to obtain an auth cookie for requests requiring authentication
 const { getAuthCookie } = require('./helpers/auth');
 
 describe('API security and health', () => {

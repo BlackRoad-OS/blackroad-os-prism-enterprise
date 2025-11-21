@@ -8,6 +8,7 @@ process.env.CLAIMREG_ADDR = '0x' + '2'.repeat(40);
 const request = require('supertest');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
 // Shared helper that logs in and returns authentication cookies for requests.
+// Helper to log in and retrieve the auth cookie for authenticated requests
 const { getAuthCookie } = require('./helpers/auth');
 
 describe('Git API', () => {
