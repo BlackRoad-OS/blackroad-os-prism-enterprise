@@ -29,6 +29,7 @@ client = OpenAI(api_key=_api_key) if _api_key else None
 # Instantiate the OpenAI client only when an API key is available so the
 # module can still import and Streamlit can display a friendly warning instead
 # of crashing at startup.
+# Configure the OpenAI client only when an API key is available
 openai_api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=openai_api_key) if openai_api_key else None
 if client is None:
