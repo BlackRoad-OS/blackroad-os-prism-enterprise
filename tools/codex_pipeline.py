@@ -20,6 +20,18 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict
 from urllib import request
+from typing import Any, Callable, Dict
+from urllib import request
+
+import requests
+
+# ---------------------------------------------------------------------------
+# Logging and constants
+ERROR_LOG = Path("pipeline_errors.log")
+BACKUP_ROOT = Path("/var/backups/blackroad")
+LATEST_BACKUP = BACKUP_ROOT / "latest"
+DROPLET_BACKUP = BACKUP_ROOT / "droplet"
+LOG_FILE = Path(__file__).resolve().parent.parent / "pipeline_validation.log"
 
 LOGGER = logging.getLogger(__name__)
 if not LOGGER.handlers:
@@ -153,6 +165,11 @@ def _run_command(command: str, *, dry_run: bool) -> None:
     else:  # pragma: no cover - parser enforces valid choices
         raise ValueError(f"Unknown command: {command}")
 
+        "--dry-run", action="store_true", help="Simulate actions without executing commands"
+    )
+    parser.add_argument(
+        "--skip-validate", action="store_true", help="Skip service health validation"
+    )
 
 def main(argv: list[str] | None = None) -> int:
     """CLI entry point used by tests and manual runs."""
@@ -171,4 +188,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":  # pragma: no cover - manual invocation
+if __name__ == "__main__":
     raise SystemExit(main())
