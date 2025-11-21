@@ -16,6 +16,16 @@ describe('API security and health', () => {
     loginLimiter.resetKey('::ffff:127.0.0.1');
     loginLimiter.resetKey('127.0.0.1');
     server.close(done);
+process.env.MINT_PK =
+  '0x1111111111111111111111111111111111111111111111111111111111111111';
+process.env.CLAIMREG_ADDR = '0x2222222222222222222222222222222222222222';
+process.env.ETH_RPC_URL = 'http://127.0.0.1:8545';
+const request = require('supertest');
+const { app, shutdown } = require('../srv/blackroad-api/server_full.js');
+
+describe('API security and health', () => {
+  afterAll((done) => {
+    shutdown(done);
   });
 
   it('responds to /health', async () => {
