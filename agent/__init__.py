@@ -116,3 +116,4 @@ __all__ = [
     "telemetry",
     "jobs",
 ]
+"""Agent package for console integrations."""
