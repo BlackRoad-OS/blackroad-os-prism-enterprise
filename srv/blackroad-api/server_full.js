@@ -32,6 +32,7 @@ const notify = require('./lib/notify');
 const logger = require('./lib/log');
 const attachLlmRoutes = require('./routes/admin_llm');
 const gitRouter = require('./routes/git');
+const providersRouter = require('./routes/providers');
 
 // Custom environment variable loader replaces the standard 'dotenv' package.
 // Rationale: We use a custom loader to reduce external dependencies, avoid issues with dotenv's parsing logic,
@@ -417,6 +418,49 @@ if (process.env.JEST_WORKER_ID) {
   start(0);
 } else if (require.main === module) {
   start();
+// Quantum AI table seed
+db.prepare(
+  `
+  CREATE TABLE IF NOT EXISTS quantum_ai (
+    topic TEXT PRIMARY KEY,
+    summary TEXT NOT NULL
+  )
+`
+).run();
+const qSeed = [
+  {
+    topic: 'reasoning',
+    summary:
+      'Quantum parallelism lets models explore many reasoning paths simultaneously for accelerated insight.',
+  },
+  {
+    topic: 'memory',
+    summary:
+      'Quantum RAM with entangled states hints at dense, instantly linked memory architectures.',
+  },
+  {
+    topic: 'symbolic',
+    summary:
+      'Interference in quantum-symbolic AI could amplify useful symbol chains while damping noise.',
+  },
+];
+for (const row of qSeed) {
+  db.prepare(
+    'INSERT OR IGNORE INTO quantum_ai (topic, summary) VALUES (?, ?)'
+  ).run(row.topic, row.summary);
+}
+
+// Git API
+app.use('/api/git', requireAuth, gitRouter);
+app.use('/v1/providers', providersRouter);
+
+// Helpers
+function listRows(t) {
+  return db
+    .prepare(
+      `SELECT id, name, updated_at, meta FROM ${t} ORDER BY datetime(updated_at) DESC`
+    )
+    .all();
 }
 function createRow(t, name, meta = null) {
   const stmt = db.prepare(
