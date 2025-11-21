@@ -6,6 +6,11 @@ const request = require('supertest');
  *
  * @param {import('express').Express} app - Express app instance under test.
  * @returns {Promise<string[]>} set-cookie header for the authenticated user.
+ * Log in to the application using test credentials and return the
+ * authentication cookie so it can be reused in subsequent requests.
+ *
+ * @param {import('express').Express} app - Express app under test.
+ * @returns {Promise<string[]>} cookie headers from the login response
  */
 async function getAuthCookie(app) {
   const login = await request(app)

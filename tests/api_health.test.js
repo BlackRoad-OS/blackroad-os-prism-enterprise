@@ -8,6 +8,7 @@ const request = require('supertest');
 const { app, server, loginLimiter } = require('../srv/blackroad-api/server_full.js');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
 // Login helper reused across tests to obtain authenticated cookies.
+// Helper to obtain an auth cookie for requests requiring authentication
 const { getAuthCookie } = require('./helpers/auth');
 
 describe('API security and health', () => {
@@ -15,6 +16,16 @@ describe('API security and health', () => {
     loginLimiter.resetKey('::ffff:127.0.0.1');
     loginLimiter.resetKey('127.0.0.1');
     server.close(done);
+process.env.MINT_PK =
+  '0x1111111111111111111111111111111111111111111111111111111111111111';
+process.env.CLAIMREG_ADDR = '0x2222222222222222222222222222222222222222';
+process.env.ETH_RPC_URL = 'http://127.0.0.1:8545';
+const request = require('supertest');
+const { app, shutdown } = require('../srv/blackroad-api/server_full.js');
+
+describe('API security and health', () => {
+  afterAll((done) => {
+    shutdown(done);
   });
 
   it('responds to /health', async () => {

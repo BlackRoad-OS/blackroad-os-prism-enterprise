@@ -32,6 +32,23 @@ can drop in without rewriting the entire workflow.
 | 043 | The Equity Oath        | Fairness, access, and inclusion are systemic.   |
 | 047 | The Transparency of Emotion | Emotion is acknowledged with honesty, tone awareness, and care. |
 | 051 | The Transparency of Creation | Every artifact traces its origin and intent. |
+| ID  | Title                   | Description                                          |
+| --- | ----------------------- | ---------------------------------------------------- |
+| 001 | The First Principle     | Lucidia exists to protect and empower everyone.      |
+| 003 | The Workflow Circle     | Work runs in visible capture → adjust loops.         |
+| 004 | The Autonomy Manifest   | Data autonomy through consent, export, and wipe.     |
+| 022 | The Security Spine      | Security backbone with layered zero-trust defenses.  |
+| 028 | The Custodianship Code  | Stewardship keeps Lucidia healthy across generations. |
+| 042 | The Wonder Clause       | Awe and curiosity stay central alongside logic.      |
+
+## Policy Stubs
+
+Policy stubs keep our living commitments easy to find outside of the full
+Codex entries. They live at the repository root so operations, product, and
+policy teams can reference them without digging through subdirectories.
+
+- [WONDER.md](../WONDER.md) — captures the active Wonder commitments that map
+  to [Codex 042 — The Wonder Clause](entries/042-wonder-clause.md).
 
 ## BlackRoad Pipeline
 

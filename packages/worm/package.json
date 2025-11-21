@@ -4,6 +4,8 @@
   "description": "Append-only WORM archive for FeeForge evidence.",
   "type": "module",
   "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": ["dist"],
@@ -13,6 +15,12 @@
   },
   "devDependencies": {
     "rimraf": "^6.0.1",
+  "dependencies": {
+    "@blackroad/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.11",
+    "rimraf": "^5.0.7",
     "typescript": "^5.4.5"
   }
 }

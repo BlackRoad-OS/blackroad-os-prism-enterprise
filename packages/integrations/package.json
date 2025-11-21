@@ -4,6 +4,8 @@
   "description": "External integration stubs for FeeForge (custody, payments, pricing).",
   "type": "module",
   "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": ["dist"],
@@ -17,6 +19,11 @@
   },
   "devDependencies": {
     "rimraf": "^6.0.1",
+    "nanoid": "^5.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.11",
+    "rimraf": "^5.0.7",
     "typescript": "^5.4.5"
   }
 }

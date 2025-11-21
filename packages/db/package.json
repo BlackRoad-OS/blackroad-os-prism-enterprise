@@ -45,5 +45,27 @@
   "devDependencies": {
     "prisma": "^5.19.1",
     "typescript": "~5.5.4"
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "prisma"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "generate": "prisma generate",
+    "lint": "eslint --ext .ts src"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.16.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.11",
+    "prisma": "^5.16.1",
+    "rimraf": "^5.0.7",
+    "typescript": "^5.4.5"
   }
 }

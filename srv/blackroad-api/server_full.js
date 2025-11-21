@@ -41,6 +41,27 @@ function loadEnvFile() {
   const envPath = process.env.DOTENV_PATH || path.join(process.cwd(), '.env');
   if (!fs.existsSync(envPath)) {
     return;
+// --- Config
+const PORT = parseInt(process.env.PORT || '4000', 10);
+const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-me';
+const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
+const LLM_URL = process.env.LLM_URL || 'http://127.0.0.1:8000/chat';
+const ALLOW_SHELL =
+  String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
+const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
+const BILLING_DISABLE =
+  String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
+const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
+const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
+const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS
+  ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim())
+  : [];
+
+['SESSION_SECRET', 'INTERNAL_TOKEN'].forEach((name) => {
+  if (!process.env[name]) {
+    console.error(`Missing required env ${name}`);
+    process.exit(1);
   }
   try {
     const content = fs.readFileSync(envPath, 'utf8');
@@ -348,6 +369,21 @@ const server = http.createServer(app);
     event: 'stripe_webhook_received',
     type: event?.type || 'unknown',
   });
+app.post('/api/billing/webhook', (req, res) => {
+  if (!stripeClient || !STRIPE_WEBHOOK_SECRET) {
+    return res.status(501).json({ error: 'stripe_unconfigured' });
+  }
+  const sig = req.headers['stripe-signature'];
+  try {
+    stripeClient.webhooks.constructEvent(
+      JSON.stringify(req.body),
+      sig,
+      STRIPE_WEBHOOK_SECRET
+    );
+  } catch (e) {
+    logger.error('stripe_webhook_verify_failed', e);
+    return res.status(400).json({ error: 'invalid_signature' });
+  }
   res.json({ received: true });
 });
 
@@ -589,6 +625,7 @@ app.post('/api/llm/chat', requireAuth, async (req, res) => {
       .send(out || '(no content)');
   } catch (err) {
     logger.error({ event: 'llm_stream_proxy_failed', error: err.message });
+    logger.error('llm_proxy_error', err);
     res.status(502).type('text/plain').send('(llm upstream error)');
   }
 });
@@ -678,7 +715,7 @@ require('./modules/truth_diff')({ app });
 io.on('connection', (socket) => {
   socket.emit('hello', { ok: true, t: Date.now() });
 });
-setInterval(() => {
+const metricsTimer = setInterval(() => {
   const total = os.totalmem(),
     free = os.freemem();
   const payload = {
@@ -735,3 +772,9 @@ server.listen(PORT, () => {
 
 module.exports = { app, server, start, INTERNAL_TOKEN, ALLOW_ORIGINS };
 module.exports = { app, server, loginLimiter };
+function shutdown(done) {
+  clearInterval(metricsTimer);
+  server.close(done);
+}
+
+module.exports = { app, server, shutdown };

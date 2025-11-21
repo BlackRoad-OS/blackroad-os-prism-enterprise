@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import os
+import random
+import time
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Union
 
@@ -18,6 +20,23 @@ READ_ONLY = os.environ.get("PRISM_READ_ONLY", "0") == "1"
 def _ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
+from orchestrator.flags import get_flag
+from orchestrator.tenancy import ns_path
+
+
+def _apply_chaos() -> None:
+    delay = int(get_flag("chaos.storage.delay_ms", 0) or 0)
+    if delay > 0:
+        time.sleep(delay / 1000)
+    rate = float(get_flag("chaos.storage.error_rate", 0) or 0)
+    if rate > 0 and random.random() < rate:
+        raise IOError("Injected storage error")
+
+
+def _rewrite(path: str) -> str:
+    tenant = os.getenv("PRISM_TENANT")
+    return ns_path(tenant, path)
+
 
 def write(path: Union[str, Path], content: Union[Mapping[str, Any], str]) -> None:
     """Write *content* to *path*.
@@ -31,6 +50,14 @@ def write(path: Union[str, Path], content: Union[Mapping[str, Any], str]) -> Non
     mode = "a" if target.suffix == ".jsonl" else "w"
     payload = json.dumps(content) if isinstance(content, Mapping) else str(content)
     with target.open(mode, encoding="utf-8") as handle:
+def write(path: str, content: Union[dict, str]) -> None:
+    path = _rewrite(path)
+    _apply_chaos()
+    p = Path(path)
+    os.makedirs(p.parent, exist_ok=True)
+    mode = "a" if p.suffix == ".jsonl" else "w"
+    text = json.dumps(content) if isinstance(content, dict) else str(content)
+    with open(p, mode, encoding="utf-8") as fh:
         if mode == "a":
             handle.write(payload + "\n")
         else:
@@ -41,6 +68,10 @@ def read(path: Union[str, Path]) -> str:
     """Read text from *path*, returning an empty string if it does not exist."""
 
     target = Path(path)
+def read(path: str) -> str:
+    path = _rewrite(path)
+    _apply_chaos()
+    p = Path(path)
     try:
         return target.read_text(encoding="utf-8")
     except FileNotFoundError:

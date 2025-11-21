@@ -55,6 +55,7 @@ jobs:
         with:
           files: |
             **/junit-*.xml
+      - run: pytest tests/prism
       - uses: codecov/codecov-action@v4
         with:
           files: prism/server/coverage/coverage-final.json
