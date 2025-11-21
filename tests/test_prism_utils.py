@@ -15,6 +15,7 @@ when the input does not start with a parseable number.
 import pytest
 """Tests for :func:`prism_utils.parse_numeric_prefix`."""
 """Test helper functions in `prism_utils`."""
+"""Tests for parse_numeric_prefix."""
 
 from prism_utils import parse_numeric_prefix
 
