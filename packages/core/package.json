@@ -6,6 +6,7 @@
   "name": "@blackroad/core",
   "version": "0.1.0",
   "private": true,
+  "description": "Core domain types, validators, crypto helpers, and the SurveillanceHub engine for BlackRoad Finance.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,6 +25,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@blackroad/worm": "workspace:*",
     "decimal.js": "^10.4.3",
     "luxon": "^3.4.4",
     "uuid": "^9.0.1",

@@ -1,7 +1,7 @@
 {
   "name": "@blackroad/worm",
   "version": "0.1.0",
-  "description": "Append-only WORM archive for FeeForge evidence.",
+  "description": "Append-only WORM archive and verification utilities for BlackRoad SurveillanceHub evidence.",
   "type": "module",
   "license": "Apache-2.0",
   "private": true,
@@ -12,6 +12,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@blackroad/db": "workspace:*"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",
