@@ -49,6 +49,12 @@ policy teams can reference them without digging through subdirectories.
 
 - [WONDER.md](../WONDER.md) — captures the active Wonder commitments that map
   to [Codex 042 — The Wonder Clause](entries/042-wonder-clause.md).
+| ID  | Title                   | Description                                     |
+| --- | ----------------------- | ----------------------------------------------- |
+| 001 | The First Principle     | Lucidia exists to protect and empower everyone. |
+| 003 | The Workflow Circle     | Work runs in visible capture → adjust loops.    |
+| 004 | The Autonomy Manifest   | Data autonomy through consent, export, and wipe. |
+| 026 | The Playground Clause   | Protect play spaces with clear guardrails.      |
 
 ## BlackRoad Pipeline
 
