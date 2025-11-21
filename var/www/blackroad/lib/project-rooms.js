@@ -84,6 +84,37 @@ function switchTab(path) {
   editor.setModel(tab.editorModel);
 }
 
+async function pushAutosave(path){
+  const key = `${currentProject}:${path}`;
+  const text = PENDING[key];
+  if (text==null) return;
+  try{
+    const r = await api(`/api/projects/${encodeURIComponent(currentProject)}/file?path=${encodeURIComponent(path)}`, {
+      method:'PUT', body: text
+    });
+    if (r.ok){
+      delete PENDING[key];
+      localStorage.setItem('br_autosave_pending', JSON.stringify(PENDING));
+      $('hint').textContent = 'Saved.';
+    } else {
+      $('hint').textContent = 'Autosave failed (will retry).';
+    }
+  }catch{
+    $('hint').textContent = 'Offline (autosave queued).';
+  }
+}
+
+function detectLanguage(p){
+  if (p.endsWith('.ts')) return 'typescript';
+  if (p.endsWith('.js')) return 'javascript';
+  if (p.endsWith('.json')) return 'json';
+  if (p.endsWith('.py')) return 'python';
+  if (p.endsWith('.md')) return 'markdown';
+  if (p.endsWith('.html')) return 'html';
+  if (p.endsWith('.css')) return 'css';
+  return 'plaintext';
+}
+
 async function openFile(path) {
   if (!currentProject) return;
   // Already open?
