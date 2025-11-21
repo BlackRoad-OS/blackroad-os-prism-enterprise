@@ -1,5 +1,8 @@
 .RECIPEPREFIX = >
 .PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy notify lint-observability
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy mpm-core energy
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy docs
 
 SHELL := /bin/bash
 PROJECT_ROOT := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
@@ -123,6 +126,9 @@ branch-cleanup-report:
 	@ls -lah ops/reports/branch-cleanup 2>/dev/null || echo "No reports yet"
 
 >. .venv/bin/activate && ruff .
+
+lint-observability:
+>python -m observability.lint
 
 validate:
 >. .venv/bin/activate && python scripts/validate_contracts.py

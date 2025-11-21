@@ -23,6 +23,18 @@ RUNS_DIR = Path("/work")  # scratch volume mounted read-only elsewhere
 RATE_WINDOW_SECONDS = int(os.getenv("MATERIALS_RATE_WINDOW_SECONDS", "60"))
 AUDIT_LOG_SIZE = int(os.getenv("MATERIALS_AUDIT_LOG_SIZE", "256"))
 START_TIME = time.time()
+from fastapi import FastAPI, HTTPException, Response
+from pydantic import BaseModel, Field, validator
+
+from services.observability import DependencyRecorder, DependencyStatus
+
+
+def _feature_enabled() -> bool:
+    return os.getenv("FEATURE_MATERIALS", "false").lower() == "true"
+
+
+RUNS_DIR = Path(os.getenv("MATERIALS_RUNS_DIR", "/work"))
+_dependency_recorder = DependencyRecorder("materials-service")
 
 app = FastAPI(title="Lucidia Materials Service", version="0.1", docs_url=None)
 configure_telemetry(app)
@@ -154,6 +166,20 @@ ensure_worker_task()
 # -----------------------------------------------------------------------------
 # API Endpoints
 # -----------------------------------------------------------------------------
+def _dependency_status() -> dict[str, DependencyStatus]:
+    deps: dict[str, DependencyStatus] = {}
+    if _feature_enabled():
+        deps["feature_flag"] = DependencyStatus.ok("enabled")
+    else:
+        deps["feature_flag"] = DependencyStatus.disabled("set FEATURE_MATERIALS=true to enable")
+
+    if RUNS_DIR.exists() and RUNS_DIR.is_dir():
+        deps["workspace"] = DependencyStatus.ok(str(RUNS_DIR))
+    else:
+        deps["workspace"] = DependencyStatus.degraded(f"missing {RUNS_DIR}")
+    return deps
+
+
 @app.get("/healthz")
 async def healthz():
     if not FEATURE_FLAG:
@@ -195,10 +221,23 @@ async def get_audit_logs(limit: int = 50):
     if limit == 0:
         return []
     return list(audit_log)[-limit:]
+async def healthz() -> dict[str, object]:
+    return _dependency_recorder.snapshot(_dependency_status())
+
+
+@app.get("/metrics")
+async def metrics() -> Response:
+    _dependency_recorder.snapshot(_dependency_status())
+    return Response(
+        content=_dependency_recorder.render_prometheus(),
+        media_type=_dependency_recorder.prometheus_content_type,
+    )
 
 
 @app.post("/jobs/grain-coarsening", response_model=JobStatus)
 async def create_grain_job(params: GrainCoarseningParams):
+    if not _feature_enabled():
+        raise HTTPException(404, "Materials feature disabled")
     job_id = uuid.uuid4().hex
     jobs[job_id] = JobStatus(id=job_id, status="pending")
     ensure_worker_task()
@@ -209,6 +248,8 @@ async def create_grain_job(params: GrainCoarseningParams):
 
 @app.post("/jobs/small-strain-fft", response_model=JobStatus)
 async def create_fft_job(params: SmallStrainFFTParams):
+    if not _feature_enabled():
+        raise HTTPException(404, "Materials feature disabled")
     job_id = uuid.uuid4().hex
     jobs[job_id] = JobStatus(id=job_id, status="pending")
     ensure_worker_task()
