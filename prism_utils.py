@@ -62,6 +62,7 @@ _NUMERIC_PREFIX_RE = re.compile(
 
 def parse_numeric_prefix(text: str) -> float:
     """Return the leading numeric value in ``text`` or 1.0 if none exists.
+    """Return the leading numeric value in ``text`` or ``1.0`` if absent.
 
     The function extracts an optional sign and numeric token—supporting
     integers, decimals, and scientific notation—at the start of ``text`` using
@@ -91,6 +92,9 @@ def parse_numeric_prefix(text: str) -> float:
     are suppressed. This covers empty strings, whitespace, non-numeric tokens,
     or malformed expressions, and the default ``1.0`` is returned in those
     cases.
+    accepts inputs like ``"2, something"``. Only ``ValueError`` and
+    ``SyntaxError`` are suppressed—such as for empty strings, non-numeric
+    tokens, or malformed expressions—and the default ``1.0`` is returned.
     """
     match = _NUMERIC_PREFIX_RE.match(text)
     if not match:
