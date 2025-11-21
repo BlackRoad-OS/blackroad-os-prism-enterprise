@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/checkout@v4
       - run: git tag v${{ github.event.inputs.version }}
       - run: git push origin v${{ github.event.inputs.version }}
       - run: |
@@ -24,3 +25,8 @@ jobs:
           gh release create "v${{ github.event.inputs.version }}" \
             --title "v${{ github.event.inputs.version }}" \
             --notes-file CHANGELOG.md
+      - uses: actions/create-release@v1
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          release_name: v${{ github.event.inputs.version }}
+          body_path: CHANGELOG.md
