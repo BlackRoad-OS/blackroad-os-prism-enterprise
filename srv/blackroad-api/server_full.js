@@ -173,6 +173,7 @@ require('./modules/love_math')({ app });
 safeAttach('jobs', () => require('./modules/jobs')({ app }));
 safeAttach('memory', () => require('./modules/memory')({ app }));
 require('./modules/brain_chat')({ app });
+require('./modules/jobs_locked')({ app });
 // --- Middleware
 app.disable('x-powered-by');
 app.use(helmet());
