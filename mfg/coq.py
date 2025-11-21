@@ -108,3 +108,18 @@ def cli_coq(argv: List[str] | None = None) -> Dict[str, float]:
 
 
 __all__ = ["compute", "build", "cli_coq", "ART_DIR", "FIXTURES_DIR"]
+            bucket = row["bucket"]
+            totals[bucket] = totals.get(bucket, 0.0) + float(row["cost"])
+    ART_DIR.mkdir(parents=True, exist_ok=True)
+    report = {"period": period, "buckets": totals}
+    artifacts.validate_and_write(str(ART_DIR / "coq.json"), report, str(SCHEMA))
+    artifacts.validate_and_write(
+        str(ART_DIR / "coq.csv"),
+        "bucket,cost\n" + "\n".join(f"{k},{v}" for k, v in totals.items()),
+    )
+    artifacts.validate_and_write(
+        str(ART_DIR / "coq.md"),
+        "\n".join(f"{k}: {v}" for k, v in totals.items()),
+    )
+    metrics.inc("coq_built")
+    return totals
