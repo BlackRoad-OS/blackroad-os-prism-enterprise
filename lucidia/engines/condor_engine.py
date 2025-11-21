@@ -14,6 +14,22 @@ This module intentionally implements only a very small subset of the full
 design proposed in the specification. The helpers defined here are sufficient
 for local experimentation and unit testing. Advanced sandboxing, provenance
 and solver features should be implemented in the future.
+"""Utilities for running NASA Condor models locally.
+
+This module intentionally implements only a very small subset of the full
+Condor feature set. The helpers defined here are sufficient for local
+experimentation and unit testing. Advanced sandboxing, provenance, and solver
+features should be implemented in the future.
+
+The helpers in this file provide lightweight wrappers around Condor's modelling
+interfaces. The functions are intentionally small so the heavy lifting remains
+within the Condor library itself. The goal is to expose a stable Python API
+that can be called from agents or HTTP routes without pulling in any remote
+resources.
+
+The actual Condor package is optional at import time so the repository can be
+used in environments where the dependency is not yet installed. Runtime errors
+are only raised if helpers that require Condor are invoked when it is missing.
 """
 
 from __future__ import annotations
@@ -35,6 +51,7 @@ from typing import Any, Dict, Optional, Type
 
 try:  # Optional dependency used only at runtime
 try:  # pragma: no cover - optional dependency
+try:  # Optional dependency
     import numpy as np  # type: ignore
 except Exception:  # pragma: no cover - numpy may be absent
     np = None  # type: ignore
@@ -42,6 +59,7 @@ except Exception:  # pragma: no cover - numpy may be absent
 try:  # Condor itself may not be installed in all environments
     import condor  # type: ignore  # noqa: F401
 except Exception:  # pragma: no cover - Condor may be absent
+except Exception:  # pragma: no cover - condor may be absent in CI
     condor = None  # type: ignore
 try:  # pragma: no cover - optional dependency in CI
     import numpy as np  # type: ignore
@@ -75,6 +93,8 @@ def _dataclass_to_dict(obj: Any) -> Any:
     This helper ensures that results are JSON serialisable. ``numpy`` arrays
     are transformed into Python lists.
     """
+    """Recursively convert dataclasses and ``numpy`` arrays into primitives."""
+
     if is_dataclass(obj):
         return {k: _to_primitive(v) for k, v in asdict(obj).items()}
     if np is not None and isinstance(obj, np.ndarray):
@@ -97,6 +117,8 @@ def validate_model_source(py_text: str) -> None:
     a small allow-list of imports is permitted and several dangerous names are
     rejected. The intent is to catch obvious misuse before executing code in a
     sandbox.
+    names are rejected. The intent is to catch obvious misuse before executing
+    code in a sandbox.
     """
 FORBIDDEN_NAMES = {"open", "os", "sys", "subprocess", "socket", "eval", "exec"}
 
@@ -125,12 +147,18 @@ def validate_model_source(py_text: str) -> None:
         elif isinstance(node, ast.ImportFrom):
             if (node.module or "").split(".")[0] not in ALLOWED_IMPORTS:
                 raise ValueError(f"from '{node.module}' import is not allowed")
+        elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+            if node.func.id in FORBIDDEN_NAMES:
+                raise ValueError(f"Forbidden call: {node.func.id}")
         elif isinstance(node, ast.Name):
             if node.id in FORBIDDEN_NAMES:
                 raise ValueError(f"use of '{node.id}' is forbidden")
         elif isinstance(node, ast.Attribute):
             if node.attr.startswith("__"):
                 raise ValueError("dunder attribute access is forbidden")
+                raise ValueError(f"usage of '{node.id}' is forbidden")
+        elif isinstance(node, ast.Attribute) and node.attr.startswith("__"):
+            raise ValueError("Dunder attribute access is not allowed")
 
     for token in FORBIDDEN_NAMES:
         if token in py_text:
@@ -186,6 +214,10 @@ def solve_algebraic(model_cls: Type[Any], **params: Any) -> Dict[str, Any]:
 
     The returned object is converted to basic Python types so that it is
     easy to serialise to JSON.
+    The helper instantiates ``model_cls`` with ``params`` and calls its
+    ``solve`` method. Results are converted into a JSON-friendly dictionary.
+    This function does not require the Condor package to be installed; it only
+    relies on the behaviour of the provided model class.
     """
 def solve_algebraic(model_cls: Type[Any], **params: Any) -> Dict[str, Any]:
     """Solve a Condor ``AlgebraicSystem`` model."""
@@ -208,6 +240,9 @@ def solve_algebraic(model_cls: Type[Any], **params: Any) -> Dict[str, Any]:
     model = model_cls(**params)
     result = model.solve() if hasattr(model, "solve") else model
     return _normalise(result)
+    model = model_cls(**params)
+    solution = model.solve() if hasattr(model, "solve") else model
+    return _dataclass_to_dict(solution)
 
 
 def simulate_ode(
@@ -241,6 +276,9 @@ def simulate_ode(
     events: Any | None = None,
     modes: Any | None = None,
 ) -> Dict[str, Any]:
+
+    if condor is None:  # pragma: no cover - runtime guard
+        raise RuntimeError("Condor is not installed")
     model = model_cls(**params)
     if not hasattr(model, "simulate"):
         raise RuntimeError("Model does not implement simulate()")

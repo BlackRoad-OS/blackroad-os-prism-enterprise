@@ -1,6 +1,7 @@
 import pytest
 
 libcst = pytest.importorskip("libcst")
+libcst = pytest.importorskip("libcst", reason="Install libcst or ask codex for help")
 from codemods.rename_foo_to_bar import codemod
 
 
