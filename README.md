@@ -387,3 +387,29 @@ python -m cli.console hitl:enqueue --task T100 --type security --artifact artifa
 python -m cli.console records:status
 python -m cli.console tui:run --theme high_contrast --lang es
 ```
+
+## Flags
+
+```
+python -m cli.console flags:list
+python -m cli.console flags:set --name bot.SRE-BOT.postmortem_v2 --value true
+```
+
+## Migrations
+
+```
+python -m cli.console migrate:status
+python -m cli.console migrate:up
+```
+
+## Tenancy
+
+```
+python -m cli.console --tenant ACME task:create --goal "Tenant task"
+```
+
+## Quotas
+
+```
+python -m cli.console quota:show --as-user U_PM
+```
