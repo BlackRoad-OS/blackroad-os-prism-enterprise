@@ -22,4 +22,9 @@
   },
   "include": ["src/**/*.ts"],
   "exclude": ["dist"]
+  "extends": "../../tsconfig.lib.json",
+  "compilerOptions": {
+    "outDir": "dist"
+  },
+  "include": ["src/**/*.ts"]
 }

@@ -55,6 +55,7 @@ policy teams can reference them without digging through subdirectories.
 | 003 | The Workflow Circle     | Work runs in visible capture → adjust loops.    |
 | 004 | The Autonomy Manifest   | Data autonomy through consent, export, and wipe. |
 | 026 | The Playground Clause   | Protect play spaces with clear guardrails.      |
+| 049 | The Curiosity Compact  | Curiosity is guided by consent, scope, and care.|
 
 ## BlackRoad Pipeline
 

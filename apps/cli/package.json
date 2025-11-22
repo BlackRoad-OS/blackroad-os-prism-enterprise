@@ -66,5 +66,25 @@
     "@types/node": "^20.14.11",
     "tsx": "^4.15.7",
     "typescript": "^5.4.5"
+  "name": "blackroad-custodysync",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "blackroad-custodysync": "dist/index.js"
+  },
+  "files": ["dist"],
+  "dependencies": {
+    "@blackroad/adapters": "workspace:*",
+    "@blackroad/core": "workspace:*",
+    "@blackroad/db": "workspace:*",
+    "@blackroad/jobs": "workspace:*",
+    "commander": "^12.1.0",
+    "ora": "^8.1.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
   }
 }

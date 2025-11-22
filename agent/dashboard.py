@@ -37,6 +37,11 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from agent import jobs, telemetry
+from fastapi import FastAPI, Request, Form
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
+import uvicorn
+from agent import telemetry, jobs
 
 app = FastAPI(title="BlackRoad Dashboard")
 templates = Jinja2Templates(directory="agent/templates")
@@ -138,6 +143,7 @@ async def ws_run(websocket: WebSocket) -> None:
             "jetson": jetson,
             "target": {"host": JETSON_HOST, "user": JETSON_USER},
         }
+        {"request": request, "pi": pi, "jetson": jetson}
     )
 
 
@@ -146,6 +152,7 @@ def run_job(
     command: str = Form(...),
     _: HTTPBasicCredentials = Depends(require_basic_auth),
 ):
+def run_job(command: str = Form(...)):
     jobs.run_remote(JETSON_HOST, command, user=JETSON_USER)
     return RedirectResponse("/", status_code=303)
 
@@ -193,3 +200,9 @@ async def ws_run(websocket: WebSocket):
 
 def main():
     uvicorn.run(app, host="0.0.0.0", port=8081)
+def main():
+    uvicorn.run(app, host="0.0.0.0", port=8081)
+
+
+if __name__ == "__main__":
+    main()

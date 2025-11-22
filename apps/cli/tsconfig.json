@@ -18,9 +18,16 @@
   },
   "include": ["src"]
   "extends": "../../tsconfig.clientos.json",
+  "extends": "../../tsconfig.lib.json",
   "compilerOptions": {
     "outDir": "dist"
   },
   "include": ["src/**/*.ts"],
   "exclude": ["dist"]
+  "references": [
+    { "path": "../../packages/core" },
+    { "path": "../../packages/db" },
+    { "path": "../../packages/jobs" },
+    { "path": "../../packages/adapters" }
+  ]
 }

@@ -17,4 +17,12 @@
   },
   "include": ["src/**/*"],
   "exclude": ["dist"]
+  "extends": "../../tsconfig.lib.json",
+  "compilerOptions": {
+    "outDir": "dist"
+  },
+  "include": ["src/**/*.ts"],
+  "references": [
+    { "path": "../core" }
+  ]
 }

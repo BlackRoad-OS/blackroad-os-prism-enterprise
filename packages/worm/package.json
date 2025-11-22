@@ -25,5 +25,14 @@
     "@types/node": "^20.14.11",
     "rimraf": "^5.0.7",
     "typescript": "^5.4.5"
+  "dependencies": {
+    "@blackroad/db": "workspace:*",
+    "fast-json-stable-stringify": "^2.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
   }
 }

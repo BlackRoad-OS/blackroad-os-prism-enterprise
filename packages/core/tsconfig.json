@@ -12,4 +12,13 @@
   },
   "include": ["src/**/*.ts", "tests/**/*.ts"],
   "exclude": ["dist"]
+  "extends": "../../tsconfig.lib.json",
+  "compilerOptions": {
+    "outDir": "dist"
+  },
+  "include": ["src/**/*.ts"],
+  "references": [
+    { "path": "../db" },
+    { "path": "../worm" }
+  ]
 }
