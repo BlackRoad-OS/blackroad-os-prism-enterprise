@@ -77,6 +77,23 @@ Each command prints the high-level actions it would perform. Real OAuth
 or webhook integrations can be added later by filling in the TODO
 sections.
 
+### Prism console multi-repo integrator
+
+`codex/tools/prism_repo_integrator.py` coordinates git hygiene, optional
+tests, and deploy hooks across the Prism console repository plus its
+closest satellites (API gateway, product site, ingest jobs). The helper
+reads `codex/tools/prism_repo_integrations.json` so adding a new
+repository is as simple as appending a new entry.
+
+```bash
+python codex/tools/prism_repo_integrator.py status              # show git status for every repo
+python codex/tools/prism_repo_integrator.py sync --dry-run      # preview commit/push flow
+python codex/tools/prism_repo_integrator.py test api-gateway    # run configured tests for a subset
+```
+
+Pass `--config` to load a different JSON manifest or `--root` to point
+the paths at another workspace checkout.
+
 ## Codex Agent (“next” trigger watcher)
 
 `codex/tools/codex-agent.sh` can run on any Linux host to watch for a
