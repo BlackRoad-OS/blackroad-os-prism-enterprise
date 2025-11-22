@@ -3,7 +3,6 @@ requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-<<<<<<< main
 name = "blackroad-quantum-labs"
 version = "0.1.0"
 description = "Quantum computing teaching lab and agent orchestration toolkit"
@@ -41,18 +40,15 @@ name = "quantum-lab"
 version = "0.1.0"
 description = "Quantum computing teaching lab and Quantum Language Model laboratory"
 readme = "README.md"
-=======
 name = "quantum-lab"
 version = "0.1.0"
 description = "Quantum computing teaching lab"
 readme = "README-quantum-lab.md"
->>>>>>> origin/codex/fix-quantum-lab-pyproject-merge-conflict
 requires-python = ">=3.11"
 authors = [{ name = "Quantum Lab", email = "labs@example.com" }]
 dependencies = [
     "numpy>=1.26,<3",
     "matplotlib>=3.8,<4",
-<<<<<<< main
     "sympy",
     "nbformat",
     "nbconvert",
@@ -72,7 +68,6 @@ dev = [
     "mypy",
     "pytest",
     "pytest-cov",
-=======
     "pyyaml>=6.0,<7",
 ]
 
@@ -81,24 +76,19 @@ qiskit = ["qiskit", "qiskit-aer", "qiskit-ibm-runtime"]
 viz = ["matplotlib"]
 
 dev = [
->>>>>>> origin/codex/fix-quantum-lab-pyproject-merge-conflict
     "pytest",
     "pytest-cov",
     "mypy",
     "ruff",
 ]
-<<<<<<< main
 qiskit = ["qiskit", "qiskit-aer", "qiskit-ibm-runtime"]
 viz = ["matplotlib>=3.8,<4"]
 viz = ["matplotlib"]
-=======
->>>>>>> origin/codex/fix-quantum-lab-pyproject-merge-conflict
 
 [project.urls]
 Homepage = "https://example.com/quantum-lab"
 
 [tool.pytest.ini_options]
-<<<<<<< main
 addopts = "-q --cov=qlm_lab.tools.quantum_np --cov=quantum_lab.core.circuit --cov-report=term-missing --cov-fail-under=90"
 testpaths = [
     "tests/test_agents_loop.py",
@@ -135,10 +125,9 @@ line-length = 100
 target-version = "py311"
 [tool.pytest.ini_options]
 pythonpath = ["."]
-=======
+<<<<<<< main
 testpaths = ["tests"]
 addopts = "-q"
->>>>>>> origin/codex/fix-quantum-lab-pyproject-merge-conflict
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -146,20 +135,17 @@ include = ["quantum_lab*", "qlm_lab*"]
 [tool.mypy]
 python_version = "3.11"
 ignore_missing_imports = true
-<<<<<<< main
-=======
 
 [tool.ruff]
 target-version = "py311"
 line-length = 100
->>>>>>> origin/codex/fix-quantum-lab-pyproject-merge-conflict
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["quantum_lab*"]
-<<<<<<< main
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["quantum_lab*", "qlm_lab*"]
 =======
->>>>>>> origin/codex/fix-quantum-lab-pyproject-merge-conflict
+testpaths = ["tests"]
+>>>>>>> origin/copilot/sub-pr-606

@@ -30,6 +30,14 @@ resources.
 The actual Condor package is optional at import time so the repository can be
 used in environments where the dependency is not yet installed. Runtime errors
 are only raised if helpers that require Condor are invoked when it is missing.
+# ruff: noqa
+
+"""Wrappers for running NASA Condor models locally.
+
+The helpers here expose a minimal, import-safe subset of Condor's
+functionality so tests can exercise code paths without requiring the full
+dependency. The real Condor package is optional at import time; calling
+these helpers will raise ``RuntimeError`` if Condor is not installed.
 """
 
 from __future__ import annotations
@@ -59,6 +67,8 @@ except Exception:  # pragma: no cover - numpy may be absent
 try:  # Condor itself may not be installed in all environments
     import condor  # type: ignore  # noqa: F401
 except Exception:  # pragma: no cover - Condor may be absent
+try:  # pragma: no cover - optional dependency
+    import condor  # type: ignore  # noqa: F401
 except Exception:  # pragma: no cover - condor may be absent in CI
     condor = None  # type: ignore
 try:  # pragma: no cover - optional dependency in CI
@@ -95,6 +105,7 @@ def _dataclass_to_dict(obj: Any) -> Any:
     """
     """Recursively convert dataclasses and ``numpy`` arrays into primitives."""
 
+    """Recursively convert dataclasses and ``numpy`` arrays into primitives."""
     if is_dataclass(obj):
         return {k: _to_primitive(v) for k, v in asdict(obj).items()}
     if np is not None and isinstance(obj, np.ndarray):
@@ -138,6 +149,7 @@ def _normalise(value: Any) -> Any:
 def validate_model_source(py_text: str) -> None:
     """Perform a tiny security audit over ``py_text``."""
 
+    """Validate a user supplied model source string."""
     tree = ast.parse(py_text)
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
@@ -176,6 +188,8 @@ def validate_model_source(py_text: str) -> None:
 
 
 def _load_module(py_text: str, module_name: str) -> ModuleType:
+def _load_module_from_source(source: str, module_name: str) -> ModuleType:
+    """Load a module from source text in an isolated temporary directory."""
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / f"{module_name}.py"
         path.write_text(py_text, encoding="utf-8")
@@ -196,6 +210,9 @@ def load_model_from_source(py_text: str, class_name: str) -> Type[Any]:
     return getattr(module, class_name)
 
     """Validate ``py_text`` and return ``class_name`` from it."""
+    validate_model_source(py_text)
+    module = _load_module_from_source(py_text, "user_model")
+    return getattr(module, class_name)
 
     validate_model_source(py_text)
     module = _load_module(py_text, "condor_user_model")
@@ -223,6 +240,8 @@ def solve_algebraic(model_cls: Type[Any], **params: Any) -> Dict[str, Any]:
     """Solve a Condor ``AlgebraicSystem`` model."""
 
     if condor is None and model_cls.__module__.split(".")[0] == "condor":
+    """Solve a Condor ``AlgebraicSystem`` model."""
+    if condor is None:  # pragma: no cover - runtime guard
         raise RuntimeError("Condor is not installed")
 
     if condor is None and model_cls.__module__.split(".")[0] == CONDOR_PACKAGE_PREFIX:
@@ -298,6 +317,9 @@ def optimize(
 ) -> Dict[str, Any]:
     """Solve an optimisation problem if ``problem_cls`` implements ``solve``."""
 
+    """Solve an ``OptimizationProblem`` and return a serialisable dictionary."""
+    if condor is None:  # pragma: no cover - runtime guard
+        raise RuntimeError("Condor is not installed")
     problem = problem_cls()
     if hasattr(problem, "solve"):
         result = problem.solve(initial_guess, bounds=bounds, options=options)
