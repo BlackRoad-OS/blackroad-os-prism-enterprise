@@ -58,6 +58,7 @@ policy teams can reference them without digging through subdirectories.
 | 026 | The Playground Clause   | Protect play spaces with clear guardrails.      |
 | 049 | The Curiosity Compact  | Curiosity is guided by consent, scope, and care.|
 | 056 | The Listening Treaty   | Feedback loops, silence, and telemetry keep Lucidia receptive. |
+| 054 | The Transparency of Tools | Tools remain inspectable, configurable, and accountable. |
 
 ## BlackRoad Pipeline
 
