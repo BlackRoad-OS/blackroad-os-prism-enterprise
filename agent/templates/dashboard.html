@@ -391,6 +391,7 @@
     input[type=text] { width: 70%; padding: 0.5em; }
     button { padding: 0.5em 1em; margin-left: .5em; cursor: pointer; }
     #log { background:#000; color:#0f0; padding:1em; height:280px; overflow:auto; border-radius:6px; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+    button { padding: 0.5em 1em; margin-left: 0.5em; }
   </style>
 </head>
 <body>
@@ -940,4 +941,10 @@ stopBtn.addEventListener('click', () => {
       };
     </script>
   </body>
+    <form action="/run" method="post">
+      <input type="text" name="command" placeholder="Enter command (e.g. nvidia-smi)" />
+      <button type="submit">Run on Jetson</button>
+    </form>
+  </div>
+</body>
 </html>
