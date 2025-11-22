@@ -40,6 +40,7 @@ services/health-sidecar/.env
 workers/unity/downloads/
 artifacts.sha256
 public/artifacts.sha256
+workers/unity/downloads/
 
 # Local data
 srv/blackroad-api/blackroad.db

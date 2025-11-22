@@ -1,4 +1,5 @@
 import express, { Express } from "express";
+import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { z } from "zod";
@@ -19,6 +20,7 @@ const requestSchema = z.object({
 type RequestPayload = z.infer<typeof requestSchema>;
 
 const app: Express = express();
+const app = express();
 app.use(express.json({ limit: "1mb" }));
 app.use(cors());
 app.use(helmet({ contentSecurityPolicy: false }));

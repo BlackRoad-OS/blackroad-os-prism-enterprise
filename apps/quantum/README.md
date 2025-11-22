@@ -34,3 +34,8 @@ Open `apps/quantum/ternary_consciousness_v3.html` in a browser (no build step re
 - `.github/workflows/deploy-quantum.yml` — CI/CD to server via rsync
 
 _Last updated on 2025-09-12_
+How to use, math notes (S(ρ)=−Tr ρ log ρ, P=Tr ρ²), Lindblad params (γφ, γrel), CSV export, and keyboard shortcuts.
+- `apps/quantum/ternary_consciousness_v3.html` — standalone app
+- `.github/workflows/deploy-quantum.yml` — CI/CD to server via rsync
+
+_Last updated on 2025-09-11_

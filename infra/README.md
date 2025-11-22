@@ -29,3 +29,7 @@ of truth for automation:
 
 Update the manifest when infrastructure configuration changes and reference it from
 new runbooks so release operators know which environment characteristics to verify.
+Customize `ansible/inventory.ini` with hostnames or IPs for your environment before
+running the bootstrap script.
+
+_Last updated on 2025-09-11_

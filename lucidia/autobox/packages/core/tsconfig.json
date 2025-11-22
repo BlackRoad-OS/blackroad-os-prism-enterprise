@@ -12,6 +12,7 @@
     "types": ["node"],
     "esModuleInterop": true,
     "skipLibCheck": true
+    "target": "ES2020"
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules"]

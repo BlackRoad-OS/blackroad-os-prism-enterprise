@@ -85,6 +85,7 @@
     "prepare": "husky"
     "demo": "brc plm:items:load --dir fixtures/plm/items && brc plm:bom:load --dir fixtures/plm/boms && brc mfg:wc:load --file fixtures/mfg/work_centers.csv && brc mfg:routing:load --dir fixtures/mfg/routings && brc mfg:routing:capcheck --item PROD-100 --rev B --qty 1000 && brc mfg:wi:render --item PROD-100 --rev B && brc mfg:spc:analyze --op OP-200 --window 50 && brc mfg:yield --period 2025-09 && brc mfg:mrp --demand artifacts/sop/allocations.csv --inventory fixtures/mfg/inventory.csv --pos fixtures/mfg/open_pos.csv && brc mfg:coq --period 2025-Q3",
     "custodysync:test": "pnpm -r --filter @blackroad/core test && pnpm -r --filter @blackroad/adapters test"
+    "test": "echo \"No tests specified\" && exit 0"
   },
   "engines": {
     "node": ">=20"

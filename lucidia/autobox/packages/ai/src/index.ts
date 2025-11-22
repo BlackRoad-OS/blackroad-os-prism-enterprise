@@ -62,6 +62,8 @@ function deterministicShuffle<T>(items: T[], seed: string): T[] {
 
 function extractKeywords(text: string, limit = 5): string[] {
   const tokens = (tokenizer.tokenize(text.toLowerCase()) || [])
+  const tokens = tokenizer
+    .tokenize(text.toLowerCase())
     .filter((token) => /[a-z0-9]/.test(token))
     .filter((token) => !stopWords.has(token));
 

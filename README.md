@@ -413,3 +413,6 @@ python -m cli.console --tenant ACME task:create --goal "Tenant task"
 ```
 python -m cli.console quota:show --as-user U_PM
 ```
+See [docs/blackroad-equation-backbone.md](docs/blackroad-equation-backbone.md) for a curated list of one hundred foundational equations across mathematics, physics, computer science, and engineering.
+
+_Last updated on 2025-09-11_

@@ -5,6 +5,11 @@ from __future__ import annotations
 import pytest
 
 torch = pytest.importorskip("torch", reason="Install torch or ask codex for help")
+# ruff: noqa: E402,I001
+
+import pytest
+
+torch = pytest.importorskip("torch")
 
 from lucidia.modules.random_fields.clfm_engine import CLFMEngine, TrainConfig
 from lucidia.modules.random_fields.constraints import MeanConstraint
