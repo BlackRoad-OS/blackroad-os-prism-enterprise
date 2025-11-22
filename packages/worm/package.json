@@ -2,6 +2,8 @@
   "name": "@blackroad/worm",
   "version": "0.1.0",
   "description": "Append-only WORM archive and verification utilities for BlackRoad SurveillanceHub evidence.",
+  "version": "0.2.0",
+  "description": "Append-only WORM archive for BlackRoad evidence.",
   "type": "module",
   "license": "Apache-2.0",
   "private": true,
@@ -11,12 +13,17 @@
   "files": ["dist"],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.18.0"
   },
   "dependencies": {
     "@blackroad/db": "workspace:*"
   },
   "devDependencies": {
+    "@types/node": "^20.12.7",
     "rimraf": "^6.0.1",
   "dependencies": {
     "@blackroad/db": "workspace:*"
@@ -34,5 +41,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json"
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
   }
 }

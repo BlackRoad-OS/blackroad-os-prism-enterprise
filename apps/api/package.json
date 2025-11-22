@@ -3,6 +3,9 @@
   "version": "0.3.0",
   "version": "0.2.1",
   "private": true,
+  "name": "@blackroad/grc-api",
+  "version": "0.1.0",
+  "description": "Fastify API for BlackRoad GRC backbone",
   "type": "module",
   "scripts": {
     "dev": "tsx src/server.ts",
@@ -153,6 +156,21 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@blackroad/db": "workspace:*",
+    "@blackroad/grc-core": "workspace:*",
+    "@blackroad/worm": "workspace:*",
+    "@fastify/jwt": "^9.4.1",
+    "@fastify/swagger": "^8.15.0",
+    "@fastify/swagger-ui": "^3.0.0",
+    "@fastify/type-provider-zod": "^1.2.0",
+    "fastify": "^4.28.0",
+    "fastify-plugin": "^4.5.1",
+    "pino": "^9.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "rimraf": "^6.0.1",
     "tsx": "^4.15.7",
     "typescript": "^5.5.4"
   },

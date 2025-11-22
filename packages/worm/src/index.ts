@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 type PrismaClient = import("@blackroad/db").PrismaClient;
+import type { PrismaClient } from "@prisma/client";
 
 export interface WormAppendInput<T = unknown> {
   payload: T;
@@ -18,6 +19,7 @@ export interface WormLedger<T = unknown> {
   append(entry: WormAppendInput<T>): Promise<WormBlock<T>>;
   tail(): Promise<WormBlock<T> | null>;
   all(): Promise<WormBlock<T>[]>;
+  verify(): Promise<boolean>;
 }
 
 export class InMemoryWormLedger<T = unknown> implements WormLedger<T> {
@@ -27,6 +29,7 @@ export class InMemoryWormLedger<T = unknown> implements WormLedger<T> {
     const prev = this.blocks[this.blocks.length - 1] ?? null;
     const ts = entry.timestamp ?? new Date();
     const safePayload = clonePayload(entry.payload);
+    const prev = this.blocks.at(-1) ?? null;
     const block: WormBlock<T> = {
       idx: prev ? prev.idx + 1 : 1,
       ts,
@@ -64,8 +67,83 @@ export class InMemoryWormAdapter implements WormAdapter {
   }
 
   getAll(): WormBlock[] {
+    return this.blocks.at(-1) ?? null;
+  }
+
   async all(): Promise<WormBlock<T>[]> {
     return [...this.blocks];
+  }
+
+  async verify(): Promise<boolean> {
+    let prevHash = "GENESIS";
+    for (const block of this.blocks) {
+      const expected = computeHash(prevHash, block.payload);
+      if (expected !== block.hash) return false;
+      prevHash = block.hash;
+    }
+    return true;
+  }
+}
+
+export class PrismaWormLedger<T = unknown> implements WormLedger<T> {
+  constructor(private readonly prisma: PrismaClient) {}
+
+  async append(entry: WormAppendInput<T>): Promise<WormBlock<T>> {
+    const latest = await this.prisma.wormBlock.findFirst({
+      orderBy: { idx: "desc" },
+    });
+    const prevHash = latest?.hash ?? "GENESIS";
+    const block = await this.prisma.wormBlock.create({
+      data: {
+        idx: latest ? latest.idx + 1 : 1,
+        payload: entry.payload as any,
+        prevHash,
+        hash: computeHash(prevHash, entry.payload),
+      },
+    });
+    return {
+      idx: block.idx,
+      ts: block.ts,
+      payload: block.payload as T,
+      prevHash: block.prevHash,
+      hash: block.hash,
+    };
+  }
+
+  async tail(): Promise<WormBlock<T> | null> {
+    const block = await this.prisma.wormBlock.findFirst({ orderBy: { idx: "desc" } });
+    if (!block) return null;
+    return {
+      idx: block.idx,
+      ts: block.ts,
+      payload: block.payload as T,
+      prevHash: block.prevHash,
+      hash: block.hash,
+    };
+  }
+
+  async all(): Promise<WormBlock<T>[]> {
+    const blocks = await this.prisma.wormBlock.findMany({ orderBy: { idx: "asc" } });
+    return blocks.map((block) => ({
+      idx: block.idx,
+      ts: block.ts,
+      payload: block.payload as T,
+      prevHash: block.prevHash,
+      hash: block.hash,
+    }));
+  }
+
+  async verify(): Promise<boolean> {
+    const blocks = await this.prisma.wormBlock.findMany({ orderBy: { idx: "asc" } });
+    let prevHash = "GENESIS";
+    for (const block of blocks) {
+      const expected = computeHash(prevHash, block.payload);
+      if (expected !== block.hash) {
+        return false;
+      }
+      prevHash = block.hash;
+    }
+    return true;
   }
 }
 
@@ -237,4 +315,8 @@ export class WormLedger {
     }
     return true;
   }
+}
+export function computeHash(prevHash: string, payload: unknown): string {
+  const content = JSON.stringify({ prevHash, payload });
+  return createHash("sha256").update(content).digest("hex");
 }

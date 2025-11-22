@@ -25,4 +25,11 @@
   "references": [
     { "path": "../core" }
   ]
+    "module": "ESNext",
+    "target": "ES2022",
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["dist"]
 }

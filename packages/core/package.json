@@ -7,6 +7,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "Core domain types, validators, crypto helpers, and the SurveillanceHub engine for BlackRoad Finance.",
+  "name": "@blackroad/grc-core",
+  "version": "0.1.0",
+  "description": "Governance, Risk, and Compliance backbone for BlackRoad Finance.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -26,12 +29,23 @@
   },
   "dependencies": {
     "@blackroad/worm": "workspace:*",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@blackroad/worm": "workspace:*",
+    "@prisma/client": "^5.18.0",
     "decimal.js": "^10.4.3",
     "luxon": "^3.4.4",
+    "pino": "^9.1.0",
     "uuid": "^9.0.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/node": "^20.12.7",
     "rimraf": "^6.0.1",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"
