@@ -105,3 +105,5 @@ Terraform backends, and change-management requirements.
 - Branch guardrails: `docs/ops/merge-queue.md`, `docs/ops/required-checks.md`, `docs/ops/branch-policy.md`
 
 _Last updated on 2025-10-06_
+
+_Last updated on 2025-09-11_

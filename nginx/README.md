@@ -87,3 +87,4 @@ access_log /var/log/nginx/access.log main_ce;
 Reload after editing (`nginx -t && systemctl reload nginx`), then run the
 script again with `ACCESS_LOG` pointing to that file to see log-derived
 counts alongside the live probe output.
+_Last updated on 2025-09-11_

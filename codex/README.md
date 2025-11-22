@@ -97,3 +97,8 @@ python3 codex/tools/codex_entries_audit.py
 
 Add `--format json` for machine-readable output that downstream
 automation can ingest.
+Each command prints the high level actions it would perform.  Real OAuth
+or webhook logic can be added by filling in the TODO sections inside the
+script.
+
+_Last updated on 2025-09-11_
