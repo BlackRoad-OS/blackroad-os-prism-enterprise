@@ -10,6 +10,7 @@ function randomUUID(): string {
     return v.toString(16);
   });
 }
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 
 export const identitySchema = z.object({
@@ -184,6 +185,12 @@ export function createConsentReceipt(
 }
 
 // Removed duplicate interface - using type from zod schema below
+export interface ExplainabilityRecord {
+  previewId: string;
+  itemText: string;
+  suggestion: ClassificationSuggestion;
+  minimalFeatures: string[];
+}
 
 export const explainabilityRecordSchema = z.object({
   previewId: z.string().min(1),
