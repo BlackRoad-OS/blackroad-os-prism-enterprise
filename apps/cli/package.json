@@ -86,5 +86,27 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json"
+  "name": "blackroad-compliance-cli",
+  "version": "0.1.0",
+  "type": "module",
+  "files": ["dist"],
+  "bin": {
+    "blackroad-compliance": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "src/index.ts",
+  "sideEffects": false,
+  "scripts": {
+    "build": "node ./scripts/build.mjs"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "date-fns": "^3.6.0",
+    "pdf-parse": "^1.1.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "esbuild": "^0.23.1"
   }
 }
