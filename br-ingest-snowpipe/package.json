@@ -8,6 +8,7 @@
     "start": "node dist/index.js",
     "migrate": "psql \"$PG_URL\" -f src/schema.sql",
     "test": "vitest run"
+    "migrate": "psql \"$PG_URL\" -f src/schema.sql"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
@@ -25,5 +26,6 @@
     "tsx": "^4.16.2",
     "typescript": "^5.5.4",
     "vitest": "^1.6.0"
+    "typescript": "^5.5.4"
   }
 }
