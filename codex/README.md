@@ -29,6 +29,7 @@ can drop in without rewriting the entire workflow.
 | 003 | The Workflow Circle    | Work runs in visible capture → adjust loops.    |
 | 004 | The Autonomy Manifest  | Data autonomy through consent, export, and wipe. |
 | 022 | The Security Spine     | Security backbone with layered zero-trust defenses. |
+| 028 | The Custodianship Code | Lucidia is entrusted to caretakers who steward continuity. |
 | 043 | The Equity Oath        | Fairness, access, and inclusion are systemic.   |
 | 047 | The Transparency of Emotion | Emotion is acknowledged with honesty, tone awareness, and care. |
 | 051 | The Transparency of Creation | Every artifact traces its origin and intent. |
@@ -56,6 +57,7 @@ policy teams can reference them without digging through subdirectories.
 | 004 | The Autonomy Manifest   | Data autonomy through consent, export, and wipe. |
 | 026 | The Playground Clause   | Protect play spaces with clear guardrails.      |
 | 049 | The Curiosity Compact  | Curiosity is guided by consent, scope, and care.|
+| 056 | The Listening Treaty   | Feedback loops, silence, and telemetry keep Lucidia receptive. |
 
 ## BlackRoad Pipeline
 
