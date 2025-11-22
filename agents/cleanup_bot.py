@@ -10,6 +10,7 @@ executing them.
 
 from __future__ import annotations
 
+# --- Imports ---
 import argparse
 import json
 import logging
@@ -22,6 +23,7 @@ LOGGER = logging.getLogger(__name__)
 from subprocess import CalledProcessError
 from typing import List
 import subprocess
+import sys
 from dataclasses import dataclass
 from subprocess import CalledProcessError
 from subprocess import CalledProcessError, CompletedProcess
@@ -121,6 +123,7 @@ from subprocess import CalledProcessError, CompletedProcess, run
 from typing import Dict, Iterable, List, Sequence
 
 
+# --- Core functionality ---
 @dataclass
 class CleanupBot:
     """Delete local and remote Git branches once work is merged."""
@@ -196,6 +199,16 @@ class CleanupBot:
         )
         # Extract branch names from the command output while ignoring
         # the base branch and "HEAD" references.
+        try:
+            result = subprocess.run(
+                ["git", "branch", "--merged", base],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+        except CalledProcessError as exc:
+            logging.error("Failed to list merged branches: %s", exc)
+            raise RuntimeError("Could not list merged branches") from exc
         branches: List[str] = []
         for line in result.stdout.splitlines():
             name = line.strip().lstrip("*").strip()
@@ -361,6 +374,7 @@ def cleanup(branches: Iterable[str], dry_run: bool = False) -> Dict[str, bool]:
 
         return self._run_git("branch", "-D", branch)
 def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    # --- Argument parsing ---
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "branches",
@@ -392,6 +406,18 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     def cleanup(self) -> List[BranchCleanupResult]:
         """Remove the configured branches locally and remotely."""
     bot = CleanupBot.from_merged(base=args.base, dry_run=args.dry_run)
+    # --- Logging setup ---
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(message)s")
+
+    try:
+        bot = CleanupBot.from_merged(base=args.base, dry_run=args.dry_run)
+    except RuntimeError as exc:
+        logging.error("%s", exc)
+        return 1
+    if not bot.branches:
+        logging.info("No merged branches to clean up.")
+        return 0
+
     results = bot.cleanup()
 
     if not results:
@@ -472,6 +498,11 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
     def delete_branch(self, branch: str) -> bool:
         """Delete a branch locally and remotely.
+    successes = sum(1 for deleted in results.values() if deleted)
+    failures = len(results) - successes
+    logging.info("Summary: %d deleted, %d failed", successes, failures)
+
+    return 0 if failures == 0 else 1
 
         Returns
         -------
