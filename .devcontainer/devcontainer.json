@@ -171,5 +171,22 @@
         "terraform.codelens.enabled": true
       }
     }
+  "name": "blackroad-workspace",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
+  "features": { "ghcr.io/devcontainers/features/github-cli:1": {} },
+  "postCreateCommand": "npm i -g pnpm && pnpm i && npx playwright install --with-deps",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-playwright.playwright",
+        "github.copilot",
+        "ms-vscode.remote-repositories",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  },
+  "forwardPorts": [3000, 9229],
+  "remoteEnv": {
+    "PLAYWRIGHT_BROWSERS_PATH": "0"
   }
 }
