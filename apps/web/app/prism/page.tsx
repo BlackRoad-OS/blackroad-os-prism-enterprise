@@ -31,6 +31,12 @@ export default async function PrismDashboard() {
     fetchSeries('/v1/metrics/linear/issues_created?from=-P7D'),
     fetchSeries('/v1/metrics/linear/issues_completed?from=-P7D'),
     fetchSeries(`/v1/metrics/linear/burndown?team=ENG&cycleStart=${encodeURIComponent('2025-10-01')}&cycleEnd=${encodeURIComponent('2025-10-14')}`),
+  const [events, errors, charges, activeSubs, mrr] = await Promise.all([
+    fetchSeries('/v1/metrics/events?from=-P7D'),
+    fetchSeries('/v1/metrics/errors?from=-P7D'),
+    fetchSeries('/v1/metrics/stripe/charges?from=-P7D'),
+    fetchSeries('/v1/metrics/stripe/active_subs'),
+    fetchSeries('/v1/metrics/stripe/mrr'),
   ]);
 
   return (
@@ -45,6 +51,9 @@ export default async function PrismDashboard() {
         <Tile title="Linear Created (7d)" series={linCreated} />
         <Tile title="Linear Completed (7d)" series={linCompleted} />
         <Tile title="Linear Burndown (cycle)" series={linBurndown} />
+        <Tile title="Stripe: New Charges (7d, $)" series={charges} rangeLabel="7d" />
+        <Tile title="Stripe: Active Subs (now)" series={activeSubs} rangeLabel="now" />
+        <Tile title="Stripe: MRR (now, $)" series={mrr} rangeLabel="now" />
       </div>
 
   if (!res.ok) {

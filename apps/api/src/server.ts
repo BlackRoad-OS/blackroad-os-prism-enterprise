@@ -619,6 +619,8 @@ app.post('/api/search/reindex', reindex);
 app.get('/api/search', cacheHeaders('search'), query);
 // resolve org from header or session
 app.use(orgResolver());
+import metricsRouter from "./routes/metrics.js";
+import sourcesRouter from "./routes/sources.js";
 
 const app = express();
 
@@ -816,6 +818,8 @@ app.use('/api/hooks', hooks);
 app.use('/api/metrics', metricsRouter);
 app.use('/api/esg', esgFA, esgCalc, esgTargets, esgOffsets, esgSup, esgRep);
 app.use("/", classifyRouter);
+app.use("/v1/metrics", metricsRouter);
+app.use("/v1/sources", sourcesRouter);
 
 const port = Number(process.env.PORT ?? 4000);
 
