@@ -22,6 +22,71 @@ The BlackRoad Prism Console is a comprehensive ecosystem combining:
 # Setup environment
 npm install
 make setup
+cd /path/to/your/working/copy
+sudo bash ops/install.sh
+bash tools/verify-runtime.sh
+```
+
+- The installer will:
+  - Locate your API (prefers `./srv/blackroad-api`, then `/srv/blackroad-api`, else searches for `server_full.js`)
+  - Create `package.json` if missing and **auto-install** any missing npm packages it finds
+  - Create `.env` from the example if missing and generate strong secrets
+  - Ensure your SQLite file exists (defaults to `blackroad.db` inside the API dir if `DB_PATH` is not set)
+  - Check if `127.0.0.1:8000` is serving `/health`. If not, it prints a one-liner to launch the stub.
+
+## Git workflow
+
+When you're ready to share changes:
+
+1. Stage your updates:
+   ```bash
+   git add -A
+   ```
+2. Commit with a clear message:
+   ```bash
+   git commit -m "feat: describe your change"
+   ```
+
+## Executive Autopilot
+
+Offline analytics helpers:
+
+```bash
+python -m cli.console cohort:new --name apac_flagship --criteria samples/cohorts/apac_flagship.json
+python -m cli.console anomaly:run --rules configs/anomaly_rules.yaml --window W
+python -m cli.console decide:plan --anomalies artifacts/anomalies/latest.json --goals configs/goals.yaml --constraints configs/constraints.yaml
+python -m cli.console narrative:build --plan artifacts/decisions/plan_*.json --out artifacts/reports/exec_latest
+```
+3. Push the branch:
+   ```bash
+   git push origin <branch-name>
+   ```
+4. Open a Pull Request and review the CI results.
+
+## Developing with VS Code and Docker on macOS
+
+1. Start [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac/).
+2. Install [Visual Studio Code](https://code.visualstudio.com/) and the **Dev Containers** extension.
+3. Open this repository in VS Code and select **Reopen in Container** to use `.devcontainer/devcontainer.json`.
+4. Once the container is running, use the integrated terminal to run commands like `npm install`, `npm run lint`, or `npm test`.
+
+---
+
+## Notes & assumptions
+
+- Stack recorded in memory (Aug 2025): SPA on `/var/www/blackroad/index.html`, Express API on port **4000**
+  at `/srv/blackroad-api` with SQLite; LLM service on **127.0.0.1:8000**; NGINX proxies `/api` and `/ws`.
+- This bundle does **not** ship `node_modules/` (native builds vary by machine). Instead, it generates
+  and installs what’s actually needed by **scanning your sources**.
+- If your API already has `package.json`, nothing is overwritten; missing deps are added.
+- If you maintain your API directly under a different path, run the scanner manually, e.g.:
+  ```bash
+  node tools/dep-scan.js --dir /path/to/api --save
+  ```
+
+If anything looks off, run `bash tools/verify-runtime.sh` and share the output.
+
+## Subscribe API
 
 # Start Prism Console web interface
 npm run dev
