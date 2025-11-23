@@ -408,6 +408,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 import billing from './routes/billing.js';
 import stripeWebhook from './routes/stripe_webhook.js';
+import esgFA from './routes/esg/factors_activity.js';
+import esgCalc from './routes/esg/calc.js';
+import esgTargets from './routes/esg/targets.js';
+import esgOffsets from './routes/esg/offsets.js';
+import esgSup from './routes/esg/suppliers.js';
+import esgRep from './routes/esg/report.js';
 
 dotenv.config();
 
@@ -797,6 +803,7 @@ app.get('/api/health', (_req, res) => res.json({ ok: true }));
 import hooks from './routes/hooks.js';
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metricsRouter);
+app.use('/api/esg', esgFA, esgCalc, esgTargets, esgOffsets, esgSup, esgRep);
 
 const port = process.env.PORT || 4000;
 
