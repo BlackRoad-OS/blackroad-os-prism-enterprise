@@ -71,6 +71,13 @@ def cluster(rows: List[Dict[str, Any]], cfg: MatchConfig) -> List[Dict[str, Any]
                     stack.append(neighbor)
         members.sort()
         clusters.append({"members": members})
+        group = [i]
+        seen[i] = True
+        for j in range(i + 1, n):
+            if score_pair(rows[i], rows[j], cfg.weights) >= cfg.auto_merge:
+                group.append(j)
+                seen[j] = True
+        clusters.append({"members": group})
     return clusters
 
 

@@ -416,3 +416,12 @@ python -m cli.console quota:show --as-user U_PM
 See [docs/blackroad-equation-backbone.md](docs/blackroad-equation-backbone.md) for a curated list of one hundred foundational equations across mathematics, physics, computer science, and engineering.
 
 _Last updated on 2025-09-11_
+
+## Master Data & Governance Quickstart
+
+```bash
+python -m cli.console mdm:stage --domain account --file fixtures/mdm/account.csv
+python -m cli.console mdm:match --domain account --config configs/mdm/match_account.yaml
+python -m cli.console mdm:golden --domain account --policy configs/mdm/survivorship_account.yaml
+python -m cli.console mdm:dq --domain account --config configs/mdm/dq_account.yaml
+```
