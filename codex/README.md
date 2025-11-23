@@ -59,6 +59,7 @@ policy teams can reference them without digging through subdirectories.
 | 049 | The Curiosity Compact  | Curiosity is guided by consent, scope, and care.|
 | 056 | The Listening Treaty   | Feedback loops, silence, and telemetry keep Lucidia receptive. |
 | 054 | The Transparency of Tools | Tools remain inspectable, configurable, and accountable. |
+| 005 | The Explainability Doctrine | Every AI action ships with rationale, version, and undo. |
 
 ## BlackRoad Pipeline
 
