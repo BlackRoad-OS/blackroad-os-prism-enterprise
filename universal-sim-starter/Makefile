@@ -1,4 +1,5 @@
 .PHONY: genesis solid fluid diag variants variants-batch report-all clean
+.PHONY: genesis solid fluid diag clean
 
 PYTHON ?= python3
 ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
