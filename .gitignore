@@ -160,3 +160,5 @@ artifacts/**
 !artifacts/agents/
 !artifacts/agents/**
 *.tsbuildinfo
+br-release-notes/dist/
+br-release-notes/node_modules/
