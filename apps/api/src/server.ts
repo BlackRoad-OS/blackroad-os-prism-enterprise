@@ -620,9 +620,20 @@ app.get('/api/search', cacheHeaders('search'), query);
 // resolve org from header or session
 app.use(orgResolver());
 
-// Notifications
-app.use('/api/notify', notifySend);
-app.use('/api/notify/webpush', webpush);
+const app = express();
+
+app.use(helmet());
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
+app.use(express.json({ limit: "1mb" }));
+
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok" });
+});
 
 app.use('/api/crm', crmAcc, crmCon, crmLead, crmOpp, crmStages, crmF, crmTer, crmQ, crmICM, crmRen);
 app.use('/api/hooks', hooks);
@@ -804,8 +815,9 @@ import hooks from './routes/hooks.js';
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metricsRouter);
 app.use('/api/esg', esgFA, esgCalc, esgTargets, esgOffsets, esgSup, esgRep);
+app.use("/", classifyRouter);
 
-const port = process.env.PORT || 4000;
+const port = Number(process.env.PORT ?? 4000);
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   app.listen(port, () => console.log(`API listening on ${port}`));
@@ -1317,6 +1329,10 @@ export async function buildServer(options: BuildOptions = {}): Promise<FastifyIn
   });
 
   return app;
+if (process.env.NODE_ENV !== "test") {
+  app.listen(port, () => {
+    console.log(`Lucidia Auto-Box API listening on port ${port}`);
+  });
 }
 
 export default app;
