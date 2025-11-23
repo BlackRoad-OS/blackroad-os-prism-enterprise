@@ -69,6 +69,12 @@ dev = [
     "pytest",
     "pytest-cov",
     "pyyaml>=6.0,<7",
+    "fastapi",
+    "jinja2",
+    "paho-mqtt",
+    "pydantic",
+    "typer>=0.9.0",
+    "uvicorn",
 ]
 
 [project.optional-dependencies]
@@ -117,6 +123,14 @@ target-version = "py311"
 line-length = 100
 target-version = "py311"
 
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["cli"]
+include-package-data = true
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["qlm_lab*", "quantum_lab*"]
@@ -125,7 +139,6 @@ line-length = 100
 target-version = "py311"
 [tool.pytest.ini_options]
 pythonpath = ["."]
-<<<<<<< main
 testpaths = ["tests"]
 addopts = "-q"
 
@@ -139,6 +152,7 @@ ignore_missing_imports = true
 [tool.ruff]
 target-version = "py311"
 line-length = 100
+<<<<<<< main
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -146,6 +160,10 @@ include = ["quantum_lab*"]
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["quantum_lab*", "qlm_lab*"]
-=======
 testpaths = ["tests"]
->>>>>>> origin/copilot/sub-pr-606
+=======
+extend-select = ["I"]
+
+[tool.setuptools.package-data]
+agent = ["templates/*.html"]
+>>>>>>> origin/codex/flag-major-enforcement-development-in-crypto-fraud
