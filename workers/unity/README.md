@@ -646,6 +646,21 @@ npm install
 npm start
 # POST to http://localhost:3000/export with the JSON body above
 ```
+Stub service that now assembles a lightweight, editor-ready Unity project
+template. The export is a `.zip` archive that includes project settings,
+package manifest, and a simple SampleScene so the project opens cleanly in
+Unity Hub.
+
+- **Endpoint:** `POST /export`
+- **Body:**
+  ```json
+  {
+    "projectName": "OptionalName", // defaults to "BlackRoadUnityTemplate"
+    "description": "Optional README summary"
+  }
+  ```
+- **Output:** `downloads/<sanitized-project-name>.zip`
+- **Response:** lists all files included in the archive for quick inspection.
 
 The service writes exported archives to `downloads/`. Remove old files as
 needed to avoid confusion during iterative testing.
