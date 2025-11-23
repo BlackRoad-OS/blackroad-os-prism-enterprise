@@ -36,6 +36,10 @@ dist/
 # Ignore environment files for the health sidecar service
 services/health-sidecar/.env
 .env
+.env.local
+.env.*.local
+*.egg-info/
+*.egg-info
 !tools/tools-adapter/.env
 workers/unity/downloads/
 artifacts.sha256
