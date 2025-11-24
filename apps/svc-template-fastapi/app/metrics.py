@@ -10,7 +10,7 @@ from fastapi.responses import PlainTextResponse
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
 
 from .config import Settings, get_settings
-from .logging import get_logger
+from .structured_logging import get_logger
 
 logger = get_logger(__name__)
 
