@@ -161,8 +161,8 @@ include = ["quantum_lab*"]
 where = ["."]
 include = ["quantum_lab*", "qlm_lab*"]
 testpaths = ["tests"]
-=======
 extend-select = ["I"]
+=======
 
 [tool.setuptools.package-data]
 agent = ["templates/*.html"]

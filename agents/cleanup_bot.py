@@ -29,6 +29,40 @@ from subprocess import CalledProcessError
 from subprocess import CalledProcessError, CompletedProcess
 from typing import Dict, List
 
+from logging import Logger
+
+
+@dataclass
+class CleanupSummary:
+    """Summary of cleanup results for a batch of branches."""
+
+    results: Dict[str, bool]
+
+    @property
+    def deleted(self) -> int:
+        """Number of branches successfully deleted."""
+
+        return sum(1 for deleted in self.results.values() if deleted)
+
+    @property
+    def failed(self) -> int:
+        """Number of branches that failed to delete."""
+
+        return sum(1 for deleted in self.results.values() if not deleted)
+
+    def is_empty(self) -> bool:
+        """Return ``True`` when there are no branches in the summary."""
+
+        return not self.results
+
+    def log_details(self, logger: Logger) -> None:
+        """Log per-branch results and overall summary using ``logger``."""
+
+        for branch, deleted in self.results.items():
+            status = "deleted" if deleted else "failed"
+            logger.info("%s: %s", branch, status)
+        logger.info("Summary: %d deleted, %d failed", self.deleted, self.failed)
+
 
 @dataclass(frozen=True)
 class BranchCleanupResult:
@@ -351,6 +385,16 @@ class CleanupBot:
             success = self.delete_branch(branch)
             results[branch] = success
         return results
+    def cleanup(self) -> CleanupSummary:
+        """Remove the configured branches locally and remotely.
+
+        Returns:
+            Summary containing per-branch deletion status.
+        """
+        results: Dict[str, bool] = {}
+        for branch in self.branches:
+            results[branch] = self.delete_branch(branch)
+        return CleanupSummary(results)
 
 
 def cleanup(branches: Iterable[str], dry_run: bool = False) -> Dict[str, bool]:
@@ -529,6 +573,15 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
             print(f"Remote branch '{branch}' already removed.")
 
         return local_deleted and remote_deleted
+    summary = bot.cleanup()
+
+    if summary.is_empty():
+        logging.info("No merged branches to clean up.")
+        return 0
+
+    summary.log_details(logging.getLogger(__name__))
+
+    return 0 if summary.failed == 0 else 1
 
     def cleanup(self) -> Dict[str, bool]:
         """Remove configured branches locally and remotely."""
