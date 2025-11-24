@@ -25,5 +25,20 @@
     "@types/node": "^20.14.11",
     "rimraf": "^5.0.7",
     "typescript": "^5.4.5"
+  "description": "Integration stubs for CRD, NIPR, and state portals",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist", "src"],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint src --ext .ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.5.4"
   }
 }

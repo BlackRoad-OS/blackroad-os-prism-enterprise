@@ -1,4 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "exclude": ["tests"]
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.json",
+  "include": ["src"],
+  "compilerOptions": {
+    "noEmit": false
+  }
 }

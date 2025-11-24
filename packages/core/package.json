@@ -97,22 +97,26 @@
     "build": "tsc -p tsconfig.json",
     "test": "vitest run"
   "description": "Core domain types, validators, and crypto helpers for Lucidia Auto-Box.",
+  "name": "@blackroad/core",
+  "version": "0.1.0",
+  "description": "Core domain models and planners for BlackRoad licensing orchestration",
   "type": "module",
-  "license": "Apache-2.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist", "src"],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "clean": "rimraf dist"
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest",
+    "lint": "eslint src --ext .ts"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "dependencies": {
-    "zod": "^3.23.8"
+    "yaml": "^2.3.4"
   },
   "devDependencies": {
-    "rimraf": "^6.0.1",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.4",
+    "vitest": "^1.6.0"
   }
 }
