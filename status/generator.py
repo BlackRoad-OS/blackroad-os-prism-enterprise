@@ -55,6 +55,14 @@ def build() -> None:
         lines.append("")
         for note in warnings:
             lines.append(f"> {note}")
+    lines.append("| Service | Availability | Last Check |")
+    lines.append("|---|---|---|")
+    for s in services:
+        hc = _load_health(s["id"]) 
+        ok = sum(1 for c in hc.get("checks", []) if c["status"] == "ok")
+        total = len(hc.get("checks", [])) or 1
+        avail = f"{(ok/total)*100:.1f}%"
+        lines.append(f"| {s['id']} | {avail} | {ok}/{total} checks ok |")
     md = "\n".join(lines)
     out_md = "artifacts/status/index.md"
     artifacts.validate_and_write(out_md, md, "schemas/status.schema.json")
