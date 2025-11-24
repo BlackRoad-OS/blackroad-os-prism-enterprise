@@ -90,6 +90,7 @@ const NAV_ITEMS = [
   { key: 'subscribe', to: '/subscribe', text: 'Subscribe', icon: <Rocket size={18} /> },
   { key: 'nexus', to: '/nexus', text: 'Nexus Console', icon: <LayoutGrid size={18} /> },
 ]
+import Git from './pages/Git.jsx'
 
 export default function App(){
   const location = useLocation()
@@ -288,6 +289,34 @@ export default function App(){
               BlackRoad.io
             </div>
             {sidebar}
+
+            <nav className="space-y-1">
+              <NavItem icon={<Activity size={18} />} text="Dashboard" href="/dashboard" />
+              <NavItem icon={<User size={18} />} text="You" href="/you" />
+              <NavItem icon={<LayoutGrid size={18} />} text="Workspace" href="/" />
+              <NavItem icon={<SquareDashedMousePointer size={18} />} text="Projects" />
+              <NavItem icon={<Brain size={18} />} text="Agents" />
+              <NavItem icon={<Database size={18} />} text="Datasets" />
+              <NavItem icon={<ShieldCheck size={18} />} text="Models" />
+              <NavItem icon={<Settings size={18} />} text="Integrations" />
+              <NavItem icon={<Cpu size={18} />} text="Claude" href="/claude" />
+              <NavItem icon={<Cpu size={18} />} text="Codex" href="/codex" />
+              <NavItem icon={<Wallet size={18} />} text="RoadCoin" href="/roadcoin" />
+              <NavItem icon={<Rocket size={18} />} text="Subscribe" href="/subscribe" />
+              <NavItem icon={<BookOpen size={18} />} text="Roadbook" to="/roadbook" />
+              <NavItem to="/" icon={<Activity size={18} />} text="Chat" />
+              <NavItem to="/projects" icon={<SquareDashedMousePointer size={18} />} text="Projects" />
+              <NavItem to="/agents" icon={<Brain size={18} />} text="Agents" />
+              <NavItem to="/datasets" icon={<Database size={18} />} text="Datasets" />
+              <NavItem to="/models" icon={<ShieldCheck size={18} />} text="Models" />
+              <NavItem to="/integrations" icon={<Settings size={18} />} text="Integrations" />
+              <NavItem to="/git" icon={<GitCommit size={18} />} text="Git" />
+              <NavItem to="/roadview" icon={<LayoutGrid size={18} />} text="RoadView" />
+              <NavItem to="/autoheal" icon={<HeartPulse size={18} />} text="Auto-Heal" />
+              <NavItem to="/novelty" icon={<Sparkles size={18} />} text="Novelty Dashboard" />
+              <NavItem icon={<Rocket size={18} />} text="Orchestrator" to="/orchestrator" />
+              <NavItem icon={<Rocket size={18} />} text="Manifesto" href="/manifesto" />
+            </nav>
           </aside>
 
           <main className="flex-1 px-6 py-4 grid grid-cols-12 gap-6 items-start">
@@ -330,6 +359,10 @@ export default function App(){
               <Route path="/novelty" element={<Section><Novelty /></Section>} />
               <Route path="/nexus" element={<Section><Nexus /></Section>} />
               <Route path="*" element={<Dashboard tab={tab} setTab={setTab} timeline={timeline} tasks={tasks} commits={commits} onAction={handleAction} stream={stream} setStream={setStream} system={system} wallet={wallet} contradictions={contradictions} notes={notes} setNotes={handleNotesChange} />} />
+              <Route path="/" element={<Dashboard tab={tab} setTab={setTab} timeline={timeline} tasks={tasks} commits={commits} onAction={onAction} stream={stream} setStream={setStream} system={system} wallet={wallet} contradictions={contradictions} notes={notes} setNotes={async (v)=>{ setNotesState(v); await setNotes(v); }} />} />
+              <Route path="/roadview" element={<RoadView agents={agents} stream={stream} setStream={setStream} system={system} wallet={wallet} contradictions={contradictions} notes={notes} setNotes={async (v)=>{ setNotesState(v); await setNotes(v); }} />} />
+              <Route path="/autoheal" element={<AutoHeal />} />
+              <Route path="/git" element={<Git />} />
             </Routes>
           </main>
         </>
