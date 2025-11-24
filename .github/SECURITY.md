@@ -8,12 +8,12 @@ This standard operating procedure applies to all repositories under the BlackRoa
 - **Sunset classic PATs.** Existing classic tokens must be replaced with fine-grained equivalents unless a feature gap prevents the migration. Document the exception and track it in the token inventory.
 
 ## 2. Organization Controls
-- Enable mandatory approval for fine-grained PATs requesting organization access (Org Settings → Personal access tokens → Fine-grained → Require approval).
+- Enable mandatory approval for fine-grained PATs requesting organization access. Navigate to your organization settings, open the personal access tokens section, and require approval for fine-grained tokens. Confirm the exact labels against the current GitHub documentation.
 - Block or strictly restrict classic PAT issuance at the organization level and enforce maximum token lifetimes.
 - Review pending token approval requests weekly; reject scopes that exceed documented needs.
 
 ## 3. Secret Scanning Push Protection
-- Enable secret scanning with push protection at the organization level (Settings → Code security → Secret scanning → Enable push protection).
+- Enable secret scanning with push protection at the organization level. Follow the Code security settings in the organization dashboard and confirm the latest UI labels in GitHub's documentation when enabling push protection.
 - Require contributors to remediate flagged secrets or provide policy-justified bypass notes captured in the audit log.
 
 ## 4. Workflow Guidance
