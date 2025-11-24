@@ -99,6 +99,8 @@ viz = ["matplotlib"]
 [project.urls]
 Homepage = "https://example.com/quantum-lab"
 [project.scripts]
+blackroad = "cli.blackroad:cli"
+blackroad-agent = "agent.daemon:main"
 brc = "cli.console:main"
 blackroad-console = "cli.console:main"
 blackroad = "cli.blackroad:cli"

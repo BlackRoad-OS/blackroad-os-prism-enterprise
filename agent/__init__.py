@@ -124,3 +124,6 @@ telemetry = import_module(".telemetry", __name__)
 jobs = import_module(".jobs", __name__)
 
 __all__ = ["telemetry", "jobs"]
+"""BlackRoad agent package for daemon and telemetry helpers."""
+
+__all__ = ["telemetry"]
