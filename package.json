@@ -47,6 +47,15 @@
     "test": "node tests/smoke.test.mjs && jest",
     "guard:dev-mode": "node scripts/security/dev_mode_guard.js",
     "test": "jest tests/api_health.test.js tests/git_api.test.js",
+    "lint": "eslint . --ext .js,.jsx,.mjs,.cjs || true",
+    "lint:api": "eslint --config .eslintrc.cjs srv/blackroad-api/server_full.js tests/api_health.test.js tests/git_api.test.js",
+    "format": "prettier -w .",
+    "format:check": "prettier package.json tests/api_health.test.js srv/lucidia-llm/test_app.py var/www/blackroad/.prettierrc.json .prettierrc.json RUNME.sh Makefile .github/workflows/ci.yml CLEANUP_PLAN.md CLEANUP_DECISIONS.md CLEANUP_RESULTS.md ROLLBACK.md CHANGELOG.md --check --ignore-unknown",
+    "test": "node tests/smoke.test.mjs && cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:api": "jest tests/api_health.test.js",
+    "test-agents-pack": "node tests/test_agents_mega.js",
+    "guard:dev-mode": "node scripts/security/dev_mode_guard.js",
+    "debug:scan-logs": "node scripts/guardrails/log_scan_stub.js",
     "typecheck": "echo 'no typecheck'",
     "health": "node scripts/health.js",
     "next:start": "next start",
@@ -242,6 +251,11 @@
     "yaml": "^2.3.4"
   },
   "devDependencies": {
+    "winston": "^3.17.0",
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.12.0",
     "@types/node": "^20.14.9",
     "@types/node-fetch": "^2.6.11",
     "@types/react": "^18.2.64",
@@ -281,6 +295,12 @@
     "prettier": "^3.3.3",
     "supertest": "^6.3.4",
     "tsx": "^4.19.2",
+    "jest": "^29.7.0",
+    "lint-staged": "^16.1.5",
+    "nodemon": "^3.0.2",
+    "pino-pretty": "^11.2.2",
+    "prettier": "^3.3.3",
+    "supertest": "^6.3.4",
     "typescript": "^5.6.3"
   },
   "lint-staged": {

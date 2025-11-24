@@ -1,4 +1,7 @@
 // <!-- FILE: tests/api_health.test.js -->
+/* eslint-env node, jest */
+const process = require('node:process');
+const { describe, it, expect } = require('@jest/globals');
 process.env.SESSION_SECRET = 'test-secret';
 process.env.INTERNAL_TOKEN = 'x';
 process.env.ALLOW_ORIGINS = 'https://example.com';
@@ -30,6 +33,33 @@ describe('API security and health', () => {
 
   it('responds to /health', async () => {
     const res = await request(app).get('/health');
+process.env.ETH_RPC_URL = 'http://127.0.0.1:8545';
+process.env.MATH_ENGINE_URL = '';
+
+const fs = require('node:fs');
+const path = require('node:path');
+const request = require('supertest');
+
+// eslint-disable-next-line no-undef
+const originKeyPath = path.join(__dirname, 'origin.key');
+fs.writeFileSync(originKeyPath, 'test-origin-key');
+process.env.ORIGIN_KEY_PATH = originKeyPath;
+
+const originHeaders = {
+  'X-BlackRoad-Key': 'test-origin-key',
+};
+
+const { app, server } = require('../srv/blackroad-api/server_full.js');
+
+describe('API security and health', () => {
+  afterAll((done) => {
+    server.close(() => {
+      fs.rm(originKeyPath, { force: true }, () => done());
+    });
+  });
+
+  it('responds to /health', async () => {
+    const res = await request(app).get('/health').set(originHeaders);
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
   });
@@ -54,7 +84,12 @@ describe('API security and health', () => {
 
   it('validates login payload', async () => {
     const res = await request(app).post('/api/login').send({});
+    const res = await request(app)
+      .post('/api/login')
+      .set(originHeaders)
+      .send({});
     expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: 'missing_credentials' });
   });
 
   it('returns default entitlements for logged-in user', async () => {
@@ -156,5 +191,44 @@ test('authenticated task creation succeeds', async () => {
     const body = await response.json();
     assert.equal(body.ok, true);
     assert.equal(body.task.title, 'Ship secure endpoint');
+  });
+
+  it('exposes seeded quantum research summaries', async () => {
+    const list = await request(app).get('/api/quantum').set(originHeaders);
+    expect(list.status).toBe(200);
+    expect(Array.isArray(list.body.topics)).toBe(true);
+    expect(list.body.topics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ topic: 'reasoning' }),
+        expect.objectContaining({ topic: 'memory' }),
+        expect.objectContaining({ topic: 'symbolic' }),
+      ])
+    );
+
+    const detail = await request(app)
+      .get('/api/quantum/reasoning')
+      .set(originHeaders);
+    expect(detail.status).toBe(200);
+    expect(detail.body).toEqual(
+      expect.objectContaining({
+        topic: 'reasoning',
+      })
+    );
+    expect(detail.body.summary).toMatch(/Quantum/i);
+  });
+
+  it('reports math engine unavailable when not configured', async () => {
+    const res = await request(app).get('/api/math/health').set(originHeaders);
+    expect(res.status).toBe(503);
+    expect(res.body).toEqual({ ok: false, error: 'engine_unavailable' });
+  });
+
+  it('blocks math evaluation when engine is unavailable', async () => {
+    const res = await request(app)
+      .post('/api/math/eval')
+      .set(originHeaders)
+      .send({ expr: '2+2' });
+    expect(res.status).toBe(503);
+    expect(res.body).toEqual({ error: 'engine_unavailable' });
   });
 });
