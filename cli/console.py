@@ -653,6 +653,22 @@ def cmd_task_import(argv: List[str]) -> None:
 def main(tenant: Optional[str] = typer.Option(None, "--tenant")):
     if tenant:
         os.environ["PRISM_TENANT"] = tenant
+import json
+from datetime import datetime
+from pathlib import Path
+from typing import Optional
+
+import typer
+
+from orchestrator.protocols import Task
+from orchestrator import orchestrator
+from tools import storage
+from bots import available_bots
+
+app = typer.Typer()
+
+ROOT = Path(__file__).resolve().parents[1]
+ARTIFACTS = ROOT / "artifacts"
 
 
 def _next_task_id() -> str:
@@ -687,6 +703,7 @@ def task_create(
 ):
     if as_user:
         quotas_lib.check_and_consume(as_user, "tasks")
+):
     ctx = json.loads(storage.read(str(context))) if context else None
     task_id = _next_task_id()
     task = Task(id=task_id, goal=goal, context=ctx, created_at=datetime.utcnow())
@@ -2163,6 +2180,32 @@ def alerts_trigger(
 def alerts_list(limit: int = typer.Option(20, "--limit")):
     for e in list_alerts(limit):
         typer.echo(json.dumps(e))
+    bot: str = typer.Option(..., "--bot"),
+):
+    task_data = json.loads(storage.read(str(ARTIFACTS / id / "task.json")))
+    task = Task(**task_data)
+    response = orchestrator.route(task, bot)
+    storage.write(str(ARTIFACTS / id / "response.json"), response.model_dump(mode="json"))
+    typer.echo(response.summary)
+
+
+@app.command("task:status")
+def task_status(id: str = typer.Option(..., "--id")):
+    resp_path = ARTIFACTS / id / "response.json"
+    if not resp_path.exists():
+        typer.echo("No response")
+        raise typer.Exit(code=1)
+    data = json.loads(storage.read(str(resp_path)))
+    typer.echo(f"Summary: {data.get('summary')}")
+    typer.echo("Next actions:")
+    for act in data.get("next_actions", []):
+        typer.echo(f"- {act}")
+
+
+@app.command("bot:list")
+def bot_list():
+    for name, cls in available_bots().items():
+        typer.echo(f"{name}\t{cls.mission}")
 
 
 if __name__ == "__main__":

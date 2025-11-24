@@ -53,6 +53,13 @@ def write(path: Union[str, Path], content: Union[Mapping[str, Any], str]) -> Non
 def write(path: str, content: Union[dict, str]) -> None:
     path = _rewrite(path)
     _apply_chaos()
+import json
+import os
+from pathlib import Path
+from typing import Union
+
+
+def write(path: str, content: Union[dict, str]) -> None:
     p = Path(path)
     os.makedirs(p.parent, exist_ok=True)
     mode = "a" if p.suffix == ".jsonl" else "w"
@@ -205,3 +212,15 @@ __all__ = [
     "load_json",
     "save_json",
 ]
+            fh.write(text + "\n")
+        else:
+            fh.write(text)
+
+
+def read(path: str) -> str:
+    p = Path(path)
+    try:
+        with open(p, "r", encoding="utf-8") as fh:
+            return fh.read()
+    except FileNotFoundError:
+        return ""

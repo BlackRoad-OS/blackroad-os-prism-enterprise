@@ -81,3 +81,4 @@ def route(bot_name: str, task: plugin_api.Task) -> Any:
     if exec_mode == "sandbox":
         return run_in_sandbox(lambda: bot.handle(task))
     return bot.handle(task)
+"""Orchestrator package for bot routing."""
