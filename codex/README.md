@@ -60,6 +60,14 @@ policy teams can reference them without digging through subdirectories.
 | 056 | The Listening Treaty   | Feedback loops, silence, and telemetry keep Lucidia receptive. |
 | 054 | The Transparency of Tools | Tools remain inspectable, configurable, and accountable. |
 | 005 | The Explainability Doctrine | Every AI action ships with rationale, version, and undo. |
+| ID  | Title                     | Description                                              |
+| --- | ------------------------- | -------------------------------------------------------- |
+| 001 | The First Principle       | Lucidia exists to protect and empower everyone.          |
+| 003 | The Workflow Circle       | Work runs in visible capture → adjust loops.             |
+| 004 | The Autonomy Manifest     | Data autonomy through consent, export, and wipe.         |
+| 022 | The Security Spine        | Security backbone with layered zero-trust defenses.      |
+| 028 | The Custodianship Code    | Stewardship mindset keeps Lucidia cared for and shared.  |
+| 039 | The Transparency of Intent | Make every action's purpose visible and consent-aligned. |
 
 ## BlackRoad Pipeline
 
