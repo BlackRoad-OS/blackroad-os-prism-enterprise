@@ -1,6 +1,4 @@
-import Fastify from 'fastify';
-import swagger from '@fastify/swagger';
-import swaggerUI from '@fastify/swagger-ui';
+import { sdk } from '../otel.js';
 
 const app = Fastify({ logger: true, bodyLimit: 10 * 1024 * 1024 });
 
@@ -32,14 +30,9 @@ app.addContentTypeParser(/^application\/json(;.*)?$/, { parseAs: 'buffer' }, (re
   jsonParser(req, text, done);
 });
 const app = Fastify({ logger: true });
+await sdk.start();
 
-await app.register(swagger, {
-  openapi: {
-    info: { title: 'BlackRoad API', version: '0.1.0' },
-    servers: [{ url: 'https://api.blackroad.io' }]
-  }
-});
-await app.register(swaggerUI, { routePrefix: '/docs' });
+const { startServer } = await import('./server.js');
 
 app.get('/health', async () => ({ ok: true, service: 'br-api-gateway', ts: Date.now() }));
 
@@ -57,3 +50,4 @@ const port = Number(process.env.PORT || 3001);
 app.listen({ port, host: '0.0.0.0' }).catch((e) => {
   app.log.error(e); process.exit(1);
 });
+await startServer();
