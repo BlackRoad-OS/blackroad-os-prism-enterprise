@@ -8,6 +8,7 @@ import { EventEmitter } from 'events';
 import { spawn } from 'child_process';
 import { writeFileSync, mkdirSync } from 'fs';
 import { join, dirname, resolve, sep } from 'path';
+import { join, dirname } from 'path';
 import { z } from 'zod';
 
 interface PrismDiffHunk { lines: string[]; }
@@ -117,6 +118,8 @@ export function buildServer() {
     }
     const dangerous = ['&&', ';', '|', '||', '>', '<'];
     if (parts.some((p) => dangerous.includes(p))) {
+    const allow = (process.env.PRISM_RUN_ALLOW || '').split(',').filter(Boolean);
+    if (allow.length && !allow.includes(cmd.split(' ')[0])) {
       reply.code(400).send({ error: 'cmd not allowed' });
       return;
     }
@@ -133,6 +136,7 @@ export function buildServer() {
     };
     runs.push(rec);
     const child = spawn(command, parts.slice(1), { cwd, env });
+    const child = spawn(cmd, { cwd, env, shell: true });
     (rec as any).child = child;
     emit('run.start', { runId: id, cmd, cwd });
     child.stdout.on('data', (c) => emit('run.out', { runId: id, chunk: c.toString() }));
@@ -181,6 +185,8 @@ export function buildServer() {
       if (!filePath.startsWith(base + sep)) {
         throw new Error('invalid path');
       }
+    for (const d of diffs) {
+      const filePath = join(process.cwd(), 'prism', 'work', d.path);
       mkdirSync(dirname(filePath), { recursive: true });
       const content = d.hunks.map((h: PrismDiffHunk) => h.lines.join('\n')).join('\n');
       writeFileSync(filePath, content);
@@ -215,6 +221,8 @@ export function buildServer() {
       } catch (e: any) {
         reply.code(400).send({ error: e.message });
       }
+      writeDiffs(diffs as any);
+      reply.send({ status: 'applied' });
     }
   });
 
@@ -251,6 +259,7 @@ export function buildServer() {
         reply.code(400).send({ error: e.message });
         return;
       }
+      writeDiffs(a.payload as any);
     }
     emit('approval.approved', { id });
     reply.send({ status: 'approved' });
@@ -293,3 +302,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // eslint-disable-next-line no-console
   console.log(`Prism server listening on ${port}`);
 }
+  return app;
+}
+
+if (process.argv[1] === new URL(import.meta.url).pathname) {
+  const app = buildServer();
+  app.listen({ port: 3000 });
+}
+export { bus };

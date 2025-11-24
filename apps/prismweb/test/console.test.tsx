@@ -19,6 +19,7 @@ class MockEventSource {
     };
     (this.listeners[type] || []).forEach((cb) => cb({ data: JSON.stringify(envelope) }));
   }
+  emit(type: string, data: any) { (this.listeners[type] || []).forEach((cb) => cb({ data: JSON.stringify(data) })); }
   close() {}
 }
 (globalThis as any).EventSource = MockEventSource as any;

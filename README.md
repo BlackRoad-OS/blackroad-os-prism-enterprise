@@ -489,4 +489,20 @@ python -m cli.console mdm:stage --domain account --file fixtures/mdm/account.csv
 python -m cli.console mdm:match --domain account --config configs/mdm/match_account.yaml
 python -m cli.console mdm:golden --domain account --policy configs/mdm/survivorship_account.yaml
 python -m cli.console mdm:dq --domain account --config configs/mdm/dq_account.yaml
+## Prism Developer Mode
+
+Start the development server:
+
+```bash
+cd prism/server
+npm install
+npm run dev
+```
+
+Run the web console with Approvals panel:
+
+```bash
+cd apps/prismweb
+npm install
+npm run dev
 ```

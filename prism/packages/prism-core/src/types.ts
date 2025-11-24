@@ -7,6 +7,10 @@ export interface PrismDiffHunk {
 }
 
 // Removed duplicate - see type definition below
+export interface PrismDiff {
+  path: string;
+  hunks: PrismDiffHunk[];
+}
 
 export interface RunRecord {
   id: string;
@@ -56,3 +60,8 @@ export type Policy = {
   mode: 'playground' | 'dev' | 'trusted' | 'prod';
   approvals: Partial<Record<'read' | 'write' | 'exec' | 'net' | 'secrets' | 'dns' | 'deploy', 'auto' | 'review' | 'forbid'>>;
 };
+export interface PrismEvent<T = any> {
+  id: string;
+  kind: string;
+  data: T;
+}

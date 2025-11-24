@@ -31,6 +31,16 @@ const Console: React.FC<{ client: Client }> = ({ client }) => {
     });
     es.addEventListener('run.end', (e) => {
       const data = extract(e as MessageEvent);
+    es.addEventListener('run.out', (e) => {
+      const data = JSON.parse((e as MessageEvent).data);
+      if (data.runId === runId) setLines((l) => [...l, data.chunk]);
+    });
+    es.addEventListener('run.err', (e) => {
+      const data = JSON.parse((e as MessageEvent).data);
+      if (data.runId === runId) setLines((l) => [...l, data.chunk]);
+    });
+    es.addEventListener('run.end', (e) => {
+      const data = JSON.parse((e as MessageEvent).data);
       if (data.runId === runId) {
         setStatus(data.exitCode === 0 ? 'ok' : data.exitCode === null ? 'cancelled' : 'error');
         es.close();
