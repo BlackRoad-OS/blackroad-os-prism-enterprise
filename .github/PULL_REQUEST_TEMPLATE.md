@@ -201,3 +201,20 @@ If anyone spots drift, lag, or something off — flag here before merge. Silence
 - [ ] Tests pass (CI ≤ 10 min)
 - [ ] Docs/CHANGELOG updated if user-visible
 - [ ] Feature flag default checked
+## Summary
+-
+
+## Type
+- [ ] feat
+- [ ] fix
+- [ ] chore
+- [ ] docs
+- [ ] refactor
+
+## Screens / Evidence
+-
+
+## Checklist
+- [ ] Tests pass (CI ≤ 10 min)
+- [ ] Docs/CHANGELOG updated (if user-visible)
+- [ ] Linked issues

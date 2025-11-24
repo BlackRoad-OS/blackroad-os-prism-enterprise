@@ -97,6 +97,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # Changelog
 
+All notable changes to this project will be documented here.
+
+## [0.1.0] - 2025-10-04
+### Added
+- Initial release
+
 ## [1.7.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.6.0...v1.7.0) (2025-09-29)
 
 
