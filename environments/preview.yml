@@ -7,6 +7,8 @@ description: >-
   the pull request closes.
 branch: pr/*
 contacts:
+  reviewers:
+    - blackboxprogramming
   slack: "#eng"
 domains:
   base: https://dev.blackroad.io
@@ -86,6 +88,7 @@ deployments:
       bucket_secret: PREVIEW_ENV_TF_STATE_BUCKET
       lock_table_secret: PREVIEW_ENV_TF_LOCK_TABLE
       key_template: preview/pr-<pr-number>.tfstate
+    module: modules/preview-env
     domain_pattern: https://pr-<pr-number>.dev.blackroad.io
     health_check: https://pr-<pr-number>.dev.blackroad.io/healthz/ui
     images:
@@ -115,6 +118,9 @@ deployments:
 change_management:
   approvals: []
 observability:
+  health_checks:
+    - name: pr-web
+      url: https://pr-<pr-number>.dev.blackroad.io/health
   verification:
     - terraform output -raw preview_url
     - aws ecs describe-services --cluster <cluster-arn> --services pr-<pr-number> --region us-east-1

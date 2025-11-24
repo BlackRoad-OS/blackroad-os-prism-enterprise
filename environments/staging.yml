@@ -6,6 +6,8 @@ description: >-
   rehearsals, and policy validation before promoting to main.
 branch: staging
 contacts:
+  reviewers:
+    - blackboxprogramming
   slack: "#eng"
 domains:
   primary: https://stage.blackroad.io
@@ -120,3 +122,12 @@ url: https://staging.blackroad.io
 reviewers:
   users:
     - blackboxprogramming
+  runbooks:
+    - README-DEPLOY.md
+    - README-OPS.md
+observability:
+  health_checks:
+    - name: static-health
+      url: https://stage.blackroad.io/health.json
+  verification:
+    - curl -sf https://stage.blackroad.io/health.json

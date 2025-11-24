@@ -24,8 +24,14 @@ in sync:
   provision the footprint.
 - `automation` — deploy workflows, required secrets, and notification routes
   that move new builds into the environment.
+  `state` inside each block when a service is still being wired up. When the
+  infrastructure is provisioned through Terraform modules, reference the
+  relative module path so the manifest doubles as navigation for ops engineers.
 - `change_management` — approvals or runbooks that must be followed.
 - `observability` — scripts or commands teams use to verify the environment.
+- Optional fields like `environment`, `secrets`, or `notes` help describe the
+  inputs a workflow expects and any gotchas future maintainers should keep in
+  mind. List them when they save a trip to other repos or credential stores.
 
 The additional `infrastructure` and `automation` sections make it easier for
 release tooling to wire GitHub Actions, Terraform state, and downstream
@@ -161,3 +167,5 @@ A field can be omitted when it does not apply, but try to prefer explicit empty 
 
 When adding a new environment, copy one of the existing manifests, update the metadata and
 infrastructure blocks, and link the file from the table above.
+- `preview.yml` — ephemeral PR preview infrastructure under dev.blackroad.io,
+  backed by the reusable Terraform stack in `infra/preview-env`.
