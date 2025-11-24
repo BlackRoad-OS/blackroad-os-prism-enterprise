@@ -68,7 +68,7 @@ try:  # Condor itself may not be installed in all environments
     import condor  # type: ignore  # noqa: F401
 except Exception:  # pragma: no cover - Condor may be absent
 try:  # pragma: no cover - optional dependency
-    import condor  # type: ignore  # noqa: F401
+    import condor  # type: ignore
 except Exception:  # pragma: no cover - condor may be absent in CI
     condor = None  # type: ignore
 try:  # pragma: no cover - optional dependency in CI
@@ -106,6 +106,11 @@ def _dataclass_to_dict(obj: Any) -> Any:
     """Recursively convert dataclasses and ``numpy`` arrays into primitives."""
 
     """Recursively convert dataclasses and ``numpy`` arrays into primitives."""
+    """
+    Recursively convert dataclasses and ``numpy`` arrays into primitives suitable for JSON serialization.
+
+    This helper ensures that results are JSON serialisable. ``numpy`` arrays are transformed into Python lists.
+    """
     if is_dataclass(obj):
         return {k: _to_primitive(v) for k, v in asdict(obj).items()}
     if np is not None and isinstance(obj, np.ndarray):
@@ -150,6 +155,14 @@ def validate_model_source(py_text: str) -> None:
     """Perform a tiny security audit over ``py_text``."""
 
     """Validate a user supplied model source string."""
+    """
+    Validate user-supplied model source code using conservative static analysis.
+
+    The validator walks the ``ast`` for the provided source, restricts imports to a
+    small allow-list, and rejects several dangerous names and dunder attribute
+    access. Any disallowed construct raises ``ValueError`` to prevent unsafe
+    execution when loading user models.
+    """
     tree = ast.parse(py_text)
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
@@ -210,6 +223,34 @@ def load_model_from_source(py_text: str, class_name: str) -> Type[Any]:
     return getattr(module, class_name)
 
     """Validate ``py_text`` and return ``class_name`` from it."""
+    """
+    Validate and load a model class from source code.
+
+    Parameters
+    ----------
+    py_text : str
+        The Python source code as a string, expected to define a model class.
+    class_name : str
+        The name of the class to load from the provided source code.
+
+    Returns
+    -------
+    Type[Any]
+        The loaded model class object.
+
+    Raises
+    ------
+    ValueError
+        If the source code contains forbidden imports or names.
+    ImportError
+        If the module cannot be loaded from the source code.
+    AttributeError
+        If the specified class is not found in the loaded module.
+
+    This function first validates the provided source code for safety,
+    then loads it as a module in an isolated temporary directory,
+    and finally returns the specified class object from the module.
+    """
     validate_model_source(py_text)
     module = _load_module_from_source(py_text, "user_model")
     return getattr(module, class_name)
@@ -241,6 +282,22 @@ def solve_algebraic(model_cls: Type[Any], **params: Any) -> Dict[str, Any]:
 
     if condor is None and model_cls.__module__.split(".")[0] == "condor":
     """Solve a Condor ``AlgebraicSystem`` model."""
+    """
+    Instantiates the given Condor ``AlgebraicSystem`` model class with the provided parameters,
+    calls its ``solve`` method, and returns the results as a JSON-friendly dictionary.
+
+    Parameters
+    ----------
+    model_cls : Type[Any]
+        The Condor model class to instantiate (should be a subclass of ``AlgebraicSystem``).
+    **params : Any
+        Keyword arguments to pass to the model class constructor.
+
+    Returns
+    -------
+    Dict[str, Any]
+        The solution returned by ``model.solve()``, converted to a JSON-serializable dictionary.
+    """
     if condor is None:  # pragma: no cover - runtime guard
         raise RuntimeError("Condor is not installed")
 
@@ -296,6 +353,13 @@ def simulate_ode(
     modes: Any | None = None,
 ) -> Dict[str, Any]:
 
+    """
+    Simulate an ``ODESystem`` until ``t_final``.
+
+    Forwards to the model's ``simulate`` method and returns results
+    serialised via :func:`_dataclass_to_dict`.
+    The output is a serialisable dictionary.
+    """
     if condor is None:  # pragma: no cover - runtime guard
         raise RuntimeError("Condor is not installed")
     model = model_cls(**params)
