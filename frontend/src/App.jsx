@@ -195,16 +195,17 @@ export default function App(){
 
   useEffect(() => {
     const token = localStorage.getItem('token')
+
     if (!token) {
-      setAuthChecked(true)
       resetState()
+      setAuthChecked(true)
       return
     }
     setToken(token)
     ;(async () => {
       try {
-        const current = await me()
-        setUser(current)
+        const currentUser = await me()
+        setUser(currentUser)
         await bootData()
         connectSocket()
       } catch (err) {
