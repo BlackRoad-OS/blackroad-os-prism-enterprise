@@ -38,6 +38,10 @@
   "dependencies": {
     "@blackroad/worm": "workspace:*",
     "@prisma/client": "^5.18.0",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@blackroad/worm": "workspace:*",
     "decimal.js": "^10.4.3",
     "luxon": "^3.4.4",
     "pino": "^9.1.0",
