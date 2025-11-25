@@ -16,3 +16,5 @@ class Settings:
 
 
 settings = Settings()
+ENCRYPT_DATA_AT_REST = False
+DATA_RETENTION_DAYS = 30

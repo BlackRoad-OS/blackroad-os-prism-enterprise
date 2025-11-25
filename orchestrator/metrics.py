@@ -21,3 +21,20 @@ def log_metric(metric_type: str, task_id: str, **extra: Any) -> None:
     with METRICS_PATH.open("a", encoding="utf-8") as f:
         f.write(json.dumps(record) + "\n")
 
+from collections import Counter
+
+_counters: Counter[str] = Counter()
+
+
+def inc(name: str) -> None:
+    _counters[name] += 1
+
+
+def get(name: str) -> int:
+    return _counters.get(name, 0)
+
+
+policy_applied = 'policy_applied'
+crypto_rotate = 'crypto_rotate'
+docs_built = 'docs_built'
+janitor_purge = 'janitor_purge'

@@ -4,3 +4,4 @@
     {"id": "sam", "role": "security", "permissions": ["policy:approve"]}
   ]
 }
+{"roles": {}}
