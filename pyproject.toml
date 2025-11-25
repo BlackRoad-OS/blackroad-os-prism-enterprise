@@ -182,6 +182,13 @@ extend-select = ["I"]
 
 [tool.setuptools.package-data]
 agent = ["templates/*.html"]
-=======
 extend-select = ["I"]
->>>>>>> origin/codex/flag-trademark-issue-with-cadillac-name
+=======
+[tool.mypy]
+python_version = "3.11"
+packages = ["orchestrator", "bots", "config", "cli", "tools"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+extend-select = ["I"]  # import sort
+>>>>>>> origin/codex/implement-multi-bot-system-with-plugins
