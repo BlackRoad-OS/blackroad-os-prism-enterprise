@@ -162,6 +162,39 @@ function GradientBackground() {
       <div className="absolute bottom-0 left-1/2 h-96 w-[32rem] -translate-x-1/2 rounded-full bg-brand-blue/30 blur-3xl" />
     </div>
   )
+import { useEffect, useState } from "react";
+import Window from "../desktop/Window.jsx";
+import ApiAgent from "../desktop/apps/ApiAgent.jsx";
+import LlmAgent from "../desktop/apps/LlmAgent.jsx";
+import MathAgent from "../desktop/apps/MathAgent.jsx";
+import EchoAgent from "../desktop/apps/EchoAgent.jsx";
+import GuardianAgent from "../desktop/apps/GuardianAgent.jsx";
+import ExplorerAgent from "../desktop/apps/ExplorerAgent.jsx";
+import createId from "../desktop/createId.js";
+
+const APPS = {
+  api: { title: "API Agent", icon: "API", component: ApiAgent, size: { width: 420, height: 360 } },
+  llm: { title: "LLM Agent", icon: "LLM", component: LlmAgent, size: { width: 460, height: 440 } },
+  math: { title: "Math Agent", icon: "MATH", component: MathAgent, size: { width: 520, height: 480 } },
+  echo: { title: "Echo Agent", icon: "ECHO", component: EchoAgent, size: { width: 360, height: 320 } },
+  guardian: { title: "Guardian Agent", icon: "GUARD", component: GuardianAgent, size: { width: 380, height: 340 } },
+  explorer: { title: "Prism Explorer", icon: "FS", component: ExplorerAgent, size: { width: 460, height: 360 } },
+};
+
+function defaultWin(key) {
+  const layout = APPS[key];
+  const size = layout?.size || {};
+  return {
+    id: createId(),
+    app: key,
+    title: layout?.title || key,
+    x: 80,
+    y: 80,
+    w: size.width || 400,
+    h: size.height || 320,
+    minimized: false,
+    maximized: false,
+  };
 }
 
 function FeatureCard({ eyebrow, title, body, bullets }) {
@@ -647,3 +680,11 @@ export default function Desktop() {
     </div>
   );
 }
+
+function renderApp(key) {
+  const entry = APPS[key];
+  if (!entry || !entry.component) return null;
+  const Component = entry.component;
+  return <Component />;
+}
+
