@@ -115,6 +115,9 @@
         "lucidia/roadie.py",
         ".github/workflows/*.yml",
         ".github/workflows/*.yaml"
+        ".github/workflows/ci.yml",
+        ".github/workflows/deploy.yml",
+        ".github/workflows/release-please.yml"
       ],
       "checks": [
         "Open dbt models; confirm normalized schema + marts.",
