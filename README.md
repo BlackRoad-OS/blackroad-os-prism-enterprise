@@ -572,3 +572,17 @@ python -m cli.console index:build
 python -m cli.console sem:metrics
 ```
 
+## Training & Enablement Hub Quickstart
+
+```bash
+python -m cli.console learn:courses:load --dir configs/enablement/courses
+python -m cli.console learn:courses:list --role_track "Solutions Engineer"
+```
+
+## Integration Security Playbook
+
+For guidance on connecting Slack, Asana, GitLab, GitHub, Discord, Airtable, and other
+automation bots to the BlackRoad Prism Console, review
+[`INTEGRATIONS_SECURITY.md`](./INTEGRATIONS_SECURITY.md). The playbook documents
+hardening steps for key management, OAuth scopes, monitoring, and incident response so
+that integrations remain auditable and compliant.
