@@ -26,6 +26,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node.js
+      - name: Verify encrypted secrets
+        run: |
+          test -f .env.enc
+          grep -q 'sops' .env.enc
+
+      - name: Setup Node 20
         uses: actions/setup-node@v4
         with:
           node-version: "20"
