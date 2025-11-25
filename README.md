@@ -562,3 +562,13 @@ python -m cli.console bot:list
 python -m cli.console bot:run --bot "RevOps-BOT" --goal "Check forecast accuracy for Q3"
 python -m cli.console bot:run --bot "SRE-BOT" --goal "Compute error-budget burn for Service A"
 ```
+
+## Data Layer Quickstart
+
+Build and query the offline lake:
+
+```
+python -m cli.console index:build
+python -m cli.console sem:metrics
+```
+
