@@ -91,3 +91,11 @@ Linear API keys stored only in SSM SecureString. No plaintext in DB or logs.
 
 Hardening pass shipped: WAFv2 (managed rules + per-IP rate-limit) on ALB + Route53 failover to CloudFront “maintenance” page for api.blackroad.io. If ALB health dips, traffic flips automatically; flip back is automatic when healthy. We’ll tune WAF after a day of real traffic.
 Cadillac cutover: api.blackroad.io now has ACM cert + ALB + ECS Fargate + autoscaling + SSM secrets + GitHub OIDC deploys. Merge to main in br-api-gateway → auto rollout with zero downtime.
+
+## #announcements — Status page launch
+
+status.blackroad.io is live 🎉
+- Hosted on S3+CloudFront with ACM cert
+- Health checks wired to API
+- Incidents flow via repo PRs or Asana
+- Customers + team can see uptime and history in one place
