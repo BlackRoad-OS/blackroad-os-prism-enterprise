@@ -13,8 +13,8 @@
   "include": ["src/**/*.ts"],
   "exclude": ["dist", "test"]
     "target": "es2020",
-    "module": "es2020",
-    "moduleResolution": "node",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "outDir": "dist",
     "rootDir": "src",
     "esModuleInterop": true,
