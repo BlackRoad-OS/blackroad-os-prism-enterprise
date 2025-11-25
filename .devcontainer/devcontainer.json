@@ -45,6 +45,13 @@
     },
     "ghcr.io/devcontainers/features/aws-ssm-session-manager:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {}
+  "name": "BlackRoad Dev",
+  "build": { "dockerfile": "Dockerfile" },
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "20" },
+    "ghcr.io/devcontainers/features/python:1": { "version": "3.11" },
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/pnpm:1": {}
   },
   "remoteUser": "vscode",
   "updateRemoteUserUID": true,
@@ -189,4 +196,18 @@
   "remoteEnv": {
     "PLAYWRIGHT_BROWSERS_PATH": "0"
   }
+        "esbenp.prettier-vscode",
+        "github.vscode-pull-request-github",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "python.analysis.typeCheckingMode": "basic"
+      }
+    }
+  },
+  "postCreateCommand": "pip3 install -U pip && if [ -f requirements.txt ]; then pip3 install -r requirements.txt; fi && corepack enable pnpm@latest-8 && if [ -f pnpm-lock.yaml ] || [ -f pnpm-workspace.yaml ]; then pnpm install; elif [ -f package-lock.json ]; then npm ci; elif [ -f package.json ]; then npm install; fi",
+  "forwardPorts": [3000, 4000, 5173, 8000],
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": true
 }
