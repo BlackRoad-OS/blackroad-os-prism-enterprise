@@ -199,6 +199,7 @@ async function writeTemplateZip(zipPath, files) {
     archive.finalize();
   });
 }
+import { createUnityProject } from "./exporter.js";
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
@@ -1853,6 +1854,16 @@ app.post("/export", async (req, res) => {
       await rm(workspaceDir, { recursive: true, force: true }).catch(() => {});
     }
     res.status(500).json({ ok: false, error: error.message || String(error) });
+  try {
+    const { projectName, description } = req.body ?? {};
+    const result = await createUnityProject({ projectName, description });
+    res.json({ ok: true, ...result });
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      error: error.message,
+      details: error.cause ? String(error.cause) : undefined,
+    });
   }
 });
 
