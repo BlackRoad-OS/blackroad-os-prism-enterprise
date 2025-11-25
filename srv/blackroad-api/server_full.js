@@ -61,9 +61,9 @@ function loadEnvFile() {
   if (!fs.existsSync(envPath)) {
     return;
 // --- Config
+const { enforceSecurityDefaults } = require('./lib/securityDefaults.cjs');
+
 const PORT = parseInt(process.env.PORT || '4000', 10);
-const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-me';
-const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
 const LLM_URL = process.env.LLM_URL || 'http://127.0.0.1:8000/chat';
 const ALLOW_SHELL =
   String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
@@ -266,6 +266,36 @@ const GITHUB_WEBHOOK_SECRET = resolvedEnv.GITHUB_WEBHOOK_SECRET;
 const STRIPE_SECRET = resolvedEnv.STRIPE_SECRET;
 const STRIPE_WEBHOOK_SECRET = resolvedEnv.STRIPE_WEBHOOK_SECRET;
 const STRIPE_PUBLIC_KEY = resolvedEnv.STRIPE_PUBLIC_KEY;
+const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
+const BILLING_DISABLE =
+  String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
+const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || '';
+const BRANCH_MAIN = process.env.BRANCH_MAIN || 'main';
+const BRANCH_STAGING = process.env.BRANCH_STAGING || 'staging';
+const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
+const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
+const MATH_ENGINE_URL = process.env.MATH_ENGINE_URL || '';
+const DEBUG_MODE =
+  String(process.env.DEBUG_MODE || process.env.DEBUG_PROBES || 'false').toLowerCase() ===
+  'true';
+const FLAGS_PARAM = process.env.FLAGS_PARAM || '/blackroad/dev/flags';
+const FLAGS_MAX_AGE_MS = Number(process.env.FLAGS_MAX_AGE_MS || '30000');
+
+let securityDefaults;
+try {
+  securityDefaults = enforceSecurityDefaults({ env: process.env, logger });
+} catch (error) {
+  if (error && error.code === 'SECURITY_DEFAULTS') process.exit(1);
+  throw error;
+}
+
+const {
+  sessionSecret: SESSION_SECRET,
+  internalToken: INTERNAL_TOKEN,
+  allowOrigins: ALLOW_ORIGINS,
+  allowShellEnabled: ALLOW_SHELL,
+} = securityDefaults;
 
 const PRISM_PLACEHOLDER = {
   github: [

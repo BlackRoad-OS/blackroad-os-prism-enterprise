@@ -89,7 +89,11 @@ required, fall back to the documented scripts:
 
 - Legacy webhook configuration and GitHub App manifests live in
   `srv/blackroad-api/`. Keep `BR_DEPLOY_SECRET`, `BR_DEPLOY_URL`, and the GitHub
-  App webhook secret in sync.
+  App webhook secret in sync. The API now refuses to boot unless
+  `SESSION_SECRET`, `INTERNAL_TOKEN`, and a non-wildcard `ALLOW_ORIGINS`
+  allowlist are provided. Shell execution remains disabled unless you set both
+  `ALLOW_SHELL=true` **and** `ALLOW_SHELL_OVERRIDE=I_UNDERSTAND_THE_RISK`—avoid
+  doing so outside of controlled diagnostics.
 - `.github/workflows/blackroad-deploy.yml` exposes `target=legacy-ssh` for SSH
   hosts. Supply `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_KEY`, and optional
   `DEPLOY_PORT` secrets when invoking the manual path.
