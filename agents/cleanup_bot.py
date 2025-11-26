@@ -182,6 +182,9 @@ class CleanupBot:
     Attributes:
         branches: Branch names to delete.
         dry_run: If ``True``, print commands instead of executing them.
+        When ``True`` no commands are executed and planned actions are
+        printed instead. This is helpful for verifying branch names before
+        actual deletion.
     """
     """Delete local and remote branches after merges."""
 
@@ -382,6 +385,17 @@ class CleanupBot:
             self._git("branch", "-D", branch)
         except CalledProcessError:
             print(f"Failed to delete local branch '{branch}'")
+    def _run_git(self, *args: str) -> subprocess.CompletedProcess:
+        """Execute a git command with ``check=True`` and captured output."""
+        return subprocess.run(["git", *args], check=True, capture_output=True, text=True)
+
+    def delete_branch(self, branch: str) -> bool:
+        """Delete a branch locally and remotely."""
+        try:
+            self._run("git", "branch", "-D", branch)
+            self._run("git", "push", "origin", "--delete", branch)
+            return True
+        except CalledProcessError:
             return False
 
         try:
@@ -675,3 +689,13 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 if __name__ == "__main__":  # pragma: no cover - CLI entrypoint
     raise SystemExit(main())
+        """Remove the configured branches locally and remotely."""
+        results: Dict[str, bool] = {}
+        for branch in self.branches:
+            results[branch] = self.delete_branch(branch)
+        return results
+
+
+if __name__ == "__main__":
+    print("CleanupBot ready to delete branches.")
+

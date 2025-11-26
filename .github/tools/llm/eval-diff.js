@@ -1,52 +1,66 @@
 #!/usr/bin/env node
-/**
- * Compare current artifacts/llm-eval/*.json to the main branch snapshot (if available).
- * Outputs a brief markdown summary to stdout.
- */
-import { execSync as sh } from 'child_process';
-import fs from 'fs';
-import path from 'path';
-const dir = 'artifacts/llm-eval';
-if (!fs.existsSync(dir)) { console.log('No eval artifacts; skipping.'); process.exit(0); }
-try {
-  sh('git fetch origin main:refs/remotes/origin/main', { stdio: 'ignore' });
-} catch {
-  /* ignore fetch errors */
-}
-try { sh('git fetch origin main:refs/remotes/origin/main', {stdio:'ignore'}); } catch {}
-  /* ignore errors if the main branch isn't available */
-}
-const tmp='.llm-eval-main'; fs.rmSync(tmp,{recursive:true,force:true}); fs.mkdirSync(tmp,{recursive:true});
-try { sh(`git show origin/main:${dir} 1>/dev/null 2>&1`); } catch { console.log('No prior artifacts on main; skipping diff.'); process.exit(0); }
+'use strict';
+
+const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+
+const dir = path.join('artifacts', 'llm-eval');
+
 if (!fs.existsSync(dir)) {
   console.log('No eval artifacts; skipping.');
   process.exit(0);
 }
+
 try {
-  sh('git fetch origin main:refs/remotes/origin/main', { stdio: 'ignore' });
-} catch {}
-const tmp = '.llm-eval-main';
-fs.rmSync(tmp, { recursive: true, force: true });
-fs.mkdirSync(tmp, { recursive: true });
+  execSync('git fetch origin main:refs/remotes/origin/main', { stdio: 'ignore' });
+} catch (error) {
+  // fetching main is best-effort only
+}
+
 try {
-  sh(`git show origin/main:${dir} 1>/dev/null 2>&1`);
-} catch {
+  execSync(`git show origin/main:${dir} > /dev/null 2>&1`, { stdio: 'ignore', shell: '/bin/bash' });
+} catch (error) {
   console.log('No prior artifacts on main; skipping diff.');
   process.exit(0);
 }
+
+const files = fs
+  .readdirSync(dir)
+  .filter((file) => file.endsWith('.json') && file !== 'latency.json');
+
+if (!files.length) {
+  console.log('No eval artifacts; skipping.');
+  process.exit(0);
+}
+
 let md = '### LLM Eval Diff (advisory)\n';
-const nowFiles = fs.readdirSync(dir).filter((f) => f.endsWith('.json') && f !== 'latency.json');
-for (const f of nowFiles) {
-  let prev = '';
+
+for (const file of files) {
+  const nowPath = path.join(dir, file);
+  let prevContent = '';
   try {
-    prev = sh(`git show origin/main:${dir}/${f}`, { encoding: 'utf8' });
-  } catch {
+    prevContent = execSync(`git show origin/main:${dir}/${file}`, {
+      encoding: 'utf8',
+      stdio: 'pipe',
+      shell: '/bin/bash',
+    });
+  } catch (error) {
+    const nowObj = JSON.parse(fs.readFileSync(nowPath, 'utf8'));
+    const nowCount = nowObj.results?.length || 0;
+    md += `- ${file}: new file with ${nowCount} cases\n`;
     continue;
   }
-  const prevObj = JSON.parse(prev),
-    nowObj = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
-  const prevN = prevObj.results?.length || 0,
-    nowN = nowObj.results?.length || 0;
-  md += `- ${f}: cases ${prevN} → ${nowN}\n`;
+
+  try {
+    const prevObj = JSON.parse(prevContent);
+    const nowObj = JSON.parse(fs.readFileSync(nowPath, 'utf8'));
+    const prevCount = prevObj.results?.length || 0;
+    const nowCount = nowObj.results?.length || 0;
+    md += `- ${file}: cases ${prevCount} → ${nowCount}\n`;
+  } catch (error) {
+    md += `- ${file}: unable to parse JSON diff\n`;
+  }
 }
-console.log(md);
+
+process.stdout.write(md);

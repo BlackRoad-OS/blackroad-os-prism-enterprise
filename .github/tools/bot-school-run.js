@@ -1,5 +1,4 @@
 /* eslint-env node */
-/* eslint-disable no-undef */
 /**
  * Bot School Runner — now merges ALL lesson files under .github/prompts/*.yaml
  * into one pool and executes selected ones.

@@ -620,3 +620,20 @@ function stop() {
 const exportedServer = require.main === module ? start() : { close: stop };
 
 module.exports = { app, server: exportedServer, start, stop };
+// Prism backend server scaffold
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+// TODO: JWT middleware placeholder
+// app.use((req,res,next)=>{ /* verify token */ next(); });
+
+// TODO: mount routes
+app.get('/', (_req, res) => res.json({ ok: true }));
+
+const PORT = process.env.PORT || 4000;
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`Backend running on ${PORT}`));
+}
+
+module.exports = app;

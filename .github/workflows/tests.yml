@@ -11,6 +11,9 @@ concurrency:
 
 jobs:
   pytest:
+on: [push, pull_request]
+jobs:
+  run:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -65,3 +68,8 @@ jobs:
         with:
           name: demo-output
           path: demo_output.txt
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: npm test

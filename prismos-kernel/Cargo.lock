@@ -19,6 +19,9 @@ name = "bitflags"
 version = "2.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2261d10cca569e4643e526d8dc2e62e433cc8aba21ab764233731f8d369bf394"
+version = "2.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "812e12b5285cc515a9c72a5c1d3b6d46a19dac5acfef5265968c166106e31dd3"
 
 [[package]]
 name = "bootloader"
@@ -91,6 +94,7 @@ checksum = "c101112411baafbb4bf8d33e4c4a80ab5b02d74d2612331c61e8192fc9710491"
 dependencies = [
  "bit_field",
  "bitflags 2.9.4",
+ "bitflags 2.10.0",
  "rustversion",
  "volatile",
 ]

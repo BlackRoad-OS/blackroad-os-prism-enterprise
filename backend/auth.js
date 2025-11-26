@@ -7,7 +7,7 @@ const { getDb, addUser } = require('./data');
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 
 function signup(req, res) {
-  const { email, password, role } = req.body || {};
+  const { email, password } = req.body || {};
   if (!email || !password) return res.status(400).json({ error: 'missing_fields' });
   const db = getDb();
   const exists = db.prepare('SELECT id FROM users WHERE email = ?').get(email);

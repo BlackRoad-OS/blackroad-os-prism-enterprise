@@ -6,11 +6,10 @@
  * - Writes artifacts/llm-eval/<suite>.json with {prompt, response, latencyMs}
  * - Produces latency summary artifacts/llm-eval/latency.json
  */
-import fs from 'fs';
-import path from 'path';
-import crypto from 'crypto';
-import https from 'https';
-import http from 'http';
+const fs = require('fs');
+const path = require('path');
+const https = require('https');
+const http = require('http');
 const suitesDir = path.join(process.cwd(), 'prompts', 'llm');
 const outDir = path.join(process.cwd(), 'artifacts', 'llm-eval');
 fs.mkdirSync(outDir, { recursive: true });

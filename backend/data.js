@@ -689,5 +689,7 @@ module.exports = {
   claimExceptionTicket,
   releasePendingTicket,
   PENDING_TICKET_KEY,
+// TODO: database helper stubs
+module.exports = {
+  // getUser: async (id) => { /* TODO */ },
 };
-

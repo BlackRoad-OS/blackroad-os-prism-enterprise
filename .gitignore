@@ -172,3 +172,8 @@ br-release-notes/node_modules/
 
 #Ignore vscode AI rules
 .github/instructions/codacy.instructions.md
+
+# Prism project artifacts
+prism-web/node_modules/
+prism-web/dist/
+prismos-kernel/target/

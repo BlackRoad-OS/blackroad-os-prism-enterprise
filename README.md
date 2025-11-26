@@ -36,11 +36,10 @@ controlled by the Copilot service (not repo files). See `COPILOT_SETUP.md` and
 - `srv/lucia-llm/` — same stub (duplicate dir name for compatibility with earlier scripts)
 
 Date: 2025-08-22
+# Prism Project
 
-This bundle is a **drop-in helper** to resolve “missing dependencies etc.” without requiring
-connector access. Push it into your working copy, then run one script on the server to scan
-your API, install missing npm packages, set up env defaults, and (optionally) boot a local
-LLM stub on port **8000** if none is running.
+Prism unifies a minimal bare-metal operating system **PrismOS** with a web-based environment **PrismWeb**.
+This repository provides an initial scaffold for experiments across hardware and cloud.
 
 **What’s included**
 
@@ -51,9 +50,14 @@ LLM stub on port **8000** if none is running.
 - `srv/blackroad-api/package.json.sample` — a safe starter if your API has no package.json
 - `srv/lucidia-llm/` — minimal FastAPI echo stub (only used if you don’t already run an LLM on 8000)
 - `srv/lucia-llm/` — same stub (duplicate dir name for compatibility with earlier scripts)
+## Repository Structure
 
-> Nothing here overwrites your existing code. The scripts are defensive: they detect paths,
-> **merge** deps, and only generate files if missing.
+- `prismos-kernel/` – Rust `no_std` kernel targeting `x86_64-prismos` with memory, filesystem and shell stubs plus a QEMU build script.
+- `backend/` – Node.js + SQLite API skeleton with migration and route placeholders.
+- `prism-web/` – React + Tailwind frontend scaffold offering multi-tab desktop metaphors.
+- `agents/` – IPC-driven agents grouped into `core`, `elite` and `novelty` tiers, each responding to ping.
+- `tests/` – Jest stubs covering database, auth, projects, logs and agent tiers.
+- `.github/workflows/` – Placeholder CI workflows for tests, backend and frontend builds.
 
 ---
 
@@ -769,3 +773,4 @@ docker compose run --rm test-python
 
 For detailed documentation, see [DOCKER_TESTS.md](DOCKER_TESTS.md).
 
+Each subdirectory contains a README or TODO comments describing how to extend the stub into a full implementation.
