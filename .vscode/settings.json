@@ -6,3 +6,5 @@
     "cmake.sourceDirectory": "/workspaces/blackroad-prism-console/linmath",
     "remote.autoForwardPortsFallback": 0
 }
+    "remote.autoForwardPortsFallback": 0
+}
