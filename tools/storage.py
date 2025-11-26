@@ -287,3 +287,19 @@ def append_text(path: Path, content: str) -> None:
 
 def write_json(path: Path, data: dict) -> None:
     write_text(path, json.dumps(data, indent=2))
+"""Stub storage adapter.
+
+Provides a placeholder interface for persistent storage.
+"""
+
+
+def save(key: str, data: str) -> None:
+    """Persist *data* under *key*.
+
+    Raises
+    ------
+    NotImplementedError
+        Always, since storage is not configured.
+    """
+
+    raise NotImplementedError("Persistent storage not configured")

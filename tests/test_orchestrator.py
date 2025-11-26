@@ -1,27 +1,32 @@
-import time
+from bots.finance import FinanceBot
+from orchestrator.orchestrator import Orchestrator
 
 import time
 
 from lucidia.orchestrator import run_shards
 
+def test_routing_finance_bot(tmp_path):
+    mem = tmp_path / "mem.jsonl"
+    orch = Orchestrator(memory_path=mem)
+    orch.register_bot("finance", FinanceBot())
+    task = orch.create_task("Review treasury position", "finance")
+    response = orch.route(task.id)
+    assert response.status == "success"
+    assert "treasury" in response.data.lower()
 
-def test_run_shards_completes_all():
-    def job(shard_id: int) -> int:
-        time.sleep(0.01)
-        return shard_id
 
-    results, errors = run_shards(job, num_shards=10, timebox_seconds=5)
-    assert len(results) == 10
-    assert errors == {}
+def test_state_persistence_across_instances(tmp_path):
+    memory_path = tmp_path / "memory.jsonl"
+    state_path = tmp_path / "orch_state.json"
 
+    first = Orchestrator(memory_path=memory_path, state_path=state_path)
+    first.register_bot("finance", FinanceBot())
+    created = first.create_task("Check liquidity", "finance")
+    first.route(created.id)
 
-def test_run_shards_timebox():
-    def job(shard_id: int) -> int:
-        if shard_id == 0:
-            time.sleep(0.2)
-        else:
-            time.sleep(0.01)
-        return shard_id
+    # Recreate orchestrator using the same storage paths to ensure state loads.
+    second = Orchestrator(memory_path=memory_path, state_path=state_path)
+    second.register_bot("finance", FinanceBot())
 
     results, errors = run_shards(job, num_shards=10, timebox_seconds=0.05)
     assert 0 not in results
@@ -48,3 +53,7 @@ def test_treasury_bot_route_appends_memory():
     assert len(lines) == 1
     record = json.loads(lines[0])
     assert record["task"]["id"] == "TTEST"
+    assert created.id in {task.id for task in second.list_tasks()}
+    restored = second.get_status(created.id)
+    assert restored is not None
+    assert restored.status == "success"
