@@ -116,6 +116,19 @@ automation:
         - BR_HOST
         - BR_USER
         - BR_SSH_KEY
+    - name: BlackRoad API • ECS Deploy
+      file: .github/workflows/blackroad-api-ecs.yml
+      triggers:
+        - workflow_dispatch
+        - workflow_call
+      summary: >-
+        Uses the reusable ECS deployment workflow to roll out the API service on
+        Fargate and optionally waits for stability checks to pass.
+      secrets:
+        - PROD_AWS_DEPLOY_ROLE_ARN
+        - PROD_ECS_CLUSTER
+        - PROD_ECS_SERVICE
+        - PROD_ECS_CONTAINER
 deployments:
   - service: marketing-site
     type: static-site
