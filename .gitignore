@@ -101,6 +101,9 @@ rag/index/meta.json
 !secrets/README.md
 !secrets/*.env.example
 
+# Lucidia rituals (generated each morning)
+ritual/
+
 # Codex CI kit
 tests/_codex_autogen/
 .tmp/
