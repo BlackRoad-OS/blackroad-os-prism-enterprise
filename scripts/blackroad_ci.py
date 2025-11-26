@@ -248,14 +248,23 @@ def handle_command(command: str) -> None:
     elif "linear" in cmd:
         sync_linear()
     if "push" in cmd:
+        run_tests()
         push_latest()
         deploy_to_droplet()
     elif "refresh" in cmd and "redeploy" in cmd:
+        run_tests()
         refresh_working_copy()
         deploy_to_droplet()
     elif "rebase" in cmd:
+        run_tests()
         rebase_branch()
         deploy_to_droplet()
+    elif "git" in cmd and "status" in cmd:
+        git_status()
+    elif "git" in cmd and "log" in cmd:
+        git_recent_log()
+    elif "linear" in cmd:
+        sync_linear()
     elif "sync" in cmd:
         sync_connectors()
         deploy_to_droplet()
