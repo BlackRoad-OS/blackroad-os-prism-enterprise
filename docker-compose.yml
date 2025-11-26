@@ -295,3 +295,24 @@ services:
 
 volumes:
   blackroad-db:
+version: '3.9'
+services:
+  app:
+    build:
+      context: .
+      target: production
+    ports:
+      - '3000:3000'
+    env_file: .env
+    depends_on:
+      - db
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: prism
+      POSTGRES_PASSWORD: prism
+      POSTGRES_DB: prism
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:

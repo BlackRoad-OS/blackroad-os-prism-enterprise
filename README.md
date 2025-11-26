@@ -1,6 +1,7 @@
 # BlackRoad Prism Console
 ![Build](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/monorepo-matrix.yml/badge.svg) ![E2E](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/playwright.yml/badge.svg) ![Deploy](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/deploy-blackroad.yml/badge.svg)
 # BlackRoad.io — Dependency & Ops Bundle
+[![CI](https://github.com/<org>/prism/actions/workflows/ci.yml/badge.svg)](https://github.com/<org>/prism/actions/workflows/ci.yml)
 
 Date: 2025-08-22
 
@@ -647,3 +648,15 @@ automation bots to the BlackRoad Prism Console, review
 [`INTEGRATIONS_SECURITY.md`](./INTEGRATIONS_SECURITY.md). The playbook documents
 hardening steps for key management, OAuth scopes, monitoring, and incident response so
 that integrations remain auditable and compliant.
+## Running Tests
+
+Install dependencies and execute the Jest suite:
+
+```bash
+npm install
+npm test
+```
+
+## Infrastructure
+
+Terraform examples live in `infra/terraform`. Configure a remote backend (e.g. S3 state bucket) inside `terraform {}` before running `terraform init`.
