@@ -578,6 +578,27 @@ import InfinityMath from './pages/InfinityMath.jsx';
 import Agents from './pages/Agents.jsx';
 import Desktop from './pages/Desktop.jsx';
 import { useEffect, useState } from 'react';
+import QuatJuliaLab from './pages/QuatJuliaLab.jsx';
+import StableFluidsLab from './pages/StableFluidsLab.jsx';
+import AutoDiffLab from './pages/AutoDiffLab.jsx';
+import ConformalGridLab from './pages/ConformalGridLab.jsx';
+import EikonalLab from './pages/EikonalLab.jsx';
+import PoissonDiskLab from './pages/PoissonDiskLab.jsx';
+import LSystemLab from './pages/LSystemLab.jsx';
+import MinimalSurfaceLab from './pages/MinimalSurfaceLab.jsx';
+import EigenmapsLab from './pages/EigenmapsLab.jsx';
+import PoissonBlendLab from './pages/PoissonBlendLab.jsx';
+import NBodyLab from './pages/NBodyLab.jsx';
+import WaveletLab from './pages/WaveletLab.jsx';
+import PoissonBoltzmannLab from './pages/PoissonBoltzmannLab.jsx';
+import RidgeRegressionLab from './pages/RidgeRegressionLab.jsx';
+import KernelPCALab from './pages/KernelPCALab.jsx';
+import BrushfirePathLab from './pages/BrushfirePathLab.jsx';
+import BlueNoiseTSPLab from './pages/BlueNoiseTSPLab.jsx';
+import BezierShadedSurfaceLab from './pages/BezierShadedSurfaceLab.jsx';
+import Kalman2DTrackerLab from './pages/Kalman2DTrackerLab.jsx';
+import VorticityStreamLab from './pages/VorticityStreamLab.jsx';
+import UnityHost from './pages/UnityHost.jsx';
 
 function useApiHealth() {
   const [state, setState] = useState({ ok: null, info: '' });
@@ -751,6 +772,9 @@ function LegacyApp({session}){
           <NavLink className="nav-link" to="/desktop">
             Desktop
           </NavLink>
+          <NavLink className="nav-link" to="/unity">
+            Unity Host
+          </NavLink>
           <NavLink className="nav-link" to="/agents">
             Agents
           </NavLink>
@@ -876,6 +900,7 @@ function LegacyApp({session}){
             <Route path="/backroad" element={<Backroad />} />
             <Route path="/backroad" element={<BackRoad />} />
             <Route path="/desktop" element={<Desktop />} />
+            <Route path="/unity" element={<UnityHost />} />
             <Route path="/agents" element={<Agents />} />
             <Route path="/subscribe" element={<Subscribe />} />
             <Route path="/lucidia" element={<Lucidia />} />
@@ -896,6 +921,7 @@ function LegacyApp({session}){
             <Route path="terminal" element={<Terminal />} />
             <Route path="roadview" element={<RoadView />} />
             <Route path="backroad" element={<Backroad />} />
+            <Route path="unity" element={<UnityHost />} />
             <Route path="subscribe" element={<Subscribe />} />
             <Route path="lucidia" element={<Lucidia />} />
             <Route path="math" element={<InfinityMath />} />
