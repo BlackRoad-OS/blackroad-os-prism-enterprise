@@ -10,15 +10,20 @@ const runRequestSchema = z.object({
   cwd: z.string().optional(),
   env: z.record(z.string()).optional(),
 });
+import { recordWorkflowEvent } from '../observability';
 
 export default async function runRoutes(app: FastifyInstance) {
   app.post('/run', async (req, reply) => {
     const decision = checkCapability('exec');
+    recordWorkflowEvent(`run.decision.${decision}`);
+    req.log.info({ decision }, 'run capability decision');
     if (decision === 'forbid') {
+      recordWorkflowEvent('run.forbidden');
       reply.code(403).send({ capability: 'exec', mode: 'forbid', message: 'exec forbidden in this mode' });
       return;
     }
     if (decision === 'review') {
+      recordWorkflowEvent('run.pending_review');
       reply.send({ status: 'pending' });
       return;
     }
@@ -40,5 +45,8 @@ export default async function runRoutes(app: FastifyInstance) {
     const params = z.object({ id: z.string() }).parse(req.params);
     const cancelled = cancelRun(params.id);
     reply.send({ ok: cancelled });
+    recordWorkflowEvent('run.started');
+    req.log.info('run accepted for execution');
+    reply.send({ status: 'started' });
   });
 }

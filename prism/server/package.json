@@ -22,6 +22,7 @@
     "shell-quote": "^1.8.3",
     "yaml": "^2.3.4",
   "name": "prism-server",
+  "name": "@blackroad/prism-server",
   "version": "0.1.0",
   "type": "module",
   "scripts": {
@@ -31,9 +32,14 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "better-sqlite3": "^9.4.3",
+    "diff": "^5.1.0",
     "fastify": "^4.28.0",
     "midi": "^2.0.0",
+    "globby": "^14.0.0",
+    "prom-client": "^15.1.0",
     "shell-quote": "^1.8.3",
+    "yaml": "^2.3.4",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -43,6 +49,7 @@
     "supertest": "^6.3.4",
     "tsx": "^4.7.2",
     "supertest": "^6.3.3",
+    "supertest": "^6.3.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.0",
     "vitest": "^1.4.0"

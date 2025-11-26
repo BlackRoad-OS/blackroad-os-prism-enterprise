@@ -29,8 +29,15 @@ export default async function diffsRoutes(app: FastifyInstance) {
 
   app.post('/diffs/apply', async (req, reply) => {
     const body = z.object({ diffs: z.array(diffSchema), message: z.string() }).parse(req.body);
+import { recordWorkflowEvent } from '../observability';
+
+export default async function diffRoutes(app: FastifyInstance) {
+  app.post('/diffs/apply', async (req, reply) => {
     const decision = checkCapability('write');
+    recordWorkflowEvent(`diffs.decision.${decision}`);
+    req.log.info({ decision }, 'diff apply capability decision');
     if (decision === 'forbid') {
+      recordWorkflowEvent('diffs.forbidden');
       reply.code(403).send({ capability: 'write', mode: 'forbid', message: 'write forbidden in this mode' });
       return;
     }
@@ -68,5 +75,11 @@ export default async function diffsRoutes(app: FastifyInstance) {
       insertEvent(event);
       broadcast(event);
     }
+      recordWorkflowEvent('diffs.pending_review');
+      reply.send({ status: 'pending' });
+      return;
+    }
+    recordWorkflowEvent('diffs.applied');
+    reply.send({ status: 'applied' });
   });
 }

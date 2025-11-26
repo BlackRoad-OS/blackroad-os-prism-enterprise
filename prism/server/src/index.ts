@@ -628,6 +628,22 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // eslint-disable-next-line no-console
   console.log(`Prism server listening on ${port}`);
 }
+export { bus };
+import intelRoutes from './routes/intel';
+import policyRoutes from './policy';
+import diffRoutes from './routes/diffs';
+import runRoutes from './routes/run';
+import graphRoutes from './routes/graph';
+import { observabilityPlugin } from './observability';
+
+export function buildServer() {
+  const app = Fastify({ logger: true });
+  app.register(observabilityPlugin);
+  app.register(intelRoutes);
+  app.register(policyRoutes);
+  app.register(diffRoutes);
+  app.register(runRoutes);
+  app.register(graphRoutes);
   return app;
 }
 
