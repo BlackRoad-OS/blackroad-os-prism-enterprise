@@ -6,7 +6,7 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - uses: actions/setup-python@v5
         with: { python-version: '3.11' }
       - run: python -m pip install -U pip pytest jsonschema
@@ -27,6 +27,25 @@ jobs:
         run: bash scripts/hash_artifacts.sh || true
 
 on:
+  build-test:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci --prefix apps/api
+      - run: npm run build --prefix apps/api
+      - run: npm test --prefix apps/api --if-present
+      - name: Upload API dist
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: api-dist
+          path: apps/api/dist
+---
+name: BlackRoad CI/CD
+
+'on':
   push:
     branches: [ main ]
   pull_request:
@@ -84,6 +103,7 @@ jobs:
         uses: actions/setup-node@v4
         # v4.3.0 https://github.com/actions/checkout/releases/tag/v4.3.0
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - name: Use Node.js 20.x
         # v4.4.0 https://github.com/actions/setup-node/releases/tag/v4.4.0
@@ -121,6 +141,14 @@ jobs:
           esac
 
       - name: Lint (optional)
+  build_test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name != 'pull_request' || github.base_ref == 'main'
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - name: Validate Terraform
         run: |
           if [ -f package.json ]; then
             if jq -e '.scripts.lint' package.json >/dev/null 2>&1; then
@@ -202,9 +230,13 @@ jobs:
       - name: Build (use/push cache)
         uses: docker/build-push-action@v6
       - name: Upload artifact
-        # v4.6.2 https://github.com/actions/upload-artifact/releases/tag/v4.6.2
+<<<<        # v4.6.2 https://github.com/actions/upload-artifact/releases/tag/v4.6.2
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
+>>>>>>>+main
+===
+            uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+>>>>>>>+origin/codex/pi
+    with:
           context: .
           push: false
           load: false
@@ -242,7 +274,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+<<<<      - uses: actions/checkout@v4
       - run: corepack enable || true
       - run: pnpm -v || npm i -g pnpm
       - run: pnpm install --ignore-scripts || npm install
@@ -315,8 +347,12 @@ jobs:
       - run: echo "opa eval would run here" # placeholder; keep alias 'policy'
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
+>>>>>>>+main
+===
+          - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+>>>>>>>+origin/codex/pi
+   - name: Setup Node.js
         uses: actions/setup-node@v4
       - name: Checkout
         # v4.3.0 https://github.com/actions/checkout/releases/tag/v4.3.0

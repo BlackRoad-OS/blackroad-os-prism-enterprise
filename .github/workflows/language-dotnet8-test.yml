@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
           dotnet-version: '8.0.x'
           cache: true
@@ -61,8 +61,12 @@ jobs:
 
       - name: Upload .NET artifacts on failure
         if: failure()
-        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4
-        with:
+<<<<        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4
+>>>>>>>+main
+===
+            uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+>>>>>>>+origin/codex/pi
+    with:
           name: dotnet8-test-reports
           path: reports
           if-no-files-found: ignore

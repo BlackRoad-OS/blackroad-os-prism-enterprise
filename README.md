@@ -1,6 +1,67 @@
 # BlackRoad Prism Console
+![Build](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/monorepo-matrix.yml/badge.svg) ![E2E](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/playwright.yml/badge.svg) ![Deploy](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/deploy-blackroad.yml/badge.svg)
+# BlackRoad.io — Dependency & Ops Bundle
 
-A production-grade multi-agent AI platform featuring quantum computing capabilities, sacred geometry-based agent coordination, distributed intelligence orchestration, and comprehensive visualization tools.
+Date: 2025-08-22
+
+Requires Node.js 20 or later. If you're bootstrapping a Red Hat Enterprise Linux
+(or CentOS Stream) host, follow the step-by-step guide in
+[`docs/rhel-node-web-console.md`](docs/rhel-node-web-console.md) to enable the
+Cockpit web console and install Node.js 20 with `dnf`.
+
+This bundle is a **drop-in helper** to resolve “missing dependencies etc.” without requiring
+connector access. Push it into your working copy, then run one script on the server to scan
+your API, install missing npm packages, set up env defaults, and (optionally) boot a local
+LLM stub on port **8000** if none is running.
+
+> **Heads-up from the maintainer:** I'm still getting everything set up and I'm honestly not a
+> strong coder yet. Thank you for your patience if anything here is rough around the edges —
+> I'm doing my best and truly sorry for any bumps along the way.
+## Note on GitHub Copilot agent UI
+
+The Codespaces chat quick-actions are provided by GitHub Copilot's agent features and are
+controlled by the Copilot service (not repo files). See `COPILOT_SETUP.md` and
+`.github/copilot-instructions.md` for guidance to enable and tune Copilot agent behavior.
+
+**What’s included**
+
+- `ops/install.sh` — one-shot setup for `/srv/blackroad-api` (or detected API path)
+- `tools/dep-scan.js` — scans JS/TS for `require()`/`import` usage and installs missing packages
+- `tools/verify-runtime.sh` — quick health checks (API on 4000, LLM on 8000)
+- `srv/blackroad-api/.env.example` — sample env for your Express API
+- `srv/blackroad-api/package.json.sample` — a safe starter if your API has no package.json
+- `srv/lucidia-llm/` — minimal FastAPI echo stub (only used if you don’t already run an LLM on 8000)
+- `srv/lucia-llm/` — same stub (duplicate dir name for compatibility with earlier scripts)
+
+Date: 2025-08-22
+
+This bundle is a **drop-in helper** to resolve “missing dependencies etc.” without requiring
+connector access. Push it into your working copy, then run one script on the server to scan
+your API, install missing npm packages, set up env defaults, and (optionally) boot a local
+LLM stub on port **8000** if none is running.
+
+**What’s included**
+
+- `ops/install.sh` — one-shot setup for `/srv/blackroad-api` (or detected API path)
+- `tools/dep-scan.js` — scans JS/TS for `require()`/`import` usage and installs missing packages
+- `tools/verify-runtime.sh` — quick health checks (API on 4000, LLM on 8000)
+- `srv/blackroad-api/.env.example` — sample env for your Express API
+- `srv/blackroad-api/package.json.sample` — a safe starter if your API has no package.json
+- `srv/lucidia-llm/` — minimal FastAPI echo stub (only used if you don’t already run an LLM on 8000)
+- `srv/lucia-llm/` — same stub (duplicate dir name for compatibility with earlier scripts)
+
+> Nothing here overwrites your existing code. The scripts are defensive: they detect paths,
+> **merge** deps, and only generate files if missing.
+
+---
+
+## Quick start
+
+**On your workstation**
+
+1. Unzip this at the **root of your working copy** (where your repo root lives).
+2. Commit and push.
+uring quantum computing capabilities, sacred geometry-based agent coordination, distributed intelligence orchestration, and comprehensive visualization tools.
 
 ## Overview
 

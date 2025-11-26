@@ -28,6 +28,10 @@ jobs:
         with:
           node-version: '20'
 
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci --prefix apps/api
       - name: Run PR autopilot
         env:
           GH_TOKEN: ${{ secrets.GITHUB_PAT != '' && secrets.GITHUB_PAT || secrets.GITHUB_TOKEN }}
