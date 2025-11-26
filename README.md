@@ -738,3 +738,34 @@ success
 ## Infrastructure
 
 Terraform examples live in `infra/terraform`. Configure a remote backend (e.g. S3 state bucket) inside `terraform {}` before running `terraform init`.
+
+## Running Tests in Docker
+
+This repository includes Docker support for running tests in an isolated environment.
+
+### Quick Start
+
+Validate your Docker test environment:
+
+```bash
+./scripts/validate-docker-test.sh
+```
+
+Run all tests (Jest + pytest):
+
+```bash
+docker compose run --rm tests
+```
+
+Run specific test suites:
+
+```bash
+# JavaScript tests only
+docker compose run --rm test-node
+
+# Python tests only
+docker compose run --rm test-python
+```
+
+For detailed documentation, see [DOCKER_TESTS.md](DOCKER_TESTS.md).
+
