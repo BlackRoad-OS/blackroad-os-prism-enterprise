@@ -6,6 +6,16 @@ Use this runbook when you need to confirm that a Raspberry Pi on your LAN can re
 
 > **Safety first:** Only run commands you understand. Redact private data before sharing outputs outside your environment.
 
+> **macOS note:** This runbook targets Linux utilities on the Pi and droplet. When you collect evidence from a macOS workstation,
+> adjust the tooling accordingly:
+> - Substitute `ifconfig`, `netstat -an`, or `lsof -i` for `ip`, `ss`, or other Linux network commands. For SSH audit logs, run
+>   `log show --predicate 'process == "sshd"' --last 10m` because `systemctl` and `journalctl` are unavailable on macOS.
+> - Manage the local SSH daemon with `sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist` (enable) or
+>   `sudo launchctl unload -w /System/Library/LaunchDaemons/ssh.plist` (disable). `sudo systemsetup -getremotelogin` confirms
+>   whether Remote Login is currently enabled.
+> - When droplet-side checks are required, open an SSH session first (for example, `ssh your_droplet_user@<droplet-ip>`) and run
+>   the droplet commands inside that shell instead of executing them directly from macOS.
+
 ## 1. Baseline checks on the Pi
 Perform these steps from a terminal on the Pi (directly or over LAN SSH).
 
