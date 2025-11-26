@@ -320,6 +320,32 @@ input matching a previous release image tag.
 Preview review flows now publish a GHCR image for each pull request through
 `.github/workflows/preview-containers.yml`. The job shares the same triggers as
 the Terraform-backed preview environment and:
+### Rollback / roll forward playbook
+
+Follow the `runbooks/examples/release_rollback_forward.yaml` runbook when a
+deployment needs human review. It captures the pre-checks, health validation,
+and paths for both rollback and roll forward so the on-call can document the
+decision and keep the rest of engineering in the loop.
+
+Quick reference from the runbook:
+
+1. Announce the investigation and complete the pre-checks (latest deploy SHA,
+   change approval status, and health probes).
+2. Record the decision in the runbook artifacts and, if rolling back, point the
+   symlinks at the previous release using `scripts/deploy.sh <prior-tarball>`.
+3. After the environment stabilizes, either re-run the deploy workflow from the
+   target SHA (roll forward) or confirm rollback completion in `#eng` with links
+   to the collected metrics and health checks.
+
+All evidence collected through the runbook lands in
+`artifacts/runbooks/releases/<environment>/` (for example,
+`artifacts/runbooks/releases/staging/`), making it easy to hand off context
+to the next on-call or audit the decision later.
+
+Monorepo notes
+•If your SPA is at web/, it will be built and packaged automatically.
+•If your API is at api/, its source is packaged (prod deps installed on the server).
+•If you keep everything at root, the workflow still attempts sensible fallbacks.
 
 1. Builds the current branch into a container tagged
    `ghcr.io/<owner>/blackroad-prism-console:pr-<pr-number>-<short-sha>`.

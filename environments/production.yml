@@ -192,6 +192,7 @@ change_management:
     - README-DEPLOY.md
     - README-OPS.md
     - RUNBOOKS/01_ollama_bridge_rollforward.md
+    - runbooks/examples/release_rollback_forward.yaml
 observability:
   health_checks:
     - https://blackroad.io/healthz
