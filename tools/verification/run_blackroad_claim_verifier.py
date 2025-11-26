@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict
 from typing import Any, Dict, List, Sequence, Set
+from typing import Any, Dict, Iterable
 
 DEFAULT_CLAIMS_PATH = Path("docs/verification/blackroad_resume_claims.json")
 
@@ -470,6 +471,7 @@ def main() -> None:
     claims = load_claims(args.claims)
     action_group = parser.add_mutually_exclusive_group()
     action_group.add_argument(
+    parser.add_argument(
         "--resume-bullets",
         action="store_true",
         help="When set, print the top resume bullets instead of the verification payload.",
@@ -500,6 +502,26 @@ def main() -> None:
         validation_section = format_interview_validation(validation_entries)
         if validation_section:
             rendered = f"{rendered}\n\n{validation_section}"
+
+    args = parser.parse_args()
+    claims = load_claims(args.claims)
+    if args.resume_bullets:
+        bullets = claims.get("top_resume_bullets")
+        if not bullets:
+            raise SystemExit(
+                "No 'top_resume_bullets' section found in claims JSON.\n"
+                "Please ensure your claims file includes a 'top_resume_bullets' key with a list of resume bullets.\n"
+                "Example structure:\n"
+                '{\n'
+                '  "top_resume_bullets": [\n'
+                '    "Built distributed memory palace for multi-agent chat",\n'
+                '    "Reduced latency by 30% via async SSE routes",\n'
+                '    "Benchmarked QNN estimator on CI artifacts"\n'
+                '  ],\n'
+                '  ...\n'
+                '}\n'
+            )
+        rendered = format_resume_bullets(bullets)
         if args.output is None:
             print(rendered)
         else:

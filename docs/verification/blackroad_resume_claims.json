@@ -105,6 +105,12 @@
         "ops/metrics/tls/*.json"
       ]
     }
+  "top_resume_bullets": [
+    "Architected Lucidia, a symbolic multi-agent AI core integrating Qwen, Llama, Mistral, and Grok through local Ollama orchestration, reducing external API dependency by ~40% and compute overhead by ~30%.",
+    "Engineered a Guardian-Roadie-Contradiction-Quantum-IDE agent mesh with stateful memory and contradiction logging that boosted peer-to-peer inference efficiency ~45% and reduced workflow solve times ~55%.",
+    "Developed Codex Ψ′ trinary true/false/needs-evidence guards that deterministically gate LLM pre/post outputs and lowered hallucination-adjacent failures ~40% in production tasks.",
+    "Integrated Qiskit + PyTorch TorchConnector quantum ML pipelines and functional-VAE modules, delivering Sampler/Estimator QNN tooling for physics-informed learning.",
+    "Implemented local-first NGINX, Express/Socket.IO, SQLite, Docker, and systemd infrastructure with health/readiness endpoints, p95 < 500 ms SLOs, error budgets, nightly backups, and A+ TLS hardening."
   ],
   "bullets": [
     {
@@ -264,6 +270,7 @@
       ],
       "files": [
         "docs/\u2026 (whitepaper md)",
+        "docs/… (whitepaper md)",
         "services/lucidia_api/app/routes.py",
         "agents/auto_novel_agent.py",
         "lucidia/brain.py",
