@@ -210,5 +210,8 @@ reviewers:
   users:
     - blackboxprogramming
 url: https://blackroad.io
+aliases:
+  - https://www.blackroad.io
+description: Primary customer-facing footprint.
 reviewers:
   - blackboxprogramming
