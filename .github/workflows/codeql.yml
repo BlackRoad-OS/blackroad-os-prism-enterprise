@@ -35,8 +35,11 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@429e1977040da7a23b6822b13c129cd1ba93dbb2 # v3
 on:
-  push: { branches: [main] }
-  pull_request: { branches: [main] }
+  push:
+    branches: [main, develop]
+  pull_request:
+  schedule:
+    - cron: '22 4 * * 2'
 jobs:
   analyze:
     runs-on: ubuntu-latest
@@ -44,8 +47,12 @@ jobs:
       security-events: write
       actions: read
       contents: read
+    strategy:
+      matrix:
+        language: [javascript, python]
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v3
-        with: { languages: javascript }
+        with:
+          languages: ${{ matrix.language }}
       - uses: github/codeql-action/analyze@v3

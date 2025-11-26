@@ -1,6 +1,8 @@
 <!-- Short, copyable PR template for contributors and automated agents -->
 
 # Pull Request
+## Summary
+-
 
 ## Summary
 
@@ -17,7 +19,9 @@ Provide a short (1-2 line) summary of the change.
 - **Tests:** (re)run suites; focus on auth/permissions edges.
 - **Merge plan:** if green, merge to `main` after review + sign-off.
 
-## Checks
+## Checklist
+- [ ] Tests added/updated (if applicable)
+- [ ] No secrets/keys in diff (Gitleaks will run)
 - [ ] CI green
 - [ ] API /api/health returns 200
 - [ ] Updated docs/tests as needed
@@ -163,6 +167,8 @@ Notes for reviewers / special instructions:
 **Checklist**
 - [ ] Tests added or updated
 - [ ] Docs updated
+- [ ] API `/api/health` returns 200 (if relevant)
+- [ ] If touching workflows/scripts/infra: security reviewer added
 
 > Comment `@codex fix comments` to trigger bot autofix.
 

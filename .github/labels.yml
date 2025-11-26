@@ -31,3 +31,12 @@
   color: "0e8a16"
   description: Eligible for merge queue automation
 
+- name: priority: high
+  color: "b60205"
+  description: Critical priority for triage
+- name: manual-approval
+  color: "ededed"
+  description: Authorized reviewer validated manually
+- name: severity:critical
+  color: "000000"
+  description: Requires immediate security response

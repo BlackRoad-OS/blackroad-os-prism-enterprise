@@ -35,3 +35,17 @@ Audit the inventory quarterly. Revoke unused tokens and confirm that documented 
 - If a token is suspected compromised, revoke it immediately via the organization token dashboard and rotate any downstream secrets.
 - Trigger the security incident response playbook, including credential rotation for dependent systems and post-incident review.
 - Document lessons learned and update this SOP as needed.
+# Security Policy
+
+- Report vulnerabilities privately to: security@blackroad.io
+- Do not open public issues for security matters.
+- Protected branches require reviews and passing checks (CI build, CodeQL, Gitleaks).
+- We rotate secrets every 90 days (see `docs/SECRET_ROTATION.md`).
+- Enable Org-level 2FA, Secret Scanning, and Push Protection.
+
+## Scope
+This applies to this repository (code, workflows, and the Probot app scaffold under `/.bots`).
+
+## Incident Handling
+- Limit blast radius; revoke tokens; rotate secrets; add temporary branch restrictions.
+- Document postmortem under `docs/incidents/` (private repo recommended).
