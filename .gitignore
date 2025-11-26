@@ -166,3 +166,6 @@ artifacts/**
 *.tsbuildinfo
 br-release-notes/dist/
 br-release-notes/node_modules/
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md

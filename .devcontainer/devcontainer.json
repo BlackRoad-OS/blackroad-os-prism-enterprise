@@ -39,9 +39,23 @@
       "version": "20"
     },
     "ghcr.io/devcontainers/features/pnpm:2": {},
+    "ghcr.io/devcontainers/features/go:1": {
+      "version": "1.22"
+    },
     "ghcr.io/devcontainers/features/aws-cli:1": {},
     "ghcr.io/devcontainers/features/terraform:1": {
       "version": "1.6.6"
+    }
+  },
+  "postCreateCommand": "/bin/bash .devcontainer/scripts/postCreate.sh",
+  "forwardPorts": [
+    3000,
+    4000,
+    8000
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "Next.js frontend"
     },
     "ghcr.io/devcontainers/features/aws-ssm-session-manager:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {}
@@ -100,8 +114,14 @@
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "updateContentCommand": "echo '✅ Dev container ready'",
     "ghcr.io/devcontainers/features/aws-ssm-session-manager:1": {}
+    "4000": {
+      "label": "Express API"
+    },
+    "8000": {
+      "label": "LLM stub"
+    }
   },
-  "postCreateCommand": "npm install -g commitlint @commitlint/config-conventional && pip install --user pre-commit",
+  "onCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
   "customizations": {
     "vscode": {
       "settings": {
@@ -167,7 +187,8 @@
         "HashiCorp.terraform",
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
-        "ms-python.python"
+        "ms-python.python",
+        "golang.go"
       ]
     }
   },
