@@ -54,7 +54,7 @@
 - [ ] Surface download URLs through the console UI so humans can pull artifacts without SSH.
 
 ## In Progress
-<!-- Agents move tasks here when running -->
+- Unity exporter automation — see `workers/unity/TASKS.md` for coordination board.
 
 - [ ] Deploy site (`WebsiteBot`) (owner: WorkerBot)
 ## Blocked

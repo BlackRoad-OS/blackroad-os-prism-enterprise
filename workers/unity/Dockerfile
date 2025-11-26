@@ -4,6 +4,7 @@ RUN apk add --no-cache zip
 
 WORKDIR /app
 
+WORKDIR /app
 RUN apk add --no-cache zip
 
 COPY package.json ./
@@ -21,5 +22,11 @@ COPY README.md ./README.md
 RUN npm install --omit=dev
 COPY server.js ./
 COPY template ./template
+
+COPY server.js ./server.js
+COPY template ./template
+COPY README.md ./README.md
+COPY TASKS.md ./TASKS.md
+
 EXPOSE 3000
 CMD ["node", "server.js"]

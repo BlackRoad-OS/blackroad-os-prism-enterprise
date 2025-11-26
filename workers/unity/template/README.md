@@ -52,3 +52,11 @@ This template contains the minimum Unity project structure needed to get up and 
 - `Assets/Scenes/README.md` with quick-start instructions.
 
 Additional Unity metadata files will be created the first time you open the project in the Unity Editor.
+# Unity Template
+
+This directory contains the files that seed each exported Unity project. The exporter
+performs simple token replacement using `{{PROJECT_NAME}}` and `{{SCENE_NAME}}` before
+archiving the template into a downloadable zip.
+
+Real builds should replace these placeholders with scenes, prefabs, and project assets
+assembled by the Unity automation pipeline.
