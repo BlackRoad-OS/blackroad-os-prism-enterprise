@@ -48,3 +48,13 @@ dotnet run
 ```
 
 You can now connect the .NET agent to Python peers through A2A or MCP adapters, iterate locally, and publish to Azure AI Foundry when production-ready.
+
+### Map on-screen prompts to CLI commands
+During the Microsoft Agent Framework quickstart, the guided UI may surface buttons such as **Open Start Server**, **Open workspace**, **Refer to changes first**, or **Wait for working copy**. You can complete each of these actions directly from the terminal instead:
+
+- **Open Start Server** → run `dotnet run` from your agent project directory to boot the local host process.
+- **Open workspace** → launch your editor of choice (for example `code .` for VS Code or `open AgentQuickstart.sln` on macOS) once the project scaffold is created.
+- **Refer to changes first** → use Git commands like `git status` and `git diff` to inspect pending edits before continuing.
+- **Wait for working copy** → pull the latest changes with `git pull` (or `git fetch` followed by `git merge`) until the working tree is clean.
+
+Having the CLI equivalents handy keeps the setup script unblocked even when the interactive checklist stalls on these prompts.
