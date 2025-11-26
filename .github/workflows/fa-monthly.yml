@@ -13,5 +13,7 @@ jobs:
         - uses: actions/setup-node@v4
 >>>>>>>+origin/codex/pi
       with: { node-version: '20' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
       - run: node scripts/fa/depr.ts
       - run: node scripts/fa/gl_export.ts

@@ -13,5 +13,7 @@ jobs:
         - uses: actions/setup-node@v4
 >>>>>>>+origin/codex/pi
       with: { node-version: '20' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
       - run: node scripts/leases/build_schedule.ts
       - run: node scripts/leases/journalize.ts

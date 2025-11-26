@@ -48,6 +48,11 @@ jobs:
         with:
           node-version: 20
           cache: npm
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+
+      - name: Node 20
+        uses: actions/setup-node@v4
+        with: { node-version: 20, cache: 'npm' }
 
       - name: Build SPA
         run: |
@@ -321,6 +326,69 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+
+  legacy-ssh-deploy:
+    name: Legacy SSH deploy
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'legacy-ssh' }}
+    runs-on: ubuntu-latest
+    env:
+      HEALTH_URL: ${{ github.event.inputs.health_url || 'https://blackroad.io/health' }}
+      API_HEALTH_URL: ${{ github.event.inputs.api_health_url || 'https://blackroad.io/api/health' }}
+    steps:
+      - name: Checkout repository
+           uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+>>>>>>>+main
+uses: ac        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+>>>>>>>+origin/codex/pi
+et up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 20
+
+      - name: Build frontend
+        working-directory: sites/blackroad
+        run: |
+          npm ci
+          npm run build
+          tar -czf blackroad-site.tar.gz dist
+
+      - name: Package API
+        run: |
+          tar -czf blackroad-api.tar.gz -C srv/blackroad-api .
+
+      - name: Upload artifacts to server
+        uses: appleboy/scp-action@8a92fcdb1eb4ffbf538b2fa286739760aac8a95b
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || vars.DEPLOY_PORT || '22' }}
+          source: |
+            sites/blackroad/blackroad-site.tar.gz
+            blackroad-api.tar.gz
+          target: /tmp
+
+      - name: Deploy and restart services
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || vars.DEPLOY_PORT || '22' }}
+          script: |
+            set -euo pipefail
+            sudo tar -xzf /tmp/blackroad-site.tar.gz -C /var/www/blackroad --strip-components=1
+            sudo tar -xzf /tmp/blackroad-api.tar.gz -C /srv/blackroad-api --strip-components=1
+            sudo systemctl restart blackroad-api
+            sudo systemctl restart lucidia-llm
+            sudo systemctl status blackroad-api
+            sudo systemctl status lucidia-llm
+            curl -f "${HEALTH_URL}"
+            curl -f "${API_HEALTH_URL}"
 
   legacy-ssh-deploy:
     name: Legacy SSH deploy

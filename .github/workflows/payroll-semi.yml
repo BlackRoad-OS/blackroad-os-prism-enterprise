@@ -13,6 +13,8 @@ jobs:
           - uses: actions/setup-node@v4
 >>>>>>>+origin/codex/pi
     with: { node-version: '20' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
       - run: node scripts/payroll/calc_run.ts
       - run: node scripts/payroll/ach_file.ts
       - run: node scripts/payroll/gl_export.ts
