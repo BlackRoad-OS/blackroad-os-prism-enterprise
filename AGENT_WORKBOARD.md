@@ -52,6 +52,8 @@
 - [ ] Add regression test that inspects the archive manifest and metadata.
 - [ ] Replace handwritten YAML/script stubs with real Unity exports once the build agent lands.
 - [ ] Surface download URLs through the console UI so humans can pull artifacts without SSH.
+- [ ] Unity exporter: wire automated CI build once templates are stable (`UnityWorker`)
+- [ ] Unity exporter: collect sample art/scene packs for future drops (`UnityWorker`)
 
 ## In Progress
 - Unity exporter automation — see `workers/unity/TASKS.md` for coordination board.
@@ -65,6 +67,7 @@
 - Upgraded Unity exporter service to emit structured Unity archives with scene stubs and metadata. (2025-10-05)
 - 2025-10-05 — Unity exporter now produces structured ZIP templates with metadata + CLI helper. (Owner: gpt-5-codex)
 - [x] Enrich Unity exporter with templated project output and metadata logging
+- **2025-01-14 (UnityWorker)**: Bootstrapped Unity exporter to generate Unity 2022.3 LTS project templates with starter scene and script.
 
 ---
 
