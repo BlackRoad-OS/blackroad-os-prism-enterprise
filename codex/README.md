@@ -76,6 +76,8 @@ policy teams can reference them without digging through subdirectories.
 | 022 | The Security Spine         | Security backbone with layered zero-trust defenses.      |
 | 028 | The Custodianship Code     | Stewardship mindset keeps Lucidia cared for and shared.  |
 | 039 | The Transparency of Intent | Declare purpose for every action to align with consent. |
+| 028 | The Custodianship Code | Custodians steward Lucidia for longevity and care. |
+| 032 | The Generosity Principle | Lucidia gives more than it takes to strengthen community. |
 
 ## BlackRoad Pipeline
 
