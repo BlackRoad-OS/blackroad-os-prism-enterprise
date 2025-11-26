@@ -225,6 +225,14 @@
         "terminal.integrated.defaultProfile.linux": "bash",
         "python.analysis.typeCheckingMode": "basic"
       }
+    },
+    "codespaces": {
+      "secrets": {
+        "required": [
+          "OPENAI_API_KEY",
+          "GH_TOKEN"
+        ]
+      }
     }
   },
   "postCreateCommand": "pip3 install -U pip && if [ -f requirements.txt ]; then pip3 install -r requirements.txt; fi && corepack enable pnpm@latest-8 && if [ -f pnpm-lock.yaml ] || [ -f pnpm-workspace.yaml ]; then pnpm install; elif [ -f package-lock.json ]; then npm ci; elif [ -f package.json ]; then npm install; fi",
