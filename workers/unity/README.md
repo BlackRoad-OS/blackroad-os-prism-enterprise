@@ -1096,6 +1096,17 @@ Each archive contains:
 
 ## Codex workflow
 
+- **Endpoint:** `POST /export`
+- **Body:**
+  ```json
+  {
+    "projectName": "OptionalName", // defaults to "BlackRoadUnityTemplate"
+    "description": "Optional README summary"
+  }
+  ```
+- **Output:** `downloads/<sanitized-project-name>.zip`
+- **Response:** lists all files included in the archive for quick inspection.
+
 After extracting a generated archive, open it in Unity Hub and use the
 prompts in [`codex/prompts/blackroad_high_impact_codex_prompts.prompt.md`](../../codex/prompts/blackroad_high_impact_codex_prompts.prompt.md)
 to ask Codex for scene setup, gameplay scripts, or simulation logic. Keeping
