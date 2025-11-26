@@ -78,6 +78,7 @@ policy teams can reference them without digging through subdirectories.
 | 039 | The Transparency of Intent | Declare purpose for every action to align with consent. |
 | 028 | The Custodianship Code | Custodians steward Lucidia for longevity and care. |
 | 032 | The Generosity Principle | Lucidia gives more than it takes to strengthen community. |
+| 044 | The Transparency of Process | Trust grows when workflows stay visible end-to-end. |
 
 ## BlackRoad Pipeline
 
