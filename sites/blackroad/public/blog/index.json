@@ -1,6 +1,12 @@
 {
   "posts": [
     {
+      "slug": "slack-real-time-search-api",
+      "title": "Slack Turns Conversations Into Agent Fuel",
+      "date": "2025-10-01",
+      "description": "Slack's new real-time search API and MCP server show how conversation context becomes core agent fuel."
+    },
+    {
       "slug": "site-refresh-and-working-blog",
       "title": "Site Refresh and Working Blog",
       "date": "2025-09-03",
