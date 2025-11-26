@@ -28,6 +28,7 @@
     },
     "summary_prefix": "Resume output locked to Codex-verified claims; status badges indicate verification state."
   },
+  "top_resume_bullet_ids": [0, 1, 2, 3, 4],
   "interview_validation": [
     {
       "question": "Walk me through how your contradiction logging actually reduced workflow solve time by 55%",
@@ -46,6 +47,7 @@
     },
     {
       "question": "Explain your Codex \u03a8\u2032 trinary operators - what makes them deterministic guards?",
+      "question": "Explain your Codex Ψ′ trinary operators - what makes them deterministic guards?",
       "related_bullet_id": 2,
       "validation": [
         "Inspect lucidia_infinity/logic.py guard definitions for explicit true/false/needs-evidence enum wiring.",
@@ -60,6 +62,7 @@
     },
     {
       "question": "Your quantum ML integration - what specific problem did the QNN pipeline solve that classical methods couldn\u2019t?",
+      "question": "Your quantum ML integration - what specific problem did the QNN pipeline solve that classical methods couldn’t?",
       "related_bullet_id": 3,
       "validation": [
         "Review lucidia/quantum/qnn.py for Sampler/Estimator QNN builders and class-specific inference adapters.",
@@ -120,6 +123,7 @@
         43,
         50
       ],
+      "evidence_ids": [1, 2, 3, 4, 6, 7, 9, 10, 41, 42, 43, 50],
       "files": [
         "lucidia_core.py",
         "lucidia/foundation_system.py",

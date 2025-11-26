@@ -36,6 +36,11 @@ Success criteria:
 
 Ψ′-post (write):
 If any verdict is FALSE, generate a minimal PR plan (file, snippet to add, test) to make it TRUE."""
+from typing import Any, Dict, Iterable, List, Sequence
+
+from prompt_templates import RESUME_VERIFICATION_PROMPT
+
+DEFAULT_CLAIMS_PATH = Path("docs/verification/blackroad_resume_claims.json")
 
 
 def load_claims(path: Path) -> Dict[str, Any]:
@@ -145,12 +150,19 @@ def resolve_top_resume_bullet_records(
 
     if policy is None:
         policy = resolve_resume_policy(claims)
+        "prompt": RESUME_VERIFICATION_PROMPT.strip(),
+    }
+
+
+def resolve_top_resume_bullets(claims: Dict[str, Any]) -> List[str]:
+    """Return the curated top resume bullet texts."""
 
     if "top_resume_bullets" in claims:
         bullets = claims["top_resume_bullets"]
         if not isinstance(bullets, list) or not all(isinstance(item, str) for item in bullets):
             raise SystemExit("top_resume_bullets must be a list of strings.")
         return [{"id": idx, "text": text} for idx, text in enumerate(bullets)]
+        return bullets
 
     bullet_ids = claims.get("top_resume_bullet_ids")
     if bullet_ids is None:
@@ -189,6 +201,15 @@ def resolve_top_resume_bullet_records(
             record["status_note"] = status_notes[status]
 
         resolved.append(record)
+    resolved: List[str] = []
+    for index in bullet_ids:
+        try:
+            bullet = bullets[index]
+        except IndexError:
+            raise SystemExit(f"top_resume_bullet_ids entry {index} is out of range.") from None
+        if not isinstance(bullet, dict) or "text" not in bullet or not isinstance(bullet["text"], str):
+            raise SystemExit(f"Bullet at index {index} is malformed; expected an object with a text field.")
+        resolved.append(bullet["text"])
 
     return resolved
 
@@ -204,6 +225,12 @@ def validate_claims(claims: Dict[str, Any]) -> None:
     """Validate the structure of the claims payload."""
 
     require_entity_string(claims)
+def validate_claims(claims: Dict[str, Any]) -> None:
+    """Validate the structure of the claims payload."""
+
+    entity = claims.get("entity")
+    if not isinstance(entity, str) or not entity.strip():
+        raise SystemExit("claims JSON must include a non-empty 'entity' string.")
 
     bullets = claims.get("bullets")
     if not isinstance(bullets, list) or not bullets:
@@ -313,6 +340,13 @@ def format_resume_bullets(
                 focus = ", ".join(entry["evidence_focus"])
                 lines.append(f"    Evidence focus: {focus}")
 
+    resolve_top_resume_bullets(claims)
+    resolve_interview_validation(claims)
+
+
+def format_resume_bullets(bullets: Iterable[str]) -> str:
+    """Format the resume bullets as a Markdown list."""
+    lines = [f"- {bullet}" for bullet in bullets]
     return "\n".join(lines)
 
 
@@ -348,6 +382,7 @@ def resolve_interview_validation(claims: Dict[str, Any]) -> List[Dict[str, Any]]
         try:
             related_bullet = bullets[related_id]
         except (IndexError, TypeError):
+        except IndexError:
             raise SystemExit(
                 f"interview_validation entry {index} references bullet {related_id}, which is out of range."
             ) from None
@@ -459,6 +494,12 @@ def main() -> None:
         grouped_validation = group_interview_validation_by_bullet(validation_entries)
         entity = require_entity_string(claims)
         rendered = format_resume_bullets(bullet_records, grouped_validation, policy, entity)
+        bullets = resolve_top_resume_bullets(claims)
+        rendered = format_resume_bullets(bullets)
+        validation_entries = resolve_interview_validation(claims)
+        validation_section = format_interview_validation(validation_entries)
+        if validation_section:
+            rendered = f"{rendered}\n\n{validation_section}"
         if args.output is None:
             print(rendered)
         else:
