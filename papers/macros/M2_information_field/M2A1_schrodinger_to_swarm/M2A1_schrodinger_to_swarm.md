@@ -85,3 +85,19 @@ This paper makes three main contributions:
 By treating “from Schrödinger to swarm” not as a metaphor but as a **precise mapping from single-agent wavefunctions to swarm-level operator dynamics**, this paper lays the theoretical foundation for the BlackRoad information field and prepares the ground for subsequent work on thermodynamics, safety, and synthetic phenomenology.
 
 ---
+## 1. Introduction
+### 1.1 Problem Statement
+### 1.2 Background & Related Work
+### 1.3 Contribution
+
+## 2. Methods / Architecture
+
+## 3. Experiments / Case Studies
+
+## 4. Results
+
+## 5. Discussion
+
+## 6. Limitations & Future Work
+
+## References

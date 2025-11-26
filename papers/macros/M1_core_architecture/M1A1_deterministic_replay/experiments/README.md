@@ -7,3 +7,4 @@ python deterministic_replay_experiment.py
 ```
 
 Journals are written to `./journals/` beside the script. A run is considered successful when the replay reconstruction matches the live run (hash chain verifies and counters align).
+Placeholder for experiments.
