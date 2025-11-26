@@ -28,6 +28,9 @@ from dataclasses import dataclass
 from subprocess import CalledProcessError
 from subprocess import CalledProcessError, CompletedProcess
 from typing import Dict, List
+import subprocess
+from dataclasses import dataclass
+from subprocess import CalledProcessError
 
 from logging import Logger
 
@@ -176,10 +179,13 @@ class CleanupBot:
         When ``True`` the bot only prints the operations it would perform
         without issuing git commands.
         If ``True`` commands are printed instead of executed.
+    Attributes:
+        branches: Branch names to delete.
+        dry_run: If ``True``, print commands instead of executing them.
     """
     """Delete local and remote branches after merges."""
 
-    branches: List[str]
+    branches: list[str]
     dry_run: bool = False
     remote: str = "origin"
     _normalized_branches: List[str] = field(init=False, repr=False)
@@ -311,6 +317,21 @@ class CleanupBot:
                 LOGGER.warning("Unable to delete remote branch %s", branch, exc_info=exc)
         Args:
             branch: The branch name to remove.
+    def _run(self, *cmd: str) -> None:
+        """Run a command unless in dry-run mode.
+
+        Raises:
+            CalledProcessError: Propagated from :func:`subprocess.run` when a
+                command exits with a non-zero status while ``dry_run`` is
+                ``False``.
+        """
+        if self.dry_run:
+            print("DRY-RUN:", " ".join(cmd))
+            return
+        subprocess.run(cmd, check=True)
+
+    def delete_branch(self, branch: str) -> bool:
+        """Delete a branch locally and remotely.
 
         Returns:
             True if the branch was deleted both locally and remotely, False otherwise.
@@ -320,6 +341,7 @@ class CleanupBot:
         prints a short message for each unsuccessful step. A ``True`` return
         value means both attempts succeeded, while ``False`` indicates at least
         one failure.
+            ``True`` if both deletions succeed, ``False`` otherwise.
         """
         success = True
     def _execute(self, *cmd: str) -> bool:
@@ -390,8 +412,19 @@ class CleanupBot:
 
         Returns:
             Summary containing per-branch deletion status.
+            self._run("git", "branch", "-D", branch)
+            self._run("git", "push", "origin", "--delete", branch)
+            return True
+        except CalledProcessError:
+            return False
+
+    def cleanup(self) -> dict[str, bool]:
+        """Remove the configured branches locally and remotely.
+
+        Returns:
+            Mapping of branch names to a boolean indicating success.
         """
-        results: Dict[str, bool] = {}
+        results: dict[str, bool] = {}
         for branch in self.branches:
             results[branch] = self.delete_branch(branch)
         return CleanupSummary(results)
@@ -637,6 +670,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     results = bot.cleanup()
     failures = [name for name, success in results.items() if not success]
     return 0 if not failures else 1
+        return results
 
 
 if __name__ == "__main__":  # pragma: no cover - CLI entrypoint

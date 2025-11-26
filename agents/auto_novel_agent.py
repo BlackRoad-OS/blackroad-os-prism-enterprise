@@ -70,6 +70,7 @@ from typing import ClassVar
 from typing import ClassVar, Dict, Iterator
 
 DEFAULT_SUPPORTED_ENGINES: tuple[str, ...] = ("unity", "unreal")
+from typing import ClassVar
 
 
 @dataclass
@@ -236,8 +237,12 @@ class AutoNovelAgent:
         if normalized not in self.supported_engines:
         Args:
             engine: Game engine to use.
-            include_weapons: If True, raise a ``ValueError`` because weapons are not
-                allowed.
+            include_weapons: If ``True``, raise a ``ValueError`` because weapons
+                are not allowed.
+
+        Raises:
+            ValueError: If ``engine`` is not supported or ``include_weapons`` is
+                ``True``.
         """
         engine_lower = engine.lower()
         if not self.supports_engine(engine_lower):
