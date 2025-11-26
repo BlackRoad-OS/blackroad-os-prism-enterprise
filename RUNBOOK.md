@@ -189,8 +189,14 @@ Use the following steps to confirm the runtime controller is actually running wi
    ```
 3. **Confirm the service is serving developer-mode responses**
    ```bash
-   curl -fsS "http://localhost:${PORT:-8080}/health" && echo
-   curl -fsS "http://localhost:${PORT:-8080}/version" && echo
+   port="${PORT:-${CONTROLLER_PORT:-8080}}"
+   if [ -z "${PORT:-}" ] && [ -z "${CONTROLLER_PORT:-}" ]; then
+     echo "PORT not exported; probing fallback ${port} (adjust if the service binds elsewhere)"
+   else
+     echo "Probing controller on ${port}"
+   fi
+   curl -fsS "http://localhost:${port}/health" && echo
+   curl -fsS "http://localhost:${port}/version" && echo
    ss -tulpn | awk '/LISTEN/ && /controller|python|gunicorn|uvicorn/ {print}'
    journalctl -u controller.service -n 80 --no-pager | sed -n '1,40p'
    ```
@@ -216,6 +222,8 @@ kubectl exec -n <ns> deploy/controller -- printenv APP_ENV
 kubectl port-forward -n <ns> deploy/controller 8080:PORT &
 curl -fsS localhost:8080/version
 ```
+
+> **Tip:** In `btop`, press `f` to filter on the controller process; a healthy developer loop emits small CPU blips roughly every 60 seconds. Watch for flatlines (stalled loop) or sustained spikes (runaway retries).
 
 **Success criteria**
 
