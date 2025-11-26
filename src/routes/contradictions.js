@@ -708,6 +708,14 @@ function normalizeStatus(value) {
   const status = String(value).trim().toLowerCase();
   return ALLOWED_STATUSES.has(status) ? status : null;
 }
+router.delete('/:id', requireAdmin, (req, res) => {
+  const { id } = req.params;
+  const info = db.prepare('DELETE FROM contradictions WHERE id = ?').run(id);
+  if (info.changes === 0) {
+    return res.status(404).json({ ok: false, error: 'not_found' });
+  }
+  res.json({ ok: true });
+});
 
 function cryptoRandomId() {
   return require('crypto').randomBytes(16).toString('hex');
