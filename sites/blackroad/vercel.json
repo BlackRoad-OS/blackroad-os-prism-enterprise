@@ -9,6 +9,8 @@
   },
   "rewrites": [
     { "source": "/((?!api|_next/|assets/|.*\\.).*)", "destination": "/index.html" }
+  "redirects": [
+    { "source": "/blackroadinc", "destination": "https://blackroadinc.io", "permanent": true }
   ],
   "headers": [
     {
@@ -20,5 +22,11 @@
   ],
   "redirects": [
     { "source": "/blackroadinc", "destination": "https://blackroadinc.io", "permanent": true }
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=15552000; includeSubDomains; preload"
+        }
+      ]
+    }
   ]
 }

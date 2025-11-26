@@ -1,14 +1,18 @@
 {
   "name": "blackroad-site",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "prebuild": "node ./scripts/build-docs.cjs && node ./scripts/build-blog.cjs && node ./scripts/build-codex.cjs",
     "dev": "vite",
     "watch-content": "node ./scripts/watch-content.cjs",
     "build": "vite build",
     "preview": "vite preview",
+    "prebuild": "node ./scripts/build-docs.cjs && node ./scripts/build-blog.cjs",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "watch-content": "node ./scripts/watch-content.cjs",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "format": "prettier -w .",
     "test": "vitest run",
@@ -30,6 +34,9 @@
     "react-rnd": "10.5.2",
     "react-router-dom": "6.30.1",
     "recharts": "^2.11.0"
+    "next": "^15.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",
@@ -53,8 +60,15 @@
     "autoprefixer": "10.4.21",
     "chokidar": "^3.6.0",
     "cypress": "^13.14.0",
+    "@types/node": "^22.10.1",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.5",
+    "@typescript-eslint/eslint-plugin": "^8.4.0",
+    "@typescript-eslint/parser": "^8.4.0",
+    "autoprefixer": "10.4.21",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-config-next": "^15.1.6",
     "gray-matter": "^4.0.3",
     "husky": "^9.1.5",
     "jsdom": "27.0.1",
@@ -69,5 +83,6 @@
     "vitest": "^2.1.5"
     "tailwindcss": "4.1.13",
     "vite": "^7.1.4"
+    "typescript": "^5.6.3"
   }
 }
