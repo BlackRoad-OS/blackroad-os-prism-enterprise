@@ -46,4 +46,10 @@
       "spectrum://cecilia@9b4f"
     ]
   }
+  "description": "Creative spectrum engineer registered inside Prism.",
+  "capabilities": [
+    "profile",
+    "memory-summary",
+    "manifest-export"
+  ]
 }
