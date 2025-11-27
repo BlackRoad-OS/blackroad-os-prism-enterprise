@@ -60,6 +60,7 @@ The following catalog grounds the BlackRoad claims in repository artifacts acros
 ### Machine and deep learning
 
 21. `build_estimator_qnn` constructs gradient-enabled `EstimatorQNN` models with configurable feature maps and ansatzes for local quantum classifiers. `lucidia/quantum/qnn.py`
+21. `build_estimator_qnn` constructs gradient-enabled `EstimatorQNN` models with configurable feature maps and ansätze for local quantum classifiers. `lucidia/quantum/qnn.py`
 22. `build_sampler_qnn` prepares probabilistic `SamplerQNN` networks sized to multi-class outputs for measurement-based inference. `lucidia/quantum/qnn.py`
 23. `QModule` wraps Qiskit neural networks with `TorchConnector`, letting PyTorch autograd train quantum circuits alongside deep nets. `lucidia/quantum/torch_bridge.py`
 24. `FunctionalVAE.encode` splits latent means and log-variances, while `reparam` samples noise for unsupervised field modeling. `lucidia/modules/random_fields/functional_vae.py`
@@ -121,6 +122,7 @@ The following catalog grounds the BlackRoad claims in repository artifacts acros
 68. The Grover Sudoku example constructs oracle clauses and uncomputes ancillas to keep the quantum oracle reversible. `envs/quantum/src/torchquantum/examples/grover/grover_example_sudoku.py`
 69. `fit_qsvc` trains Pegasos quantum SVMs on local kernels for hybrid ML workflows. `lucidia/quantum/kernels.py`
 70. `build_sampler_qnn` generates multi-class sampler networks for measurement-based predictions. `lucidia/quantum/qnn.py`
+70. `build_sampler_qnn` (reused here) generates multi-class sampler networks for measurement-based predictions. `lucidia/quantum/qnn.py`
 
 ### Consciousness, neuroscience, and AI education
 
@@ -160,6 +162,118 @@ The following catalog grounds the BlackRoad claims in repository artifacts acros
 98. The juxtaposition of these supervised and unsupervised approaches is discussed in the research summary, highlighting both learning regimes present in the codebase. See comparative analysis in Section 2 (Background & Motivation). `docs/blackroad-research.md`
 99. `riemann_zeros` fetches the first `n` nontrivial Riemann zeta zeros and compares their spacings to Wigner distributions. `experiments/hilbert_polya_gue.py`
 100. `tail_risk` sums scenario scores and evaluates `mpmath.zeta(1 + s)` to quantify systemic risk. `risk/engine.py`
+94. The Backbone equations list covers Turing’s halting problem, Kolmogorov complexity, RSA, and other computational theory staples. `docs/blackroad-equation-backbone.md`
+95. Logistic regression and cross-entropy equations document supervised learning updates within the AI consciousness codex. `docs/ai-consciousness-intelligence-equation-codex.md`
+96. Juxtaposing those supervised formulas with the unsupervised `FunctionalVAE.forward` loss highlights both learning regimes living in the codebase. `docs/ai-consciousness-intelligence-equation-codex.md`, `lucidia/modules/random_fields/functional_vae.py`
+97. `riemann_zeros` fetches the first `n` nontrivial Riemann zeta zeros and compares their spacings to Wigner distributions. `experiments/hilbert_polya_gue.py`
+98. `tail_risk` sums scenario scores and evaluates `mpmath.zeta(1 + s)` to quantify systemic risk. `risk/engine.py`
+99. The Grover Sudoku oracle uncomputes clause qubits to keep the electron-inspired search oracle reversible. `envs/quantum/src/torchquantum/examples/grover/grover_example_sudoku.py`
+100. The Backbone list also includes the Riemann zeta function and hypothesis entries—“Zeta lol” grounded in math instead of memes. `docs/blackroad-equation-backbone.md`
+
+### 1A Evidence Source Index
+
+| # | Source files |
+| --- | --- |
+| 1 | [`lucidia_core.py`](../lucidia_core.py) |
+| 2 | [`lucidia_core.py`](../lucidia_core.py) |
+| 3 | [`lucidia_core.py`](../lucidia_core.py) |
+| 4 | [`lucidia_core.py`](../lucidia_core.py) |
+| 5 | [`lucidia_core.py`](../lucidia_core.py) |
+| 6 | [`lucidia/foundation_system.py`](../lucidia/foundation_system.py) |
+| 7 | [`lucidia/foundation_system.py`](../lucidia/foundation_system.py) |
+| 8 | [`lucidia/foundation_system.py`](../lucidia/foundation_system.py) |
+| 9 | [`lucidia/brain.py`](../lucidia/brain.py) |
+| 10 | [`lucidia/brain.py`](../lucidia/brain.py) |
+| 11 | [`lucidia/guardian.py`](../lucidia/guardian.py) |
+| 12 | [`lucidia/guardian.py`](../lucidia/guardian.py) |
+| 13 | [`lucidia/roadie.py`](../lucidia/roadie.py) |
+| 14 | [`lucidia/roadie.py`](../lucidia/roadie.py) |
+| 15 | [`sites/blackroad`](../sites/blackroad)<br>[`agents/build_blackroad_site_agent.py`](../agents/build_blackroad_site_agent.py) |
+| 16 | [`agents/auto_novel_agent.py`](../agents/auto_novel_agent.py) |
+| 17 | [`agents/quantum_agent.py`](../agents/quantum_agent.py) |
+| 18 | [`scripts/blackroad_sync.sh`](../scripts/blackroad_sync.sh) |
+| 19 | [`scripts/blackroad_sync.py`](../scripts/blackroad_sync.py) |
+| 20 | [`opt/blackroad`](../opt/blackroad)<br>[`scripts/blackroad_sync.py`](../scripts/blackroad_sync.py) |
+| 21 | [`lucidia/quantum/qnn.py`](../lucidia/quantum/qnn.py) |
+| 22 | [`lucidia/quantum/qnn.py`](../lucidia/quantum/qnn.py) |
+| 23 | [`lucidia/quantum/torch_bridge.py`](../lucidia/quantum/torch_bridge.py) |
+| 24 | [`lucidia/modules/random_fields/functional_vae.py`](../lucidia/modules/random_fields/functional_vae.py) |
+| 25 | [`lucidia/modules/random_fields/functional_vae.py`](../lucidia/modules/random_fields/functional_vae.py) |
+| 26 | [`lucidia/modules/random_fields/clfm_engine.py`](../lucidia/modules/random_fields/clfm_engine.py) |
+| 27 | [`lucidia/modules/random_fields/clfm_engine.py`](../lucidia/modules/random_fields/clfm_engine.py) |
+| 28 | [`lucidia/modules/random_fields/datasets/synthetic_gp.py`](../lucidia/modules/random_fields/datasets/synthetic_gp.py) |
+| 29 | [`lucidia/modules/random_fields/constraints.py`](../lucidia/modules/random_fields/constraints.py) |
+| 30 | [`lucidia/modules/random_fields/constraints.py`](../lucidia/modules/random_fields/constraints.py) |
+| 31 | [`analytics/dbt/models/staging/stg_github__issues.sql`](../analytics/dbt/models/staging/stg_github__issues.sql) |
+| 32 | [`analytics/dbt/models/marts/ops/fct_github_open_bugs.sql`](../analytics/dbt/models/marts/ops/fct_github_open_bugs.sql) |
+| 33 | [`analytics/dbt/models/marts/ops/fct_github_issues_daily.sql`](../analytics/dbt/models/marts/ops/fct_github_issues_daily.sql) |
+| 34 | [`tools/export_embeddings.py`](../tools/export_embeddings.py) |
+| 35 | [`tools/export_embeddings.py`](../tools/export_embeddings.py) |
+| 36 | [`lucidia_meta_annotator/annotate.py`](../lucidia_meta_annotator/annotate.py) |
+| 37 | [`lucidia_meta_annotator/tempattr.py`](../lucidia_meta_annotator/tempattr.py) |
+| 38 | [`lucidia_meta_annotator/io_generic.py`](../lucidia_meta_annotator/io_generic.py) |
+| 39 | [`lucidia_meta_annotator/logging.py`](../lucidia_meta_annotator/logging.py) |
+| 40 | [`tools/export_embeddings.py`](../tools/export_embeddings.py) |
+| 41 | [`services/lucidia_api/app/routes.py`](../services/lucidia_api/app/routes.py) |
+| 42 | [`services/lucidia_api/app/routes.py`](../services/lucidia_api/app/routes.py) |
+| 43 | [`services/lucidia_api/app/routes.py`](../services/lucidia_api/app/routes.py) |
+| 44 | [`lucidia/app.py`](../lucidia/app.py) |
+| 45 | [`lucidia/app.py`](../lucidia/app.py) |
+| 46 | [`lucidia/app.py`](../lucidia/app.py) |
+| 47 | [`lucidia/app.py`](../lucidia/app.py) |
+| 48 | [`agents/auto_novel_agent.py`](../agents/auto_novel_agent.py) |
+| 49 | [`lucidia/app.py`](../lucidia/app.py) |
+| 50 | [`lucidia/app.py`](../lucidia/app.py) |
+| 51 | [`prompts/blackroad_codex_prompts.md`](../prompts/blackroad_codex_prompts.md) |
+| 52 | [`prompts/blackroad_codex_prompts.md`](../prompts/blackroad_codex_prompts.md) |
+| 53 | [`prompts/blackroad_codex_prompts.md`](../prompts/blackroad_codex_prompts.md) |
+| 54 | [`prompts/blackroad_codex_prompts.md`](../prompts/blackroad_codex_prompts.md) |
+| 55 | [`prompts/blackroad_codex_prompts.md`](../prompts/blackroad_codex_prompts.md) |
+| 56 | [`prompts/blackroad_codex_prompts.md`](../prompts/blackroad_codex_prompts.md) |
+| 57 | [`prompts/blackroad_codex_prompts.md`](../prompts/blackroad_codex_prompts.md) |
+| 58 | [`prompts/blackroad_codex_prompts.md`](../prompts/blackroad_codex_prompts.md) |
+| 59 | [`prompts/blackroad_codex_prompts.md`](../prompts/blackroad_codex_prompts.md) |
+| 60 | [`prompts/blackroad_codex_prompts.md`](../prompts/blackroad_codex_prompts.md) |
+| 61 | [`lucidia/quantum/__init__.py`](../lucidia/quantum/__init__.py) |
+| 62 | [`lucidia/quantum/__init__.py`](../lucidia/quantum/__init__.py) |
+| 63 | [`lucidia/quantum/backends.py`](../lucidia/quantum/backends.py) |
+| 64 | [`lucidia/quantum/backends.py`](../lucidia/quantum/backends.py) |
+| 65 | [`lucidia/quantum/policies.py`](../lucidia/quantum/policies.py) |
+| 66 | [`lucidia/quantum/tests/test_qml.py`](../lucidia/quantum/tests/test_qml.py) |
+| 67 | [`lucidia/quantum/torch_bridge.py`](../lucidia/quantum/torch_bridge.py) |
+| 68 | [`envs/quantum/src/torchquantum/examples/grover/grover_example_sudoku.py`](../envs/quantum/src/torchquantum/examples/grover/grover_example_sudoku.py) |
+| 69 | [`lucidia/quantum/kernels.py`](../lucidia/quantum/kernels.py) |
+| 70 | [`lucidia/quantum/qnn.py`](../lucidia/quantum/qnn.py) |
+| 71 | [`lucidia_core.py`](../lucidia_core.py) |
+| 72 | [`docs/ai-consciousness-intelligence-equation-codex.md`](../docs/ai-consciousness-intelligence-equation-codex.md) |
+| 73 | [`docs/ai-consciousness-intelligence-equation-codex.md`](../docs/ai-consciousness-intelligence-equation-codex.md) |
+| 74 | [`lucidia/brain.py`](../lucidia/brain.py) |
+| 75 | [`opt/blackroad/tdb/docker-compose.yml`](../opt/blackroad/tdb/docker-compose.yml) |
+| 76 | [`apps/quantum/ternary_consciousness_v3.html`](../apps/quantum/ternary_consciousness_v3.html) |
+| 77 | [`docs/AI_CODE_EXECUTION_GAP_REMEDIATION_PLAN.md`](../docs/AI_CODE_EXECUTION_GAP_REMEDIATION_PLAN.md) |
+| 78 | [`docs/fusion-tier-concepts.md`](../docs/fusion-tier-concepts.md) |
+| 79 | [`docs/fusion-tier-concepts.md`](../docs/fusion-tier-concepts.md) |
+| 80 | [`docs/ai-consciousness-intelligence-equation-codex.md`](../docs/ai-consciousness-intelligence-equation-codex.md) |
+| 81 | [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json) |
+| 82 | [`api/openapi.yaml`](../api/openapi.yaml) |
+| 83 | [`api/openapi.yaml`](../api/openapi.yaml) |
+| 84 | [`sites/blackroad/index.html`](../sites/blackroad/index.html) |
+| 85 | [`sites/blackroad/src/styles.css`](../sites/blackroad/src/styles.css) |
+| 86 | [`sites/blackroad/public/blog/hello-blackroad.json`](../sites/blackroad/public/blog/hello-blackroad.json) |
+| 87 | [`blackroad-foundation/scripts/working_copy.md`](../blackroad-foundation/scripts/working_copy.md) |
+| 88 | [`systemd/blackroad-api.service`](../systemd/blackroad-api.service) |
+| 89 | [`scripts/blackroad_sync.py`](../scripts/blackroad_sync.py) |
+| 90 | [`scripts/blackroad_sync.py`](../scripts/blackroad_sync.py) |
+| 91 | [`lucidia_infinity/logic.py`](../lucidia_infinity/logic.py) |
+| 92 | [`lucidia_infinity/logic.py`](../lucidia_infinity/logic.py) |
+| 93 | [`lucidia_infinity/logic.py`](../lucidia_infinity/logic.py) |
+| 94 | [`docs/blackroad-equation-backbone.md`](../docs/blackroad-equation-backbone.md) |
+| 95 | [`docs/ai-consciousness-intelligence-equation-codex.md`](../docs/ai-consciousness-intelligence-equation-codex.md) |
+| 96 | [`docs/ai-consciousness-intelligence-equation-codex.md`](../docs/ai-consciousness-intelligence-equation-codex.md)<br>[`lucidia/modules/random_fields/functional_vae.py`](../lucidia/modules/random_fields/functional_vae.py) |
+| 97 | [`experiments/hilbert_polya_gue.py`](../experiments/hilbert_polya_gue.py) |
+| 98 | [`risk/engine.py`](../risk/engine.py) |
+| 99 | [`envs/quantum/src/torchquantum/examples/grover/grover_example_sudoku.py`](../envs/quantum/src/torchquantum/examples/grover/grover_example_sudoku.py) |
+| 100 | [`docs/blackroad-equation-backbone.md`](../docs/blackroad-equation-backbone.md) |
 
 ⸻
 
