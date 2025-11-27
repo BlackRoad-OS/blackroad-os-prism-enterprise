@@ -177,3 +177,6 @@ br-release-notes/node_modules/
 prism-web/node_modules/
 prism-web/dist/
 prismos-kernel/target/
+# Agent export files
+agents/agent_config.json
+agents/agent_list.txt
