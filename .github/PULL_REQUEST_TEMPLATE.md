@@ -224,3 +224,12 @@ If anyone spots drift, lag, or something off — flag here before merge. Silence
 - [ ] Tests pass (CI ≤ 10 min)
 - [ ] Docs/CHANGELOG updated (if user-visible)
 - [ ] Linked issues
+## What
+- …
+
+## How to test
+- …
+
+## Checklist
+- [ ] Tests updated
+- [ ] Docs updated (if needed)
