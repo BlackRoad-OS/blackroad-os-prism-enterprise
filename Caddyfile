@@ -18,4 +18,7 @@ blackroad.io, www.blackroad.io, blackroadinc.us {
   handle {
     reverse_proxy frontend:3000
   }
+blackroad.io, www.blackroad.io {
+  encode gzip
+  reverse_proxy web:3000
 }
