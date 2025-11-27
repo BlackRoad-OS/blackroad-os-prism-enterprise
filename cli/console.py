@@ -224,6 +224,26 @@ from mdm import (
     lineage_diff as mdm_lineage_diff,
     changes as mdm_changes,
 )
+from tools import storage
+from sops.engine import SOPEngine, SOPValidationError
+
+VERB_FUN: dict[str, str] = {}
+VERB_FUN['plm:bom:where-used'] = 'cli_bom_where_used'
+
+mfg_yield = importlib.import_module("mfg.yield")
+
+from close import calendar as close_calendar
+from close import flux as close_flux
+from close import journal as close_journal
+from close import packet as close_packet
+from close import recon as close_recon
+from close import sox as close_sox
+
+app = typer.Typer()
+sops_app = typer.Typer()
+
+ROOT = Path(__file__).resolve().parents[1]
+ARTIFACTS = ROOT / "artifacts"
 
 from close import calendar as close_calendar, journal as close_journal, recon as close_recon, flux as close_flux, sox as close_sox, packet as close_packet
 
@@ -1737,6 +1757,25 @@ def aiops_execute(
 def main() -> None:
     """Entrypoint for CLI execution."""
 
+@sops_app.command("run")
+def sops_run(procedure: str = typer.Argument(...)):
+    """Execute a Standard Operating Procedure by name."""
+    engine = SOPEngine()
+    try:
+        record = engine.run(procedure)
+        typer.echo(str(record))
+    except SOPValidationError as exc:  # pragma: no cover - user feedback
+        typer.echo(f"Validation error: {exc}")
+        raise typer.Exit(code=1)
+    except FileNotFoundError:
+        typer.echo("Procedure not found")
+        raise typer.Exit(code=1)
+
+
+app.add_typer(sops_app, name="sops")
+
+
+if __name__ == "__main__":
     app()
 
 
