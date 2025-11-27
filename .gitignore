@@ -67,6 +67,8 @@ logs/blackroad_deploy.log*
 Thumbs.db
 
 # Artifacts
+artifacts/
+universal_sim/artifacts/
 coverage/
 tests/_codex_autogen/
 .tmp/
