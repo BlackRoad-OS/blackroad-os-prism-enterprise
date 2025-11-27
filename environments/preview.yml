@@ -136,5 +136,6 @@ reviewers:
     - blackboxprogramming
 url: https://pr-<number>.dev.blackroad.io
 description: Ephemeral preview spun up per pull request via the ECS/Fargate module.
+url: https://pr-<pr-number>.dev.blackroad.io
 reviewers:
   - blackboxprogramming
