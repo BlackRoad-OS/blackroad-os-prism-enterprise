@@ -518,6 +518,33 @@ class AutoNovelAgent:
         return (
             f"A tale of {clean_theme}{setting_part} begins with hope. "
             f"In the end, {protagonist_part} discovers that {clean_theme} prevails."
+    def generate_poem(self, theme: str, form: str = "haiku") -> str:
+        """Generate a simple poem using the provided theme.
+
+        Currently only the ``haiku`` form is supported.
+
+        Args:
+            theme: Central theme for the poem. Must be a non-empty string.
+            form: Poetic form to use. Only ``haiku`` is supported.
+
+        Returns:
+            A poem string with lines separated by newlines.
+
+        Raises:
+            ValueError: If ``theme`` is empty or ``form`` is unsupported.
+        """
+        if not theme or not theme.strip():
+            raise ValueError("Theme must be a non-empty string.")
+        form_lower = form.lower()
+        if form_lower != "haiku":
+            raise ValueError("Only 'haiku' form is supported.")
+        theme_clean = theme.strip()
+        return "\n".join(
+            [
+                f"{theme_clean} in the breeze",
+                "Soft whispers through the tall trees",
+                "Dreams drift on the leaves",
+            ]
         )
 
 
@@ -538,3 +565,5 @@ if __name__ == "__main__":
     print(agent.write_novel("Journey", "Alice"))
     for title in agent.generate_outline("Space Adventure", chapters=2):
         print(title)
+    print(agent.generate_story("mystical", "A coder"))
+    print(agent.generate_poem("serenity"))
