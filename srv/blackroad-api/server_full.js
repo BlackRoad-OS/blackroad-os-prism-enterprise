@@ -64,6 +64,12 @@ function loadEnvFile() {
 const { enforceSecurityDefaults } = require('./lib/securityDefaults.cjs');
 
 const PORT = parseInt(process.env.PORT || '4000', 10);
+const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-me';
+const DEFAULT_DB_PATH =
+  process.env.NODE_ENV === 'test'
+    ? ':memory:'
+    : '/srv/blackroad-api/blackroad.db';
+const DB_PATH = process.env.DB_PATH || DEFAULT_DB_PATH;
 const LLM_URL = process.env.LLM_URL || 'http://127.0.0.1:8000/chat';
 const ALLOW_SHELL =
   String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
@@ -733,6 +739,7 @@ app.get('/api/health', async (_req, res) => {
     llm = r.ok;
   } catch (err) {
     logger.warn({ event: 'health_llm_check_failed', error: err.message });
+    logger.warn('health_llm_check_failed', { error: String(err) });
   }
   res.json({
     ok: true,
@@ -808,6 +815,34 @@ function nowIso() {
 
 function requireAuth(req, res, next) {
   if (req.session && req.session.user) {
+// --- Auth (cookie-session)
+function extractInternalToken(req) {
+  const headerToken = req.get('x-internal-token');
+  if (headerToken) return headerToken.trim();
+  const authHeader = req.get('authorization') || '';
+  if (authHeader.toLowerCase().startsWith('bearer ')) {
+    return authHeader.slice(7).trim();
+  }
+  return null;
+}
+
+function grantInternalSession(req) {
+  if (!req.session) req.session = {};
+  if (!req.session.user) {
+    req.session.user = {
+      username: 'internal-service',
+      role: 'system',
+      plan: 'enterprise',
+    };
+  }
+  req.session.user.internal = true;
+}
+
+function requireAuth(req, res, next) {
+  if (req.session && req.session.user) return next();
+  const token = extractInternalToken(req);
+  if (token && verifyToken(token, INTERNAL_TOKEN)) {
+    grantInternalSession(req);
     return next();
   }
   return res.status(401).json({ error: 'unauthorized' });
@@ -893,6 +928,10 @@ app.post('/api/billing/webhook', (req, res) => {
     logger.error('stripe_webhook_verify_failed', e);
     return res.status(400).json({ error: 'invalid_signature' });
   }
+  logger.info('stripe_webhook_received', {
+    id: event.id,
+    type: event.type,
+  });
   res.json({ received: true });
 });
 
@@ -1272,7 +1311,11 @@ app.get('/api/subscribe/plans', requireAuth, (_req, res) => {
     for (const r of rows) {
       try {
         r.features = JSON.parse(r.features);
-      } catch {
+      } catch (err) {
+        logger.warn('plan_features_parse_failed', {
+          planId: r.id,
+          error: String(err),
+        });
         r.features = [];
 const http = require('http');
 const { randomUUID } = require('crypto');
@@ -1501,6 +1544,7 @@ app.post('/api/llm/chat', requireAuth, async (req, res) => {
       if (j && typeof j.text === 'string') out = j.text;
     } catch (err) {
       logger.debug({ event: 'llm_fallback_parse_failed', error: err.message });
+      logger.warn('llm_chat_parse_failed', { error: String(err) });
     }
     res
       .status(upstream.ok ? 200 : upstream.status)
@@ -1509,6 +1553,8 @@ app.post('/api/llm/chat', requireAuth, async (req, res) => {
   } catch (err) {
     logger.error({ event: 'llm_stream_proxy_failed', error: err.message });
     logger.error('llm_proxy_error', err);
+  } catch (e) {
+    logger.error('llm_chat_proxy_failed', e);
     res.status(502).type('text/plain').send('(llm upstream error)');
   }
 });
@@ -1551,16 +1597,19 @@ app.get('/api/connectors/status', async (_req, res) => {
     }
   } catch (err) {
     logConnectorStatusError('slack', err);
+    logger.warn('connector_slack_check_failed', { error: String(err) });
   }
   try {
     if (process.env.AIRTABLE_API_KEY) status.airtable = true;
   } catch (err) {
     logConnectorStatusError('airtable', err);
+    logger.warn('connector_airtable_check_failed', { error: String(err) });
   }
   try {
     if (process.env.LINEAR_API_KEY) status.linear = true;
   } catch (err) {
     logConnectorStatusError('linear', err);
+    logger.warn('connector_linear_check_failed', { error: String(err) });
   }
   try {
     if (process.env.SF_USERNAME) status.salesforce = true;
@@ -1575,6 +1624,8 @@ app.get('/api/connectors/status', async (_req, res) => {
   try {
     if (SF_USERNAME) status.salesforce = true;
   } catch {}
+    logger.warn('connector_salesforce_check_failed', { error: String(err) });
+  }
   res.json(status);
 });
 

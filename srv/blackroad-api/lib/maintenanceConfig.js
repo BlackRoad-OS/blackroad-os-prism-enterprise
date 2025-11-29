@@ -7,7 +7,12 @@ const DEFAULT_CONFIG = {
     global_enabled: true,
   },
   maintenance_mode: {
-    allowlist_endpoints: ['GET /health/live', 'GET /health/ready'],
+    allowlist_endpoints: [
+      'GET /health/live',
+      'GET /health/ready',
+      'GET /health',
+      'GET /api/health',
+    ],
     status_code: 503,
     retry_after_seconds: 60,
     message: 'AutoPal is paused by ops.',
@@ -96,7 +101,7 @@ function readConfigFromDisk(configPath) {
           message: err.message,
           path: configPath,
         });
-      } catch (_) {
+      } catch {
         // Swallow logging errors — never block on config read issues.
       }
     }

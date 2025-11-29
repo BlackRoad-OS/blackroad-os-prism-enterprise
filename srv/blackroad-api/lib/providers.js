@@ -9,11 +9,28 @@ const CONFIG_PATH =
 let cache;
 
 function loadConfig() {
-  if (!cache) {
-    const file = fs.readFileSync(CONFIG_PATH, 'utf8');
-    const data = yaml.parse(file);
-    cache = data.providers || {};
+  if (cache) {
+    return cache;
   }
+
+  let file;
+  try {
+    file = fs.readFileSync(CONFIG_PATH, 'utf8');
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      cache = {
+        openai: { display_name: 'OpenAI', env_key: 'OPENAI_API_KEY' },
+      };
+      return cache;
+    }
+    throw err;
+  }
+
+  let data = {};
+  if (file && file.trim()) {
+    data = yaml.parse(file) || {};
+  }
+  cache = data.providers || {};
   return cache;
 }
 

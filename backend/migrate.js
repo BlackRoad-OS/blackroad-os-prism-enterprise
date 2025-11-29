@@ -1,6 +1,29 @@
 // Simple migration stub
 const Database = require('better-sqlite3');
 const db = new Database('prism.db');
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+const shouldMockSqlite =
+  process.env.NODE_ENV === 'test' ||
+  String(process.env.USE_SQLITE_MOCK || '').toLowerCase() === 'true' ||
+  process.env.USE_SQLITE_MOCK === '1';
+
+let Database;
+if (!shouldMockSqlite) {
+  try {
+    Database = require('better-sqlite3');
+  } catch (err) {
+    if (!shouldMockSqlite) {
+      throw err;
+    }
+  }
+}
+
+if (!Database) {
+  Database = require('../tests/mocks/better-sqlite3.js');
+}
 
 const DB_FILE =
   process.env.NODE_ENV === 'test'

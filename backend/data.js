@@ -3,7 +3,25 @@
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
-const Database = require('better-sqlite3');
+const shouldMockSqlite =
+  process.env.NODE_ENV === 'test' ||
+  String(process.env.USE_SQLITE_MOCK || '').toLowerCase() === 'true' ||
+  process.env.USE_SQLITE_MOCK === '1';
+
+let Database;
+if (!shouldMockSqlite) {
+  try {
+    Database = require('better-sqlite3');
+  } catch (err) {
+    if (!shouldMockSqlite) {
+      throw err;
+    }
+  }
+}
+
+if (!Database) {
+  Database = require('../tests/mocks/better-sqlite3.js');
+}
 const migrate = require('./migrate');
 
 const DB_FILE =
@@ -86,6 +104,7 @@ const demoProjectId = uuidv4();
 // Ephemeral in-memory store. Replace with DB in prod.
 const { randomUUID } = require('crypto');
 
+// eslint-disable-next-line no-unused-vars
 const store = {
   users: [
     {

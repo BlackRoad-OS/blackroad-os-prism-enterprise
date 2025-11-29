@@ -15,6 +15,22 @@ module.exports = function attachPatentNet({ app }) {
   const STATUS_FILE = path.join(ARCH, ".anchor-status.json");
   const provider = ethers ? new ethers.JsonRpcProvider(process.env.ETH_RPC_URL) : null;
   const wallet = ethers ? new ethers.Wallet(process.env.MINT_PK, provider) : null;
+try { ({ ethers } = require("ethers")); } catch { console.warn("[patentnet] WARNING: ethers not installed"); }
+
+module.exports = function attachPatentNet({ app }) {
+  const ARCH = "/srv/patent-archive"; fs.mkdirSync(ARCH, {recursive:true});
+  const rpcUrl = process.env.ETH_RPC_URL || "";
+  const mintKey = process.env.MINT_PK || "";
+  const provider = ethers && rpcUrl ? new ethers.JsonRpcProvider(rpcUrl) : null;
+  let wallet = null;
+  if (ethers && mintKey) {
+    try {
+      wallet = new ethers.Wallet(mintKey, provider || undefined);
+    } catch {
+      console.warn("[patentnet] WARNING: invalid MINT_PK provided; blockchain features disabled");
+      wallet = null;
+    }
+  }
   const claimAddr = process.env.CLAIMREG_ADDR || (fs.existsSync("/srv/blackroad-api/.claimregistry.addr") ?
     fs.readFileSync("/srv/blackroad-api/.claimregistry.addr","utf8").trim() : "");
   if (!claimAddr) console.warn("[patentnet] WARNING: no CLAIMREG_ADDR set");
@@ -50,6 +66,7 @@ module.exports = function attachPatentNet({ app }) {
   ];
   const contract =
     claimAddr && wallet ? new ethers.Contract(claimAddr, abi, wallet) : null;
+  const contract = claimAddr && wallet ? new ethers.Contract(claimAddr, abi, wallet) : null;
 
   const OK = (res, x) =>
     res

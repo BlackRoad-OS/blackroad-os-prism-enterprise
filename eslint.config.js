@@ -83,11 +83,28 @@ module.exports = [
   {
     files: ['srv/blackroad-api/**/*.js', 'tests/**/*.js'],
     files: ['srv/blackroad-api/**/*.js', 'tests/**/*.test.js'],
+  {
+    ignores: ['node_modules/**', '_trash/**'],
+  },
+  js.configs.recommended,
+  {
+    files: [
+      'srv/blackroad-api/**/*.js',
+      'backend/**/*.js',
+      'tests/**/*.js',
+      'jest.config.js',
+      'eslint.config.js',
+    ],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'commonjs',
       globals: {
         ...nodeGlobals,
+        require: 'readonly',
+        module: 'readonly',
+        __dirname: 'readonly',
+        process: 'readonly',
+        global: 'readonly',
         describe: 'readonly',
         test: 'readonly',
         it: 'readonly',
@@ -237,6 +254,12 @@ module.exports = [
         ...commonGlobals,
         ...nodeGlobals,
         ...testGlobals,
+        it: 'readonly',
+        jest: 'readonly',
+        console: 'readonly',
+        fetch: 'readonly',
+        Buffer: 'readonly',
+        setInterval: 'readonly',
       },
     },
   },
