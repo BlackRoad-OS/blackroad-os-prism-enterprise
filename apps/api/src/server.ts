@@ -421,6 +421,7 @@ const app = express();
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
+app.use(canaryMiddleware(Number(process.env.CANARY_PERCENT || 10)));
 
 const urlencodedParser = express.urlencoded({ extended: true });
 app.use((req: any, res, next) => {
