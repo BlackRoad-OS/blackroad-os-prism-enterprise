@@ -454,6 +454,8 @@ function buildCorsOptions() {
 }
 
 const app = express();
+// Trust first proxy (e.g., Nginx) so secure headers like HSTS work behind TLS terminators
+app.set('trust proxy', 1);
 require('./modules/jsonEnvelope')(app);
 require('./modules/requestGuard')(app);
 const server = http.createServer(app);
@@ -532,6 +534,15 @@ require('./modules/jobs_locked')({ app });
 // --- Middleware
 app.disable('x-powered-by');
 app.use(helmet());
+// Enforce strict transport security and limit referrer leakage
+app.use(
+  helmet.hsts({
+    maxAge: 60 * 60 * 24 * 365 * 2, // 2 years
+    includeSubDomains: true,
+    preload: true,
+  })
+);
+app.use(helmet.referrerPolicy({ policy: 'no-referrer' }));
 app.use(
   helmet.hsts({
     maxAge: 60 * 60 * 24 * 365,
