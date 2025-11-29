@@ -79,6 +79,7 @@ services/quantum_lab/*.db
 repos/
 runtime/
 __pycache__/
+*.egg-info/
 codex/runtime/
 benchmarks/
 *.egg-info/

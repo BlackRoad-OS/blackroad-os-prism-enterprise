@@ -15,6 +15,10 @@ IMAGE_TAG ?= $(shell git rev-parse --short HEAD)
 ENV ?= dev
 
 .PHONY: setup test build compose-up fly-deploy ecs-deploy k8s-apply rollback lint
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy notify environments-validate
+
+setup:
+>python -m venv .venv && . .venv/bin/activate && pip install -U pip pytest jsonschema ruff PyYAML
 
 setup:
 	python3 -m venv .venv
@@ -133,6 +137,12 @@ lint-observability:
 
 validate:
 >. .venv/bin/activate && python scripts/validate_contracts.py
+
+environments-validate:
+>python scripts/check_environment_manifests.py
+
+notify:
+>cd compliance && SLACK_WEBHOOK_URL="$(SLACK_WEBHOOK_URL)" go run ./cmd/harness test:mirror
 
 demo:
 >brc plm:items:load --dir fixtures/plm/items && \
