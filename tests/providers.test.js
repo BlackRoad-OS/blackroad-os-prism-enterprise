@@ -1,6 +1,8 @@
 process.env.SESSION_SECRET = 'test-secret';
 process.env.INTERNAL_TOKEN = 'x';
 process.env.ALLOW_ORIGINS = 'https://example.com';
+process.env.BR_TEST_DISABLE_DB = '1';
+process.env.MINT_PK = '0x' + '11'.repeat(32);
 const request = require('supertest');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
 

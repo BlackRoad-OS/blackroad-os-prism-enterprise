@@ -28,8 +28,39 @@ const { spawn } = require('child_process');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const path = require('path');
-const { createDatabase } = require('../lib/sqlite');
-const YAML = require('yaml');
+<<const { createDatabase } = require('../lib/sqlite');
+>>>>>>>+main
+=====
+coconst disableDbFlag = String(
+  process.env.BR_TEST_DISABLE_DB || process.env.BRC_DISABLE_NATIVE_DB || ''
+).toLowerCase();
+const SHOULD_DISABLE_DB = disableDbFlag === '1' || disableDbFlag === 'true';
+
+let Database;
+if (!SHOULD_DISABLE_DB) {
+  try {
+    Database = require('better-sqlite3');
+  } catch (err) {
+    console.warn('[jobs] better-sqlite3 unavailable, using mock DB:', err);
+  }
+}
+
+function createMockDb() {
+  const noopStatement = {
+    run: () => ({ changes: 0, lastInsertRowid: 0 }),
+    all: () => [],
+    get: () => undefined,
+    iterate: function* iterate() {},
+  };
+  return {
+    prepare() {
+      return { ...noopStatement };
+    },
+    close: () => {},
+  };
+}
+>>>>>>>+origin/copilot/
+nst YAML = require('yaml');
 
 const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
 const PROJECTS_DIR = process.env.PROJECTS_DIR || '/srv/projects';
@@ -40,8 +71,14 @@ const RUNNER = (process.env.JOB_RUNNER || 'docker').toLowerCase();
 const DEFAULT_IMG = process.env.DOCKER_DEFAULT_IMAGE || 'node:20-slim';
 
 function db() {
-  return createDatabase(DB_PATH);
-}
+<<  return createDatabase(DB_PATH);
+>>>>>>>+main
+=====
+    if (!Database) {
+    return createMockDb();
+  }
+  return new Database(DB_PATH);
+>>>>>>>+origin/copilot/
 function run(db, sql, p = []) {
   return Promise.resolve(db.prepare(sql).run(p));
 }
@@ -156,8 +193,12 @@ function spawnDockerTracked(
 // core streaming/LED updates
 async function wireChild(job_id, child, onClose) {
   let lastPct = 0;
-  const handleChunk = async (buf) => {
-    const s = buf.toString();
+<<  const handleChunk = async (buf) => {
+>>>>>>>+main
+=====
+    const handleChunk = async (buf, _source) => {
+>>>>>>>+origin/copilot/
+  const s = buf.toString();
     await appendEvent(job_id, 'log', s);
     for (const line of s.split(/\r?\n/)) {
       const p = parseProgressLine(line);

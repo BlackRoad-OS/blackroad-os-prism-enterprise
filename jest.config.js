@@ -30,4 +30,6 @@ module.exports = {
       },
     ],
   ],
+  testMatch: ['**/*.test.js'],
+  forceExit: true,
 };

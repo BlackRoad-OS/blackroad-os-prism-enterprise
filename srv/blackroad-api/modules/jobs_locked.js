@@ -29,6 +29,37 @@ const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const path = require('path');
 const { createDatabase } = require('../lib/sqlite');
+const disableDbFlag = String(
+  process.env.BR_TEST_DISABLE_DB || process.env.BRC_DISABLE_NATIVE_DB || ''
+).toLowerCase();
+const SHOULD_DISABLE_DB = disableDbFlag === '1' || disableDbFlag === 'true';
+
+let Database;
+if (!SHOULD_DISABLE_DB) {
+  try {
+    Database = require('better-sqlite3');
+  } catch (err) {
+    console.warn(
+      '[jobs_locked] better-sqlite3 unavailable, using mock DB:',
+      err
+    );
+  }
+}
+
+function createMockDb() {
+  const noopStatement = {
+    run: () => ({ changes: 0, lastInsertRowid: 0 }),
+    all: () => [],
+    get: () => undefined,
+    iterate: function* iterate() {},
+  };
+  return {
+    prepare() {
+      return { ...noopStatement };
+    },
+    close: () => {},
+  };
+}
 const YAML = require('yaml');
 
 const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
@@ -110,6 +141,10 @@ function resolveImageDigest(image) {
 
 function db() {
   return createDatabase(DB_PATH);
+  if (!Database) {
+    return createMockDb();
+  }
+  return new Database(DB_PATH);
 }
 function run(db, sql, p = []) {
   return Promise.resolve(db.prepare(sql).run(p));
@@ -395,6 +430,7 @@ function wireChild(job_id, child, onClose) {
   return new Promise((resolve) => {
     let lastPct = 0;
     const handleChunk = async (buf) => {
+    const handleChunk = async (buf, _source) => {
       const s = buf.toString();
       await appendEvent(job_id, 'log', s);
       for (const line of s.split(/\r?\n/)) {

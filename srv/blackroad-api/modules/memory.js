@@ -14,9 +14,97 @@ try {
   Database = require('better-sqlite3');
 } catch (error) {
   databaseLoadError = error;
+// Local memory index/search using SQLite + FTS5 + Ollama embeddings.
+// Falls back to an in-memory stub when better-sqlite3 is unavailable.
+const fs = require('fs');
+const path = require('path');
+
+const disableDbFlag = String(
+  process.env.BR_TEST_DISABLE_DB || process.env.BRC_DISABLE_NATIVE_DB || ''
+).toLowerCase();
+const SHOULD_DISABLE_DB = disableDbFlag === '1' || disableDbFlag === 'true';
+
+let Database;
+if (!SHOULD_DISABLE_DB) {
+  try {
+    Database = require('better-sqlite3');
+  } catch (err) {
+    console.warn(
+      '[memory] better-sqlite3 unavailable, using in-memory stub:',
+      err
+    );
+  }
+} else {
+  console.warn(
+    '[memory] native database disabled via env flag; using in-memory stub'
+  );
+}
+
+function attachStub({ app }) {
+  const docs = new Map();
+  app.post('/api/memory/index', async (req, res) => {
+    let raw = '';
+    req.on('data', (d) => {
+      raw += d;
+    });
+    await new Promise((resolve) => req.on('end', resolve));
+    let body = {};
+    try {
+      body = raw ? JSON.parse(raw) : {};
+    } catch {
+      return res.status(400).json({ error: 'invalid json' });
+    }
+    const id =
+      body.id || `doc:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
+    const text = String(body.text || '').slice(0, 200000);
+    if (!text) return res.status(400).json({ error: 'missing text' });
+    const meta = { source: body.source || null, tags: body.tags || [] };
+    docs.set(id, { text, meta, ts: Date.now() });
+    return res.json({ ok: true, id });
+  });
+
+  app.post('/api/memory/search', async (req, res) => {
+    let raw = '';
+    req.on('data', (d) => {
+      raw += d;
+    });
+    await new Promise((resolve) => req.on('end', resolve));
+    let body = {};
+    try {
+      body = raw ? JSON.parse(raw) : {};
+    } catch {
+      return res.status(400).json({ error: 'invalid json' });
+    }
+    const q = String(body.q || '').trim();
+    const k = Math.max(1, Math.min(20, body.top_k || 5));
+    if (!q) return res.status(400).json({ error: 'empty query' });
+    const lc = q.toLowerCase();
+    const results = [];
+    for (const [id, entry] of docs.entries()) {
+      if (!entry?.text) continue;
+      if (entry.text.toLowerCase().includes(lc)) {
+        results.push({
+          id,
+          score: 1,
+          text: entry.text.slice(0, 2000),
+          meta: entry.meta,
+        });
+      }
+    }
+    return res.json({ results: results.slice(0, k) });
+  });
+
+  console.log('[memory] in-memory stub online');
 }
 
 module.exports = function attachMemory({ app }) {
+  if (!app) return;
+
+  if (!Database) {
+    attachStub({ app });
+    return;
+  }
+
   const DBP = process.env.MEMORY_DB || '/srv/blackroad-api/memory.db';
   const FALLBACK_FILE = process.env.MEMORY_FALLBACK_FILE || '/home/agents/cecilia/logs/memory.txt';
 
@@ -192,6 +280,17 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
       na = 0,
       nb = 0;
     for (let i = 0; i < Math.min(a.length, b.length); i++) {
+  function run(sql, p = []) {
+    return Promise.resolve(db.prepare(sql).run(p));
+  }
+  function all(sql, p = []) {
+    return Promise.resolve(db.prepare(sql).all(p));
+  }
+  function get(sql, p = []) {
+    return Promise.resolve(db.prepare(sql).get(p));
+  }
+
+  function cosine(a, b) {
     let dot = 0;
     let na = 0;
     let nb = 0;
@@ -229,6 +328,12 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
     let raw = '';
     req.on('data', (d) => (raw += d));
     await new Promise((r) => req.on('end', r));
+  app.post('/api/memory/index', async (req, res) => {
+    let raw = '';
+    req.on('data', (d) => {
+      raw += d;
+    });
+    await new Promise((resolve) => req.on('end', resolve));
     const body = raw ? JSON.parse(raw) : {};
     const id =
       body.id || `doc:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
@@ -318,6 +423,12 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
     const embs = [];
     for (const c of chunks) {
       embs.push(await embed(c));
+    const chunks = [];
+    for (let i = 0; i < text.length; i += 1000)
+      chunks.push(text.slice(i, i + 1000));
+    const embs = [];
+    for (const chunk of chunks) {
+      embs.push(await embed(chunk));
     }
     await run(`INSERT OR REPLACE INTO vecs(id,v) VALUES(?,?)`, [
       id,
@@ -577,6 +688,10 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
     return res.json({ ok: true, id, webdav: webdavOk });
   });
 
+    ]);
+    return res.json({ ok: true, id });
+  });
+
   app.post('/api/memory/search', async (req, res) => {
     let raw = '';
     req.on('data', (d) => {
@@ -591,6 +706,7 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
     let raw = '';
     req.on('data', d => (raw += d));
     await new Promise(r => req.on('end', r));
+    await new Promise((resolve) => req.on('end', resolve));
     const body = raw ? JSON.parse(raw) : {};
     const q = String(body.q || '').trim();
     const k = Math.max(1, Math.min(20, body.top_k || 5));
@@ -685,6 +801,9 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
     }
     scored.sort((a, b) => b.score - a.score);
     res.json({ results: scored.slice(0, k) });
+    }
+    scored.sort((a, b) => b.score - a.score);
+    return res.json({ results: scored.slice(0, k) });
   });
 
   if (fallbackMode) {

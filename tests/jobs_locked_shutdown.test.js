@@ -4,7 +4,11 @@ const vm = require('vm');
 const { EventEmitter } = require('events');
 
 function loadWireChild() {
-  const filePath = path.join(__dirname, '..', 'srv/blackroad-api/modules/jobs_locked.js');
+  const filePath = path.join(
+    __dirname,
+    '..',
+    'srv/blackroad-api/modules/jobs_locked.js'
+  );
   let code = fs.readFileSync(filePath, 'utf8');
   code += '\n;globalThis.wireChild = wireChild; globalThis.PROCS = PROCS;';
   const sandbox = {
@@ -15,9 +19,15 @@ function loadWireChild() {
         return class FakeDB {
           prepare() {
             return {
-              run() { return this; },
-              all() { return []; },
-              get() { return {}; },
+              run() {
+                return this;
+              },
+              all() {
+                return [];
+              },
+              get() {
+                return {};
+              },
             };
           }
         };
@@ -65,6 +75,7 @@ describe('jobs_locked wireChild', () => {
     const promise = wireChild(jobId, child, onClose);
     child.emit('close', 0);
     await promise;
+    await expect(promise).resolves.toBeUndefined();
 
     expect(onCloseCalls).toBe(1);
     expect(deleteCalls).toBe(1);

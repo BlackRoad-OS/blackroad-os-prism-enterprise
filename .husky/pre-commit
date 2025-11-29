@@ -2,3 +2,6 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 npx lint-staged
+export NODE_PATH="$(npm root)"
+npx --no-install lint-staged
+npm test
