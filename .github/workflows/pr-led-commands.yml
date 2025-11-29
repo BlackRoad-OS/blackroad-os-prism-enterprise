@@ -13,9 +13,7 @@ jobs:
       (
         contains(toLower(github.event.comment.body), 'athena ') ||
         contains(toLower(github.event.comment.body), '/lightshow') ||
-        startsWith(trim(toLower(github.event.comment.body)), '/led') ||
-        contains(replace(replace(toLower(github.event.comment.body), '\r', ' '), '\n', ' '), ' /led ') ||
-        endsWith(trim(toLower(github.event.comment.body)), '/led')
+        contains(toLower(github.event.comment.body), '/led')
       )
     # Require trusted commenters (repo members/collaborators/owners)
     runs-on: [self-hosted, linux, blackroad]
