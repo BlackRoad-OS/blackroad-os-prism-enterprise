@@ -6,7 +6,7 @@ class Profile(BaseModel):
     email: Optional[str] = None
     phone: Optional[str] = None
     location: Optional[str] = None
-    extras: Dict[str, str] = {}
+    extras: Dict[str, str] = Field(default_factory=dict)
 
 class ApplyRequest(BaseModel):
     job_urls: List[HttpUrl] = Field(default_factory=list, description="Company job posting URLs")

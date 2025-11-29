@@ -3,5 +3,10 @@ fastapi==0.115.0
 uvicorn==0.37.0
 pydantic==2.12.2
 uvicorn==0.30.6
+<<<<<<< main
 pydantic==2.12.2
 transformers==4.53.0
+=======
+pydantic==2.11.7
+transformers==4.43.0
+>>>>>>> origin/dependabot/pip/pydantic-2.11.7
