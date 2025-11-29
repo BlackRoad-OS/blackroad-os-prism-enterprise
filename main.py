@@ -12,6 +12,7 @@ import importlib.util
 import os
 import tempfile
 from typing import Any, Optional
+from datetime import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -152,6 +153,49 @@ def _collect_user_input() -> str:
         transcript = PRISM_APP["transcribe_audio"](audio_file)
         st.markdown(f"**You said:** {transcript}")
         return transcript.strip()
+    return result["text"]
+
+
+# Initialize chat history
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = [
+        {
+            "role": "system",
+            "content": (
+                "You are the BlackRoad Venture Console AI, a holographic assistant that replies "
+                "with scientific and symbolic insights."
+            ),
+        }
+    ]
+
+# Initialize terminal output log
+if "terminal_log" not in st.session_state:
+    st.session_state.terminal_log = []
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    st.session_state.terminal_log.append(f"[{timestamp}] System initialized")
+    st.session_state.terminal_log.append(f"[{timestamp}] BlackRoad Prism Console ready")
+
+
+def log_to_terminal(message: str) -> None:
+    """Add a timestamped message to the terminal log."""
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    st.session_state.terminal_log.append(f"[{timestamp}] {message}")
+    # Keep only the last 50 messages
+    if len(st.session_state.terminal_log) > 50:
+        st.session_state.terminal_log = st.session_state.terminal_log[-50:]
+
+st.markdown(
+    "#### Speak or type an idea, formula, or question. The AI will respond and project a hologram:"
+)
+
+audio_file = st.file_uploader("Upload your voice (mp3 or wav)", type=["mp3", "wav"])
+if audio_file is not None:
+    log_to_terminal(f"Audio file uploaded: {audio_file.name}")
+    user_input = transcribe_audio(audio_file)
+    log_to_terminal(f"Transcription complete: {len(user_input)} characters")
+    st.markdown(f"**You said:** {user_input}")
+else:
+    user_input = st.text_input("Or type here")
 
     return st.text_input("Or type here").strip()
 
@@ -160,6 +204,7 @@ user_prompt = _collect_user_input()
 if user_prompt:
     if CLIENT is None:
         st.error("OpenAI API key not set.")
+        log_to_terminal("ERROR: OpenAI API key not configured")
     else:
         placeholder = st.empty()
         placeholder.write("Processing request...")
@@ -225,6 +270,9 @@ def generate_assistant_reply(client: Optional[OpenAI]) -> Optional[str]:
         return None
 
     try:
+        log_to_terminal(f"User input: {user_input[:50]}{'...' if len(user_input) > 50 else ''}")
+        st.session_state.chat_history.append({"role": "user", "content": user_input})
+        log_to_terminal("Sending request to GPT-4o-mini...")
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=st.session_state.chat_history,
@@ -233,6 +281,34 @@ def generate_assistant_reply(client: Optional[OpenAI]) -> Optional[str]:
     except Exception as exc:  # pragma: no cover - network/runtime failure
         st.error(f"Failed to generate a response: {exc}")
         return None
+        assistant_reply = response.choices[0].message.content
+        log_to_terminal(f"Received response: {len(assistant_reply)} characters")
+        st.session_state.chat_history.append({"role": "assistant", "content": assistant_reply})
+        st.markdown(f"**Venture Console AI:** {assistant_reply}")
+
+        magnitude = parse_numeric_prefix(user_input)
+        log_to_terminal(f"Generating hologram with magnitude: {magnitude}")
+        fig = plt.figure(figsize=(6, 4))
+        ax = fig.add_subplot(111, projection="3d")
+        x = np.linspace(-5, 5, 100)
+        y = np.linspace(-5, 5, 100)
+        x, y = np.meshgrid(x, y)
+        z = np.sin(np.sqrt(x**2 + y**2)) * magnitude
+        ax.plot_surface(x, y, z, cmap="plasma")
+        ax.axis("off")
+
+        buf = io.BytesIO()
+        plt.savefig(buf, format="png")
+        buf.seek(0)
+        st.image(buf)
+        plt.close(fig)
+        log_to_terminal("Hologram projection complete")
+
+# Terminal Output Section
+st.markdown("---")
+st.markdown("### 💻 Terminal Output")
+terminal_text = "\n".join(st.session_state.terminal_log)
+st.code(terminal_text, language="bash")
 
     if not response.choices:
         return None
