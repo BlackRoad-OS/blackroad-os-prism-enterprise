@@ -145,6 +145,20 @@ module.exports = function attachMemory({ app }) {
     }
     db = new Database(DBP);
     db.exec(`CREATE TABLE IF NOT EXISTS docs (id TEXT PRIMARY KEY, text TEXT, meta TEXT, ts INTEGER);
+}
+
+module.exports = function attachMemory({ app }) {
+  const DBP = process.env.MEMORY_DB || '/srv/blackroad-api/memory.db';
+  const FALLBACK_FILE = process.env.MEMORY_FALLBACK_FILE || '/home/agents/cecilia/logs/memory.txt';
+
+  let db = null;
+  let fallbackMode = false;
+
+  if (Database) {
+    try {
+      fs.mkdirSync(path.dirname(DBP), { recursive: true });
+      db = new Database(DBP);
+      db.exec(`CREATE TABLE IF NOT EXISTS docs (id TEXT PRIMARY KEY, text TEXT, meta TEXT, ts INTEGER);
 CREATE VIRTUAL TABLE IF NOT EXISTS fts USING fts5(text, content='docs', content_rowid='rowid');
 CREATE TRIGGER IF NOT EXISTS docs_ai AFTER INSERT ON docs BEGIN INSERT INTO fts(rowid,text) VALUES (new.rowid, new.text); END;
 CREATE TRIGGER IF NOT EXISTS docs_ad AFTER DELETE ON docs BEGIN INSERT INTO fts(fts, rowid, text) VALUES('delete', old.rowid, old.text); END;
@@ -155,11 +169,14 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
       db = undefined;
       console.warn(`[memory] SQLite unavailable; using fallback file ${FALLBACK_FILE}`);
       console.warn('[memory] sqlite error:', error);
+      console.warn(`[memory] SQLite unavailable; using fallback file ${FALLBACK_FILE}`);
+      console.warn(error);
     }
   } else {
     fallbackMode = true;
     const msg = databaseLoadError ? databaseLoadError.message : 'module load failed';
     console.warn(`[memory] better-sqlite3 unavailable (${msg}); using fallback`);
+    console.warn(`[memory] better-sqlite3 unavailable (${msg}); using fallback file ${FALLBACK_FILE}`);
   }
 
   if (fallbackMode) {
@@ -288,6 +305,14 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
   }
   function get(sql, p = []) {
     return Promise.resolve(db.prepare(sql).get(p));
+  let run = async () => { throw new Error('SQLite unavailable'); };
+  let all = async () => { throw new Error('SQLite unavailable'); };
+  let get = async () => { throw new Error('SQLite unavailable'); };
+
+  if (db) {
+    run = (sql, p = []) => Promise.resolve(db.prepare(sql).run(p));
+    all = (sql, p = []) => Promise.resolve(db.prepare(sql).all(p));
+    get = (sql, p = []) => Promise.resolve(db.prepare(sql).get(p));
   }
 
   function cosine(a, b) {
@@ -310,6 +335,9 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
     const metaObj = { source: body.source || null, tags: Array.isArray(body.tags)?body.tags:[] };
     const meta = JSON.stringify(metaObj);
     if (!text) return res.status(400).json({error:'missing text'});
+    const metaObj = {source:body.source||null,tags:body.tags||[]};
+    if (!text) return res.status(400).json({error:'missing text'});
+
     if (fallbackMode || !db) {
       const entry = { id, text, meta: metaObj, ts: Date.now() };
       try {
@@ -323,6 +351,12 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
       }
       return res.json({ok:true,id,fallback:true});
     }
+        return res.status(500).json({ error: 'fallback write failed', details: String(error.message||error) });
+      }
+      return res.json({ok:true,id,fallback:true});
+    }
+
+    const meta = JSON.stringify(metaObj);
     await run(`INSERT OR REPLACE INTO docs(id,text,meta,ts) VALUES(?,?,?,?)`, [id,text,meta,Date.now()]);
   app.post('/api/memory/index', async (req, res) => {
     let raw = '';
@@ -753,6 +787,61 @@ CREATE TABLE IF NOT EXISTS vecs (id TEXT PRIMARY KEY, v TEXT);`);
       }
 
       matches.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+      const query = q.toLowerCase();
+      const matches = [];
+      const windowSize = Math.max(k, 50);
+      let fileMissing = false;
+
+      try {
+        await new Promise((resolve, reject) => {
+          const stream = fs.createReadStream(FALLBACK_FILE, { encoding: 'utf8' });
+          let rl;
+          stream.on('error', (error) => {
+            if (rl) rl.close();
+            stream.destroy();
+            if (error.code === 'ENOENT') {
+              fileMissing = true;
+              resolve();
+              return;
+            }
+            reject(error);
+          });
+
+          rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
+          rl.on('line', (line) => {
+            if (!line.trim()) return;
+            try {
+              const entry = JSON.parse(line);
+              if (!entry?.text) return;
+              if (entry.text.toLowerCase().includes(query)) {
+                matches.push({
+                  id: entry.id,
+                  score: 1,
+                  text: String(entry.text || '').slice(0, 2000),
+                  meta: entry.meta || {},
+                  ts: entry.ts || 0,
+                });
+                matches.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+                if (matches.length > windowSize) {
+                  matches.length = windowSize;
+                }
+              }
+            } catch (error) {
+              console.warn('[memory] failed to parse fallback entry', error);
+            }
+          });
+
+          rl.on('close', resolve);
+        });
+      } catch (error) {
+        console.error('[memory] fallback read failed', error);
+        return res.status(500).json({ error: 'fallback read failed', details: String(error.message||error) });
+      }
+
+      if (fileMissing) {
+        return res.json({ results: [], fallback: true });
+      }
+
       return res.json({ results: matches.slice(0, k), fallback: true });
     }
 
