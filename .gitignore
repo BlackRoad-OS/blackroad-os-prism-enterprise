@@ -183,3 +183,7 @@ prismos-kernel/target/
 # Agent export files
 agents/agent_config.json
 agents/agent_list.txt
+# Debug/test data for br-ingest-github worker
+data/prism/
+data/ssm/
+workers/br-ingest-github/test-store.js
