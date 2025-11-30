@@ -127,6 +127,13 @@ EOB
 - Need more acceleration? Add Pi 5 + Hailo AI HAT or Coral USB TPU.
 - For large models, burst to cloud and stream results back.
 
+### 9. Security & Ops Guardrails
+- Keep Pi user passwords unique; rotate SSH keys quarterly.
+- Store Mosquitto credentials in `/etc/mosquitto/passwd` with file perms `640`.
+- Verify no API tokens or secrets linger in shell history before imaging SD cards.
+- Confirm each MQTT publisher uses least-privilege topics and QoS required for its role.
+- Log deploy commands in the runbook and capture hashes of flashed images for traceability.
+
 ### Physical Reminders
 - Individual power supplies per Pi; avoid powering from USB hubs.
 - Label cables, keep Pi camera adapters handy (15↔22-pin).
