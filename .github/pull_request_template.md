@@ -1,11 +1,24 @@
-## Risk
-- 
+# Pull Request
 
-## Rollback Plan
-- 
+## Description
 
-## Policy Impact
-- 
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation update
+- [ ] Infrastructure/DevOps change
 
-## Ops Notes
-- 
+## Testing
+- [ ] Tested locally
+- [ ] Health checks pass
+- [ ] Railway deployment succeeds
+
+## Checklist
+- [ ] Code follows project style
+- [ ] Self-reviewed code
+- [ ] Updated documentation
+- [ ] Tests pass
+
+---
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
