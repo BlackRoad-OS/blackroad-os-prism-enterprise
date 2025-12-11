@@ -57,6 +57,7 @@ export default function EikonalPathLab() {
   }, [goal, sim]);
 
 <<<<<<< main
+<<<<<<< main
   useEffect(()=>{
     const c=cnv.current; if(!c) return;
     const ctx=c.getContext("2d",{alpha:false});
@@ -76,21 +77,38 @@ export default function EikonalPathLab() {
       render(ctx, sim, start, goal, extractPath(sim, start, goal));
       frame = requestAnimationFrame(draw);
 >>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx
+=======
+  useEffect(() => {
+    const c = cnv.current;
+    if (!c) return;
+    const ctx = c.getContext("2d", { alpha: false });
+    let frame;
+    const draw = () => {
+      solve(sim, iters);
+      render(ctx, sim, start, goal, extractPath(sim, start, goal));
+      frame = requestAnimationFrame(draw);
+>>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx
     };
     frame=requestAnimationFrame(draw);
     return ()=>cancelAnimationFrame(frame);
 <<<<<<< main
     draw();
 <<<<<<< main
+<<<<<<< main
     return()=>{ if(frame) cancelAnimationFrame(frame); };
 =======
 >>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx-hu73id
   },[sim,iters,start,goal]);
 =======
+=======
+>>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx
     return () => {
       if (frame) cancelAnimationFrame(frame);
     };
   }, [sim, iters, start, goal]);
+<<<<<<< main
+>>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx
+=======
 >>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx
 
   return (

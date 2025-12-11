@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 export function dft2(A){
   const N=A.length, M=A[0].length;
   const mag=Array.from({length:N},()=>Array(M).fill(0));
@@ -21,6 +22,8 @@ export function dft2(A){
     B[us][vs]=Math.log(1+mag[u][v]/(mx+1e-9));
   }
 =======
+=======
+>>>>>>> 418c5b315ed97e0c5577d58ec8e24f31e4aaf5a3
 export function dft2(A) {
   const N = A.length;
   const M = A[0].length;
@@ -51,6 +54,9 @@ export function dft2(A) {
       const vs = ((v + M / 2) | 0) % M;
       B[us][vs] = Math.log(1 + mag[u][v] / (mx + 1e-9));
     }
+<<<<<<< HEAD
+>>>>>>> 418c5b315ed97e0c5577d58ec8e24f31e4aaf5a3
+=======
 >>>>>>> 418c5b315ed97e0c5577d58ec8e24f31e4aaf5a3
   return B;
 }

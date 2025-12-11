@@ -3,6 +3,7 @@ import ActiveReflection from "./ActiveReflection.jsx";
 import { dft2 } from "../lib/fourier.js";
 
 <<<<<<< main
+<<<<<<< main
 export default function FourierOpticsLab(){
   const [N,setN]=useState(64);
   const [ap,setAp]=useState("circle");
@@ -112,6 +113,23 @@ export default function FourierOpticsLab() {
 
   const A = useMemo(() => makeAperture(N, ap, param), [N, ap, param]);
 
+=======
+export default function FourierOpticsLab() {
+  const [N, setN] = useState(64);
+  const [ap, setAp] = useState("circle");
+  const [param, setParam] = useState(0.3); // radius or slit width
+  const cnvA = useRef(null);
+  const cnvF = useRef(null);
+  const [F, setF] = useState(null);
+  const workerRef = useRef();
+  const requestIdRef = useRef(0);
+  const lastHandledRef = useRef(0);
+  const [useFallback, setUseFallback] = useState(false);
+  const [workerReady, setWorkerReady] = useState(false);
+
+  const A = useMemo(() => makeAperture(N, ap, param), [N, ap, param]);
+
+>>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx
   useEffect(() => {
     if (typeof Worker === "undefined") {
       setUseFallback(true);
@@ -184,6 +202,9 @@ export default function FourierOpticsLab() {
   useEffect(() => {
     if (F) drawField(cnvF.current, F);
   }, [F]);
+<<<<<<< main
+>>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx
+=======
 >>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx
 
   return (
@@ -203,10 +224,13 @@ export default function FourierOpticsLab() {
         <div />
         <section className="p-3 rounded-lg bg-white/5 border border-white/10">
 <<<<<<< main
+<<<<<<< main
           <Radio name="ap" value={ap} set={setAp} opts={[["circle","circle"],["slit","slit"],["rect","rect"],["checker","checker"]]} />
           <Slider label="param" v={param} set={setParam} min={0.05} max={0.5} step={0.01}/>
           <Slider label="grid N" v={N} set={setN} min={32} max={128} step={16}/>
 =======
+=======
+>>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx
           <Radio
             name="ap"
             value={ap}
@@ -220,6 +244,9 @@ export default function FourierOpticsLab() {
           />
           <Slider label="param" v={param} set={setParam} min={0.05} max={0.5} step={0.01} />
           <Slider label="grid N" v={N} set={setN} min={32} max={128} step={16} />
+<<<<<<< main
+>>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx
+=======
 >>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx
           <ActiveReflection
             title="Active Reflection — Fourier Optics"
@@ -236,6 +263,7 @@ export default function FourierOpticsLab() {
   );
 }
 
+<<<<<<< main
 <<<<<<< main
 function makeAperture(N, ap, p){
   const A=Array.from({length:N},()=>Array(N).fill(0));
@@ -263,6 +291,8 @@ function drawField(canvas, A, hot){
   }
   ctx.putImageData(img,0,0);
 =======
+=======
+>>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx
 function makeAperture(N, ap, p) {
   const A = Array.from({ length: N }, () => Array(N).fill(0));
   for (let y = 0; y < N; y++)
@@ -280,6 +310,7 @@ function makeAperture(N, ap, p) {
       A[y][x] = v;
     }
   return A;
+<<<<<<< main
 }
 function drawField(canvas, A) {
   if (!canvas) return;
@@ -308,6 +339,35 @@ function drawField(canvas, A) {
   ctx.putImageData(img, 0, 0);
 >>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx
 }
+=======
+}
+function drawField(canvas, A) {
+  if (!canvas) return;
+  const N = A.length;
+  const M = A[0].length;
+  canvas.width = N;
+  canvas.height = M;
+  const ctx = canvas.getContext("2d", { alpha: false });
+  const img = ctx.createImageData(N, M);
+  let mx = 0;
+  for (let y = 0; y < N; y++)
+    for (let x = 0; x < N; x++) mx = Math.max(mx, A[y][x]);
+  for (let y = 0; y < N; y++)
+    for (let x = 0; x < N; x++) {
+      const t = A[y][x] / (mx + 1e-9);
+      const off = 4 * (y * N + x);
+      // gentle palette
+      const R = Math.floor(40 + 200 * t);
+      const G = Math.floor(50 + 180 * (1 - t));
+      const B = Math.floor(220 * (1 - t));
+      img.data[off] = R;
+      img.data[off + 1] = G;
+      img.data[off + 2] = B;
+      img.data[off + 3] = 255;
+    }
+  ctx.putImageData(img, 0, 0);
+}
+>>>>>>> origin/codex/fix-comments-in-fourieropticslab.jsx
 function Radio({ name, value, set, opts }) {
   return (
     <div className="flex gap-3 text-sm">
