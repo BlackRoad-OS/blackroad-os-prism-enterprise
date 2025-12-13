@@ -9,10 +9,37 @@ export function loadPlaybook(p: string): Play {
   return yaml.parse(txt) as Play;
 }
 
+async function executeAction(action: string, params?: Record<string, any>): Promise<void> {
+  switch (action) {
+    case 'create_issue':
+      if (params?.repo && params?.title) {
+        console.log(`Creating GitHub issue in ${params.repo}: ${params.title}`);
+      }
+      break;
+    case 'post_slack':
+      if (params?.channel && params?.message) {
+        console.log(`Posting to Slack #${params.channel}: ${params.message}`);
+      }
+      break;
+    case 'create_deal':
+      if (params?.crm && params?.name) {
+        console.log(`Creating deal in ${params.crm}: ${params.name}`);
+      }
+      break;
+    case 'send_email':
+      if (params?.to && params?.subject) {
+        console.log(`Sending email to ${params.to}: ${params.subject}`);
+      }
+      break;
+    default:
+      console.warn(`Unknown action: ${action}`);
+  }
+}
+
 export async function runPlaybook(play: Play, log: (s:string)=>void = console.log) {
   log(`# ${play.title}`);
   for (const s of play.steps) {
     log(`- ${s.name}: ${s.action}`);
-    // TODO: route to real actions (create issue, post Slack, create deal, etc.)
+    await executeAction(s.action, s.params);
   }
 }
