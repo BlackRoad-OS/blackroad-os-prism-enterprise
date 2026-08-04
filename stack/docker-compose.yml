@@ -108,7 +108,7 @@ services:
       - "9001:9001"
 
   postgres-primary:
-    image: bitnami/postgresql-repmgr:16
+    image: soldevelo/postgresql-repmgr:16
     container_name: postgres-primary
     restart: always
     environment:
@@ -128,7 +128,7 @@ services:
       - "5432:5432"
 
   postgres-replica:
-    image: bitnami/postgresql-repmgr:16
+    image: soldevelo/postgresql-repmgr:16
     container_name: postgres-replica
     restart: always
     environment:
